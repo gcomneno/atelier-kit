@@ -1,0 +1,140 @@
+<script>
+  let { item, catalog } = $props();
+
+  let fields = $derived(catalog.fields ?? {});
+</script>
+
+<a class="card" href={`/items/${item.id}`}>
+  <div class="image-wrap">
+    <img src={item.image_file} alt={item.title} loading="lazy" />
+  </div>
+
+  <div class="body">
+    {#if fields.show_status && item.status}
+      <p class="status">{item.status}</p>
+    {/if}
+
+    <h2>{item.title}</h2>
+
+    {#if item.subtitle}
+      <p class="subtitle">{item.subtitle}</p>
+    {/if}
+
+    <p class="description">{item.description}</p>
+
+    <dl>
+      {#if fields.show_material && item.material}
+        <div>
+          <dt>Material</dt>
+          <dd>{item.material}</dd>
+        </div>
+      {/if}
+
+      {#if fields.show_dimensions && item.dimensions}
+        <div>
+          <dt>Dimensions</dt>
+          <dd>{item.dimensions}</dd>
+        </div>
+      {/if}
+
+      {#if fields.show_availability && item.availability}
+        <div>
+          <dt>Availability</dt>
+          <dd>{item.availability}</dd>
+        </div>
+      {/if}
+    </dl>
+  </div>
+</a>
+
+<style>
+  .card {
+    display: grid;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    background: #fffaf2;
+    border: 1px solid #e4d8c7;
+    border-radius: 28px;
+    box-shadow: 0 20px 70px rgb(36 27 18 / 0.08);
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: #c9ad89;
+    box-shadow: 0 24px 90px rgb(36 27 18 / 0.14);
+  }
+
+  .image-wrap {
+    aspect-ratio: 4 / 3;
+    background: #f3eadc;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .body {
+    padding: 1.4rem;
+  }
+
+  .status {
+    width: fit-content;
+    margin: 0 0 0.85rem;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid #d7c1a4;
+    border-radius: 999px;
+    color: #6d5841;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: clamp(1.35rem, 4vw, 1.75rem);
+  }
+
+  .subtitle {
+    margin: 0.35rem 0 0;
+    color: #725f4a;
+  }
+
+  .description {
+    margin: 1rem 0;
+    color: #4f4236;
+    line-height: 1.6;
+  }
+
+  dl {
+    display: grid;
+    gap: 0.55rem;
+    margin: 1.25rem 0 0;
+  }
+
+  dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    border-top: 1px solid #efe3d2;
+    padding-top: 0.55rem;
+  }
+
+  dt {
+    color: #7b6a58;
+    font-size: 0.85rem;
+  }
+
+  dd {
+    margin: 0;
+    color: #2f281f;
+    text-align: right;
+  }
+</style>

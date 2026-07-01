@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Atelier-Kit placeholder image</title>
+  <desc id="desc">A neutral placeholder image for a catalog item.</desc>
+  <rect width="1200" height="900" fill="#f3efe7"/>
+  <rect x="120" y="100" width="960" height="700" rx="36" fill="#fffaf0" stroke="#d8cfbf" stroke-width="4"/>
+  <circle cx="600" cy="390" r="120" fill="#e1d7c8"/>
+  <path d="M470 565h260" stroke="#c7bba8" stroke-width="18" stroke-linecap="round"/>
+  <path d="M515 625h170" stroke="#d8cfbf" stroke-width="14" stroke-linecap="round"/>
+  <text x="600" y="735" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" fill="#7b7164">Replace image</text>
+</svg>

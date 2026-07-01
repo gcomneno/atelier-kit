@@ -35,7 +35,7 @@
           </div>
         </section>
 
-        <VisitorBrief {item} {signalClouds} />
+        <VisitorBrief {item} {signalClouds} contact={data.contact} />
       {/if}
     </div>
 

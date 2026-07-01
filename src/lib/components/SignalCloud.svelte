@@ -1,18 +1,34 @@
 <script>
-  import { browser } from '$app/environment';
+  import { onMount } from 'svelte';
 
-  let { itemId, cloud } = $props();
+  /**
+   * @typedef {{ id: string, label: string }} SignalOption
+   * @typedef {{ id: string, question: string, options: SignalOption[] }} SignalCloud
+   */
 
-  let selectedOptionId = $state(/** @type {string | null} */ (null));
-  let saved = $state(false);
-  let storageKey = $derived(`atelier-kit:signals:${itemId}:${cloud.id}`);
+  /** @type {string} */
+  export let itemId;
 
-  $effect(() => {
-    if (!browser) {
-      return;
+  /** @type {SignalCloud} */
+  export let cloud;
+
+  /** @type {string | null} */
+  let selectedOptionId = null;
+
+  $: storageKey = `atelier-kit:signals:${itemId}:${cloud.id}`;
+  $: headingId = `signal-cloud-${itemId}-${cloud.id}-heading`;
+  $: hintId = `signal-cloud-${itemId}-${cloud.id}-hint`;
+  $: selectedOption = cloud.options.find((option) => option.id === selectedOptionId);
+  $: selectionMessage = selectedOption
+    ? `Selected: ${selectedOption.label}`
+    : 'No option selected yet.';
+
+  onMount(() => {
+    const savedOptionId = localStorage.getItem(storageKey);
+
+    if (savedOptionId && cloud.options.some((option) => option.id === savedOptionId)) {
+      selectedOptionId = savedOptionId;
     }
-
-    selectedOptionId = localStorage.getItem(storageKey);
   });
 
   /**
@@ -20,115 +36,117 @@
    */
   function choose(optionId) {
     selectedOptionId = optionId;
-    saved = true;
-
-    if (browser) {
-      localStorage.setItem(storageKey, optionId);
-    }
-
-    window.setTimeout(() => {
-      saved = false;
-    }, 1200);
+    localStorage.setItem(storageKey, optionId);
   }
 </script>
 
-<section class="signal-cloud" aria-labelledby={`${cloud.id}-title`}>
-  <div class="heading">
-    <h2 id={`${cloud.id}-title`}>{cloud.question}</h2>
-
-    {#if cloud.hint}
-      <p>{cloud.hint}</p>
-    {/if}
+<section class="signal-cloud" aria-labelledby={headingId} aria-describedby={hintId}>
+  <div class="cloud-header">
+    <h2 id={headingId}>{cloud.question}</h2>
+    <p id={hintId} class="cloud-hint">
+      Single choice. Pick one option; choosing another replaces the previous local selection.
+    </p>
   </div>
 
-  <div class="cloud" role="list">
+  <div class="options" role="group" aria-labelledby={headingId} aria-describedby={hintId}>
     {#each cloud.options as option}
+      {@const isSelected = selectedOptionId === option.id}
+
       <button
         type="button"
-        class:selected={selectedOptionId === option.id}
-        onclick={() => choose(option.id)}
+        class:selected={isSelected}
+        aria-pressed={isSelected}
+        aria-label={`Choose ${option.label}`}
+        on:click={() => choose(option.id)}
       >
-        {option.label}
+        <span>{option.label}</span>
+
+        {#if isSelected}
+          <span class="selected-mark" aria-hidden="true">✓</span>
+        {/if}
       </button>
     {/each}
   </div>
 
-  <p class="meta">
-    {#if selectedOptionId}
-      Your current signal is saved in this browser.
-      {#if saved}
-        <span>Saved.</span>
-      {/if}
-    {:else}
-      Choose one signal. You can change it later.
-    {/if}
-  </p>
+  <p class="selection-status" aria-live="polite">{selectionMessage}</p>
 </section>
 
 <style>
   .signal-cloud {
-    padding: 1.3rem;
-    background: #fffaf2;
-    border: 1px solid #e5d8c5;
-    border-radius: 26px;
+    border: 1px solid rgba(20, 20, 20, 0.12);
+    border-radius: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.72);
   }
 
-  .heading {
-    max-width: 42rem;
+  .cloud-header {
+    display: grid;
+    gap: 0.35rem;
+    margin-bottom: 0.85rem;
   }
 
   h2 {
     margin: 0;
-    font-size: clamp(1.25rem, 3vw, 1.65rem);
+    font-size: 1rem;
   }
 
-  p {
-    margin: 0.4rem 0 0;
-    color: #725f4a;
-    line-height: 1.55;
+  .cloud-hint {
+    margin: 0;
+    color: rgba(20, 20, 20, 0.66);
+    font-size: 0.9rem;
+    line-height: 1.45;
   }
 
-  .cloud {
+  .options {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.7rem;
-    margin-top: 1.2rem;
+    gap: 0.55rem;
   }
 
   button {
-    border: 1px solid #d6c1a7;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(20, 20, 20, 0.18);
     border-radius: 999px;
-    padding: 0.65rem 1rem;
-    color: #3b3027;
-    background: #fff;
-    font: inherit;
+    padding: 0.55rem 0.85rem;
+    background: rgba(255, 255, 255, 0.9);
+    color: inherit;
     cursor: pointer;
-    transition:
-      transform 140ms ease,
-      border-color 140ms ease,
-      background 140ms ease;
+    font: inherit;
+    line-height: 1;
   }
 
   button:hover {
-    transform: translateY(-2px);
-    border-color: #aa835b;
+    border-color: rgba(20, 20, 20, 0.42);
+  }
+
+  button:focus-visible {
+    outline: 3px solid rgba(20, 20, 20, 0.35);
+    outline-offset: 3px;
   }
 
   button.selected {
-    border-color: #6b4b2f;
-    color: #fffaf2;
-    background: #6b4b2f;
-  }
-
-  .meta {
-    margin-top: 1rem;
-    color: #7b6a58;
-    font-size: 0.9rem;
-  }
-
-  .meta span {
-    margin-left: 0.35rem;
-    color: #4f6f3c;
+    border-color: rgba(20, 20, 20, 0.75);
+    background: rgba(20, 20, 20, 0.08);
     font-weight: 700;
+  }
+
+  .selected-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 999px;
+    background: rgba(20, 20, 20, 0.86);
+    color: white;
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+
+  .selection-status {
+    margin: 0.85rem 0 0;
+    color: rgba(20, 20, 20, 0.66);
+    font-size: 0.9rem;
   }
 </style>

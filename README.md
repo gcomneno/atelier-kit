@@ -24,6 +24,66 @@ No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 - Browser-local Signal Cloud selections.
 - Placeholder image for quick setup.
 - Content validation script.
+- GitHub Actions validation workflow.
+
+## Quick start
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Create a first item:
+
+```bash
+npm run item:new -- my-first-item "My First Item"
+```
+
+Validate content and build:
+
+```bash
+npm run item:validate
+npm run check
+npm run build
+```
+
+Preview the site locally:
+
+```bash
+npm run preview
+```
+
+## First customization path
+
+For a first real setup, edit files in this order:
+
+1. `config/site.yaml` for site name, tagline and footer text.
+2. `config/catalog.yaml` for catalog field visibility and item vocabulary.
+3. `config/signal-clouds.yaml` for lightweight visitor preference questions.
+4. `content/items/` for item records.
+5. `static/images/items/` for item images.
+
+The fastest useful path is:
+
+```bash
+npm run item:new -- ceramic-bowl "Ceramic Bowl"
+npm run item:list
+npm run item:validate
+npm run dev
+```
+
+Then edit:
+
+```text
+content/items/ceramic-bowl.yaml
+```
 
 ## Item/Card CRUD
 
@@ -73,25 +133,15 @@ Rules:
 
 ## Development
 
-Install dependencies:
+Run all checks before pushing:
 
 ```bash
-npm install
-```
-
-Run the development server:
-
-```bash
-npm run dev
-```
-
-Check the project:
-
-```bash
+npm run item:validate
 npm run check
-npm run content:validate
 npm run build
 ```
+
+The repository also includes a GitHub Actions workflow that runs validation on pushes and pull requests.
 
 ## Deploy
 
@@ -108,6 +158,16 @@ Production deploy:
 ```bash
 npx vercel --prod
 ```
+
+See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
+
+## Documentation
+
+- `docs/usage/configuration.md` explains the YAML configuration files.
+- `docs/usage/customization.md` explains the first customization workflow.
+- `docs/usage/deploy-vercel.md` explains Vercel deployment.
+- `docs/product/positioning.md` explains the product direction.
+- `docs/architecture/adr-0001-configurable-showcase-kit.md` explains the main architecture decision.
 
 ## Support
 

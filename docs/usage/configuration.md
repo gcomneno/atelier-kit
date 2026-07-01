@@ -1,24 +1,157 @@
 # Configuration guide
 
-Atelier-Kit is configured through YAML files.
+Atelier-Kit is configured with YAML files.
 
-Initial files:
+The goal is to keep the project editable without requiring a database, CMS or admin dashboard.
 
-- config/site.yaml
-- config/catalog.yaml
-- config/signal-clouds.yaml
-- content/items/*.yaml
+## Configuration files
 
-Images live in:
+Atelier-Kit 1.0 has three main configuration files:
 
-- static/images/items/
+- `config/site.yaml`
+- `config/catalog.yaml`
+- `config/signal-clouds.yaml`
 
-The default placeholder image is:
+Content items live separately in:
 
-- static/images/items/placeholder.svg
+- `content/items/`
 
-## Rule
+Static images live in:
 
-Configuration should describe content and behavior.
+- `static/images/items/`
 
-Svelte components should stay generic.
+## Site configuration
+
+Edit:
+
+```text
+config/site.yaml
+```
+
+Example:
+
+```yaml
+site:
+  name: "My Handmade Studio"
+  tagline: "Small handmade objects for quiet homes"
+  language: "en"
+  notice: "Demo content. Replace before publishing."
+  footer_note: "Built with Atelier-Kit"
+```
+
+Fields:
+
+- `name` appears as the main site name.
+- `tagline` appears near the site heading.
+- `language` sets the site language metadata.
+- `notice` can be used for demo warnings or short publishing notes.
+- `footer_note` appears in the footer.
+
+## Catalog configuration
+
+Edit:
+
+```text
+config/catalog.yaml
+```
+
+Example:
+
+```yaml
+catalog:
+  item_name_singular: "creation"
+  item_name_plural: "creations"
+
+  fields:
+    show_price: false
+    show_availability: true
+    show_material: true
+    show_dimensions: true
+    show_status: true
+```
+
+Rules:
+
+- items always live under `/items`;
+- configurable route segments are intentionally out of scope for Atelier-Kit 1.0;
+- field visibility should stay simple and predictable.
+
+## Signal Cloud configuration
+
+Edit:
+
+```text
+config/signal-clouds.yaml
+```
+
+Example:
+
+```yaml
+signal_clouds:
+  - id: mood
+    question: "What does this item suggest?"
+    options:
+      - id: calm
+        label: "Calm"
+      - id: playful
+        label: "Playful"
+      - id: ceremonial
+        label: "Ceremonial"
+```
+
+Rules:
+
+- each cloud represents one question;
+- each option needs a stable `id`;
+- each cloud is single-choice;
+- browser-local selections are keyed by item id, cloud id and option id;
+- no server-side storage is used in Atelier-Kit 1.0.
+
+## Item configuration
+
+Create an item with:
+
+```bash
+npm run item:new -- my-item "My Item"
+```
+
+This creates:
+
+```text
+content/items/my-item.yaml
+```
+
+Example item:
+
+```yaml
+id: "my-item"
+title: "My Item"
+subtitle: ""
+status: "draft"
+material: "Replace with material"
+dimensions: "Replace with dimensions"
+availability: "Replace with availability"
+price_mode: "hidden"
+image_file: "/images/items/placeholder.svg"
+description: "Replace with a real description."
+notice: "Draft item. Replace before publishing."
+```
+
+Rules:
+
+- `id` should match the file name without `.yaml`;
+- `image_file` must start with `/`;
+- image paths are resolved from the `static/` directory;
+- use `npm run item:validate` after editing content.
+
+## Validation
+
+Run:
+
+```bash
+npm run item:validate
+npm run check
+npm run build
+```
+
+Content validation catches missing required fields, duplicate ids and missing images.

@@ -2,6 +2,50 @@
 
 Atelier-Kit is customized through YAML files and static images.
 
+This guide shows the recommended first path from clone to customized local preview.
+
+## Recommended first path
+
+Start from a clean checkout:
+
+```bash
+npm install
+npm run item:validate
+npm run check
+npm run build
+```
+
+Create your first item:
+
+```bash
+npm run item:new -- my-first-item "My First Item"
+```
+
+List items:
+
+```bash
+npm run item:list
+```
+
+Edit the generated file:
+
+```text
+content/items/my-first-item.yaml
+```
+
+Run the dev server:
+
+```bash
+npm run dev
+```
+
+Open the homepage and the item detail page:
+
+```text
+/
+/items/my-first-item
+```
+
 ## Site identity
 
 Edit:
@@ -57,34 +101,16 @@ content/items/my-item.yaml
 
 Then edit the generated YAML file.
 
-You can also create a file manually.
-
-Add a new YAML file:
-
-```text
-content/items/my-item.yaml
-```
-
 Add an image:
 
 ```text
 static/images/items/my-item.jpg
 ```
 
-Use this structure:
+Then update the item YAML:
 
 ```yaml
-id: my-item
-title: "My Item"
-subtitle: "Short optional subtitle"
-status: "available"
-material: "Replace with material"
-dimensions: "Replace with dimensions"
-availability: "Replace with availability"
-price_mode: "Replace with price mode or hide prices"
 image_file: "/images/items/my-item.jpg"
-description: "Replace with a real description."
-notice: ""
 ```
 
 ### Read items
@@ -101,6 +127,12 @@ Each item is available at:
 
 Edit the corresponding YAML file or replace its image.
 
+Then run:
+
+```bash
+npm run item:validate
+```
+
 ### Delete an item
 
 Remove the YAML file from:
@@ -113,6 +145,13 @@ Optionally remove the unused image from:
 
 ```text
 static/images/items/
+```
+
+Then run:
+
+```bash
+npm run item:list
+npm run item:validate
 ```
 
 ## Signal Clouds
@@ -129,10 +168,23 @@ A visitor can select one answer per cloud for each item. Selecting a different a
 
 Do not remove old ids if published data or browser selections may already exist. Prefer disabling or renaming labels.
 
-## Validate content
+## Pre-publish checklist
 
-Run:
+Before publishing a customized showcase, run:
 
 ```bash
-npm run content:validate
+npm run item:list
+npm run item:validate
+npm run check
+npm run build
 ```
+
+Also check manually:
+
+- homepage title and tagline;
+- all item cards;
+- each item detail page;
+- image paths;
+- Signal Cloud labels;
+- footer text;
+- absence of demo-only notices.

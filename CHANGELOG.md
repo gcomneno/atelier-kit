@@ -6,6 +6,7 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+- Added configurable Visitor Brief contact actions.
 - Added copyable Visitor Brief from Signal Cloud selections.
 - Added nested item meta information for configurable item detail pages.
 - Improved setup, configuration, customization and Vercel deployment documentation.

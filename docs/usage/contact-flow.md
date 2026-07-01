@@ -51,3 +51,39 @@ A future contact page can stay simple and file-based:
 - instruction to paste the copied Visitor Brief.
 
 No message box is required.
+
+
+## Contact actions
+
+Visitor Brief can show configured external contact actions.
+
+Edit:
+
+```text
+config/contact.yaml
+```
+
+Example:
+
+```yaml
+contact:
+  email:
+    enabled: true
+    label: "Email this brief"
+    address: "hello@example.com"
+    subject_prefix: "Interest in"
+
+  whatsapp:
+    enabled: false
+    label: "WhatsApp this brief"
+    phone: "391234567890"
+```
+
+Supported actions:
+
+- email through a `mailto:` link;
+- WhatsApp through a `wa.me` link.
+
+No message is sent automatically. The visitor confirms sending in their own email or messaging app.
+
+If no channel is enabled, Visitor Brief still works as a copy-only tool.

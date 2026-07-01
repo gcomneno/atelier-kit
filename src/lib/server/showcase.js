@@ -231,6 +231,49 @@ export function getSignalClouds() {
   });
 }
 
+
+export function getContactConfig() {
+  const data = readYaml('/config/contact.yaml');
+  const contact = data.contact;
+
+  if (!isRecord(contact)) {
+    return {
+      email: {
+        enabled: false,
+        label: 'Email this brief',
+        address: '',
+        subject_prefix: 'Interest in'
+      },
+      whatsapp: {
+        enabled: false,
+        label: 'WhatsApp this brief',
+        phone: ''
+      }
+    };
+  }
+
+  const email = isRecord(contact.email) ? contact.email : {};
+  const whatsapp = isRecord(contact.whatsapp) ? contact.whatsapp : {};
+
+  const emailAddress = optionalString(email, 'address');
+  const whatsappPhone = optionalString(whatsapp, 'phone');
+
+  return {
+    email: {
+      enabled: email.enabled === true && emailAddress !== '',
+      label: optionalString(email, 'label', 'Email this brief'),
+      address: emailAddress,
+      subject_prefix: optionalString(email, 'subject_prefix', 'Interest in')
+    },
+    whatsapp: {
+      enabled: whatsapp.enabled === true && whatsappPhone !== '',
+      label: optionalString(whatsapp, 'label', 'WhatsApp this brief'),
+      phone: whatsappPhone
+    }
+  };
+}
+
+
 export function getItems() {
   return Object.entries(itemFiles)
     .map(([source, raw]) => {

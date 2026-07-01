@@ -82,6 +82,7 @@ Edit:
 
 ```text
 config/signal-clouds.yaml
+config/contact.yaml
 ```
 
 Example:
@@ -186,3 +187,38 @@ Rules:
 - children use the same structure as parent entries;
 - nested meta is rendered on item detail pages;
 - this is still file-based configuration, not a CMS.
+
+
+## Contact configuration
+
+Edit:
+
+```text
+config/contact.yaml
+```
+
+Use this file to enable optional Visitor Brief contact actions.
+
+Example:
+
+```yaml
+contact:
+  email:
+    enabled: true
+    label: "Email this brief"
+    address: "hello@example.com"
+    subject_prefix: "Interest in"
+
+  whatsapp:
+    enabled: false
+    label: "WhatsApp this brief"
+    phone: ""
+```
+
+Rules:
+
+- disabled channels are not shown;
+- email uses a `mailto:` link;
+- WhatsApp uses a `wa.me` link;
+- no message is sent automatically;
+- no message is stored by Atelier-Kit.

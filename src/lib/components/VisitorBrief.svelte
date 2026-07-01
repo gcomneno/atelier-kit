@@ -5,12 +5,18 @@
   /** @typedef {{ id: string, label: string }} SignalOption */
   /** @typedef {{ id: string, question: string, options: SignalOption[] }} SignalCloud */
   /** @typedef {{ question: string, label: string }} VisitorAnswer */
+  /** @typedef {{ enabled: boolean, label: string, address: string, subject_prefix: string }} EmailContact */
+  /** @typedef {{ enabled: boolean, label: string, phone: string }} WhatsAppContact */
+  /** @typedef {{ email?: EmailContact, whatsapp?: WhatsAppContact }} ContactConfig */
 
   /** @type {BriefItem} */
   export let item;
 
   /** @type {SignalCloud[]} */
   export let signalClouds = [];
+
+  /** @type {ContactConfig} */
+  export let contact = {};
 
   /** @type {VisitorAnswer[]} */
   let selectedAnswers = [];
@@ -20,6 +26,8 @@
 
   $: briefText = buildBrief(item, selectedAnswers, currentUrl);
   $: hasSelections = selectedAnswers.length > 0;
+  $: emailHref = buildEmailHref(contact.email, item, briefText);
+  $: whatsappHref = buildWhatsAppHref(contact.whatsapp, briefText);
 
   /**
    * @param {SignalCloud} cloud
@@ -96,6 +104,42 @@
     return lines.join('\n');
   }
 
+  /**
+   * @param {EmailContact | undefined} email
+   * @param {BriefItem} item
+   * @param {string} briefText
+   * @returns {string}
+   */
+  function buildEmailHref(email, item, briefText) {
+    if (!email?.enabled || !email.address) {
+      return '';
+    }
+
+    const subjectPrefix = email.subject_prefix || 'Interest in';
+    const subject = `${subjectPrefix} "${item.title}"`;
+
+    return `mailto:${encodeURIComponent(email.address)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(briefText)}`;
+  }
+
+  /**
+   * @param {WhatsAppContact | undefined} whatsapp
+   * @param {string} briefText
+   * @returns {string}
+   */
+  function buildWhatsAppHref(whatsapp, briefText) {
+    if (!whatsapp?.enabled || !whatsapp.phone) {
+      return '';
+    }
+
+    const phone = whatsapp.phone.replace(/[^0-9]/g, '');
+
+    if (!phone) {
+      return '';
+    }
+
+    return `https://wa.me/${phone}?text=${encodeURIComponent(briefText)}`;
+  }
+
   async function copyBrief() {
     try {
       if (!navigator.clipboard?.writeText) {
@@ -114,7 +158,7 @@
   <div class="brief-header">
     <h2 id="visitor-brief-heading">Visitor Brief</h2>
     <p>
-      Copy a short note based on your Signal Cloud selections and paste it into your preferred contact channel.
+      Copy a short note based on your Signal Cloud selections, or open a configured contact channel with the brief prefilled.
     </p>
   </div>
 
@@ -126,7 +170,19 @@
 
   <pre tabindex="0">{briefText}</pre>
 
-  <button type="button" on:click={copyBrief}>Copy visitor brief</button>
+  <div class="brief-actions" aria-label="Visitor Brief actions">
+    <button type="button" on:click={copyBrief}>Copy visitor brief</button>
+
+    {#if emailHref}
+      <a class="action-link" href={emailHref}>{contact.email?.label || 'Email this brief'}</a>
+    {/if}
+
+    {#if whatsappHref}
+      <a class="action-link" href={whatsappHref} target="_blank" rel="noreferrer">
+        {contact.whatsapp?.label || 'WhatsApp this brief'}
+      </a>
+    {/if}
+  </div>
 
   {#if copyStatus}
     <p class="copy-status" aria-live="polite">{copyStatus}</p>
@@ -183,23 +239,47 @@
     outline-offset: 3px;
   }
 
-  button {
+  .brief-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  button,
+  .action-link {
+    display: inline-flex;
+    align-items: center;
     width: fit-content;
     border: 1px solid rgba(20, 20, 20, 0.18);
     border-radius: 999px;
     padding: 0.6rem 0.9rem;
-    background: rgba(20, 20, 20, 0.86);
-    color: white;
     cursor: pointer;
     font: inherit;
     font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  button {
+    background: rgba(20, 20, 20, 0.86);
+    color: white;
+  }
+
+  .action-link {
+    background: rgba(255, 255, 255, 0.86);
+    color: rgba(20, 20, 20, 0.86);
   }
 
   button:hover {
     background: rgba(20, 20, 20, 0.74);
   }
 
-  button:focus-visible {
+  .action-link:hover {
+    border-color: rgba(20, 20, 20, 0.42);
+  }
+
+  button:focus-visible,
+  .action-link:focus-visible {
     outline: 3px solid rgba(20, 20, 20, 0.35);
     outline-offset: 3px;
   }

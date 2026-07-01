@@ -188,3 +188,38 @@ Also check manually:
 - Signal Cloud labels;
 - footer text;
 - absence of demo-only notices.
+
+
+## Meta information
+
+Use `meta` to customize item detail fields without adding hardcoded properties.
+
+Example:
+
+```yaml
+meta:
+  - label: "Material"
+    value: "Ceramic"
+
+  - label: "Availability"
+    value: "Available on request"
+
+  - label: "Object details"
+    children:
+      - label: "Finish"
+        value: "Matte glaze"
+      - label: "Base"
+        value: "Wooden support"
+```
+
+Recommended first-level entries:
+
+- material;
+- dimensions;
+- availability;
+- object details;
+- care;
+- provenance;
+- notes.
+
+Prefer clear labels over too much nesting.

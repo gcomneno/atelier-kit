@@ -6,6 +6,7 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+- Item helper scripts for creating, listing and validating YAML item records.
 - Initial SvelteKit showcase template.
 - YAML-driven site configuration.
 - YAML-driven catalog configuration.

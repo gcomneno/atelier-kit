@@ -162,6 +162,44 @@ function validateSignalClouds() {
   }
 }
 
+
+function validateContact() {
+  const source = 'config/contact.yaml';
+
+  if (!existsSync(path.join(ROOT, source))) {
+    return;
+  }
+
+  const data = readYaml(source);
+  const contact = data.contact;
+
+  if (!contact || typeof contact !== 'object' || Array.isArray(contact)) {
+    fail(`${source}: missing "contact" object.`);
+    return;
+  }
+
+  const email = contact.email;
+
+  if (email !== undefined) {
+    if (!email || typeof email !== 'object' || Array.isArray(email)) {
+      fail(`${source}: "contact.email" must be an object when provided.`);
+    } else if (email.enabled === true) {
+      requireString(email, 'address', `${source}:contact.email`);
+    }
+  }
+
+  const whatsapp = contact.whatsapp;
+
+  if (whatsapp !== undefined) {
+    if (!whatsapp || typeof whatsapp !== 'object' || Array.isArray(whatsapp)) {
+      fail(`${source}: "contact.whatsapp" must be an object when provided.`);
+    } else if (whatsapp.enabled === true) {
+      requireString(whatsapp, 'phone', `${source}:contact.whatsapp`);
+    }
+  }
+}
+
+
 function validateItems() {
   const itemsDir = path.join(ROOT, 'content/items');
 
@@ -210,6 +248,7 @@ function validateItems() {
 validateSite();
 validateCatalog();
 validateSignalClouds();
+validateContact();
 validateItems();
 
 if (process.exitCode) {

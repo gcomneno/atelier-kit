@@ -1,0 +1,10 @@
+catalog:
+  item_name_singular: "creation"
+  item_name_plural: "creations"
+
+  fields:
+    show_price: false
+    show_availability: true
+    show_material: true
+    show_dimensions: true
+    show_status: true

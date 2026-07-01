@@ -1,0 +1,11 @@
+id: example-item
+title: "Example Creation"
+subtitle: "Replace this item with your own work"
+status: "demo"
+material: "Replace with material"
+dimensions: "Replace with dimensions"
+availability: "Replace with availability"
+price_mode: "Replace with price mode or hide prices"
+image_file: "/images/items/placeholder.svg"
+description: "This is a placeholder catalog item. Replace it with a real creation, a real description and a real image."
+notice: "Demo placeholder. Replace before publishing."

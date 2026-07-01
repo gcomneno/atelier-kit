@@ -1,0 +1,6 @@
+site:
+  name: "Atelier-Kit Demo"
+  tagline: "A configurable showcase for handmade creations"
+  language: "en"
+  notice: "Demo content. Replace these items with your own creations."
+  footer_note: "Built with Atelier-Kit"

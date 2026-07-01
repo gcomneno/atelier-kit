@@ -1,0 +1,32 @@
+signal_clouds:
+  - id: feeling
+    enabled: true
+    question: "This creation feels..."
+    hint: "Choose the word that fits best."
+    options:
+      - id: quiet
+        label: "quiet"
+      - id: playful
+        label: "playful"
+      - id: mysterious
+        label: "mysterious"
+      - id: delicate
+        label: "delicate"
+      - id: bold
+        label: "bold"
+
+  - id: imagined_place
+    enabled: true
+    question: "I would imagine it..."
+    hint: "Choose one possible place or role."
+    options:
+      - id: at_home
+        label: "at home"
+      - id: as_gift
+        label: "as a gift"
+      - id: on_a_shelf
+        label: "on a shelf"
+      - id: in_a_studio
+        label: "in a studio"
+      - id: as_collection_piece
+        label: "as a collection piece"

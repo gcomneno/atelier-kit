@@ -43,6 +43,22 @@ Atelier-Kit 1.0 uses file-based CRUD.
 
 ### Create an item
 
+Use the helper command:
+
+```bash
+npm run item:new -- my-item "My Item"
+```
+
+This creates:
+
+```text
+content/items/my-item.yaml
+```
+
+Then edit the generated YAML file.
+
+You can also create a file manually.
+
 Add a new YAML file:
 
 ```text

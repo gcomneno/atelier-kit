@@ -29,10 +29,19 @@ No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 
 Atelier-Kit 1.0 uses file-based CRUD.
 
-- Create: add a YAML file in `content/items/` and an image in `static/images/items/`.
+Helper commands:
+
+```bash
+npm run item:new -- my-first-item "My First Item"
+npm run item:list
+npm run item:validate
+```
+
+- Create: run `npm run item:new -- <id> "<Title>"`, then edit the generated YAML file.
 - Read: the homepage and `/items/<id>` pages are generated automatically.
 - Update: edit the YAML file or replace the image.
 - Delete: remove the YAML file and optionally remove the image.
+- Validate: run `npm run item:validate`.
 
 This keeps the template simple and avoids database, login and admin-dashboard complexity.
 

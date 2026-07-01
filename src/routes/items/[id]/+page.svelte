@@ -18,8 +18,22 @@
   <a class="back-link" href="/">← Back to showcase</a>
 
   <article class="item-detail">
-    <div class="image-frame">
-      <img src={item.image_file} alt={item.image_alt || item.title} />
+    <div class="visual-column">
+      <div class="image-frame">
+        <img src={item.image_file} alt={item.image_alt || item.title} />
+      </div>
+
+      {#if signalClouds.length > 0}
+        <section class="signals" aria-labelledby="signals-heading">
+          <h2 id="signals-heading">Signal Clouds</h2>
+
+          <div class="signal-list">
+            {#each signalClouds as cloud}
+              <SignalCloud itemId={item.id} {cloud} />
+            {/each}
+          </div>
+        </section>
+      {/if}
     </div>
 
     <div class="content">
@@ -41,18 +55,6 @@
 
       {#if item.notice}
         <p class="notice">{item.notice}</p>
-      {/if}
-
-      {#if signalClouds.length > 0}
-        <section class="signals" aria-labelledby="signals-heading">
-          <h2 id="signals-heading">Signal Clouds</h2>
-
-          <div class="signal-list">
-            {#each signalClouds as cloud}
-              <SignalCloud itemId={item.id} {cloud} />
-            {/each}
-          </div>
-        </section>
       {/if}
     </div>
   </article>
@@ -84,6 +86,12 @@
     align-items: start;
   }
 
+  .visual-column,
+  .content {
+    display: grid;
+    gap: 1.25rem;
+  }
+
   .image-frame {
     overflow: hidden;
     border-radius: 1.25rem;
@@ -96,11 +104,6 @@
     width: 100%;
     aspect-ratio: 4 / 3;
     object-fit: cover;
-  }
-
-  .content {
-    display: grid;
-    gap: 1.25rem;
   }
 
   header {

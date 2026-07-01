@@ -155,3 +155,34 @@ npm run build
 ```
 
 Content validation catches missing required fields, duplicate ids and missing images.
+
+
+## Nested meta information
+
+Item YAML files can define a generic `meta` array.
+
+Example:
+
+```yaml
+meta:
+  - label: "Material"
+    value: "Ceramic"
+
+  - label: "Dimensions"
+    value: "12 × 8 cm"
+
+  - label: "Object details"
+    children:
+      - label: "Finish"
+        value: "Matte glaze"
+      - label: "Care"
+        value: "Dust gently"
+```
+
+Rules:
+
+- every meta entry needs a `label`;
+- each entry must have either a non-empty `value` or non-empty `children`;
+- children use the same structure as parent entries;
+- nested meta is rendered on item detail pages;
+- this is still file-based configuration, not a CMS.

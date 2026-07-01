@@ -8,3 +8,4 @@ catalog:
     show_material: true
     show_dimensions: true
     show_status: true
+    show_meta: true

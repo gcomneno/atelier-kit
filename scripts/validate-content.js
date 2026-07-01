@@ -51,6 +51,39 @@ function assertUnique(values, label) {
   }
 }
 
+function validateMetaEntries(entries, source, pathLabel = 'meta') {
+  if (entries === undefined) {
+    return;
+  }
+
+  if (!Array.isArray(entries)) {
+    fail(`${source}: "${pathLabel}" must be an array when provided.`);
+    return;
+  }
+
+  entries.forEach((entry, index) => {
+    const entryPath = `${pathLabel}[${index}]`;
+
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      fail(`${source}: "${entryPath}" must be an object.`);
+      return;
+    }
+
+    requireString(entry, 'label', `${source}:${entryPath}`);
+
+    const hasValue = typeof entry.value === 'string' && entry.value.trim() !== '';
+    const hasChildren = Array.isArray(entry.children) && entry.children.length > 0;
+
+    if (!hasValue && !hasChildren) {
+      fail(`${source}:${entryPath}: meta entry must have either a non-empty "value" or non-empty "children".`);
+    }
+
+    if (entry.children !== undefined) {
+      validateMetaEntries(entry.children, source, `${entryPath}.children`);
+    }
+  });
+}
+
 function validateSite() {
   const source = 'config/site.yaml';
   const data = readYaml(source);
@@ -155,6 +188,7 @@ function validateItems() {
 
     requireString(item, 'title', source);
     requireString(item, 'description', source);
+    validateMetaEntries(item.meta, source);
 
     const imageFile = requireString(item, 'image_file', source);
 

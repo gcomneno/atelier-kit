@@ -1,221 +1,268 @@
-import { error } from '@sveltejs/kit';
 import { parse } from 'yaml';
 
-/**
- * @typedef {Record<string, unknown>} UnknownRecord
- */
-
-const siteModules = import.meta.glob('/config/site.yaml', {
+const configFiles = import.meta.glob('/config/*.yaml', {
   query: '?raw',
   import: 'default',
   eager: true
 });
 
-const catalogModules = import.meta.glob('/config/catalog.yaml', {
-  query: '?raw',
-  import: 'default',
-  eager: true
-});
-
-const signalCloudModules = import.meta.glob('/config/signal-clouds.yaml', {
-  query: '?raw',
-  import: 'default',
-  eager: true
-});
-
-const itemModules = import.meta.glob('/content/items/*.yaml', {
+const itemFiles = import.meta.glob('/content/items/*.yaml', {
   query: '?raw',
   import: 'default',
   eager: true
 });
 
 /**
- * @param {Record<string, string>} modules
- * @param {string} label
- * @returns {string}
+ * @typedef {{ label: string, value?: string, children?: MetaInfoEntry[] }} MetaInfoEntry
  */
-function readSingleModule(modules, label) {
-  const values = Object.values(modules);
-
-  if (values.length !== 1) {
-    throw new Error(`Expected exactly one YAML module for ${label}, found ${values.length}`);
-  }
-
-  return values[0];
-}
 
 /**
  * @param {unknown} value
- * @param {string} source
- * @returns {UnknownRecord}
+ * @returns {value is Record<string, unknown>}
  */
-function asRecord(value, source) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error(`Invalid object in ${source}`);
+function isRecord(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+/**
+ * @param {string} source
+ * @param {string} raw
+ * @returns {Record<string, unknown>}
+ */
+function parseYaml(source, raw) {
+  const data = parse(raw);
+
+  if (!isRecord(data)) {
+    throw new Error(`${source} must contain a YAML object.`);
   }
 
-  return /** @type {UnknownRecord} */ (value);
+  return data;
 }
 
 /**
- * @param {string} raw
  * @param {string} source
- * @returns {UnknownRecord}
+ * @returns {Record<string, unknown>}
  */
-function parseYaml(raw, source) {
-  return asRecord(parse(raw), source);
+function readYaml(source) {
+  const raw = configFiles[source];
+
+  if (typeof raw !== 'string') {
+    throw new Error(`Missing YAML file: ${source}`);
+  }
+
+  return parseYaml(source, raw);
 }
 
 /**
- * @param {UnknownRecord} record
+ * @param {Record<string, unknown>} record
  * @param {string} field
  * @param {string} source
  * @returns {string}
  */
-function requireString(record, field, source) {
+function requiredString(record, field, source) {
   const value = record[field];
 
   if (typeof value !== 'string' || value.trim() === '') {
-    throw new Error(`Missing or invalid "${field}" in ${source}`);
+    throw new Error(`${source}: missing or invalid "${field}".`);
   }
 
-  return value;
+  return value.trim();
 }
 
-function normalizeSite() {
-  const source = 'config/site.yaml';
-  const data = parseYaml(readSingleModule(siteModules, source), source);
-  const site = asRecord(data.site, source);
+/**
+ * @param {Record<string, unknown>} record
+ * @param {string} field
+ * @param {string} [fallback]
+ * @returns {string}
+ */
+function optionalString(record, field, fallback = '') {
+  const value = record[field];
+
+  if (typeof value !== 'string') {
+    return fallback;
+  }
+
+  return value.trim();
+}
+
+/**
+ * @param {unknown} entries
+ * @param {string} source
+ * @returns {MetaInfoEntry[]}
+ */
+function normalizeMetaEntries(entries, source) {
+  if (entries === undefined) {
+    return [];
+  }
+
+  if (!Array.isArray(entries)) {
+    throw new Error(`${source}: "meta" must be an array when provided.`);
+  }
+
+  return entries.map((entry, index) => normalizeMetaEntry(entry, `${source}:meta[${index}]`));
+}
+
+/**
+ * @param {unknown} entry
+ * @param {string} source
+ * @returns {MetaInfoEntry}
+ */
+function normalizeMetaEntry(entry, source) {
+  if (!isRecord(entry)) {
+    throw new Error(`${source}: meta entry must be an object.`);
+  }
+
+  const label = requiredString(entry, 'label', source);
+  const value = optionalString(entry, 'value');
+  const children = normalizeMetaEntries(entry.children, `${source}.children`);
+
+  if (!value && children.length === 0) {
+    throw new Error(`${source}: meta entry must have either "value" or "children".`);
+  }
 
   return {
-    name: requireString(site, 'name', source),
-    tagline: requireString(site, 'tagline', source),
-    language: typeof site.language === 'string' ? site.language : 'en',
-    notice: typeof site.notice === 'string' ? site.notice : '',
-    footer_note: typeof site.footer_note === 'string' ? site.footer_note : ''
+    label,
+    ...(value ? { value } : {}),
+    ...(children.length > 0 ? { children } : {})
   };
 }
 
-function normalizeCatalog() {
-  const source = 'config/catalog.yaml';
-  const data = parseYaml(readSingleModule(catalogModules, source), source);
-  const catalog = asRecord(data.catalog, source);
-  const fields = asRecord(catalog.fields ?? {}, `${source} fields`);
+/**
+ * @param {MetaInfoEntry[]} entries
+ * @param {string} label
+ * @returns {string}
+ */
+function findMetaValue(entries, label) {
+  const wanted = label.toLowerCase();
+
+  for (const entry of entries) {
+    if (entry.label.toLowerCase() === wanted && entry.value) {
+      return entry.value;
+    }
+
+    if (entry.children) {
+      const value = findMetaValue(entry.children, label);
+
+      if (value) {
+        return value;
+      }
+    }
+  }
+
+  return '';
+}
+
+export function getSiteConfig() {
+  const data = readYaml('/config/site.yaml');
+  const site = data.site;
+
+  if (!isRecord(site)) {
+    throw new Error('config/site.yaml: missing "site" object.');
+  }
 
   return {
-    item_name_singular: requireString(catalog, 'item_name_singular', source),
-    item_name_plural: requireString(catalog, 'item_name_plural', source),
+    name: requiredString(site, 'name', 'config/site.yaml'),
+    tagline: requiredString(site, 'tagline', 'config/site.yaml'),
+    language: optionalString(site, 'language', 'en'),
+    notice: optionalString(site, 'notice'),
+    footer_note: optionalString(site, 'footer_note')
+  };
+}
+
+export function getCatalogConfig() {
+  const data = readYaml('/config/catalog.yaml');
+  const catalog = data.catalog;
+
+  if (!isRecord(catalog)) {
+    throw new Error('config/catalog.yaml: missing "catalog" object.');
+  }
+
+  const fields = isRecord(catalog.fields) ? catalog.fields : {};
+
+  return {
+    item_name_singular: requiredString(catalog, 'item_name_singular', 'config/catalog.yaml'),
+    item_name_plural: requiredString(catalog, 'item_name_plural', 'config/catalog.yaml'),
     fields: {
-      show_price: Boolean(fields.show_price),
+      show_price: fields.show_price === true,
       show_availability: fields.show_availability !== false,
       show_material: fields.show_material !== false,
       show_dimensions: fields.show_dimensions !== false,
-      show_status: fields.show_status !== false
+      show_status: fields.show_status !== false,
+      show_meta: fields.show_meta !== false
     }
   };
 }
 
-function normalizeSignalClouds() {
-  const source = 'config/signal-clouds.yaml';
-  const data = parseYaml(readSingleModule(signalCloudModules, source), source);
+export function getSignalClouds() {
+  const data = readYaml('/config/signal-clouds.yaml');
   const clouds = data.signal_clouds;
 
   if (!Array.isArray(clouds)) {
-    throw new Error(`Missing "signal_clouds" array in ${source}`);
+    throw new Error('config/signal-clouds.yaml: missing "signal_clouds" array.');
   }
 
-  return clouds
-    .filter((cloud) => asRecord(cloud, source).enabled !== false)
-    .map((cloud, cloudIndex) => {
-      const cloudSource = `${source} cloud #${cloudIndex + 1}`;
-      const cloudRecord = asRecord(cloud, cloudSource);
-      const options = cloudRecord.options;
+  return clouds.map((cloud, cloudIndex) => {
+    const source = `config/signal-clouds.yaml:signal_clouds[${cloudIndex}]`;
 
-      if (!Array.isArray(options) || options.length === 0) {
-        throw new Error(`Missing options in ${cloudSource}`);
-      }
+    if (!isRecord(cloud)) {
+      throw new Error(`${source}: cloud must be an object.`);
+    }
 
-      return {
-        id: requireString(cloudRecord, 'id', cloudSource),
-        question: requireString(cloudRecord, 'question', cloudSource),
-        hint: typeof cloudRecord.hint === 'string' ? cloudRecord.hint : '',
-        options: options
-          .filter((option) => asRecord(option, cloudSource).enabled !== false)
-          .map((option, optionIndex) => {
-            const optionSource = `${cloudSource} option #${optionIndex + 1}`;
-            const optionRecord = asRecord(option, optionSource);
+    if (!Array.isArray(cloud.options) || cloud.options.length === 0) {
+      throw new Error(`${source}: options must be a non-empty array.`);
+    }
 
-            return {
-              id: requireString(optionRecord, 'id', optionSource),
-              label: requireString(optionRecord, 'label', optionSource)
-            };
-          })
-      };
-    });
-}
+    return {
+      id: requiredString(cloud, 'id', source),
+      question: requiredString(cloud, 'question', source),
+      options: cloud.options.map((option, optionIndex) => {
+        const optionSource = `${source}.options[${optionIndex}]`;
 
-/**
- * @param {UnknownRecord} rawItem
- * @param {string} source
- */
-function normalizeItem(rawItem, source) {
-  const item = {
-    id: requireString(rawItem, 'id', source),
-    title: requireString(rawItem, 'title', source),
-    subtitle: typeof rawItem.subtitle === 'string' ? rawItem.subtitle : '',
-    status: typeof rawItem.status === 'string' ? rawItem.status : '',
-    material: typeof rawItem.material === 'string' ? rawItem.material : '',
-    dimensions: typeof rawItem.dimensions === 'string' ? rawItem.dimensions : '',
-    availability: typeof rawItem.availability === 'string' ? rawItem.availability : '',
-    price_mode: typeof rawItem.price_mode === 'string' ? rawItem.price_mode : '',
-    image_file: requireString(rawItem, 'image_file', source),
-    description: requireString(rawItem, 'description', source),
-    notice: typeof rawItem.notice === 'string' ? rawItem.notice : ''
-  };
+        if (!isRecord(option)) {
+          throw new Error(`${optionSource}: option must be an object.`);
+        }
 
-  if (!item.image_file.startsWith('/')) {
-    throw new Error(`image_file must start with "/" in ${source}`);
-  }
-
-  return item;
-}
-
-function normalizeItems() {
-  return Object.entries(itemModules)
-    .map(([source, raw]) => normalizeItem(parseYaml(raw, source), source))
-    .sort((a, b) => a.title.localeCompare(b.title));
-}
-
-const SITE = normalizeSite();
-const CATALOG = normalizeCatalog();
-const SIGNAL_CLOUDS = normalizeSignalClouds();
-const ITEMS = normalizeItems();
-
-export function getSiteConfig() {
-  return SITE;
-}
-
-export function getCatalogConfig() {
-  return CATALOG;
-}
-
-export function getSignalClouds() {
-  return SIGNAL_CLOUDS;
+        return {
+          id: requiredString(option, 'id', optionSource),
+          label: requiredString(option, 'label', optionSource)
+        };
+      })
+    };
+  });
 }
 
 export function getItems() {
-  return ITEMS;
+  return Object.entries(itemFiles)
+    .map(([source, raw]) => {
+      if (typeof raw !== 'string') {
+        throw new Error(`${source}: expected raw YAML content.`);
+      }
+
+      const item = parseYaml(source, raw);
+      const meta = normalizeMetaEntries(item.meta, source);
+
+      return {
+        id: requiredString(item, 'id', source),
+        title: requiredString(item, 'title', source),
+        subtitle: optionalString(item, 'subtitle'),
+        status: optionalString(item, 'status'),
+        price_mode: optionalString(item, 'price_mode'),
+        image_file: requiredString(item, 'image_file', source),
+        image_alt: optionalString(item, 'image_alt'),
+        description: requiredString(item, 'description', source),
+        notice: optionalString(item, 'notice'),
+        material: optionalString(item, 'material') || findMetaValue(meta, 'Material'),
+        dimensions: optionalString(item, 'dimensions') || findMetaValue(meta, 'Dimensions'),
+        availability: optionalString(item, 'availability') || findMetaValue(meta, 'Availability'),
+        meta
+      };
+    })
+    .sort((left, right) => left.title.localeCompare(right.title));
 }
 
 /**
  * @param {string} id
  */
 export function getItemById(id) {
-  const item = ITEMS.find((entry) => entry.id === id);
-
-  if (!item) {
-    error(404, `Catalog item not found: ${id}`);
-  }
-
-  return item;
+  return getItems().find((item) => item.id === id);
 }

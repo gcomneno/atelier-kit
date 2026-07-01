@@ -18,6 +18,7 @@ No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 - YAML-driven catalog settings.
 - YAML-driven item/card content.
 - File-based item/card CRUD.
+- Nested item meta information.
 - Static images.
 - Configurable Signal Clouds.
 - Single-choice Signal Cloud answers.
@@ -104,6 +105,33 @@ npm run item:validate
 - Validate: run `npm run item:validate`.
 
 This keeps the template simple and avoids database, login and admin-dashboard complexity.
+
+## Nested meta information
+
+Item detail pages can render configurable meta information from each item YAML file.
+
+Example:
+
+```yaml
+meta:
+  - label: "Material"
+    value: "Ceramic"
+
+  - label: "Object details"
+    children:
+      - label: "Finish"
+        value: "Matte glaze"
+      - label: "Care"
+        value: "Dust gently"
+```
+
+Meta entries support:
+
+- `label`;
+- optional `value`;
+- optional `children`.
+
+Use nested children for simple submeta structures. Keep nesting shallow unless there is a clear reason.
 
 ## Signal Clouds
 

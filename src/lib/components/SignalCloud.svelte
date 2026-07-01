@@ -37,6 +37,16 @@
   function choose(optionId) {
     selectedOptionId = optionId;
     localStorage.setItem(storageKey, optionId);
+
+    window.dispatchEvent(
+      new CustomEvent('atelier-kit:signal-change', {
+        detail: {
+          itemId,
+          cloudId: cloud.id,
+          optionId
+        }
+      })
+    );
   }
 </script>
 

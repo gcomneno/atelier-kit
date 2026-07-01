@@ -23,6 +23,7 @@ No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 - Configurable Signal Clouds.
 - Single-choice Signal Cloud answers.
 - Browser-local Signal Cloud selections.
+- Copyable Visitor Brief generated from Signal Cloud selections.
 - Placeholder image for quick setup.
 - Content validation script.
 - GitHub Actions validation workflow.
@@ -149,6 +150,14 @@ Rules:
 - no public counters are shown;
 - no personal data is collected.
 
+## Visitor Brief
+
+Visitor Brief turns Signal Cloud selections into a short copyable plain-text note.
+
+A visitor can select impressions on an item page, copy the generated brief and paste it into email, WhatsApp, Instagram, Signal or another external contact channel.
+
+No account, textarea, form backend, database or server-side storage is required.
+
 ## Project structure
 
 - `config/site.yaml` configures the site identity.
@@ -194,6 +203,7 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 - `docs/usage/configuration.md` explains the YAML configuration files.
 - `docs/usage/customization.md` explains the first customization workflow.
 - `docs/usage/deploy-vercel.md` explains Vercel deployment.
+- `docs/usage/contact-flow.md` explains the no-textarea contact flow.
 - `docs/product/positioning.md` explains the product direction.
 - `docs/architecture/adr-0001-configurable-showcase-kit.md` explains the main architecture decision.
 

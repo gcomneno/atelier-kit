@@ -223,3 +223,12 @@ Recommended first-level entries:
 - notes.
 
 Prefer clear labels over too much nesting.
+
+
+## Visitor Brief
+
+Visitor Brief is generated from Signal Cloud selections on item detail pages.
+
+It gives visitors a short note they can copy and paste into an external contact channel.
+
+This supports a contact flow without adding a textarea, form backend, database or server-side message storage.

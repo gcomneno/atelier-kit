@@ -1,6 +1,7 @@
 <script>
   import MetaInfo from '$lib/components/MetaInfo.svelte';
   import SignalCloud from '$lib/components/SignalCloud.svelte';
+  import VisitorBrief from '$lib/components/VisitorBrief.svelte';
 
   /** @type {import('./$types').PageData} */
   export let data;
@@ -33,6 +34,8 @@
             {/each}
           </div>
         </section>
+
+        <VisitorBrief {item} {signalClouds} />
       {/if}
     </div>
 

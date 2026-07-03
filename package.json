@@ -13,7 +13,8 @@
     "content:validate": "node scripts/validate-content.js",
     "item:new": "node scripts/item.js new",
     "item:list": "node scripts/item.js list",
-    "item:validate": "node scripts/item.js validate"
+    "item:validate": "node scripts/item.js validate",
+    "content:doctor": "node scripts/content-doctor.js"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.1",

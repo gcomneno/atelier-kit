@@ -10,7 +10,9 @@ Run locally:
 
 ```bash
 npm run item:list
+npm run content:validate
 npm run item:validate
+npm run content:doctor
 npm run check
 npm run build
 ```

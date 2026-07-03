@@ -26,6 +26,7 @@ No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 - Copyable Visitor Brief generated from Signal Cloud selections.
 - Placeholder image for quick setup.
 - Content validation script.
+- Content Doctor pre-publish warnings.
 - GitHub Actions validation workflow.
 
 ## Quick start
@@ -180,6 +181,30 @@ npm run build
 
 The repository also includes a GitHub Actions workflow that runs validation on pushes and pull requests.
 
+## Content Doctor
+
+Atelier-Kit includes a non-fatal pre-publish doctor.
+
+The validator checks structural correctness:
+
+```bash
+npm run content:validate
+```
+
+The doctor checks publishing readiness:
+
+```bash
+npm run content:doctor
+```
+
+It warns about starter/demo content such as placeholder images, `Replace with` text, demo notices, test item ids and placeholder contact addresses.
+
+Use strict mode when you want warnings to fail the command:
+
+```bash
+npm run content:doctor -- --strict
+```
+
 ## Deploy
 
 Atelier-Kit uses the Vercel adapter.
@@ -204,6 +229,7 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 - `docs/usage/customization.md` explains the first customization workflow.
 - `docs/usage/deploy-vercel.md` explains Vercel deployment.
 - `docs/usage/contact-flow.md` explains the no-textarea contact flow.
+- `docs/usage/content-doctor.md` explains pre-publish checks.
 - `docs/product/positioning.md` explains the product direction.
 - `docs/architecture/adr-0001-configurable-showcase-kit.md` explains the main architecture decision.
 

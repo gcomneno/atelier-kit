@@ -6,8 +6,16 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+## v0.1.1 - 2026-07-04
+
+### Added
+
 - Added a client site scaffold command with a writing showcase template.
 - Added a reusable client intake brief for first site setup.
+
+### Fixed
+
+- Removed the noninteractive `tabindex` accessibility warning from VisitorBrief.
 
 ### Added
 

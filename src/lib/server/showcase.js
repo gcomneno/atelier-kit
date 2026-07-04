@@ -12,6 +12,12 @@ const itemFiles = import.meta.glob('/content/items/*.yaml', {
   eager: true
 });
 
+const collectionFiles = import.meta.glob('/content/collections/*.yaml', {
+  query: '?raw',
+  import: 'default',
+  eager: true
+});
+
 /**
  * @typedef {{ label: string, value?: string, children?: MetaInfoEntry[] }} MetaInfoEntry
  */
@@ -231,7 +237,6 @@ export function getSignalClouds() {
   });
 }
 
-
 export function getContactConfig() {
   const data = readYaml('/config/contact.yaml');
   const contact = data.contact;
@@ -273,7 +278,6 @@ export function getContactConfig() {
   };
 }
 
-
 export function getItems() {
   return Object.entries(itemFiles)
     .map(([source, raw]) => {
@@ -308,4 +312,55 @@ export function getItems() {
  */
 export function getItemById(id) {
   return getItems().find((item) => item.id === id);
+}
+
+export function getCollections() {
+  const items = getItems();
+  const itemById = new Map(items.map((item) => [item.id, item]));
+
+  return Object.entries(collectionFiles)
+    .map(([source, raw]) => {
+      if (typeof raw !== 'string') {
+        throw new Error(`${source}: expected raw YAML content.`);
+      }
+
+      const collection = parseYaml(source, raw);
+      const collectionItems = collection.items;
+
+      if (!Array.isArray(collectionItems) || collectionItems.length === 0) {
+        throw new Error(`${source}: "items" must be a non-empty array.`);
+      }
+
+      const itemIds = collectionItems.map((itemId, index) => {
+        if (typeof itemId !== 'string' || itemId.trim() === '') {
+          throw new Error(`${source}:items[${index}] must be a non-empty item id string.`);
+        }
+
+        return itemId.trim();
+      });
+
+      return {
+        id: requiredString(collection, 'id', source),
+        title: requiredString(collection, 'title', source),
+        description: requiredString(collection, 'description', source),
+        item_ids: itemIds,
+        items: itemIds.map((itemId) => {
+          const item = itemById.get(itemId);
+
+          if (!item) {
+            throw new Error(`${source}: unknown item id "${itemId}".`);
+          }
+
+          return item;
+        })
+      };
+    })
+    .sort((left, right) => left.title.localeCompare(right.title));
+}
+
+/**
+ * @param {string} id
+ */
+export function getCollectionById(id) {
+  return getCollections().find((collection) => collection.id === id);
 }

@@ -20,6 +20,27 @@
     {/if}
   </section>
 
+  {#if data.collections.length > 0}
+    <section class="collections" aria-labelledby="collections-title">
+      <div class="section-heading">
+        <p class="eyebrow">Collections</p>
+        <h2 id="collections-title">Curated pages</h2>
+      </div>
+
+      <div class="collection-grid">
+        {#each data.collections as collection}
+          <a class="collection-card" href={`/collections/${collection.id}`}>
+            <h3>{collection.title}</h3>
+            <p>{collection.description}</p>
+            <span>{collection.items.length} {collection.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</span>
+          </a>
+        {/each}
+      </div>
+
+      <p class="text-link"><a href="/collections">View all collections</a></p>
+    </section>
+  {/if}
+
   <section class="catalog" aria-labelledby="catalog-title">
     <div class="section-heading">
       <p class="eyebrow">Catalog</p>
@@ -89,6 +110,7 @@
     background: rgb(255 250 242 / 0.72);
   }
 
+  .collections,
   .catalog {
     padding: 2rem 0 4rem;
   }
@@ -102,10 +124,61 @@
     font-size: clamp(2rem, 7vw, 4rem);
   }
 
+  .collection-grid,
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
     gap: 1.2rem;
+  }
+
+  .collection-card {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.4rem;
+    color: inherit;
+    text-decoration: none;
+    background: #fffaf2;
+    border: 1px solid #e4d8c7;
+    border-radius: 28px;
+    box-shadow: 0 20px 70px rgb(36 27 18 / 0.08);
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .collection-card:hover {
+    transform: translateY(-3px);
+    border-color: #c9ad89;
+    box-shadow: 0 24px 90px rgb(36 27 18 / 0.14);
+  }
+
+  .collection-card h3 {
+    margin: 0;
+    font-size: clamp(1.35rem, 4vw, 1.75rem);
+  }
+
+  .collection-card p {
+    margin: 0;
+    color: #4f4236;
+    line-height: 1.6;
+  }
+
+  .collection-card span {
+    color: #7b6a58;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .text-link {
+    margin: 1.4rem 0 0;
+  }
+
+  .text-link a {
+    color: #5f4529;
+    font-weight: 800;
   }
 
   footer {

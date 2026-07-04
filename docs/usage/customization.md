@@ -262,3 +262,35 @@ Available presets:
 - `writing`
 
 Presets only generate starter YAML. Edit the generated meta information before publishing.
+
+
+## File-based collections
+
+Create curated pages by adding YAML files under:
+
+```text
+content/collections/
+```
+
+Example:
+
+```yaml
+id: "quiet-home"
+title: "For a quiet home"
+description: "Objects with a calm presence."
+items:
+  - example-item
+```
+
+Collections are available at:
+
+```text
+/collections
+/collections/<id>
+```
+
+Run validation after editing collections:
+
+```bash
+npm run content:validate
+```

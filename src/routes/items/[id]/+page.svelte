@@ -59,6 +59,15 @@
       {#if item.notice}
         <p class="notice">{item.notice}</p>
       {/if}
+
+      {#if signalClouds.length > 0}
+        <aside class="contact-callout">
+          <p class="callout-title">Interested in this piece?</p>
+          <p class="callout-copy">
+            Use the Signal Clouds and Visitor Brief on the left to write a message with your preferences already included.
+          </p>
+        </aside>
+      {/if}
     </div>
   </article>
 </main>
@@ -155,6 +164,24 @@
   .notice {
     border-left: 3px solid rgba(20, 20, 20, 0.24);
     padding-left: 0.85rem;
+    color: rgba(20, 20, 20, 0.68);
+    line-height: 1.5;
+  }
+
+  .contact-callout {
+    padding: 1rem 1.1rem;
+    border-radius: 1rem;
+    background: rgb(248 240 228 / 0.9);
+    border: 1px solid rgb(47 40 31 / 0.12);
+  }
+
+  .callout-title {
+    margin: 0 0 0.35rem;
+    font-weight: 700;
+  }
+
+  .callout-copy {
+    margin: 0;
     color: rgba(20, 20, 20, 0.68);
     line-height: 1.5;
   }

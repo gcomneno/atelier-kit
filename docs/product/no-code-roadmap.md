@@ -97,22 +97,31 @@ It should validate content before saving and avoid requiring a database at first
 
 Architecture research: [`docs/architecture/adr-0002-local-studio-research.md`](../architecture/adr-0002-local-studio-research.md).
 
-**Status:** site, contact, items and collections prototype available via `npm run studio`.
+**Status:** available via `npm run studio` — site, about, catalog, contact, items (with photo upload), collections, signal clouds and publish readiness.
 
 ### Phase 4 — True no-code packaging
 
 Explore whether Atelier-Kit can become usable without the terminal for non-technical users.
 
+Decision: primary path is **kit + service + guided deploy**. See ADR 0003.
+
 Possible directions:
 
 - desktop wrapper;
 - hosted starter;
-- GitHub template plus web-based editor;
-- deployment provider integration;
-- generated ZIP export;
-- guided Vercel deployment.
+- GitHub template plus deploy button;
+- guided Vercel deployment;
+- generated ZIP export.
 
-**Status:** product research required before implementation.
+Deliverables:
+
+- [x] ADR 0003 publishing and service model
+- [x] service package documentation
+- [x] `npm run publish` script
+- [ ] desktop wrapper research
+- [ ] deploy button template for client repos
+
+**Status:** guided publish available; full terminal-free packaging remains research.
 
 ## Architecture options
 

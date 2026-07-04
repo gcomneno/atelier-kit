@@ -6,6 +6,15 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+- Extended local studio with about page, catalog settings, Signal Cloud editing, item photo upload and publish readiness review.
+- Added public `/about` page driven by `config/about.yaml`.
+- Added `npm run publish` for validation, doctor, check, build and optional Vercel deploy.
+- Added ADR 0003 and service package documentation for client delivery.
+- Improved Visitor Brief prominence on item pages.
+- Added `npm run studio:launch` to open the studio in the browser automatically.
+- Added Vercel deploy button docs and `DEPLOY.md` generation for scaffolded client sites.
+- Added ADR 0004 for desktop wrapper research (phase 1: studio launch helper).
+
 ## v0.1.7 - 2026-07-04
 
 ### Added

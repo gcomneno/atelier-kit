@@ -167,6 +167,42 @@ function validateSignalClouds() {
 }
 
 
+function validateAbout() {
+  const source = 'config/about.yaml';
+
+  if (!existsSync(path.join(ROOT, source))) {
+    return;
+  }
+
+  const data = readYaml(source);
+  const about = data.about;
+
+  if (!about || typeof about !== 'object' || Array.isArray(about)) {
+    fail(`${source}: missing "about" object.`);
+    return;
+  }
+
+  if (about.enabled === false) {
+    return;
+  }
+
+  requireString(about, 'title', source);
+
+  if (Array.isArray(about.sections)) {
+    about.sections.forEach((section, index) => {
+      const sectionSource = `${source}:sections[${index}]`;
+
+      if (!section || typeof section !== 'object' || Array.isArray(section)) {
+        fail(`${sectionSource}: section must be an object.`);
+        return;
+      }
+
+      requireString(section, 'heading', sectionSource);
+      requireString(section, 'body', sectionSource);
+    });
+  }
+}
+
 function validateContact() {
   const source = 'config/contact.yaml';
 
@@ -311,6 +347,7 @@ function validateCollections(itemIds) {
 
 validateSite();
 validateCatalog();
+validateAbout();
 validateSignalClouds();
 validateContact();
 const itemIds = validateItems();

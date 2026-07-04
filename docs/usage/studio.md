@@ -1,6 +1,6 @@
 # Local studio
 
-The local studio is Atelier-Kit Level 3 authoring in early prototype form.
+The local studio is Atelier-Kit Level 3 authoring.
 
 It provides a browser UI for editing file-based site content without opening YAML files manually.
 
@@ -8,6 +8,7 @@ It provides a browser UI for editing file-based site content without opening YAM
 
 ```bash
 npm run studio
+npm run studio:launch
 ```
 
 This starts the dev server on `127.0.0.1` with studio mode enabled and opens the authoring UI at:
@@ -24,27 +25,29 @@ npm run dev
 
 Studio write routes remain disabled outside development unless `ATELIER_STUDIO=1` is set.
 
-## Current prototype scope
+## Studio scope
 
-The studio currently edits:
+The studio edits:
 
 - site identity (`config/site.yaml`)
 - contact actions (`config/contact.yaml`)
-- items (`content/items/*.yaml`)
+- about page (`config/about.yaml`)
+- catalog labels and visible fields (`config/catalog.yaml`)
+- items with photo upload (`content/items/*.yaml`, `static/images/items/`)
 - collections (`content/collections/*.yaml`)
+- Signal Cloud questions and answer labels (`config/signal-clouds.yaml`)
+- publish readiness via Content Doctor (`/studio/readiness`)
 
-The studio currently does **not** edit:
+The studio does **not** yet:
 
-- catalog settings;
-- Signal Clouds;
-- image uploads (set image paths after adding files under `static/images/items/`).
-
-Those belong to later prototype issues.
+- deploy the site (use `npm run publish -- --deploy`);
+- edit Svelte layout or theme code;
+- support multi-user permissions or revision history.
 
 ## What the studio does
 
-- loads current site, contact, item and collection content;
-- saves changes back to YAML files;
+- loads current site content;
+- saves changes back to YAML files and item images;
 - runs structural validation after each save;
 - shows plain-language save results;
 - links to the public site preview in a separate tab.
@@ -54,34 +57,51 @@ Those belong to later prototype issues.
 | Route | Purpose |
 |---|---|
 | `/studio` | Site identity and contact settings |
+| `/studio/about` | About page |
+| `/studio/catalog` | Catalog vocabulary and visible fields |
 | `/studio/items` | List items |
-| `/studio/items/[id]` | Edit one item |
+| `/studio/items/[id]` | Edit one item and upload its photo |
 | `/studio/collections` | List collections |
 | `/studio/collections/[id]` | Edit one collection |
+| `/studio/signal-clouds` | Visitor questions and answer labels |
+| `/studio/readiness` | Content Doctor publish review |
+
+## Item photos
+
+Upload a JPG, PNG or WebP file from the item editor. The studio saves it under `static/images/items/` and updates the item `image_file` automatically using the item id.
+
+Example result:
+
+```text
+static/images/items/anello-onda.jpg
+```
+
+```yaml
+image_file: /images/items/anello-onda.jpg
+```
 
 ## What the studio does not do
 
 - deploy the site;
-- upload images;
 - initialize Git;
-- replace `content:doctor`, `check` or `build`;
+- replace `content:doctor`, `check` or `build` for final launch;
 - expose write access in production.
 
-## After saving
+## Before publishing
 
-Refresh the preview tab if the homepage does not reflect your changes immediately.
-
-Then run:
+Open `/studio/readiness` or run:
 
 ```bash
-npm run content:doctor
-npm run check
-npm run build
+npm run publish
+npm run publish -- --deploy
 ```
+
+See [`deploy-vercel.md`](deploy-vercel.md) and [`../product/service-package.md`](../product/service-package.md).
 
 ## Related docs
 
 - [`../architecture/adr-0002-local-studio-research.md`](../architecture/adr-0002-local-studio-research.md)
+- [`../architecture/adr-0003-publishing-and-service-model.md`](../architecture/adr-0003-publishing-and-service-model.md)
 - [`../product/product-levels.md`](../product/product-levels.md)
 - [`../product/no-code-roadmap.md`](../product/no-code-roadmap.md)
 - [`content-doctor.md`](content-doctor.md)

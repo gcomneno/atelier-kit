@@ -10,10 +10,14 @@
     </div>
 
     <nav aria-label="Studio">
-      <a href="/studio">Site settings</a>
+      <a href="/studio">Site</a>
+      <a href="/studio/about">About</a>
+      <a href="/studio/catalog">Catalog</a>
       <a href="/studio/items">Items</a>
       <a href="/studio/collections">Collections</a>
-      <a href="/" target="_blank" rel="noreferrer">Preview site</a>
+      <a href="/studio/signal-clouds">Signals</a>
+      <a href="/studio/readiness">Readiness</a>
+      <a href="/" target="_blank" rel="noreferrer">Preview</a>
     </nav>
   </header>
 
@@ -53,8 +57,9 @@
 
   nav {
     display: flex;
-    gap: 1rem;
-    font-size: 0.95rem;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    font-size: 0.9rem;
   }
 
   nav a {

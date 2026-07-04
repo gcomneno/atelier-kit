@@ -122,12 +122,12 @@
 <section class="panel next-steps" aria-labelledby="next-steps-title">
   <div class="panel-heading">
     <h2 id="next-steps-title">Before publishing</h2>
-    <p>Run these checks from the project folder when the site is ready.</p>
+    <p>Review publish readiness in the studio or run the publish script from the project folder.</p>
   </div>
 
-  <pre><code>npm run content:doctor
-npm run check
-npm run build</code></pre>
+  <p><a href="/studio/readiness">Open publish readiness</a></p>
+  <pre><code>npm run publish
+npm run publish -- --deploy</code></pre>
 </section>
 
 <style>

@@ -156,9 +156,10 @@
 
 <section class="visitor-brief" aria-labelledby="visitor-brief-heading">
   <div class="brief-header">
-    <h2 id="visitor-brief-heading">Visitor Brief</h2>
+    <p class="eyebrow">Contact without a form</p>
+    <h2 id="visitor-brief-heading">Write with a ready message</h2>
     <p>
-      Copy a short note based on your Signal Cloud selections, or open a configured contact channel with the brief prefilled.
+      Choose Signal Cloud answers above, then copy this brief or open email / WhatsApp with the text already prepared.
     </p>
   </div>
 
@@ -193,10 +194,20 @@
   .visitor-brief {
     display: grid;
     gap: 0.85rem;
-    border: 1px solid rgba(20, 20, 20, 0.12);
+    border: 2px solid rgb(47 40 31 / 0.18);
     border-radius: 1rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.72);
+    padding: 1.1rem;
+    background: linear-gradient(180deg, rgb(255 250 242 / 0.95), rgb(255 255 255 / 0.82));
+    box-shadow: 0 16px 40px rgb(36 27 18 / 0.08);
+  }
+
+  .eyebrow {
+    margin: 0;
+    color: rgba(20, 20, 20, 0.55);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .brief-header {

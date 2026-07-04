@@ -880,6 +880,36 @@ items:
 `);
 }
 
+function writeDeployGuide(targetRoot) {
+  const folderName = path.basename(path.resolve(targetRoot));
+
+  writeFile(
+    targetRoot,
+    'DEPLOY.md',
+    `
+# Deploy
+
+## Local publish prep
+
+\`\`\`bash
+npm run publish
+\`\`\`
+
+## Vercel CLI
+
+\`\`\`bash
+npm run publish -- --deploy
+\`\`\`
+
+## Deploy button
+
+After pushing this repo to GitHub, add this button to the README (replace YOUR_GITHUB_USER):
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FYOUR_GITHUB_USER%2F${folderName}&project-name=${folderName}&framework=sveltekit&build-command=npm%20run%20build&install-command=npm%20install)
+`
+  );
+}
+
 function printNextSteps(targetRoot, template) {
   const relativeTarget = path.relative(process.cwd(), targetRoot) || targetRoot;
 
@@ -897,7 +927,10 @@ function printNextSteps(targetRoot, template) {
   console.log('  npm run content:doctor');
   console.log('  npm run check');
   console.log('  npm run build');
+  console.log('  npm run studio:launch');
+  console.log('  npm run publish');
   console.log('');
+  console.log('See DEPLOY.md for Vercel deploy button instructions.');
   console.log('Then replace scaffold placeholders before publishing.');
 }
 
@@ -937,6 +970,7 @@ function main() {
     TEMPLATE_APPLIERS[options.template](targetRoot);
 
     patchPackageJson(targetRoot);
+    writeDeployGuide(targetRoot);
     printNextSteps(targetRoot, options.template);
   } catch (error) {
     console.error(`ERROR: ${error.message}`);

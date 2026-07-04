@@ -11,13 +11,14 @@ const EXCLUDED_NAMES = new Set([
   '.vercel'
 ]);
 
-const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork', 'handmade', 'jewelry']);
+const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork', 'handmade', 'jewelry', 'furniture']);
 
 const TEMPLATE_APPLIERS = {
   writing: applyWritingTemplate,
   artwork: applyArtworkTemplate,
   handmade: applyHandmadeTemplate,
-  jewelry: applyJewelryTemplate
+  jewelry: applyJewelryTemplate,
+  furniture: applyFurnitureTemplate
 };
 
 function usage() {
@@ -29,6 +30,7 @@ Examples:
   npm run site:scaffold -- ../artist-site --template artwork
   npm run site:scaffold -- ../quiet-clay --template handmade
   npm run site:scaffold -- ../tiny-silver --template jewelry
+  npm run site:scaffold -- ../quiet-room --template furniture
   npm run site:scaffold -- ../client-site --template writing --force
 
 Options:
@@ -728,6 +730,153 @@ title: "Available pieces"
 description: "A first curated group of jewelry pieces, available works or custom options."
 items:
   - jewelry-piece
+`);
+}
+
+function applyFurnitureTemplate(targetRoot) {
+  resetScaffoldContent(targetRoot);
+
+  writeFile(targetRoot, 'config/site.yaml', `
+site:
+  name: "Small furniture showcase"
+  tagline: "Furniture pieces and object design for quiet interiors"
+  language: "en"
+  notice: "Starter furniture scaffold. Replace with real studio copy before publishing."
+  footer_note: "Built with Atelier-Kit"
+`);
+
+  writeFile(targetRoot, 'config/catalog.yaml', `
+catalog:
+  item_name_singular: "piece"
+  item_name_plural: "pieces"
+
+  fields:
+    show_price: false
+    show_availability: true
+    show_material: true
+    show_dimensions: true
+    show_status: true
+    show_meta: true
+`);
+
+  writeFile(targetRoot, 'config/signal-clouds.yaml', `
+signal_clouds:
+  - id: material
+    enabled: true
+    question: "This piece feels made of..."
+    hint: "Choose the material that fits best."
+    options:
+      - id: wood
+        label: "wood"
+      - id: metal
+        label: "metal"
+      - id: stone
+        label: "stone"
+      - id: glass
+        label: "glass"
+      - id: mixed-materials
+        label: "mixed materials"
+
+  - id: room
+    enabled: true
+    question: "I would place it in..."
+    hint: "Choose the room that fits best."
+    options:
+      - id: living-room
+        label: "a living room"
+      - id: bedroom
+        label: "a bedroom"
+      - id: studio
+        label: "a studio"
+      - id: kitchen
+        label: "a kitchen"
+      - id: entry
+        label: "an entry"
+
+  - id: use-case
+    enabled: true
+    question: "I need it for..."
+    hint: "Choose the use case that fits best."
+    options:
+      - id: seating
+        label: "seating"
+      - id: storage
+        label: "storage"
+      - id: lighting
+        label: "lighting"
+      - id: table
+        label: "a table"
+      - id: custom-piece
+        label: "a custom piece"
+
+  - id: interest
+    enabled: true
+    question: "What interests you?"
+    hint: "Choose one starting point."
+    options:
+      - id: available-piece
+        label: "an available piece"
+      - id: dimensions
+        label: "dimensions"
+      - id: availability
+        label: "availability"
+      - id: commission
+        label: "a commission"
+      - id: process
+        label: "the process"
+`);
+
+  writeFile(targetRoot, 'config/contact.yaml', `
+contact:
+  email:
+    enabled: true
+    label: "Email this brief"
+    address: "hello@example.com"
+    subject_prefix: "Interest in"
+
+  whatsapp:
+    enabled: false
+    label: "WhatsApp this brief"
+    phone: ""
+`);
+
+  writeFile(targetRoot, 'content/items/furniture-piece.yaml', `
+id: "furniture-piece"
+title: "Furniture Piece"
+subtitle: "A furniture or object design placeholder"
+status: "draft"
+price_mode: "hidden"
+image_file: "/images/items/placeholder.svg"
+image_alt: "Neutral placeholder image for a furniture piece"
+description: "Replace this placeholder with a real chair, table, shelf, lamp or other interior object."
+notice: "Furniture scaffold placeholder. Replace before publishing."
+
+meta:
+  - label: "Material"
+    value: "Replace with material"
+
+  - label: "Dimensions"
+    value: "Replace with dimensions"
+
+  - label: "Finish"
+    value: "Replace with finish"
+
+  - label: "Use"
+    value: "Replace with intended use"
+
+  - label: "Care"
+    value: "Replace with care instructions"
+
+  - label: "Availability"
+    value: "Replace with availability"
+`);
+
+  writeFile(targetRoot, 'content/collections/room-selection.yaml', `
+id: "room-selection"
+title: "Room selection"
+description: "A first curated group of furniture pieces, available works or custom interior objects."
+items:
+  - furniture-piece
 `);
 }
 

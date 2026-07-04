@@ -41,6 +41,7 @@ They copy Atelier-Kit into a separate folder and replace starter content across 
 ```bash
 npm run site:scaffold -- ../client-site --template writing
 npm run site:scaffold -- ../artist-site --template artwork
+npm run site:scaffold -- ../quiet-clay --template handmade
 ```
 
 A scaffold template configures:
@@ -62,6 +63,7 @@ See [`client-scaffold.md`](client-scaffold.md).
 |---|---|---|---|
 | `writing` | Authors, zines, narrative projects | novel, short story, narrative project | writing desk, reading path, curated group of works |
 | `artwork` | Visual artists, sculptors, painters, illustrators, installations | artwork, sculpture, piece, installation | series, recent works, available works, exhibitions |
+| `handmade` | Makers and small craft showcases | handmade object | curated selection, available pieces, seasonal group |
 
 ### `writing`
 
@@ -81,13 +83,22 @@ Signal Clouds focus on material, presence and visitor interest.
 
 Visitor Brief selections are meant to support requests about a piece, a commission, a studio visit or collaboration.
 
+### `handmade`
+
+```bash
+npm run site:scaffold -- ../quiet-clay --template handmade
+```
+
+Signal Clouds focus on material, use case, style and visitor interest.
+
+Visitor Brief selections are meant to support requests about an object or custom work.
+
 ## Planned scaffold templates
 
 These use cases are not scaffolded yet, but can still be configured manually or with item meta presets:
 
 | Template | Use case | Status |
 |---|---|---|
-| `handmade` | makers and small craft showcases | planned |
 | `jewelry` | small jewelry collections | planned |
 | `furniture` | furniture and object design showcases | planned |
 
@@ -107,7 +118,7 @@ Examples:
 
 - a painter with a small studio catalog → `artwork`
 - an author with novels and short stories → `writing`
-- a ceramic maker with functional objects → manual setup with `--preset handmade` until the `handmade` scaffold exists
+- a ceramic maker with functional objects → `handmade`
 - a photographer selling prints → manual setup with `--preset print`
 
 ## When not to use a scaffold template

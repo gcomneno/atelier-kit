@@ -9,6 +9,7 @@ This is useful when you want to use Atelier-Kit as a product base instead of edi
 ```bash
 npm run site:scaffold -- ../atelier-noir --template writing
 npm run site:scaffold -- ../artist-site --template artwork
+npm run site:scaffold -- ../quiet-clay --template handmade
 ```
 
 The target path is relative to the Atelier-Kit repository.
@@ -39,6 +40,18 @@ It maps Atelier-Kit concepts like this:
 - Collection = series, recent works, available works or exhibitions.
 - Signal Clouds = material, presence and visitor interest.
 - Visitor Brief = request information about a piece, commission, studio visit or collaboration.
+- Contact actions = configured email and optional WhatsApp.
+
+### `handmade`
+
+Creates a starter craft showcase for makers and small handmade-object catalogs.
+
+It maps Atelier-Kit concepts like this:
+
+- Item = handmade object.
+- Collection = curated selection, available pieces or seasonal group.
+- Signal Clouds = material, use case, style and visitor interest.
+- Visitor Brief = request information about an object or custom work.
 - Contact actions = configured email and optional WhatsApp.
 
 ## What the scaffold does

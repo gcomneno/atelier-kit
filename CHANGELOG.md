@@ -7,6 +7,7 @@ All notable changes to Atelier-Kit will be documented in this file.
 ### Added
 
 - Improved Content Doctor messages with plain-language publishing notes and `--verbose` technical output.
+- Added ADR 0002 documenting local studio architecture research for `npm run studio`.
 
 ## v0.1.4 - 2026-07-04
 

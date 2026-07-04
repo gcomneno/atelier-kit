@@ -250,6 +250,7 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 - `docs/product/no-code-roadmap.md` explains the staged no-code authoring roadmap.
 - `docs/usage/site-wizard.md` explains the guided setup wizard.
 - `docs/architecture/adr-0001-configurable-showcase-kit.md` explains the main architecture decision.
+- `docs/architecture/adr-0002-local-studio-research.md` records local studio architecture research.
 
 ## Support
 

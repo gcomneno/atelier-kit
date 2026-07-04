@@ -9,6 +9,7 @@ import {
   readItemRecord,
   requiredField,
   runStructuralValidation,
+  saveItemImageUpload,
   validationMessage,
   writeItemRecord
 } from '$lib/server/studio-io.js';
@@ -57,6 +58,12 @@ export const actions = {
       assertContentId(params.id, 'Item id');
       const original = readItemRecord(params.id);
       const formData = await request.formData();
+      const upload = formData.get('image_upload');
+      let imageFile = requiredField(formData.get('image_file'), 'Image path');
+
+      if (upload instanceof File && upload.size > 0) {
+        imageFile = await saveItemImageUpload(params.id, upload);
+      }
 
       const item = {
         id: readString(original, 'id', params.id),
@@ -64,7 +71,7 @@ export const actions = {
         subtitle: optionalField(formData.get('subtitle')),
         status: optionalField(formData.get('status')),
         price_mode: optionalField(formData.get('price_mode'), 'hidden'),
-        image_file: requiredField(formData.get('image_file'), 'Image path'),
+        image_file: imageFile,
         image_alt: optionalField(formData.get('image_alt')),
         description: requiredField(formData.get('description'), 'Description'),
         notice: optionalField(formData.get('notice')),

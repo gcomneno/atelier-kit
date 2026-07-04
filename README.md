@@ -27,15 +27,18 @@ No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 - Placeholder image for quick setup.
 - Content validation script.
 - Content Doctor pre-publish warnings.
-- GitHub Actions validation workflow.
-
+- Local studio for browser-based editing (`npm run studio`).
+- Item photo upload in studio with automatic image paths.
+- About page (`config/about.yaml`, `/about`).
+- Publish prep script (`npm run publish`).
+- Client site scaffolds and guided `site:wizard`.
 - Item meta presets for common creative showcase types.
 
 ## Current release
 
-Atelier-Kit v0.1.0 is the first usable release of the kit.
+Latest release: **v0.1.7** — studio item and collection editors.
 
-See the GitHub release for highlights, validation notes and project boundaries.
+See [GitHub Releases](https://github.com/gcomneno/atelier-kit/releases) for highlights and validation notes.
 
 ## Quick start
 

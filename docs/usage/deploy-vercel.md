@@ -9,9 +9,13 @@ It does not require a database in version 1.0.
 Run locally:
 
 ```bash
-npm run item:list
+npm run publish
+```
+
+Or step by step:
+
+```bash
 npm run content:validate
-npm run item:validate
 npm run content:doctor
 npm run check
 npm run build
@@ -56,6 +60,12 @@ npx vercel
 ```
 
 Production deploy:
+
+```bash
+npm run publish -- --deploy
+```
+
+Or manually:
 
 ```bash
 npx vercel --prod

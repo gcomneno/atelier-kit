@@ -221,6 +221,7 @@ export function getSignalClouds() {
     return {
       id: requiredString(cloud, 'id', source),
       question: requiredString(cloud, 'question', source),
+      hint: optionalString(cloud, 'hint'),
       options: cloud.options.map((option, optionIndex) => {
         const optionSource = `${source}.options[${optionIndex}]`;
 
@@ -235,6 +236,36 @@ export function getSignalClouds() {
       })
     };
   });
+}
+
+export function getAboutConfig() {
+  const raw = configFiles['/config/about.yaml'];
+
+  if (typeof raw !== 'string') {
+    return null;
+  }
+
+  const data = parseYaml('/config/about.yaml', raw);
+  const about = data.about;
+
+  if (!isRecord(about) || about.enabled === false) {
+    return null;
+  }
+
+  const sections = Array.isArray(about.sections)
+    ? about.sections
+        .filter((section) => isRecord(section))
+        .map((section, index) => ({
+          heading: requiredString(section, 'heading', `config/about.yaml:sections[${index}]`),
+          body: requiredString(section, 'body', `config/about.yaml:sections[${index}]`)
+        }))
+    : [];
+
+  return {
+    title: requiredString(about, 'title', 'config/about.yaml'),
+    intro: optionalString(about, 'intro'),
+    sections
+  };
 }
 
 export function getContactConfig() {

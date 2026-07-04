@@ -11,7 +11,7 @@
 </svelte:head>
 
 <p class="intro">
-  Edit this item’s public content. Image upload is not handled here yet — set the image path after adding a file under <code>static/images/items/</code>.
+  Edit this item’s public content. Upload a photo here or keep the image path field for advanced use.
   <a href={`/items/${itemForm.id}`} target="_blank" rel="noreferrer">Preview item</a>
 </p>
 
@@ -21,7 +21,27 @@
     <p>Item id: {itemForm.id}</p>
   </div>
 
-  <form method="POST" action="?/saveItem" use:enhance class="studio-form">
+  <form method="POST" action="?/saveItem" enctype="multipart/form-data" use:enhance class="studio-form">
+    <div class="image-preview">
+      <img src={itemForm.image_file} alt={itemForm.image_alt || itemForm.title} />
+    </div>
+
+    <label>
+      Upload photo
+      <span class="hint">Saved as static/images/items/{itemForm.id}.jpg (or .png / .webp). The image path updates automatically.</span>
+      <input type="file" name="image_upload" accept="image/jpeg,image/png,image/webp" />
+    </label>
+
+    <label>
+      Image path
+      <input name="image_file" value={itemForm.image_file} required />
+    </label>
+
+    <label>
+      Image description
+      <input name="image_alt" value={itemForm.image_alt} />
+    </label>
+
     <label>
       Item title
       <input name="title" value={itemForm.title} required />
@@ -40,16 +60,6 @@
     <label>
       Price mode
       <input name="price_mode" value={itemForm.price_mode} />
-    </label>
-
-    <label>
-      Image path
-      <input name="image_file" value={itemForm.image_file} required />
-    </label>
-
-    <label>
-      Image description
-      <input name="image_alt" value={itemForm.image_alt} />
     </label>
 
     <label>
@@ -130,6 +140,20 @@
   .studio-form {
     display: grid;
     gap: 1rem;
+  }
+
+  .image-preview {
+    overflow: hidden;
+    border-radius: 0.85rem;
+    border: 1px solid rgb(47 40 31 / 0.12);
+    background: #fffdf9;
+  }
+
+  .image-preview img {
+    display: block;
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
   }
 
   fieldset {

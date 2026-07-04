@@ -3,7 +3,7 @@
 
   /**
    * @typedef {{ id: string, label: string }} SignalOption
-   * @typedef {{ id: string, question: string, options: SignalOption[] }} SignalCloud
+   * @typedef {{ id: string, question: string, hint?: string, options: SignalOption[] }} SignalCloud
    */
 
   /** @type {string} */
@@ -54,7 +54,7 @@
   <div class="cloud-header">
     <h2 id={headingId}>{cloud.question}</h2>
     <p id={hintId} class="cloud-hint">
-      Single choice. Pick one option; choosing another replaces the previous local selection.
+      {cloud.hint || 'Single choice. Pick one option; choosing another replaces the previous local selection.'}
     </p>
   </div>
 

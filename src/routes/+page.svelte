@@ -11,7 +11,6 @@
 
 <main>
   <section class="hero">
-    <p class="eyebrow">Configurable showcase kit</p>
     <h1>{data.site.name}</h1>
     <p class="tagline">{data.site.tagline}</p>
 
@@ -55,7 +54,10 @@
   </section>
 
   <footer>
-    {data.site.footer_note}
+    <p>{data.site.footer_note}</p>
+    {#if data.aboutAvailable}
+      <p class="footer-link"><a href="/about">About the studio</a></p>
+    {/if}
   </footer>
 </main>
 
@@ -185,5 +187,18 @@
     border-top: 1px solid #e3d4bf;
     padding-top: 1.5rem;
     color: #7b6a58;
+  }
+
+  footer p {
+    margin: 0;
+  }
+
+  .footer-link {
+    margin-top: 0.65rem;
+  }
+
+  .footer-link a {
+    color: #5f4529;
+    font-weight: 700;
   }
 </style>

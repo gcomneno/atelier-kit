@@ -1,12 +1,14 @@
 // @ts-nocheck
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parse, stringify } from 'yaml';
 
 const ROOT = process.cwd();
 const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 /**
  * @param {string} relativePath
@@ -206,4 +208,229 @@ export function applyMetaFromForm(originalMeta, formData) {
 
     return updated;
   });
+}
+
+/** @returns {{ ok: boolean, output: string }} */
+export function runContentDoctorReport() {
+  const result = spawnSync(process.execPath, ['scripts/content-doctor.js'], {
+    cwd: ROOT,
+    encoding: 'utf8'
+  });
+
+  const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
+
+  return {
+    ok: output.includes('found nothing obvious'),
+    output
+  };
+}
+
+/**
+ * @param {string} filename
+ */
+function imageExtensionFromName(filename) {
+  const match = filename.toLowerCase().match(/\.([a-z0-9]+)$/);
+
+  if (!match || !IMAGE_EXTENSIONS.has(match[1])) {
+    throw new Error('Use a JPG, PNG or WebP image.');
+  }
+
+  return match[1] === 'jpeg' ? 'jpg' : match[1];
+}
+
+/**
+ * @param {string} id
+ * @param {File} file
+ */
+export async function saveItemImageUpload(id, file) {
+  assertContentId(id, 'Item id');
+
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error('Choose an image file to upload.');
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error('Image must be 5 MB or smaller.');
+  }
+
+  const extension = imageExtensionFromName(file.name);
+  const imagesDir = path.join(ROOT, 'static/images/items');
+  mkdirSync(imagesDir, { recursive: true });
+
+  const filename = `${id}.${extension}`;
+  const absolutePath = path.join(imagesDir, filename);
+  const buffer = Buffer.from(await file.arrayBuffer());
+  writeFileSync(absolutePath, buffer);
+
+  return `/images/items/${filename}`;
+}
+
+export function defaultItemImagePath(id) {
+  assertContentId(id, 'Item id');
+  return `/images/items/${id}.jpg`;
+}
+
+export function loadCatalogForm() {
+  const data = readProjectYaml('config/catalog.yaml');
+  const catalog = data.catalog;
+
+  if (!catalog || typeof catalog !== 'object' || Array.isArray(catalog)) {
+    throw new Error('config/catalog.yaml is missing a catalog object.');
+  }
+
+  const fields = catalog.fields && typeof catalog.fields === 'object' ? catalog.fields : {};
+
+  return {
+    item_name_singular: typeof catalog.item_name_singular === 'string' ? catalog.item_name_singular : 'creation',
+    item_name_plural: typeof catalog.item_name_plural === 'string' ? catalog.item_name_plural : 'creations',
+    show_price: fields.show_price === true,
+    show_availability: fields.show_availability !== false,
+    show_material: fields.show_material !== false,
+    show_dimensions: fields.show_dimensions !== false,
+    show_status: fields.show_status !== false,
+    show_meta: fields.show_meta !== false
+  };
+}
+
+/**
+ * @param {Record<string, unknown>} catalogForm
+ */
+export function writeCatalogForm(catalogForm) {
+  const singular = String(catalogForm.item_name_singular ?? '').trim();
+  const plural = String(catalogForm.item_name_plural ?? '').trim();
+
+  if (singular === '') {
+    throw new Error('Item name (singular) is required.');
+  }
+
+  if (plural === '') {
+    throw new Error('Item name (plural) is required.');
+  }
+
+  writeProjectYaml('config/catalog.yaml', {
+    catalog: {
+      item_name_singular: singular,
+      item_name_plural: plural,
+      fields: {
+        show_price: catalogForm.show_price === true,
+        show_availability: catalogForm.show_availability !== false,
+        show_material: catalogForm.show_material !== false,
+        show_dimensions: catalogForm.show_dimensions !== false,
+        show_status: catalogForm.show_status !== false,
+        show_meta: catalogForm.show_meta !== false
+      }
+    }
+  });
+}
+
+export function loadAboutForm() {
+  const aboutPath = path.join(ROOT, 'config/about.yaml');
+
+  if (!existsSync(aboutPath)) {
+    return {
+      enabled: false,
+      title: '',
+      intro: '',
+      section_heading: '',
+      section_body: ''
+    };
+  }
+
+  const data = readProjectYaml('config/about.yaml');
+  const about = data.about;
+
+  if (!about || typeof about !== 'object' || Array.isArray(about)) {
+    throw new Error('config/about.yaml is missing an about object.');
+  }
+
+  const sections = Array.isArray(about.sections) ? about.sections : [];
+  const firstSection = sections[0] && typeof sections[0] === 'object' ? sections[0] : {};
+
+  return {
+    enabled: about.enabled !== false,
+    title: typeof about.title === 'string' ? about.title : '',
+    intro: typeof about.intro === 'string' ? about.intro : '',
+    section_heading: typeof firstSection.heading === 'string' ? firstSection.heading : '',
+    section_body: typeof firstSection.body === 'string' ? firstSection.body : ''
+  };
+}
+
+/**
+ * @param {Record<string, unknown>} aboutForm
+ */
+export function writeAboutForm(aboutForm) {
+  const enabled = aboutForm.enabled === true;
+  const title = optionalField(String(aboutForm.title ?? ''));
+  const intro = optionalField(String(aboutForm.intro ?? ''));
+  const sectionHeading = optionalField(String(aboutForm.section_heading ?? ''));
+  const sectionBody = optionalField(String(aboutForm.section_body ?? ''));
+
+  if (enabled && title === '') {
+    throw new Error('About page title is required when the page is enabled.');
+  }
+
+  /** @type {Record<string, unknown>} */
+  const about = {
+    enabled,
+    title,
+    intro
+  };
+
+  if (sectionHeading !== '' || sectionBody !== '') {
+    about.sections = [
+      {
+        heading: sectionHeading || 'Process',
+        body: sectionBody
+      }
+    ];
+  }
+
+  writeProjectYaml('config/about.yaml', { about });
+}
+
+export function readSignalCloudRecords() {
+  const data = readProjectYaml('config/signal-clouds.yaml');
+  const clouds = data.signal_clouds;
+
+  if (!Array.isArray(clouds)) {
+    throw new Error('config/signal-clouds.yaml is missing signal_clouds.');
+  }
+
+  return clouds;
+}
+
+/**
+ * @param {FormData} formData
+ */
+export function applySignalCloudsFromForm(originalClouds, formData) {
+  if (!Array.isArray(originalClouds)) {
+    return [];
+  }
+
+  return originalClouds.map((cloud, cloudIndex) => {
+    const updated = {
+      id: cloud.id,
+      enabled: cloud.enabled !== false,
+      question: optionalField(formData.get(`cloud_${cloudIndex}_question`), cloud.question),
+      hint: optionalField(formData.get(`cloud_${cloudIndex}_hint`), cloud.hint ?? ''),
+      options: Array.isArray(cloud.options)
+        ? cloud.options.map((option, optionIndex) => ({
+            id: option.id,
+            label: optionalField(
+              formData.get(`cloud_${cloudIndex}_option_${optionIndex}_label`),
+              option.label
+            )
+          }))
+        : []
+    };
+
+    return updated;
+  });
+}
+
+/**
+ * @param {unknown[]} clouds
+ */
+export function writeSignalCloudRecords(clouds) {
+  writeProjectYaml('config/signal-clouds.yaml', { signal_clouds: clouds });
 }

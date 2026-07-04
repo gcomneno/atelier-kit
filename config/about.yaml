@@ -1,0 +1,11 @@
+about:
+  enabled: true
+  title: About the studio
+  intro: |
+    Atelier-Kit is a small configurable showcase for handmade work, artwork and creative projects.
+    Replace this page with your own studio story, process and background.
+  sections:
+    - heading: How this showcase works
+      body: |
+        Items, collections and contact actions are edited through YAML files or the local studio.
+        Signal Clouds help visitors describe what they are looking for before sending a Visitor Brief.

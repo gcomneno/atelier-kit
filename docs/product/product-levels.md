@@ -64,7 +64,7 @@ npm run site:wizard
 npm run site:wizard -- --template jewelry
 ```
 
-**Current status:** in progress.
+**Current status:** in progress — wizard available; studio covers most file-based editing; publish script available.
 
 The wizard is the first Level 2 deliverable. It does not remove the need for `npm install`, preview or deploy, but it removes manual YAML editing for the first site setup.
 
@@ -89,9 +89,9 @@ The wizard is the first Level 2 deliverable. It does not remove the need for `np
 - plain-language validation and publish readiness;
 - optional packaging that hides the terminal for common workflows.
 
-**Current status:** planned.
+**Current status:** studio prototype available for most content; photo upload and publish readiness included. Full terminal-free use remains future work.
 
-Level 3 is a product direction, not the current default workflow. See [`no-code-roadmap.md`](no-code-roadmap.md).
+Level 3 is a product direction actively being built. See [`no-code-roadmap.md`](no-code-roadmap.md) and [`service-package.md`](service-package.md).
 
 ## How the levels relate
 

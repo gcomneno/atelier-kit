@@ -6,6 +6,9 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+- Added a local studio prototype for editing site identity and contact settings from `/studio`.
+- Added `npm run studio` to start localhost-only authoring mode.
+
 ## v0.1.5 - 2026-07-04
 
 ### Added

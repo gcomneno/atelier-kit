@@ -8,6 +8,7 @@ import {
   readProjectYaml,
   requiredField,
   runStructuralValidation,
+  validationMessage,
   writeProjectYaml
 } from '$lib/server/studio-io.js';
 
@@ -68,12 +69,8 @@ function loadContactForm() {
 }
 
 /** @param {{ ok: boolean, output: string }} validation */
-function validationMessage(validation) {
-  if (validation.ok) {
-    return 'Saved successfully. Structural validation passed. Refresh the preview tab to see changes.';
-  }
-
-  return `Saved, but validation reported a problem:\n${validation.output}`;
+function saveMessage(validation) {
+  return validationMessage(validation);
 }
 
 export function load() {
@@ -106,7 +103,7 @@ export const actions = {
 
       return {
         siteStatus: validation.ok ? 'success' : 'warning',
-        siteMessage: validationMessage(validation),
+        siteMessage: saveMessage(validation),
         siteForm: site
       };
     } catch (error) {
@@ -157,7 +154,7 @@ export const actions = {
 
       return {
         contactStatus: validation.ok ? 'success' : 'warning',
-        contactMessage: validationMessage(validation),
+        contactMessage: saveMessage(validation),
         contactForm: {
           email_enabled: contact.email.enabled,
           email_label: contact.email.label,

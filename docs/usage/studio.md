@@ -26,27 +26,38 @@ Studio write routes remain disabled outside development unless `ATELIER_STUDIO=1
 
 ## Current prototype scope
 
-Issue #38 covers the first studio slice:
+The studio currently edits:
 
 - site identity (`config/site.yaml`)
 - contact actions (`config/contact.yaml`)
+- items (`content/items/*.yaml`)
+- collections (`content/collections/*.yaml`)
 
 The studio currently does **not** edit:
 
-- items;
-- collections;
+- catalog settings;
 - Signal Clouds;
-- images.
+- image uploads (set image paths after adding files under `static/images/items/`).
 
 Those belong to later prototype issues.
 
 ## What the studio does
 
-- loads current site and contact settings;
+- loads current site, contact, item and collection content;
 - saves changes back to YAML files;
 - runs structural validation after each save;
 - shows plain-language save results;
 - links to the public site preview in a separate tab.
+
+### Studio routes
+
+| Route | Purpose |
+|---|---|
+| `/studio` | Site identity and contact settings |
+| `/studio/items` | List items |
+| `/studio/items/[id]` | Edit one item |
+| `/studio/collections` | List collections |
+| `/studio/collections/[id]` | Edit one collection |
 
 ## What the studio does not do
 

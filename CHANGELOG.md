@@ -7,6 +7,7 @@ All notable changes to Atelier-Kit will be documented in this file.
 ### Added
 
 - Added a `handmade` client site scaffold template for makers and small craft showcases.
+- Added a `jewelry` client site scaffold template for small jewelry collections.
 
 ## v0.1.2 - 2026-07-04
 

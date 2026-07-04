@@ -42,6 +42,7 @@ They copy Atelier-Kit into a separate folder and replace starter content across 
 npm run site:scaffold -- ../client-site --template writing
 npm run site:scaffold -- ../artist-site --template artwork
 npm run site:scaffold -- ../quiet-clay --template handmade
+npm run site:scaffold -- ../tiny-silver --template jewelry
 ```
 
 A scaffold template configures:
@@ -64,6 +65,7 @@ See [`client-scaffold.md`](client-scaffold.md).
 | `writing` | Authors, zines, narrative projects | novel, short story, narrative project | writing desk, reading path, curated group of works |
 | `artwork` | Visual artists, sculptors, painters, illustrators, installations | artwork, sculpture, piece, installation | series, recent works, available works, exhibitions |
 | `handmade` | Makers and small craft showcases | handmade object | curated selection, available pieces, seasonal group |
+| `jewelry` | Small jewelry collections | jewelry piece | collection, available pieces, custom pieces |
 
 ### `writing`
 
@@ -93,13 +95,22 @@ Signal Clouds focus on material, use case, style and visitor interest.
 
 Visitor Brief selections are meant to support requests about an object or custom work.
 
+### `jewelry`
+
+```bash
+npm run site:scaffold -- ../tiny-silver --template jewelry
+```
+
+Signal Clouds focus on material, size, occasion and visitor interest.
+
+Visitor Brief selections are meant to support requests about a piece, sizing, availability or custom work.
+
 ## Planned scaffold templates
 
 These use cases are not scaffolded yet, but can still be configured manually or with item meta presets:
 
 | Template | Use case | Status |
 |---|---|---|
-| `jewelry` | small jewelry collections | planned |
 | `furniture` | furniture and object design showcases | planned |
 
 Until those templates exist, use the manual client setup workflow in [`manual-client-setup.md`](manual-client-setup.md).
@@ -119,6 +130,7 @@ Examples:
 - a painter with a small studio catalog → `artwork`
 - an author with novels and short stories → `writing`
 - a ceramic maker with functional objects → `handmade`
+- a jeweler with rings and pendants → `jewelry`
 - a photographer selling prints → manual setup with `--preset print`
 
 ## When not to use a scaffold template

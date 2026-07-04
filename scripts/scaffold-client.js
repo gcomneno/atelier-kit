@@ -11,12 +11,13 @@ const EXCLUDED_NAMES = new Set([
   '.vercel'
 ]);
 
-const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork', 'handmade']);
+const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork', 'handmade', 'jewelry']);
 
 const TEMPLATE_APPLIERS = {
   writing: applyWritingTemplate,
   artwork: applyArtworkTemplate,
-  handmade: applyHandmadeTemplate
+  handmade: applyHandmadeTemplate,
+  jewelry: applyJewelryTemplate
 };
 
 function usage() {
@@ -27,6 +28,7 @@ Examples:
   npm run site:scaffold -- ../atelier-noir --template writing
   npm run site:scaffold -- ../artist-site --template artwork
   npm run site:scaffold -- ../quiet-clay --template handmade
+  npm run site:scaffold -- ../tiny-silver --template jewelry
   npm run site:scaffold -- ../client-site --template writing --force
 
 Options:
@@ -579,6 +581,153 @@ title: "Curated selection"
 description: "A first curated group of handmade pieces, available works or seasonal objects."
 items:
   - maker-piece
+`);
+}
+
+function applyJewelryTemplate(targetRoot) {
+  resetScaffoldContent(targetRoot);
+
+  writeFile(targetRoot, 'config/site.yaml', `
+site:
+  name: "Small jewelry showcase"
+  tagline: "Rings, pendants and wearable pieces in quiet batches"
+  language: "en"
+  notice: "Starter jewelry scaffold. Replace with real studio copy before publishing."
+  footer_note: "Built with Atelier-Kit"
+`);
+
+  writeFile(targetRoot, 'config/catalog.yaml', `
+catalog:
+  item_name_singular: "piece"
+  item_name_plural: "pieces"
+
+  fields:
+    show_price: false
+    show_availability: true
+    show_material: true
+    show_dimensions: false
+    show_status: true
+    show_meta: true
+`);
+
+  writeFile(targetRoot, 'config/signal-clouds.yaml', `
+signal_clouds:
+  - id: material
+    enabled: true
+    question: "This piece feels made of..."
+    hint: "Choose the material that fits best."
+    options:
+      - id: silver
+        label: "silver"
+      - id: gold
+        label: "gold"
+      - id: brass
+        label: "brass"
+      - id: stone
+        label: "stone"
+      - id: mixed-metals
+        label: "mixed metals"
+
+  - id: size
+    enabled: true
+    question: "I am looking for..."
+    hint: "Choose the size or format that fits best."
+    options:
+      - id: ring
+        label: "a ring"
+      - id: pendant
+        label: "a pendant"
+      - id: earrings
+        label: "earrings"
+      - id: bracelet
+        label: "a bracelet"
+      - id: made-to-size
+        label: "made-to-size"
+
+  - id: occasion
+    enabled: true
+    question: "It would be for..."
+    hint: "Choose the occasion that fits best."
+    options:
+      - id: everyday
+        label: "everyday wear"
+      - id: gift
+        label: "a gift"
+      - id: wedding
+        label: "a wedding"
+      - id: statement
+        label: "a statement piece"
+      - id: special-event
+        label: "a special event"
+
+  - id: interest
+    enabled: true
+    question: "What interests you?"
+    hint: "Choose one starting point."
+    options:
+      - id: available-piece
+        label: "an available piece"
+      - id: sizing
+        label: "sizing"
+      - id: availability
+        label: "availability"
+      - id: custom-work
+        label: "custom work"
+      - id: process
+        label: "the process"
+`);
+
+  writeFile(targetRoot, 'config/contact.yaml', `
+contact:
+  email:
+    enabled: true
+    label: "Email this brief"
+    address: "hello@example.com"
+    subject_prefix: "Interest in"
+
+  whatsapp:
+    enabled: false
+    label: "WhatsApp this brief"
+    phone: ""
+`);
+
+  writeFile(targetRoot, 'content/items/jewelry-piece.yaml', `
+id: "jewelry-piece"
+title: "Jewelry Piece"
+subtitle: "A wearable piece placeholder"
+status: "draft"
+price_mode: "hidden"
+image_file: "/images/items/placeholder.svg"
+image_alt: "Neutral placeholder image for a jewelry piece"
+description: "Replace this placeholder with a real ring, pendant, earring or other wearable piece."
+notice: "Jewelry scaffold placeholder. Replace before publishing."
+
+meta:
+  - label: "Material"
+    value: "Replace with material"
+
+  - label: "Size"
+    value: "Replace with size"
+
+  - label: "Finish"
+    value: "Replace with finish"
+
+  - label: "Stone or detail"
+    value: "Replace with stone or detail"
+
+  - label: "Care"
+    value: "Replace with care instructions"
+
+  - label: "Availability"
+    value: "Replace with availability"
+`);
+
+  writeFile(targetRoot, 'content/collections/available-pieces.yaml', `
+id: "available-pieces"
+title: "Available pieces"
+description: "A first curated group of jewelry pieces, available works or custom options."
+items:
+  - jewelry-piece
 `);
 }
 

@@ -10,6 +10,7 @@ This is useful when you want to use Atelier-Kit as a product base instead of edi
 npm run site:scaffold -- ../atelier-noir --template writing
 npm run site:scaffold -- ../artist-site --template artwork
 npm run site:scaffold -- ../quiet-clay --template handmade
+npm run site:scaffold -- ../tiny-silver --template jewelry
 ```
 
 The target path is relative to the Atelier-Kit repository.
@@ -52,6 +53,18 @@ It maps Atelier-Kit concepts like this:
 - Collection = curated selection, available pieces or seasonal group.
 - Signal Clouds = material, use case, style and visitor interest.
 - Visitor Brief = request information about an object or custom work.
+- Contact actions = configured email and optional WhatsApp.
+
+### `jewelry`
+
+Creates a starter jewelry showcase for rings, pendants, earrings and small wearable collections.
+
+It maps Atelier-Kit concepts like this:
+
+- Item = jewelry piece.
+- Collection = collection, available pieces or custom pieces.
+- Signal Clouds = material, size, occasion and visitor interest.
+- Visitor Brief = request information about a piece, sizing, availability or custom work.
 - Contact actions = configured email and optional WhatsApp.
 
 ## What the scaffold does

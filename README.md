@@ -31,6 +31,12 @@ No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 
 - Item meta presets for common creative showcase types.
 
+## Current release
+
+Atelier-Kit v0.1.0 is the first usable release of the kit.
+
+See the GitHub release for highlights, validation notes and project boundaries.
+
 ## Quick start
 
 Install dependencies:

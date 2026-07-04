@@ -148,3 +148,33 @@ npm run content:doctor -- --strict
 5. Run validation and build checks.
 6. Initialize Git in the separate client folder.
 7. Publish or deploy only when the content is ready.
+
+## Upgrading an existing client site
+
+When Atelier-Kit ships new studio features or fixes, sync framework code into a client folder without touching client content:
+
+```bash
+cd ../client-site
+npm run site:upgrade -- --from ../atelier-kit
+```
+
+The command:
+
+- copies `src/` and `scripts/` from the kit;
+- merges npm scripts from the kit `package.json`;
+- prints a diff summary and asks for confirmation (use `--yes` to skip);
+- never overwrites `config/`, `content/` or `static/images/items/`.
+
+Preview only:
+
+```bash
+npm run site:upgrade -- --from ../atelier-kit --dry-run
+```
+
+From the kit repository, target a client folder directly:
+
+```bash
+npm run site:upgrade -- --target ../luna-argento --from .
+```
+
+After upgrading, run `npm run check` and `npm run build` in the client folder.

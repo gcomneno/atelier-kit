@@ -49,6 +49,20 @@ Doctor warnings do not fail by default.
 
 This keeps the starter project usable even when it intentionally contains demo content.
 
+## Friendly output
+
+By default, the doctor explains each note in plain language:
+
+- what looks unfinished;
+- which file to open;
+- what to change before publishing.
+
+Use verbose mode when you want the older technical format:
+
+```bash
+npm run content:doctor -- --verbose
+```
+
 ## Strict mode
 
 Use strict mode when you want warnings to fail the command:

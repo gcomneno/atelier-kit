@@ -30,3 +30,12 @@ It is designed for people who need a simple online showcase, not a full e-commer
 Configure the site, add items and images, deploy the showcase.
 
 No cart. No accounts. No contact-form swamp.
+
+## Product direction
+
+Atelier-Kit is currently strongest at **developer-assisted** setup and is moving toward **guided setup** and eventual **no-code** authoring.
+
+See:
+
+- [`docs/product/product-levels.md`](docs/product/product-levels.md)
+- [`docs/product/no-code-roadmap.md`](docs/product/no-code-roadmap.md)

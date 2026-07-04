@@ -246,6 +246,9 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 - `docs/usage/scaffold-templates.md` explains supported scaffold templates and their boundaries.
 - `docs/usage/manual-client-setup.md` explains manual client setup when no template fits.
 - `docs/product/positioning.md` explains the product direction.
+- `docs/product/product-levels.md` explains developer-assisted, guided and no-code levels.
+- `docs/product/no-code-roadmap.md` explains the staged no-code authoring roadmap.
+- `docs/usage/site-wizard.md` explains the guided setup wizard.
 - `docs/architecture/adr-0001-configurable-showcase-kit.md` explains the main architecture decision.
 
 ## Support

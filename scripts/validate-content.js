@@ -39,6 +39,10 @@ function requireString(record, field, source) {
   return value;
 }
 
+function isValidId(value) {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+}
+
 function assertUnique(values, label) {
   const seen = new Set();
 
@@ -205,14 +209,14 @@ function validateItems() {
 
   if (!existsSync(itemsDir)) {
     fail('content/items directory does not exist.');
-    return;
+    return new Set();
   }
 
   const files = readdirSync(itemsDir).filter((file) => file.endsWith('.yaml'));
 
   if (files.length === 0) {
     fail('content/items must contain at least one .yaml item.');
-    return;
+    return new Set();
   }
 
   const ids = [];
@@ -243,13 +247,74 @@ function validateItems() {
   }
 
   assertUnique(ids, 'item id');
+
+  return new Set(ids);
+}
+
+function validateCollections(itemIds) {
+  const collectionsDir = path.join(ROOT, 'content/collections');
+
+  if (!existsSync(collectionsDir)) {
+    return;
+  }
+
+  const files = readdirSync(collectionsDir).filter((file) => file.endsWith('.yaml'));
+
+  const collectionIds = [];
+
+  for (const file of files) {
+    const source = `content/collections/${file}`;
+    const collection = readYaml(source);
+    const id = requireString(collection, 'id', source);
+    const expectedId = file.replace(/\.yaml$/, '');
+
+    collectionIds.push(id);
+
+    if (!isValidId(id)) {
+      fail(`${source}: id must use lowercase letters, numbers and single hyphens only.`);
+    }
+
+    if (id !== expectedId) {
+      fail(`${source}: id must match filename "${expectedId}".`);
+    }
+
+    requireString(collection, 'title', source);
+    requireString(collection, 'description', source);
+
+    if (!Array.isArray(collection.items) || collection.items.length === 0) {
+      fail(`${source}: "items" must be a non-empty array.`);
+      continue;
+    }
+
+    const references = [];
+
+    collection.items.forEach((itemId, index) => {
+      const itemSource = `${source}:items[${index}]`;
+
+      if (typeof itemId !== 'string' || itemId.trim() === '') {
+        fail(`${itemSource}: item reference must be a non-empty string.`);
+        return;
+      }
+
+      references.push(itemId);
+
+      if (!itemIds.has(itemId)) {
+        fail(`${itemSource}: unknown item id "${itemId}".`);
+      }
+    });
+
+    assertUnique(references, `item reference in collection ${id}`);
+  }
+
+  assertUnique(collectionIds, 'collection id');
 }
 
 validateSite();
 validateCatalog();
 validateSignalClouds();
 validateContact();
-validateItems();
+const itemIds = validateItems();
+validateCollections(itemIds);
 
 if (process.exitCode) {
   process.exit();

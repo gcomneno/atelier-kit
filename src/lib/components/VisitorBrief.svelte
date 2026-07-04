@@ -168,7 +168,7 @@
     </p>
   {/if}
 
-  <pre tabindex="0">{briefText}</pre>
+  <pre>{briefText}</pre>
 
   <div class="brief-actions" aria-label="Visitor Brief actions">
     <button type="button" on:click={copyBrief}>Copy visitor brief</button>

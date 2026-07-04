@@ -147,6 +147,11 @@ function writeFile(targetRoot, relativePath, content) {
   fs.writeFileSync(filePath, `${content.trim()}\n`);
 }
 
+function writeSourcePointer(targetRoot, sourceRoot) {
+  const relativeKit = path.relative(targetRoot, sourceRoot) || '.';
+  writeFile(targetRoot, '.atelier-kit-source', relativeKit);
+}
+
 function resetScaffoldContent(targetRoot) {
   removeIfExists(path.join(targetRoot, 'content', 'items'));
   removeIfExists(path.join(targetRoot, 'content', 'collections'));
@@ -966,6 +971,8 @@ function main() {
     }
 
     copyTree(sourceRoot, targetRoot);
+
+    writeSourcePointer(targetRoot, sourceRoot);
 
     TEMPLATE_APPLIERS[options.template](targetRoot);
 

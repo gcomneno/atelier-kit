@@ -16,6 +16,7 @@
     "item:validate": "node scripts/item.js validate",
     "content:doctor": "node scripts/content-doctor.js",
     "site:scaffold": "node scripts/scaffold-client.js",
+    "site:upgrade": "node scripts/site-upgrade.js",
     "site:wizard": "node scripts/site-wizard.js",
     "studio": "node scripts/studio-dev.js",
     "studio:launch": "node scripts/studio-launch.js",

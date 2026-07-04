@@ -215,6 +215,50 @@ export function readCollectionRecord(id) {
 
 /**
  * @param {string} id
+ */
+export function collectionRecordExists(id) {
+  assertContentId(id, 'Collection id');
+  return existsSync(path.join(ROOT, recordPath('content/collections', id)));
+}
+
+/**
+ * @param {{ id: string, title: string, description: string, items?: string[] }} input
+ */
+export function createCollectionRecord(input) {
+  const id = requiredField(String(input.id ?? ''), 'Collection id');
+  assertContentId(id, 'Collection id');
+
+  const titleInput = String(input.title ?? '').trim();
+  const title = titleInput || titleFromItemId(id);
+  const description = requiredField(String(input.description ?? ''), 'Collection description');
+  const items = Array.isArray(input.items)
+    ? input.items.map((itemId) => String(itemId).trim()).filter(Boolean)
+    : [];
+
+  if (collectionRecordExists(id)) {
+    throw new Error(`A collection with id "${id}" already exists.`);
+  }
+
+  if (items.length === 0) {
+    throw new Error('Choose at least one item for this collection.');
+  }
+
+  mkdirSync(path.join(ROOT, 'content/collections'), { recursive: true });
+
+  const collection = {
+    id,
+    title,
+    description,
+    items
+  };
+
+  writeCollectionRecord(id, collection);
+
+  return collection;
+}
+
+/**
+ * @param {string} id
  * @param {Record<string, unknown>} collection
  */
 export function writeCollectionRecord(id, collection) {

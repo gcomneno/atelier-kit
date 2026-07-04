@@ -8,11 +8,14 @@ This is useful when you want to use Atelier-Kit as a product base instead of edi
 
 ```bash
 npm run site:scaffold -- ../atelier-noir --template writing
+npm run site:scaffold -- ../artist-site --template artwork
 ```
 
 The target path is relative to the Atelier-Kit repository.
 
 ## Supported templates
+
+See [`scaffold-templates.md`](scaffold-templates.md) for template boundaries, planned templates and when to use manual setup instead.
 
 ### `writing`
 
@@ -26,15 +29,26 @@ It maps Atelier-Kit concepts like this:
 - Visitor Brief = a copyable message based on the visitor's selections.
 - Contact actions = configured email and optional WhatsApp.
 
+### `artwork`
+
+Creates a starter visual-art showcase for painters, sculptors, illustrators and installation artists.
+
+It maps Atelier-Kit concepts like this:
+
+- Item = artwork, sculpture, piece or installation.
+- Collection = series, recent works, available works or exhibitions.
+- Signal Clouds = material, presence and visitor interest.
+- Visitor Brief = request information about a piece, commission, studio visit or collaboration.
+- Contact actions = configured email and optional WhatsApp.
+
 ## What the scaffold does
 
 The scaffold command:
 
 - copies Atelier-Kit into a separate target folder;
 - excludes `.git`, `node_modules`, `.svelte-kit` and `.vercel`;
-- replaces starter item content with a writing placeholder;
-- creates a starter writing collection;
-- configures starter Signal Clouds for a writing showcase;
+- replaces starter item and collection content for the chosen template;
+- configures starter Signal Clouds for the chosen use case;
 - keeps the generated site file-based and editable.
 
 ## What it does not do
@@ -46,9 +60,11 @@ The scaffold command does not:
 - create a GitHub repository;
 - deploy the site;
 - read or parse a filled client intake brief;
-- add a CMS, database, admin UI, ecommerce, blog or contact form backend.
+- add a CMS, database, admin UI, ecommerce, blog or contact-form backend.
 
 Those steps remain explicit and manual.
+
+If no template fits, use [`manual-client-setup.md`](manual-client-setup.md).
 
 ## Replacing an existing target
 
@@ -57,7 +73,7 @@ By default, the command fails if the target already exists.
 Use `--force` only when you intentionally want to delete and recreate the target folder:
 
 ```bash
-npm run site:scaffold -- ../atelier-noir --template writing --force
+npm run site:scaffold -- ../artist-site --template artwork --force
 ```
 
 ## After scaffolding
@@ -65,7 +81,7 @@ npm run site:scaffold -- ../atelier-noir --template writing --force
 Run the generated site checks from the new client folder:
 
 ```bash
-cd ../atelier-noir
+cd ../artist-site
 
 npm install
 
@@ -87,8 +103,9 @@ npm run content:doctor -- --strict
 ## Recommended workflow
 
 1. Fill `docs/client-intake.md` with the client.
-2. Run the scaffold command.
-3. Replace placeholder identity, contact, item and collection content.
-4. Run validation and build checks.
-5. Initialize Git in the separate client folder.
-6. Publish or deploy only when the content is ready.
+2. Choose a scaffold template or manual setup path.
+3. Run the scaffold command.
+4. Replace placeholder identity, contact, item and collection content.
+5. Run validation and build checks.
+6. Initialize Git in the separate client folder.
+7. Publish or deploy only when the content is ready.

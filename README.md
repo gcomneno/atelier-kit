@@ -243,6 +243,8 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 - `docs/recipes/README.md` lists practical customization recipes.
 - `docs/client-intake.md` provides a reusable first-site client brief.
 - `docs/usage/client-scaffold.md` explains how to create a separate client site scaffold.
+- `docs/usage/scaffold-templates.md` explains supported scaffold templates and their boundaries.
+- `docs/usage/manual-client-setup.md` explains manual client setup when no template fits.
 - `docs/product/positioning.md` explains the product direction.
 - `docs/architecture/adr-0001-configurable-showcase-kit.md` explains the main architecture decision.
 

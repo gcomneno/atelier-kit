@@ -6,6 +6,14 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+- Added an `artwork` client site scaffold template for visual artists, sculptors and illustrators.
+- Added scaffold template boundary documentation.
+- Added a manual client setup guide for use cases without a matching scaffold template.
+
+### Fixed
+
+- Fixed the `writing` scaffold template to use the supported Atelier-Kit YAML config structure.
+
 ## v0.1.1 - 2026-07-04
 
 ### Added

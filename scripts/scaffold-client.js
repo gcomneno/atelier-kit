@@ -11,18 +11,24 @@ const EXCLUDED_NAMES = new Set([
   '.vercel'
 ]);
 
-const SUPPORTED_TEMPLATES = new Set(['writing']);
+const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork']);
+
+const TEMPLATE_APPLIERS = {
+  writing: applyWritingTemplate,
+  artwork: applyArtworkTemplate
+};
 
 function usage() {
   console.log(`Usage:
-  node scripts/scaffold-client.js <target-dir> [--template writing] [--force]
+  node scripts/scaffold-client.js <target-dir> [--template <name>] [--force]
 
 Examples:
   npm run site:scaffold -- ../atelier-noir --template writing
+  npm run site:scaffold -- ../artist-site --template artwork
   npm run site:scaffold -- ../client-site --template writing --force
 
 Options:
-  --template <name>   Template to apply. Currently supported: writing.
+  --template <name>   Template to apply. Supported: ${[...SUPPORTED_TEMPLATES].join(', ')}.
   --force             Remove the target directory first if it already exists.
 
 Notes:
@@ -135,6 +141,11 @@ function writeFile(targetRoot, relativePath, content) {
   fs.writeFileSync(filePath, `${content.trim()}\n`);
 }
 
+function resetScaffoldContent(targetRoot) {
+  removeIfExists(path.join(targetRoot, 'content', 'items'));
+  removeIfExists(path.join(targetRoot, 'content', 'collections'));
+}
+
 function patchPackageJson(targetRoot) {
   const packagePath = path.join(targetRoot, 'package.json');
   const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
@@ -150,66 +161,94 @@ function patchPackageJson(targetRoot) {
 }
 
 function applyWritingTemplate(targetRoot) {
-  removeIfExists(path.join(targetRoot, 'content', 'items'));
-  removeIfExists(path.join(targetRoot, 'content', 'collections'));
+  resetScaffoldContent(targetRoot);
 
   writeFile(targetRoot, 'config/site.yaml', `
-name: "Noir writing showcase"
-tagline: "Stories, drafts and narrative projects in a darker key."
-description: "A small file-based showcase for novels, short stories and narrative projects."
-language: "en"
-notice:
-  enabled: true
-  text: "Starter writing scaffold. Replace with real author copy before publishing."
+site:
+  name: "Noir writing showcase"
+  tagline: "Stories, drafts and narrative projects in a darker key."
+  language: "en"
+  notice: "Starter writing scaffold. Replace with real author copy before publishing."
+  footer_note: "Built with Atelier-Kit"
 `);
 
   writeFile(targetRoot, 'config/catalog.yaml', `
-title: "Writing desk"
-description: "A small selection of narrative projects, drafts and stories."
-empty_state: "No writing projects have been added yet."
+catalog:
+  item_name_singular: "project"
+  item_name_plural: "projects"
+
+  fields:
+    show_price: false
+    show_availability: true
+    show_material: false
+    show_dimensions: false
+    show_status: true
+    show_meta: true
 `);
 
   writeFile(targetRoot, 'config/signal-clouds.yaml', `
-clouds:
-  - id: "atmosphere"
-    label: "Atmosphere"
+signal_clouds:
+  - id: atmosphere
+    enabled: true
+    question: "This project feels..."
+    hint: "Choose the atmosphere that fits best."
     options:
-      - "rain"
-      - "smoke"
-      - "silence"
-      - "old papers"
-      - "city night"
+      - id: rain
+        label: "rain"
+      - id: smoke
+        label: "smoke"
+      - id: silence
+        label: "silence"
+      - id: old-papers
+        label: "old papers"
+      - id: city-night
+        label: "city night"
 
-  - id: "reader-interest"
-    label: "Reader interest"
+  - id: reader-interest
+    enabled: true
+    question: "What interests you?"
+    hint: "Choose one starting point."
     options:
-      - "novel"
-      - "short story"
-      - "work in progress"
-      - "behind the scenes"
-      - "collaboration"
+      - id: novel
+        label: "a novel"
+      - id: short-story
+        label: "a short story"
+      - id: work-in-progress
+        label: "work in progress"
+      - id: behind-the-scenes
+        label: "behind the scenes"
+      - id: collaboration
+        label: "collaboration"
 
-  - id: "tone"
-    label: "Tone"
+  - id: tone
+    enabled: true
+    question: "The tone feels..."
+    hint: "Choose the tone that fits best."
     options:
-      - "noir"
-      - "psychological"
-      - "absurd"
-      - "grotesque"
-      - "restrained"
+      - id: noir
+        label: "noir"
+      - id: psychological
+        label: "psychological"
+      - id: absurd
+        label: "absurd"
+      - id: grotesque
+        label: "grotesque"
+      - id: restrained
+        label: "restrained"
 `);
 
   writeFile(targetRoot, 'config/contact.yaml', `
-email:
-  enabled: true
-  label: "Email"
-  address: "hello@example.com"
-  subject_prefix: "Interest in"
+contact:
+  email:
+    enabled: true
+    label: "Email this brief"
+    address: "hello@example.com"
+    subject_prefix: "Interest in"
 
-whatsapp:
-  enabled: false
-  label: "WhatsApp"
-  phone: ""
+  whatsapp:
+    enabled: false
+    label: "WhatsApp this brief"
+    phone: ""
 `);
 
   writeFile(targetRoot, 'content/items/first-draft.yaml', `
@@ -242,13 +281,8 @@ meta:
   - label: "Availability"
     value: "Replace with availability"
 
-  - label: "Project notes"
-    children:
-      - label: "Tone"
-        value: "Replace with tone"
-
-      - label: "Setting"
-        value: "Replace with setting"
+  - label: "Notes"
+    value: "Replace with writing notes"
 `);
 
   writeFile(targetRoot, 'content/collections/writing-desk.yaml', `
@@ -260,13 +294,148 @@ items:
 `);
 }
 
-function printNextSteps(targetRoot) {
+function applyArtworkTemplate(targetRoot) {
+  resetScaffoldContent(targetRoot);
+
+  writeFile(targetRoot, 'config/site.yaml', `
+site:
+  name: "Studio artwork showcase"
+  tagline: "Paintings, sculptures and visual works"
+  language: "en"
+  notice: "Starter artwork scaffold. Replace with real studio copy before publishing."
+  footer_note: "Built with Atelier-Kit"
+`);
+
+  writeFile(targetRoot, 'config/catalog.yaml', `
+catalog:
+  item_name_singular: "work"
+  item_name_plural: "works"
+
+  fields:
+    show_price: false
+    show_availability: true
+    show_material: true
+    show_dimensions: true
+    show_status: true
+    show_meta: true
+`);
+
+  writeFile(targetRoot, 'config/signal-clouds.yaml', `
+signal_clouds:
+  - id: material
+    enabled: true
+    question: "This work feels made of..."
+    hint: "Choose the material or medium that fits best."
+    options:
+      - id: oil
+        label: "oil"
+      - id: acrylic
+        label: "acrylic"
+      - id: bronze
+        label: "bronze"
+      - id: ceramic
+        label: "ceramic"
+      - id: mixed-media
+        label: "mixed media"
+
+  - id: presence
+    enabled: true
+    question: "Its presence feels..."
+    hint: "Choose the presence that fits best."
+    options:
+      - id: quiet
+        label: "quiet"
+      - id: dramatic
+        label: "dramatic"
+      - id: intimate
+        label: "intimate"
+      - id: monumental
+        label: "monumental"
+      - id: playful
+        label: "playful"
+
+  - id: interest
+    enabled: true
+    question: "What interests you?"
+    hint: "Choose one starting point."
+    options:
+      - id: available-work
+        label: "available work"
+      - id: commission
+        label: "a commission"
+      - id: studio-visit
+        label: "a studio visit"
+      - id: collaboration
+        label: "collaboration"
+      - id: process
+        label: "the process"
+`);
+
+  writeFile(targetRoot, 'config/contact.yaml', `
+contact:
+  email:
+    enabled: true
+    label: "Email this brief"
+    address: "hello@example.com"
+    subject_prefix: "Interest in"
+
+  whatsapp:
+    enabled: false
+    label: "WhatsApp this brief"
+    phone: ""
+`);
+
+  writeFile(targetRoot, 'content/items/studio-study.yaml', `
+id: "studio-study"
+title: "Studio Study"
+subtitle: "An artwork placeholder"
+status: "draft"
+price_mode: "hidden"
+image_file: "/images/items/placeholder.svg"
+image_alt: "Neutral placeholder image for an artwork"
+description: "Replace this placeholder with a real painting, sculpture, installation or visual work."
+notice: "Artwork scaffold placeholder. Replace before publishing."
+
+meta:
+  - label: "Technique"
+    value: "Replace with technique"
+
+  - label: "Support"
+    value: "Replace with support"
+
+  - label: "Dimensions"
+    value: "Replace with dimensions"
+
+  - label: "Year"
+    value: "Replace with year"
+
+  - label: "Frame"
+    value: "Replace with frame details"
+
+  - label: "Availability"
+    value: "Replace with availability"
+
+  - label: "Notes"
+    value: "Replace with artwork notes"
+`);
+
+  writeFile(targetRoot, 'content/collections/recent-works.yaml', `
+id: "recent-works"
+title: "Recent works"
+description: "A first curated group of artworks, sculptures or visual pieces."
+items:
+  - studio-study
+`);
+}
+
+function printNextSteps(targetRoot, template) {
   const relativeTarget = path.relative(process.cwd(), targetRoot) || targetRoot;
 
   console.log('');
   console.log('Client site scaffold created.');
   console.log('');
   console.log(`Target: ${relativeTarget}`);
+  console.log(`Template: ${template}`);
   console.log('');
   console.log('Next steps:');
   console.log(`  cd ${relativeTarget}`);
@@ -313,12 +482,10 @@ function main() {
 
     copyTree(sourceRoot, targetRoot);
 
-    if (options.template === 'writing') {
-      applyWritingTemplate(targetRoot);
-    }
+    TEMPLATE_APPLIERS[options.template](targetRoot);
 
     patchPackageJson(targetRoot);
-    printNextSteps(targetRoot);
+    printNextSteps(targetRoot, options.template);
   } catch (error) {
     console.error(`ERROR: ${error.message}`);
     process.exit(1);

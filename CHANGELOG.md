@@ -6,6 +6,8 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+- Added studio flow to create new items at `/studio/items/new`.
+
 ## v0.1.8 - 2026-07-04
 
 ### Added

@@ -7,17 +7,18 @@
 </svelte:head>
 
 <p class="intro">
-  Choose an item to edit its public details, image path and meta information.
+  Choose an item to edit, or create a new one for the catalog.
 </p>
 
 <section class="panel">
   <div class="panel-heading">
     <h2>Items</h2>
     <p>{data.items.length} item file(s) in content/items/</p>
+    <p class="create-link"><a href="/studio/items/new">+ Create new item</a></p>
   </div>
 
   {#if data.items.length === 0}
-    <p class="empty">No items found. Create one with <code>npm run item:new</code>.</p>
+    <p class="empty">No items yet. <a href="/studio/items/new">Create your first item</a>.</p>
   {:else}
     <ul class="record-list">
       {#each data.items as item}
@@ -57,6 +58,15 @@
   .panel-heading p {
     margin: 0 0 1rem;
     color: #7d684f;
+  }
+
+  .create-link {
+    margin: 0;
+  }
+
+  .create-link a {
+    color: #5a4632;
+    font-weight: 600;
   }
 
   .empty {

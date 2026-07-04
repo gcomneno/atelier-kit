@@ -4,6 +4,12 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parse, stringify } from 'yaml';
+import {
+  ITEM_PRESET_OPTIONS,
+  buildNewItemRecord,
+  normalizeItemPreset,
+  titleFromItemId
+} from '$lib/item-presets.js';
 
 const ROOT = process.cwd();
 const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -132,6 +138,45 @@ export function listItemSummaries() {
 
 export function readItemRecord(id) {
   return readProjectYaml(recordPath('content/items', id));
+}
+
+/**
+ * @param {string} id
+ */
+export function itemRecordExists(id) {
+  assertContentId(id, 'Item id');
+  return existsSync(path.join(ROOT, recordPath('content/items', id)));
+}
+
+/**
+ * @param {{ id: string, title: string, preset?: string, description?: string, notice?: string }} input
+ */
+export function createItemRecord(input) {
+  const id = requiredField(String(input.id ?? ''), 'Item id');
+  const title = requiredField(String(input.title ?? ''), 'Item title').trim() || titleFromItemId(id);
+  const preset = normalizeItemPreset(String(input.preset ?? 'default'));
+
+  if (itemRecordExists(id)) {
+    throw new Error(`An item with id "${id}" already exists.`);
+  }
+
+  mkdirSync(path.join(ROOT, 'content/items'), { recursive: true });
+
+  const item = buildNewItemRecord(id, title, preset, {
+    description:
+      typeof input.description === 'string' && input.description.trim() !== ''
+        ? input.description.trim()
+        : undefined,
+    notice: typeof input.notice === 'string' ? input.notice.trim() : undefined
+  });
+
+  writeItemRecord(id, item);
+
+  return item;
+}
+
+export function listItemPresetOptions() {
+  return ITEM_PRESET_OPTIONS;
 }
 
 /**

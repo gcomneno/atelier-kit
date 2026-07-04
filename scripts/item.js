@@ -2,88 +2,17 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { parse } from 'yaml';
+import { parse, stringify } from 'yaml';
+import {
+  META_PRESETS,
+  PLACEHOLDER_IMAGE,
+  buildNewItemRecord,
+  normalizeItemPreset,
+  titleFromItemId
+} from '../src/lib/item-presets.js';
 
 const ROOT = process.cwd();
 const ITEMS_DIR = path.join(ROOT, 'content/items');
-const PLACEHOLDER_IMAGE = '/images/items/placeholder.svg';
-
-const META_PRESETS = {
-  default: [
-    { label: 'Material', value: 'Replace with material' },
-    { label: 'Dimensions', value: 'Replace with dimensions' },
-    { label: 'Availability', value: 'Replace with availability' },
-    {
-      label: 'Object details',
-      children: [
-        { label: 'Finish', value: 'Replace with finish' },
-        { label: 'Care', value: 'Replace with care instructions' }
-      ]
-    }
-  ],
-
-  handmade: [
-    { label: 'Material', value: 'Replace with material' },
-    { label: 'Dimensions', value: 'Replace with dimensions' },
-    { label: 'Finish', value: 'Replace with finish' },
-    { label: 'Care', value: 'Replace with care instructions' },
-    { label: 'Availability', value: 'Replace with availability' },
-    {
-      label: 'Object details',
-      children: [
-        { label: 'Technique', value: 'Replace with technique' },
-        { label: 'Made in', value: 'Replace with origin or studio note' }
-      ]
-    }
-  ],
-
-  artwork: [
-    { label: 'Technique', value: 'Replace with technique' },
-    { label: 'Support', value: 'Replace with support' },
-    { label: 'Dimensions', value: 'Replace with dimensions' },
-    { label: 'Year', value: 'Replace with year' },
-    { label: 'Frame', value: 'Replace with frame details' },
-    { label: 'Availability', value: 'Replace with availability' },
-    { label: 'Notes', value: 'Replace with artwork notes' }
-  ],
-
-  jewelry: [
-    { label: 'Material', value: 'Replace with material' },
-    { label: 'Size', value: 'Replace with size' },
-    { label: 'Finish', value: 'Replace with finish' },
-    { label: 'Stone or detail', value: 'Replace with stone or detail' },
-    { label: 'Care', value: 'Replace with care instructions' },
-    { label: 'Availability', value: 'Replace with availability' }
-  ],
-
-  print: [
-    { label: 'Print technique', value: 'Replace with print technique' },
-    { label: 'Paper', value: 'Replace with paper type' },
-    { label: 'Size', value: 'Replace with size' },
-    { label: 'Edition', value: 'Replace with edition details' },
-    { label: 'Frame', value: 'Replace with frame option' },
-    { label: 'Availability', value: 'Replace with availability' }
-  ],
-
-  furniture: [
-    { label: 'Material', value: 'Replace with material' },
-    { label: 'Dimensions', value: 'Replace with dimensions' },
-    { label: 'Finish', value: 'Replace with finish' },
-    { label: 'Use', value: 'Replace with intended use' },
-    { label: 'Care', value: 'Replace with care instructions' },
-    { label: 'Availability', value: 'Replace with availability' }
-  ],
-
-  writing: [
-    { label: 'Format', value: 'Replace with format' },
-    { label: 'Genre', value: 'Replace with genre' },
-    { label: 'Language', value: 'Replace with language' },
-    { label: 'Length', value: 'Replace with length' },
-    { label: 'Reading status', value: 'Replace with reading status' },
-    { label: 'Availability', value: 'Replace with availability' },
-    { label: 'Notes', value: 'Replace with writing notes' }
-  ]
-};
 
 function availablePresets() {
   return Object.keys(META_PRESETS).join(', ');
@@ -121,11 +50,7 @@ function validateId(id) {
 }
 
 function titleFromId(id) {
-  return id
-    .split('-')
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  return titleFromItemId(id);
 }
 
 function yamlString(value) {
@@ -173,7 +98,7 @@ function parseNewArgs(args) {
 
   const [id, ...titleParts] = positional;
 
-  return { id, titleParts, preset };
+  return { id, titleParts, preset: normalizeItemPreset(preset) };
 }
 
 function renderMetaEntry(entry, indent = '  ') {

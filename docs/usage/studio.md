@@ -60,6 +60,7 @@ The studio does **not** yet:
 | `/studio/about` | About page |
 | `/studio/catalog` | Catalog vocabulary and visible fields |
 | `/studio/items` | List items |
+| `/studio/items/new` | Create a new item |
 | `/studio/items/[id]` | Edit one item and upload its photo |
 | `/studio/collections` | List collections |
 | `/studio/collections/[id]` | Edit one collection |

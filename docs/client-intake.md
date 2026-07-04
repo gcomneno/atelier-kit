@@ -16,7 +16,7 @@ Copy this document into the client project notes, fill it in with the client, th
 - `content/collections/`
 - `static/images/items/`
 
-For now, this is a manual brief. Automated scaffolding belongs to a later workflow.
+For now, this is a manual brief. For guided setup, see `npm run site:wizard` and [`docs/product/product-levels.md`](product/product-levels.md).
 
 ## Project identity
 

@@ -11,6 +11,8 @@
 
     <nav aria-label="Studio">
       <a href="/studio">Site settings</a>
+      <a href="/studio/items">Items</a>
+      <a href="/studio/collections">Collections</a>
       <a href="/" target="_blank" rel="noreferrer">Preview site</a>
     </nav>
   </header>

@@ -6,6 +6,10 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+## v0.1.7 - 2026-07-04
+
+### Added
+
 - Added studio item and collection editors at `/studio/items` and `/studio/collections`.
 
 ## v0.1.6 - 2026-07-04

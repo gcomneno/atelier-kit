@@ -7,17 +7,18 @@
 </svelte:head>
 
 <p class="intro">
-  Choose a collection to edit its title, description and included items.
+  Choose a collection to edit, or create a new curated group.
 </p>
 
 <section class="panel">
   <div class="panel-heading">
     <h2>Collections</h2>
     <p>{data.collections.length} collection file(s) in content/collections/</p>
+    <p class="create-link"><a href="/studio/collections/new">+ Create new collection</a></p>
   </div>
 
   {#if data.collections.length === 0}
-    <p class="empty">No collections found. Add a YAML file under content/collections/.</p>
+    <p class="empty">No collections yet. <a href="/studio/collections/new">Create your first collection</a>.</p>
   {:else}
     <ul class="record-list">
       {#each data.collections as collection}
@@ -55,6 +56,15 @@
   .panel-heading p {
     margin: 0 0 1rem;
     color: #7d684f;
+  }
+
+  .create-link {
+    margin: 0;
+  }
+
+  .create-link a {
+    color: #5a4632;
+    font-weight: 600;
   }
 
   .empty {

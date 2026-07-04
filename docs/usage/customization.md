@@ -294,3 +294,16 @@ Run validation after editing collections:
 ```bash
 npm run content:validate
 ```
+
+
+## Recipes
+
+For practical customization examples, see:
+
+- `docs/recipes/handmade-object-showcase.md`
+- `docs/recipes/artist-portfolio.md`
+- `docs/recipes/jewelry-mini-catalog.md`
+- `docs/recipes/small-collection-launch.md`
+- `docs/recipes/no-textarea-contact-flow.md`
+- `docs/recipes/private-preview.md`
+- `docs/recipes/replace-demo-content.md`

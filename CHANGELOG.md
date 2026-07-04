@@ -6,6 +6,7 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+- Added practical customization recipes.
 - Added file-based collections for curated item pages.
 - Added item meta presets to the item helper CLI.
 - Added Content Doctor pre-publish warnings.

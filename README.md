@@ -234,6 +234,7 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 - `docs/usage/content-doctor.md` explains pre-publish checks.
 - `docs/usage/item-presets.md` explains item meta presets.
 - `docs/usage/collections.md` explains file-based collections.
+- `docs/recipes/README.md` lists practical customization recipes.
 - `docs/product/positioning.md` explains the product direction.
 - `docs/architecture/adr-0001-configurable-showcase-kit.md` explains the main architecture decision.
 

@@ -4,6 +4,8 @@ This document defines Atelier-Kit’s staged path toward real no-code authoring.
 
 It supports epic [#35](https://github.com/gcomneno/atelier-kit/issues/35).
 
+**Epic status (2026-07-04):** closed. Phases 1–3 delivered in v0.1.2–v0.1.8. Phase 4 initial packaging delivered (publish script, deploy button, studio:launch). Full terminal-free use remains future research.
+
 ## Goal
 
 Move from a developer-assisted file-based kit to a guided and eventually visual authoring experience without losing Atelier-Kit’s core principles:
@@ -41,7 +43,7 @@ Deliverables:
 - [ ] clearer generated placeholders where still needed
 - [x] client-ready checklist in manual setup docs
 
-**Status:** complete enough for current client-site work.
+**Status:** complete.
 
 ### Phase 2 — Guided CLI setup
 

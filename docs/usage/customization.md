@@ -93,6 +93,9 @@ Use the helper command:
 
 ```bash
 npm run item:new -- my-item "My Item"
+
+# Optional: choose a starter meta preset
+npm run item:new -- oil-study "Oil Study" -- --preset artwork
 ```
 
 This creates:
@@ -236,3 +239,26 @@ Visitor Brief is generated from Signal Cloud selections on item detail pages.
 It gives visitors a short note they can copy and paste into an external contact channel.
 
 This supports a contact flow without adding a textarea, form backend, database or server-side message storage.
+
+
+## Item meta presets
+
+Use presets when creating common creative showcase items:
+
+```bash
+npm run item:new -- ceramic-bowl "Ceramic Bowl" -- --preset handmade
+npm run item:new -- oil-study "Oil Study" -- --preset artwork
+npm run item:new -- silver-ring "Silver Ring" -- --preset jewelry
+```
+
+Available presets:
+
+- `default`
+- `handmade`
+- `artwork`
+- `jewelry`
+- `print`
+- `furniture`
+- `writing`
+
+Presets only generate starter YAML. Edit the generated meta information before publishing.

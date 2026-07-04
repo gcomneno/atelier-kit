@@ -37,11 +37,11 @@ Deliverables:
 - [x] client scaffold templates for common use cases
 - [x] manual client setup guide
 - [x] scaffold template boundary documentation
-- [ ] friendlier Content Doctor messages for non-technical users
+- [x] friendlier Content Doctor messages for non-technical users
 - [ ] clearer generated placeholders where still needed
 - [x] client-ready checklist in manual setup docs
 
-**Status:** largely complete.
+**Status:** complete enough for current client-site work.
 
 ### Phase 2 — Guided CLI setup
 
@@ -72,7 +72,7 @@ Expected output:
 - validation summary;
 - next-step instructions.
 
-**Status:** in progress.
+**Status:** available in `site:wizard`.
 
 ### Phase 3 — Local Studio prototype
 
@@ -95,7 +95,9 @@ The studio should eventually allow editing:
 
 It should validate content before saving and avoid requiring a database at first.
 
-**Status:** research and prototype work not started.
+Architecture research: [`docs/architecture/adr-0002-local-studio-research.md`](../architecture/adr-0002-local-studio-research.md).
+
+**Status:** architecture research complete; prototype not started.
 
 ### Phase 4 — True no-code packaging
 
@@ -170,3 +172,4 @@ Even if a no-code authoring layer is added, the generated site should remain sma
 - [`../usage/client-scaffold.md`](../usage/client-scaffold.md)
 - [`../usage/manual-client-setup.md`](../usage/manual-client-setup.md)
 - [`../client-intake.md`](../client-intake.md)
+- [`../architecture/adr-0002-local-studio-research.md`](../architecture/adr-0002-local-studio-research.md)

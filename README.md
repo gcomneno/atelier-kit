@@ -29,6 +29,8 @@ No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 - Content Doctor pre-publish warnings.
 - GitHub Actions validation workflow.
 
+- Item meta presets for common creative showcase types.
+
 ## Quick start
 
 Install dependencies:
@@ -230,6 +232,7 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 - `docs/usage/deploy-vercel.md` explains Vercel deployment.
 - `docs/usage/contact-flow.md` explains the no-textarea contact flow.
 - `docs/usage/content-doctor.md` explains pre-publish checks.
+- `docs/usage/item-presets.md` explains item meta presets.
 - `docs/product/positioning.md` explains the product direction.
 - `docs/architecture/adr-0001-configurable-showcase-kit.md` explains the main architecture decision.
 

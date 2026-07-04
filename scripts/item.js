@@ -8,16 +8,102 @@ const ROOT = process.cwd();
 const ITEMS_DIR = path.join(ROOT, 'content/items');
 const PLACEHOLDER_IMAGE = '/images/items/placeholder.svg';
 
+const META_PRESETS = {
+  default: [
+    { label: 'Material', value: 'Replace with material' },
+    { label: 'Dimensions', value: 'Replace with dimensions' },
+    { label: 'Availability', value: 'Replace with availability' },
+    {
+      label: 'Object details',
+      children: [
+        { label: 'Finish', value: 'Replace with finish' },
+        { label: 'Care', value: 'Replace with care instructions' }
+      ]
+    }
+  ],
+
+  handmade: [
+    { label: 'Material', value: 'Replace with material' },
+    { label: 'Dimensions', value: 'Replace with dimensions' },
+    { label: 'Finish', value: 'Replace with finish' },
+    { label: 'Care', value: 'Replace with care instructions' },
+    { label: 'Availability', value: 'Replace with availability' },
+    {
+      label: 'Object details',
+      children: [
+        { label: 'Technique', value: 'Replace with technique' },
+        { label: 'Made in', value: 'Replace with origin or studio note' }
+      ]
+    }
+  ],
+
+  artwork: [
+    { label: 'Technique', value: 'Replace with technique' },
+    { label: 'Support', value: 'Replace with support' },
+    { label: 'Dimensions', value: 'Replace with dimensions' },
+    { label: 'Year', value: 'Replace with year' },
+    { label: 'Frame', value: 'Replace with frame details' },
+    { label: 'Availability', value: 'Replace with availability' },
+    { label: 'Notes', value: 'Replace with artwork notes' }
+  ],
+
+  jewelry: [
+    { label: 'Material', value: 'Replace with material' },
+    { label: 'Size', value: 'Replace with size' },
+    { label: 'Finish', value: 'Replace with finish' },
+    { label: 'Stone or detail', value: 'Replace with stone or detail' },
+    { label: 'Care', value: 'Replace with care instructions' },
+    { label: 'Availability', value: 'Replace with availability' }
+  ],
+
+  print: [
+    { label: 'Print technique', value: 'Replace with print technique' },
+    { label: 'Paper', value: 'Replace with paper type' },
+    { label: 'Size', value: 'Replace with size' },
+    { label: 'Edition', value: 'Replace with edition details' },
+    { label: 'Frame', value: 'Replace with frame option' },
+    { label: 'Availability', value: 'Replace with availability' }
+  ],
+
+  furniture: [
+    { label: 'Material', value: 'Replace with material' },
+    { label: 'Dimensions', value: 'Replace with dimensions' },
+    { label: 'Finish', value: 'Replace with finish' },
+    { label: 'Use', value: 'Replace with intended use' },
+    { label: 'Care', value: 'Replace with care instructions' },
+    { label: 'Availability', value: 'Replace with availability' }
+  ],
+
+  writing: [
+    { label: 'Format', value: 'Replace with format' },
+    { label: 'Genre', value: 'Replace with genre' },
+    { label: 'Language', value: 'Replace with language' },
+    { label: 'Length', value: 'Replace with length' },
+    { label: 'Reading status', value: 'Replace with reading status' },
+    { label: 'Availability', value: 'Replace with availability' },
+    { label: 'Notes', value: 'Replace with writing notes' }
+  ]
+};
+
+function availablePresets() {
+  return Object.keys(META_PRESETS).join(', ');
+}
+
 function usage() {
   console.log(`Atelier-Kit item helper
 
 Usage:
-  node scripts/item.js new <id> [title]
+  node scripts/item.js new <id> [title] [--preset <name>]
   node scripts/item.js list
   node scripts/item.js validate
 
+Available presets:
+  ${availablePresets()}
+
 Examples:
   npm run item:new -- ceramic-blue-bowl "Ceramic Blue Bowl"
+  npm run item:new -- ceramic-blue-bowl "Ceramic Blue Bowl" -- --preset handmade
+  npm run item:new -- oil-study "Oil Study" -- --preset artwork
   npm run item:list
   npm run item:validate
 `);
@@ -46,8 +132,84 @@ function yamlString(value) {
   return JSON.stringify(String(value));
 }
 
+function parseNewArgs(args) {
+  const positional = [];
+  let preset = 'default';
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (arg === '--') {
+      continue;
+    }
+
+    if (arg === '--preset') {
+      const value = args[index + 1];
+
+      if (!value || value.startsWith('--')) {
+        fail(`Missing preset name. Available presets: ${availablePresets()}`);
+      }
+
+      preset = value;
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith('--preset=')) {
+      preset = arg.slice('--preset='.length);
+      continue;
+    }
+
+    if (arg.startsWith('--')) {
+      fail(`Unknown option: ${arg}`);
+    }
+
+    positional.push(arg);
+  }
+
+  if (!Object.hasOwn(META_PRESETS, preset)) {
+    fail(`Unknown preset: ${preset}. Available presets: ${availablePresets()}`);
+  }
+
+  const [id, ...titleParts] = positional;
+
+  return { id, titleParts, preset };
+}
+
+function renderMetaEntry(entry, indent = '  ') {
+  const lines = [`${indent}- label: ${yamlString(entry.label)}`];
+
+  if (Object.hasOwn(entry, 'value')) {
+    lines.push(`${indent}  value: ${yamlString(entry.value)}`);
+  }
+
+  if (Array.isArray(entry.children) && entry.children.length > 0) {
+    lines.push(`${indent}  children:`);
+
+    for (const child of entry.children) {
+      lines.push(...renderMetaEntry(child, `${indent}    `));
+    }
+  }
+
+  return lines;
+}
+
+function renderMeta(preset) {
+  const entries = META_PRESETS[preset];
+
+  return ['meta:', ...entries.flatMap((entry, index) => {
+    const lines = renderMetaEntry(entry);
+
+    if (index < entries.length - 1) {
+      lines.push('');
+    }
+
+    return lines;
+  })];
+}
+
 function createItem(args) {
-  const [id, ...titleParts] = args;
+  const { id, titleParts, preset } = parseNewArgs(args);
 
   validateId(id);
 
@@ -71,29 +233,14 @@ function createItem(args) {
     'description: "Replace with a real description."',
     'notice: "Draft item. Replace before publishing."',
     '',
-    'meta:',
-    '  - label: "Material"',
-    '    value: "Replace with material"',
-    '',
-    '  - label: "Dimensions"',
-    '    value: "Replace with dimensions"',
-    '',
-    '  - label: "Availability"',
-    '    value: "Replace with availability"',
-    '',
-    '  - label: "Object details"',
-    '    children:',
-    '      - label: "Finish"',
-    '        value: "Replace with finish"',
-    '',
-    '      - label: "Care"',
-    '        value: "Replace with care instructions"',
+    ...renderMeta(preset),
     ''
   ].join('\n');
 
   writeFileSync(itemPath, content, 'utf8');
 
   console.log(`Created content/items/${id}.yaml`);
+  console.log(`Meta preset: ${preset}`);
   console.log(`Image placeholder: ${PLACEHOLDER_IMAGE}`);
   console.log('Next: edit the YAML file, then run npm run item:validate');
 }

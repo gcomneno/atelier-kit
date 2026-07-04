@@ -6,6 +6,7 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+- Added item meta presets to the item helper CLI.
 - Added Content Doctor pre-publish warnings.
 - Added configurable Visitor Brief contact actions.
 - Added copyable Visitor Brief from Signal Cloud selections.

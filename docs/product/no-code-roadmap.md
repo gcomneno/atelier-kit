@@ -97,7 +97,7 @@ It should validate content before saving and avoid requiring a database at first
 
 Architecture research: [`docs/architecture/adr-0002-local-studio-research.md`](../architecture/adr-0002-local-studio-research.md).
 
-**Status:** architecture research complete; prototype not started.
+**Status:** site/contact prototype available via `npm run studio`.
 
 ### Phase 4 — True no-code packaging
 

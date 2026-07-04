@@ -16,7 +16,8 @@
     "item:validate": "node scripts/item.js validate",
     "content:doctor": "node scripts/content-doctor.js",
     "site:scaffold": "node scripts/scaffold-client.js",
-    "site:wizard": "node scripts/site-wizard.js"
+    "site:wizard": "node scripts/site-wizard.js",
+    "studio": "node scripts/studio-dev.js"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.1",

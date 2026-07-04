@@ -6,6 +6,10 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+## v0.1.4 - 2026-07-04
+
+### Added
+
 - Added product level documentation for developer-assisted, guided and no-code paths.
 - Added a no-code roadmap documenting the staged authoring direction for epic #35.
 - Added an interactive `site:wizard` guided setup command for new client sites.

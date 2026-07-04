@@ -11,11 +11,12 @@ const EXCLUDED_NAMES = new Set([
   '.vercel'
 ]);
 
-const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork']);
+const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork', 'handmade']);
 
 const TEMPLATE_APPLIERS = {
   writing: applyWritingTemplate,
-  artwork: applyArtworkTemplate
+  artwork: applyArtworkTemplate,
+  handmade: applyHandmadeTemplate
 };
 
 function usage() {
@@ -25,6 +26,7 @@ function usage() {
 Examples:
   npm run site:scaffold -- ../atelier-noir --template writing
   npm run site:scaffold -- ../artist-site --template artwork
+  npm run site:scaffold -- ../quiet-clay --template handmade
   npm run site:scaffold -- ../client-site --template writing --force
 
 Options:
@@ -425,6 +427,158 @@ title: "Recent works"
 description: "A first curated group of artworks, sculptures or visual pieces."
 items:
   - studio-study
+`);
+}
+
+function applyHandmadeTemplate(targetRoot) {
+  resetScaffoldContent(targetRoot);
+
+  writeFile(targetRoot, 'config/site.yaml', `
+site:
+  name: "Quiet craft showcase"
+  tagline: "Handmade objects for everyday use and quiet homes"
+  language: "en"
+  notice: "Starter handmade scaffold. Replace with real maker copy before publishing."
+  footer_note: "Built with Atelier-Kit"
+`);
+
+  writeFile(targetRoot, 'config/catalog.yaml', `
+catalog:
+  item_name_singular: "piece"
+  item_name_plural: "pieces"
+
+  fields:
+    show_price: false
+    show_availability: true
+    show_material: true
+    show_dimensions: true
+    show_status: true
+    show_meta: true
+`);
+
+  writeFile(targetRoot, 'config/signal-clouds.yaml', `
+signal_clouds:
+  - id: material
+    enabled: true
+    question: "This piece feels made of..."
+    hint: "Choose the material that fits best."
+    options:
+      - id: clay
+        label: "clay"
+      - id: wood
+        label: "wood"
+      - id: textile
+        label: "textile"
+      - id: metal
+        label: "metal"
+      - id: paper
+        label: "paper"
+
+  - id: use-case
+    enabled: true
+    question: "I would use it for..."
+    hint: "Choose the use case that fits best."
+    options:
+      - id: daily-use
+        label: "daily use"
+      - id: gift
+        label: "a quiet gift"
+      - id: decor
+        label: "home decor"
+      - id: table-ritual
+        label: "a table ritual"
+      - id: custom-work
+        label: "custom work"
+
+  - id: style
+    enabled: true
+    question: "Its style feels..."
+    hint: "Choose the style that fits best."
+    options:
+      - id: calm
+        label: "calm"
+      - id: earthy
+        label: "earthy"
+      - id: playful
+        label: "playful"
+      - id: rustic
+        label: "rustic"
+      - id: refined
+        label: "refined"
+
+  - id: interest
+    enabled: true
+    question: "What interests you?"
+    hint: "Choose one starting point."
+    options:
+      - id: available-piece
+        label: "an available piece"
+      - id: custom-work
+        label: "custom work"
+      - id: care-instructions
+        label: "care instructions"
+      - id: process
+        label: "the process"
+      - id: collaboration
+        label: "collaboration"
+`);
+
+  writeFile(targetRoot, 'config/contact.yaml', `
+contact:
+  email:
+    enabled: true
+    label: "Email this brief"
+    address: "hello@example.com"
+    subject_prefix: "Interest in"
+
+  whatsapp:
+    enabled: false
+    label: "WhatsApp this brief"
+    phone: ""
+`);
+
+  writeFile(targetRoot, 'content/items/maker-piece.yaml', `
+id: "maker-piece"
+title: "Maker Piece"
+subtitle: "A handmade object placeholder"
+status: "draft"
+price_mode: "hidden"
+image_file: "/images/items/placeholder.svg"
+image_alt: "Neutral placeholder image for a handmade object"
+description: "Replace this placeholder with a real ceramic, textile, carved or other handmade object."
+notice: "Handmade scaffold placeholder. Replace before publishing."
+
+meta:
+  - label: "Material"
+    value: "Replace with material"
+
+  - label: "Dimensions"
+    value: "Replace with dimensions"
+
+  - label: "Finish"
+    value: "Replace with finish"
+
+  - label: "Care"
+    value: "Replace with care instructions"
+
+  - label: "Availability"
+    value: "Replace with availability"
+
+  - label: "Object details"
+    children:
+      - label: "Technique"
+        value: "Replace with technique"
+
+      - label: "Made in"
+        value: "Replace with origin or studio note"
+`);
+
+  writeFile(targetRoot, 'content/collections/curated-selection.yaml', `
+id: "curated-selection"
+title: "Curated selection"
+description: "A first curated group of handmade pieces, available works or seasonal objects."
+items:
+  - maker-piece
 `);
 }
 

@@ -11,6 +11,7 @@ npm run site:scaffold -- ../atelier-noir --template writing
 npm run site:scaffold -- ../artist-site --template artwork
 npm run site:scaffold -- ../quiet-clay --template handmade
 npm run site:scaffold -- ../tiny-silver --template jewelry
+npm run site:scaffold -- ../quiet-room --template furniture
 ```
 
 The target path is relative to the Atelier-Kit repository.
@@ -65,6 +66,18 @@ It maps Atelier-Kit concepts like this:
 - Collection = collection, available pieces or custom pieces.
 - Signal Clouds = material, size, occasion and visitor interest.
 - Visitor Brief = request information about a piece, sizing, availability or custom work.
+- Contact actions = configured email and optional WhatsApp.
+
+### `furniture`
+
+Creates a starter furniture and object-design showcase for chairs, tables, shelves, lamps and interior pieces.
+
+It maps Atelier-Kit concepts like this:
+
+- Item = furniture piece or interior object.
+- Collection = room, material group, available pieces or custom work.
+- Signal Clouds = material, room, use case and visitor interest.
+- Visitor Brief = request information about a piece, dimensions, availability or commission.
 - Contact actions = configured email and optional WhatsApp.
 
 ## What the scaffold does

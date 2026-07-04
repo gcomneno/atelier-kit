@@ -43,6 +43,7 @@ npm run site:scaffold -- ../client-site --template writing
 npm run site:scaffold -- ../artist-site --template artwork
 npm run site:scaffold -- ../quiet-clay --template handmade
 npm run site:scaffold -- ../tiny-silver --template jewelry
+npm run site:scaffold -- ../quiet-room --template furniture
 ```
 
 A scaffold template configures:
@@ -66,6 +67,7 @@ See [`client-scaffold.md`](client-scaffold.md).
 | `artwork` | Visual artists, sculptors, painters, illustrators, installations | artwork, sculpture, piece, installation | series, recent works, available works, exhibitions |
 | `handmade` | Makers and small craft showcases | handmade object | curated selection, available pieces, seasonal group |
 | `jewelry` | Small jewelry collections | jewelry piece | collection, available pieces, custom pieces |
+| `furniture` | Furniture and object design showcases | furniture piece or object | room, material group, available pieces, custom work |
 
 ### `writing`
 
@@ -105,15 +107,27 @@ Signal Clouds focus on material, size, occasion and visitor interest.
 
 Visitor Brief selections are meant to support requests about a piece, sizing, availability or custom work.
 
-## Planned scaffold templates
+### `furniture`
 
-These use cases are not scaffolded yet, but can still be configured manually or with item meta presets:
+```bash
+npm run site:scaffold -- ../quiet-room --template furniture
+```
 
-| Template | Use case | Status |
-|---|---|---|
-| `furniture` | furniture and object design showcases | planned |
+Signal Clouds focus on material, room, use case and visitor interest.
 
-Until those templates exist, use the manual client setup workflow in [`manual-client-setup.md`](manual-client-setup.md).
+Visitor Brief selections are meant to support requests about a piece, dimensions, availability or commission.
+
+## Use cases without a scaffold template
+
+Some showcase types do not have a dedicated scaffold template yet.
+
+Use manual setup with item meta presets when needed, for example:
+
+- print catalogs → `--preset print`
+- mixed creative catalogs spanning multiple showcase types
+- highly custom client vocabularies
+
+See [`manual-client-setup.md`](manual-client-setup.md).
 
 ## When to use a scaffold template
 
@@ -131,6 +145,7 @@ Examples:
 - an author with novels and short stories → `writing`
 - a ceramic maker with functional objects → `handmade`
 - a jeweler with rings and pendants → `jewelry`
+- a furniture maker with chairs and tables → `furniture`
 - a photographer selling prints → manual setup with `--preset print`
 
 ## When not to use a scaffold template

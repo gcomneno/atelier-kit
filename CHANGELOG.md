@@ -6,6 +6,10 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+## v0.1.8 - 2026-07-04
+
+### Added
+
 - Extended local studio with about page, catalog settings, Signal Cloud editing, item photo upload and publish readiness review.
 - Added public `/about` page driven by `config/about.yaml`.
 - Added `npm run publish` for validation, doctor, check, build and optional Vercel deploy.

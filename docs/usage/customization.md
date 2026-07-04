@@ -296,6 +296,14 @@ npm run content:validate
 ```
 
 
+## Client site scaffold
+
+For a separate client site folder, use the scaffold workflow:
+
+- [`docs/usage/client-scaffold.md`](client-scaffold.md)
+
+The scaffold currently supports a writing/author showcase starter and keeps generated sites file-based.
+
 ## Recipes
 
 For practical customization examples, see:

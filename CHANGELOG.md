@@ -6,6 +6,7 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ### Added
 
+- Added a client site scaffold command with a writing showcase template.
 - Added a reusable client intake brief for first site setup.
 
 ### Added

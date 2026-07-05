@@ -716,5 +716,92 @@ export default {
       jewelry: 'Gioielli',
       furniture: 'Mobili / design oggetti'
     }
+  },
+  visitor: {
+    common: {
+      backToShowcase: '← Torna alla vetrina',
+      backToNews: '← Torna alle notizie',
+      backToCatalog: 'Torna al catalogo',
+      home: 'Home',
+      breadcrumb: 'Percorso',
+      socialLinks: 'Link social',
+      viewAllCollections: 'Vedi tutte le collezioni',
+      readMore: 'Leggi tutto',
+      allNews: 'Tutte le notizie'
+    },
+    home: {
+      collectionsEyebrow: 'Collezioni',
+      collectionsTitle: 'Pagine curate',
+      catalogEyebrow: 'Catalogo',
+      aboutStudio: 'Lo studio'
+    },
+    collections: {
+      pageTitle: 'Collezioni',
+      metaDescription: 'Collezioni curate da {siteName}.',
+      eyebrow: 'Collezioni',
+      title: 'Pagine curate',
+      intro: 'Piccole selezioni basate su file, create dai {itemPlural} esistenti.',
+      empty: 'Nessuna collezione per ora.',
+      collectionEyebrow: 'Collezione',
+      selectedItemsEyebrow: '{itemPlural} selezionati'
+    },
+    catalog: {
+      collections: 'Collezioni',
+      latestNews: 'Ultime notizie',
+      sidebarAriaLabel: 'Barra laterale catalogo'
+    },
+    news: {
+      pageTitle: 'Notizie',
+      metaDescription: 'Notizie e aggiornamenti da {siteName}.',
+      title: 'Notizie',
+      empty: 'Nessun articolo per ora.'
+    },
+    item: {
+      visitorBriefEyebrow: 'Scheda visitatore',
+      talkAboutTitle: 'Parla di questo pezzo',
+      talkAboutIntro:
+        'Scegli alcune preferenze qui sotto. Atelier-Kit preparerà un messaggio da copiare o inviare via email o WhatsApp.',
+      details: 'Dettagli',
+      material: 'Materiale',
+      dimensions: 'Dimensioni',
+      availability: 'Disponibilità'
+    },
+    visitorBrief: {
+      contactEyebrow: 'Contatto senza modulo',
+      heading: 'Scrivi con un messaggio pronto',
+      intro:
+        'Scegli le risposte Signal Cloud qui sopra, poi copia questa scheda o apri email / WhatsApp con il testo già preparato.',
+      emptyState:
+        'Seleziona una o più risposte Signal Cloud qui sopra per rendere questa scheda più utile.',
+      actionsAriaLabel: 'Azioni scheda visitatore',
+      copyButton: 'Copia scheda visitatore',
+      emailDefault: 'Invia via email',
+      whatsappDefault: 'Invia su WhatsApp',
+      copySuccess: 'Scheda visitatore copiata.',
+      copyError: 'Copia automatica non riuscita. Seleziona e copia la scheda manualmente.',
+      interestLine: 'Mi interessa "{title}".',
+      impressionsHeading: 'Le mie impressioni:',
+      noSelections: 'Le mie impressioni: nessuna scelta Signal Cloud per ora.',
+      itemPageLine: 'Pagina del pezzo: {url}',
+      emailSubjectPrefix: 'Interesse per'
+    },
+    signalCloud: {
+      defaultHint:
+        'Scelta singola. Seleziona un’opzione; una nuova scelta sostituisce quella precedente salvata in locale.',
+      selected: 'Selezionato: {label}',
+      noSelection: 'Nessuna opzione selezionata.',
+      chooseOption: 'Scegli {label}'
+    },
+    error: {
+      notFoundTitle: 'Pezzo non trovato',
+      notFoundBody: 'Il pezzo richiesto non esiste nel catalogo.',
+      genericTitle: 'Qualcosa è andato storto',
+      unexpectedError: 'Errore imprevisto.'
+    },
+    social: {
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      x: 'X (Twitter)'
+    }
   }
 };

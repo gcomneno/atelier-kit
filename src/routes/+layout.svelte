@@ -1,9 +1,12 @@
 <script>
   import SiteFooter from '$lib/components/SiteFooter.svelte';
   import SiteHeader from '$lib/components/SiteHeader.svelte';
+  import { setVisitorI18nContext } from '$lib/i18n/visitor-context.js';
   import { appearanceCssVariables } from '$lib/site-appearance.js';
 
   let { children, data } = $props();
+
+  setVisitorI18nContext(() => data.locale);
 
   const appearanceStyle = $derived(
     Object.entries(appearanceCssVariables(data.appearance))

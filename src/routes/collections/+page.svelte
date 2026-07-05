@@ -1,25 +1,27 @@
 <script>
   import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
+  const t = useVisitorI18n();
 </script>
 
 <svelte:head>
-  <title>Collections · {data.site.name}</title>
-  <meta name="description" content={`Curated collections from ${data.site.name}.`} />
+  <title>{t('collections.pageTitle')} · {data.site.name}</title>
+  <meta name="description" content={t('collections.metaDescription', { siteName: data.site.name })} />
 </svelte:head>
 
 <!-- Sidebar layout applies on `/collections` index only; see getCatalogSidebarPageData() in showcase.js -->
 <div class="page-shell" class:with-sidebar={data.sidebarActive}>
   <main>
-    <nav aria-label="Breadcrumb">
-      <a href="/">Home</a>
+    <nav aria-label={t('common.breadcrumb')}>
+      <a href="/">{t('common.home')}</a>
     </nav>
 
     <header>
-      <p class="eyebrow">Collections</p>
-      <h1>Curated pages</h1>
-      <p>Small file-based selections built from existing {data.catalog.item_name_plural}.</p>
+      <p class="eyebrow">{t('collections.eyebrow')}</p>
+      <h1>{t('collections.title')}</h1>
+      <p>{t('collections.intro', { itemPlural: data.catalog.item_name_plural })}</p>
     </header>
 
     {#if data.collections.length > 0}
@@ -33,7 +35,7 @@
         {/each}
       </div>
     {:else}
-      <p>No collections yet.</p>
+      <p>{t('collections.empty')}</p>
     {/if}
   </main>
 

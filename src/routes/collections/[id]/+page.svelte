@@ -1,7 +1,9 @@
 <script>
   import ItemCard from '$lib/components/ItemCard.svelte';
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
+  const t = useVisitorI18n();
 </script>
 
 <svelte:head>
@@ -10,21 +12,21 @@
 </svelte:head>
 
 <main>
-  <nav aria-label="Breadcrumb">
-    <a href="/">Home</a>
+  <nav aria-label={t('common.breadcrumb')}>
+    <a href="/">{t('common.home')}</a>
     <span aria-hidden="true">/</span>
-    <a href="/collections">Collections</a>
+    <a href="/collections">{t('collections.pageTitle')}</a>
   </nav>
 
   <header>
-    <p class="eyebrow">Collection</p>
+    <p class="eyebrow">{t('collections.collectionEyebrow')}</p>
     <h1>{data.collection.title}</h1>
     <p>{data.collection.description}</p>
   </header>
 
   <section aria-labelledby="collection-items-title">
     <div class="section-heading">
-      <p class="eyebrow">Selected {data.catalog.item_name_plural}</p>
+      <p class="eyebrow">{t('collections.selectedItemsEyebrow', { itemPlural: data.catalog.item_name_plural })}</p>
       <h2 id="collection-items-title">{data.collection.items.length} {data.collection.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</h2>
     </div>
 

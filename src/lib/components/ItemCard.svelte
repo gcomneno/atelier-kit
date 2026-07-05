@@ -1,5 +1,8 @@
 <script>
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+
   let { item, catalog } = $props();
+  const t = useVisitorI18n();
 
   let fields = $derived(catalog.fields ?? {});
 </script>
@@ -25,21 +28,21 @@
     <dl>
       {#if fields.show_material && item.material}
         <div>
-          <dt>Material</dt>
+          <dt>{t('item.material')}</dt>
           <dd>{item.material}</dd>
         </div>
       {/if}
 
       {#if fields.show_dimensions && item.dimensions}
         <div>
-          <dt>Dimensions</dt>
+          <dt>{t('item.dimensions')}</dt>
           <dd>{item.dimensions}</dd>
         </div>
       {/if}
 
       {#if fields.show_availability && item.availability}
         <div>
-          <dt>Availability</dt>
+          <dt>{t('item.availability')}</dt>
           <dd>{item.availability}</dd>
         </div>
       {/if}

@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   /** @typedef {{ id: string, title: string }} BriefItem */
   /** @typedef {{ id: string, label: string }} SignalOption */
@@ -17,6 +18,8 @@
 
   /** @type {ContactConfig} */
   export let contact = {};
+
+  const t = useVisitorI18n();
 
   /** @type {VisitorAnswer[]} */
   let selectedAnswers = [];
@@ -85,20 +88,20 @@
    * @returns {string}
    */
   function buildBrief(item, answers, itemUrl) {
-    const lines = [`I am interested in "${item.title}".`, ''];
+    const lines = [t('visitorBrief.interestLine', { title: item.title }), ''];
 
     if (answers.length > 0) {
-      lines.push('My impressions:');
+      lines.push(t('visitorBrief.impressionsHeading'));
 
       for (const answer of answers) {
         lines.push(`- ${answer.question}: ${answer.label}`);
       }
     } else {
-      lines.push('My impressions: no Signal Cloud selections yet.');
+      lines.push(t('visitorBrief.noSelections'));
     }
 
     if (itemUrl) {
-      lines.push('', `Item page: ${itemUrl}`);
+      lines.push('', t('visitorBrief.itemPageLine', { url: itemUrl }));
     }
 
     return lines.join('\n');
@@ -115,7 +118,7 @@
       return '';
     }
 
-    const subjectPrefix = email.subject_prefix || 'Interest in';
+    const subjectPrefix = email.subject_prefix || t('visitorBrief.emailSubjectPrefix');
     const subject = `${subjectPrefix} "${item.title}"`;
 
     return `mailto:${encodeURIComponent(email.address)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(briefText)}`;
@@ -147,40 +150,40 @@
       }
 
       await navigator.clipboard.writeText(briefText);
-      copyStatus = 'Visitor brief copied.';
+      copyStatus = t('visitorBrief.copySuccess');
     } catch {
-      copyStatus = 'Could not copy automatically. Select and copy the brief manually.';
+      copyStatus = t('visitorBrief.copyError');
     }
   }
 </script>
 
 <section class="visitor-brief" aria-labelledby="visitor-brief-heading">
   <div class="brief-header">
-    <p class="eyebrow">Contact without a form</p>
-    <h2 id="visitor-brief-heading">Write with a ready message</h2>
+    <p class="eyebrow">{t('visitorBrief.contactEyebrow')}</p>
+    <h2 id="visitor-brief-heading">{t('visitorBrief.heading')}</h2>
     <p>
-      Choose Signal Cloud answers above, then copy this brief or open email / WhatsApp with the text already prepared.
+      {t('visitorBrief.intro')}
     </p>
   </div>
 
   {#if !hasSelections}
     <p class="empty-state">
-      Select one or more Signal Cloud answers above to make this brief more useful.
+      {t('visitorBrief.emptyState')}
     </p>
   {/if}
 
   <pre>{briefText}</pre>
 
-  <div class="brief-actions" aria-label="Visitor Brief actions">
-    <button type="button" on:click={copyBrief}>Copy visitor brief</button>
+  <div class="brief-actions" aria-label={t('visitorBrief.actionsAriaLabel')}>
+    <button type="button" on:click={copyBrief}>{t('visitorBrief.copyButton')}</button>
 
     {#if emailHref}
-      <a class="action-link" href={emailHref}>{contact.email?.label || 'Email this brief'}</a>
+      <a class="action-link" href={emailHref}>{contact.email?.label || t('visitorBrief.emailDefault')}</a>
     {/if}
 
     {#if whatsappHref}
       <a class="action-link" href={whatsappHref} target="_blank" rel="noreferrer">
-        {contact.whatsapp?.label || 'WhatsApp this brief'}
+        {contact.whatsapp?.label || t('visitorBrief.whatsappDefault')}
       </a>
     {/if}
   </div>

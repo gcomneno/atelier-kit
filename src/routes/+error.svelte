@@ -1,6 +1,8 @@
 <script>
   import { page } from '$app/state';
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
+  const t = useVisitorI18n();
   let isNotFound = $derived(page.status === 404);
 </script>
 
@@ -8,14 +10,14 @@
   <p class="eyebrow">{page.status}</p>
 
   {#if isNotFound}
-    <h1>Item not found</h1>
-    <p>The requested catalog item does not exist.</p>
+    <h1>{t('error.notFoundTitle')}</h1>
+    <p>{t('error.notFoundBody')}</p>
   {:else}
-    <h1>Something went wrong</h1>
-    <p>{page.error?.message ?? 'Unexpected error.'}</p>
+    <h1>{t('error.genericTitle')}</h1>
+    <p>{page.error?.message ?? t('error.unexpectedError')}</p>
   {/if}
 
-  <a href="/">Back to catalog</a>
+  <a href="/">{t('common.backToCatalog')}</a>
 </main>
 
 <style>

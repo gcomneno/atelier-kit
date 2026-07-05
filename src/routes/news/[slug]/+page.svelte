@@ -1,5 +1,8 @@
 <script>
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+
   let { data } = $props();
+  const t = useVisitorI18n();
 
   function formatDate(/** @type {string} */ value) {
     const parsed = new Date(`${value}T12:00:00`);
@@ -22,7 +25,7 @@
 </svelte:head>
 
 <main class="news-detail">
-  <a class="back-link" href="/news">← Back to news</a>
+  <a class="back-link" href="/news">{t('common.backToNews')}</a>
 
   <article>
     <header>

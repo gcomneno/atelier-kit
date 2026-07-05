@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   /**
    * @typedef {{ id: string, label: string }} SignalOption
@@ -12,6 +13,8 @@
   /** @type {SignalCloud} */
   export let cloud;
 
+  const t = useVisitorI18n();
+
   /** @type {string | null} */
   let selectedOptionId = null;
 
@@ -20,8 +23,8 @@
   $: hintId = `signal-cloud-${itemId}-${cloud.id}-hint`;
   $: selectedOption = cloud.options.find((option) => option.id === selectedOptionId);
   $: selectionMessage = selectedOption
-    ? `Selected: ${selectedOption.label}`
-    : 'No option selected yet.';
+    ? t('signalCloud.selected', { label: selectedOption.label })
+    : t('signalCloud.noSelection');
 
   onMount(() => {
     const savedOptionId = localStorage.getItem(storageKey);
@@ -54,7 +57,7 @@
   <div class="cloud-header">
     <h2 id={headingId}>{cloud.question}</h2>
     <p id={hintId} class="cloud-hint">
-      {cloud.hint || 'Single choice. Pick one option; choosing another replaces the previous local selection.'}
+      {cloud.hint || t('signalCloud.defaultHint')}
     </p>
   </div>
 
@@ -66,7 +69,7 @@
         type="button"
         class:selected={isSelected}
         aria-pressed={isSelected}
-        aria-label={`Choose ${option.label}`}
+        aria-label={t('signalCloud.chooseOption', { label: option.label })}
         on:click={() => choose(option.id)}
       >
         <span>{option.label}</span>

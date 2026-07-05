@@ -99,3 +99,17 @@ export function localizedItemPresets(locale) {
 export function getOperatorTranslator(locale) {
   return createTranslator(resolveLocale(locale));
 }
+
+/**
+ * @param {SupportedLocale | string} locale
+ */
+export function createVisitorTranslator(locale) {
+  return createTranslator(resolveLocale(locale));
+}
+
+/**
+ * @param {SupportedLocale | string} [locale]
+ */
+export function getVisitorTranslator(locale = 'en') {
+  return createVisitorTranslator(locale);
+}

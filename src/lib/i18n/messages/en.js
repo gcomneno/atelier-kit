@@ -713,5 +713,91 @@ export default {
       jewelry: 'Jewelry showcase',
       furniture: 'Furniture / object design showcase'
     }
+  },
+  visitor: {
+    common: {
+      backToShowcase: '← Back to showcase',
+      backToNews: '← Back to news',
+      backToCatalog: 'Back to catalog',
+      home: 'Home',
+      breadcrumb: 'Breadcrumb',
+      socialLinks: 'Social links',
+      viewAllCollections: 'View all collections',
+      readMore: 'Read more',
+      allNews: 'All news'
+    },
+    home: {
+      collectionsEyebrow: 'Collections',
+      collectionsTitle: 'Curated pages',
+      catalogEyebrow: 'Catalog',
+      aboutStudio: 'About the studio'
+    },
+    collections: {
+      pageTitle: 'Collections',
+      metaDescription: 'Curated collections from {siteName}.',
+      eyebrow: 'Collections',
+      title: 'Curated pages',
+      intro: 'Small file-based selections built from existing {itemPlural}.',
+      empty: 'No collections yet.',
+      collectionEyebrow: 'Collection',
+      selectedItemsEyebrow: 'Selected {itemPlural}'
+    },
+    catalog: {
+      collections: 'Collections',
+      latestNews: 'Latest news',
+      sidebarAriaLabel: 'Catalog sidebar'
+    },
+    news: {
+      pageTitle: 'News',
+      metaDescription: 'News and updates from {siteName}.',
+      title: 'News',
+      empty: 'No news posts yet.'
+    },
+    item: {
+      visitorBriefEyebrow: 'Visitor Brief',
+      talkAboutTitle: 'Talk about this piece',
+      talkAboutIntro:
+        'Choose a few preferences below. Atelier-Kit will assemble a message you can copy or send by email or WhatsApp.',
+      details: 'Details',
+      material: 'Material',
+      dimensions: 'Dimensions',
+      availability: 'Availability'
+    },
+    visitorBrief: {
+      contactEyebrow: 'Contact without a form',
+      heading: 'Write with a ready message',
+      intro:
+        'Choose Signal Cloud answers above, then copy this brief or open email / WhatsApp with the text already prepared.',
+      emptyState: 'Select one or more Signal Cloud answers above to make this brief more useful.',
+      actionsAriaLabel: 'Visitor Brief actions',
+      copyButton: 'Copy visitor brief',
+      emailDefault: 'Email this brief',
+      whatsappDefault: 'WhatsApp this brief',
+      copySuccess: 'Visitor brief copied.',
+      copyError: 'Could not copy automatically. Select and copy the brief manually.',
+      interestLine: 'I am interested in "{title}".',
+      impressionsHeading: 'My impressions:',
+      noSelections: 'My impressions: no Signal Cloud selections yet.',
+      itemPageLine: 'Item page: {url}',
+      emailSubjectPrefix: 'Interest in'
+    },
+    signalCloud: {
+      defaultHint:
+        'Single choice. Pick one option; choosing another replaces the previous local selection.',
+      selected: 'Selected: {label}',
+      noSelection: 'No option selected yet.',
+      chooseOption: 'Choose {label}'
+    },
+    error: {
+      notFoundTitle: 'Item not found',
+      notFoundBody: 'The requested catalog item does not exist.',
+      genericTitle: 'Something went wrong',
+      unexpectedError: 'Unexpected error.'
+    },
+    social: {
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      x: 'X (Twitter)'
+    }
   }
 };

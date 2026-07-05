@@ -21,6 +21,12 @@ const collectionFiles = import.meta.glob('/content/collections/*.yaml', {
   eager: true
 });
 
+const newsFiles = import.meta.glob('/content/news/*.yaml', {
+  query: '?raw',
+  import: 'default',
+  eager: true
+});
+
 /**
  * @typedef {{ label: string, value?: string, children?: MetaInfoEntry[] }} MetaInfoEntry
  */
@@ -595,4 +601,33 @@ export function getCollections() {
  */
 export function getCollectionById(id) {
   return getCollections().find((collection) => collection.id === id);
+}
+
+export function getNewsPosts() {
+  return Object.entries(newsFiles)
+    .map(([source, raw]) => {
+      if (typeof raw !== 'string') {
+        throw new Error(`${source}: expected raw YAML content.`);
+      }
+
+      const post = parseYaml(source, raw);
+      const imageFile = optionalString(post, 'image_file');
+
+      return {
+        id: requiredString(post, 'id', source),
+        title: requiredString(post, 'title', source),
+        date: requiredString(post, 'date', source),
+        excerpt: optionalString(post, 'excerpt'),
+        body: requiredString(post, 'body', source),
+        ...(imageFile ? { image_file: imageFile, image_alt: optionalString(post, 'image_alt') } : {})
+      };
+    })
+    .sort((left, right) => right.date.localeCompare(left.date));
+}
+
+/**
+ * @param {string} id
+ */
+export function getNewsPost(id) {
+  return getNewsPosts().find((post) => post.id === id);
 }

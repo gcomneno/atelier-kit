@@ -9,6 +9,7 @@ export default {
         about: 'Chi siamo',
         catalog: 'Catalogo',
         items: 'Pezzi',
+        news: 'News',
         collections: 'Collezioni',
         signals: 'Segnali',
         readiness: 'Pubblicazione',
@@ -239,6 +240,54 @@ export default {
       save: 'Salva pezzo',
       back: 'Torna ai pezzi'
     },
+    news: {
+      pageTitle: 'Studio · News',
+      intro: 'Scegli un post da modificare o crea un nuovo annuncio.',
+      title: 'News',
+      count: '{count} file post in content/news/',
+      createLink: '+ Crea nuovo post',
+      empty: 'Nessun post ancora.',
+      createFirst: 'Crea il tuo primo post'
+    },
+    newsNew: {
+      pageTitle: 'Studio · Nuovo post',
+      intro:
+        'Crea un nuovo post in content/news/. Usa lettere minuscole, numeri e trattini per l’id, ad esempio spring-announcement.',
+      title: 'Nuovo post',
+      introPanel: 'I post compaiono su /news, dal più recente.',
+      id: 'Id post',
+      idHint: 'Non modificabile in seguito. Diventa nome file e slug URL.',
+      idPattern: 'Usa solo lettere minuscole, numeri e trattini.',
+      titleField: 'Titolo post',
+      date: 'Data di pubblicazione',
+      dateHint: 'Formato YYYY-MM-DD.',
+      excerpt: 'Estratto (opzionale)',
+      excerptHint: 'Breve teaser nella lista news.',
+      body: 'Testo',
+      photo: 'Foto (opzionale)',
+      photoHint: 'JPG, PNG o WebP. Salvata come static/images/news/{id}.jpg',
+      imageAlt: 'Descrizione immagine',
+      create: 'Crea post',
+      cancel: 'Annulla'
+    },
+    newsEdit: {
+      intro:
+        'Modifica i contenuti pubblici del post. Carica una foto qui o usa il campo percorso immagine per casi avanzati.',
+      preview: 'Anteprima post',
+      postId: 'Id post: {id}',
+      uploadPhoto: 'Carica foto',
+      uploadHint:
+        'Salvata come static/images/news/{id}.jpg (o .png / .webp). Il percorso immagine si aggiorna automaticamente.',
+      imagePath: 'Percorso immagine',
+      imageAlt: 'Descrizione immagine',
+      titleField: 'Titolo post',
+      date: 'Data di pubblicazione',
+      excerpt: 'Estratto',
+      excerptHint: 'Breve teaser nella lista news. Lascia vuoto per usare la prima riga del testo.',
+      body: 'Testo',
+      save: 'Salva post',
+      back: 'Torna alle news'
+    },
     about: {
       pageTitle: 'Studio · Chi siamo',
       intro: 'Modifica la pagina pubblica /about. Usala per storia, processo e background dello studio.',
@@ -321,6 +370,10 @@ export default {
     collectionTitle: 'Titolo collezione',
     collectionDescription: 'Descrizione collezione',
     itemTitle: 'Titolo pezzo',
+    newsId: 'Id post',
+    newsTitle: 'Titolo post',
+    newsDate: 'Data di pubblicazione',
+    newsBody: 'Testo post',
     description: 'Descrizione',
     itemNameSingular: 'Nome pezzo (singolare)',
     itemNamePlural: 'Nome pezzo (plurale)',
@@ -343,8 +396,11 @@ export default {
     saveCollectionError: 'Impossibile salvare la collezione.',
     createItemError: 'Impossibile creare il pezzo.',
     createCollectionError: 'Impossibile creare la collezione.',
+    createNewsError: 'Impossibile creare il post news.',
     itemNotFound: 'Pezzo non trovato',
-    collectionNotFound: 'Collezione non trovata'
+    collectionNotFound: 'Collezione non trovata',
+    saveNewsError: 'Impossibile salvare il post news.',
+    newsNotFound: 'Post news non trovato'
   },
   errors: {
     required: '{label} è obbligatorio.',
@@ -353,6 +409,8 @@ export default {
     itemExists: 'Esiste già un pezzo con id "{id}".',
     collectionExists: 'Esiste già una collezione con id "{id}".',
     collectionNeedsItems: 'Scegli almeno un pezzo per questa collezione.',
+    newsExists: 'Esiste già un post news con id "{id}".',
+    newsDateInvalid: 'La data di pubblicazione deve usare il formato YYYY-MM-DD.',
     imageType: 'Usa un’immagine JPG, PNG o WebP.',
     imageRequired: 'Scegli un file immagine da caricare.',
     imageSize: 'L’immagine deve essere di 5 MB o meno.',
@@ -407,6 +465,10 @@ export default {
       itemStatus: 'Stato pezzo',
       itemNotice: 'Avviso pezzo',
       itemImageAlt: 'Descrizione immagine',
+      newsId: 'Id post',
+      newsTitle: 'Titolo post',
+      newsExcerpt: 'Estratto post',
+      newsBody: 'Testo post',
       metaLabel: 'Campo dettaglio',
       signalQuestion: 'Domanda visitatore',
       signalHint: 'Suggerimento domanda',
@@ -497,6 +559,26 @@ export default {
         title: 'Dettagli per "{itemTitle}"',
         problem: 'Questo pezzo non ha ancora campi dettaglio aggiuntivi.',
         action: 'Aggiungi dettagli utili come materiale, dimensioni, disponibilità o tecnica nel file pezzo.'
+      },
+      newsFieldStarter: {
+        title: '{fieldTitle} per "{postTitle}"',
+        problem: '{fieldTitle} sembra ancora testo starter o segnaposto.',
+        action: 'Apri {source} e aggiorna {fieldTitle} con contenuto reale.'
+      },
+      newsTestId: {
+        title: 'Id post per "{postTitle}"',
+        problem: 'L’id del post sembra ancora una voce di test o esempio.',
+        action: 'Rinomina id e file prima di pubblicare, oppure conferma che sia intenzionale.'
+      },
+      newsPlaceholderImage: {
+        title: 'Immagine per "{postTitle}"',
+        problem: 'Il post usa ancora un percorso immagine segnaposto.',
+        action: 'Carica una foto reale in Studio o aggiorna image_file nel file post.'
+      },
+      newsShortBody: {
+        title: 'Testo per "{postTitle}"',
+        problem: 'Il testo del post è molto breve.',
+        action: 'Aggiungi più contesto così i visitatori capiscono l’annuncio.'
       }
     }
   },
@@ -564,7 +646,10 @@ export default {
     collectionIdFilenameMismatch: '{source}: id deve corrispondere al nome file "{expectedId}".',
     collectionItemsRequired: '{source}: "items" deve essere un array non vuoto.',
     collectionItemRefInvalid: '{itemSource}: il riferimento pezzo deve essere una stringa non vuota.',
-    collectionItemRefUnknown: '{itemSource}: id pezzo sconosciuto "{itemId}".'
+    collectionItemRefUnknown: '{itemSource}: id pezzo sconosciuto "{itemId}".',
+    newsIdInvalid: '{source}: l’id deve usare solo lettere minuscole, numeri e trattini singoli.',
+    newsIdFilenameMismatch: '{source}: l’id deve corrispondere al nome file "{expectedId}".',
+    newsDateInvalid: '{source}: la data deve usare il formato YYYY-MM-DD.'
   },
   wizard: {
     usageTitle: 'Utilizzo:',

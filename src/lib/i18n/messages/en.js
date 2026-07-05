@@ -90,7 +90,37 @@ export default {
       publishRun: 'Run publish prep',
       publishRunning: 'Running publish prep…',
       publishOk: 'Publish prep completed successfully.',
-      publishFailed: 'Publish prep failed. Review the output below.'
+      publishFailed: 'Publish prep failed. Review the output below.',
+      liveTitle: 'Publish live',
+      liveIntro:
+        'Commit studio changes (config, content and uploaded images), push to Git and deploy to Vercel production. Requires a Git remote and Vercel CLI linked to this project.',
+      livePendingTitle: 'Pending local changes',
+      livePendingEmpty: 'No uncommitted changes in config/, content/ or static/images/. You can still redeploy the latest commit.',
+      liveCommitsAhead: '{count} local commit(s) not pushed yet.',
+      liveRun: 'Publish live',
+      liveRunning: 'Publishing live…',
+      liveOk: 'Live site updated successfully.',
+      liveFailed: 'Could not publish live.',
+      liveFailedPrep: 'Publish prep failed. Nothing was committed or deployed.',
+      liveFailedCommit: 'Git commit failed. Check Git identity settings and try again.',
+      liveFailedPush: 'Git push failed. Resolve conflicts or authentication, then try again.',
+      liveFailedDeploy: 'Vercel deploy failed. Git push may have succeeded — check the Vercel dashboard.',
+      liveConfirm:
+        'Publish live now? This will run publish prep, commit pending studio files, push to origin and deploy to production.',
+      liveCommitMessage: 'Studio update',
+      livePhasePrep: '→ Publish prep (validate, doctor, check, build)',
+      livePrepOk: 'Publish prep OK.',
+      livePhaseCommit: '→ Git commit',
+      liveCommitOk: 'Commit created.',
+      liveSkipCommit: '→ No new files to commit (pushing existing local commits).',
+      liveNoCommitNeeded: '→ No Git commit needed.',
+      livePhasePush: '→ Git push',
+      livePushOk: 'Push OK.',
+      livePhaseDeploy: '→ Vercel production deploy',
+      liveIssues: {
+        noRepo: 'This folder is not a Git repository. Initialize Git or clone the site project first.',
+        noRemote: 'Git remote "origin" is missing. Add your GitHub repository before publishing live.'
+      }
     },
     collections: {
       pageTitle: 'Studio · Collections',

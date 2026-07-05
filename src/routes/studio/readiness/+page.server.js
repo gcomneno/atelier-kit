@@ -2,6 +2,10 @@
 
 import { guardStudio } from '$lib/server/studio-guard.js';
 import { runContentDoctorReport, runPublishPrepReport } from '$lib/server/studio-io.js';
+import {
+  getPublishLivePreview,
+  runPublishLive
+} from '$lib/server/studio-publish-live.js';
 import { loadOperatorLocale } from '$lib/i18n/load-operator-locale.js';
 import { createTranslator } from '$lib/i18n/index.js';
 
@@ -9,9 +13,11 @@ export function load() {
   guardStudio();
 
   const report = runContentDoctorReport();
+  const livePreview = getPublishLivePreview();
 
   return {
-    report
+    report,
+    livePreview
   };
 }
 
@@ -26,6 +32,19 @@ export const actions = {
     return {
       prep,
       message: prep.ok ? t('studio.readiness.publishOk') : t('studio.readiness.publishFailed')
+    };
+  },
+
+  publishLive: async () => {
+    guardStudio();
+
+    const locale = loadOperatorLocale();
+    const result = runPublishLive(locale);
+
+    return {
+      live: result,
+      message: result.message,
+      livePreview: getPublishLivePreview()
     };
   }
 };

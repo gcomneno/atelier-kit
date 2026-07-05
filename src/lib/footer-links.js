@@ -9,6 +9,10 @@ export function isValidFooterHref(href) {
     return true;
   }
 
+  if (trimmed.toLowerCase().startsWith('mailto:')) {
+    return trimmed.length > 'mailto:'.length;
+  }
+
   try {
     const url = new URL(trimmed);
 

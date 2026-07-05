@@ -39,10 +39,16 @@
 <section class="panel" aria-labelledby="appearance-settings-title">
   <div class="panel-heading">
     <h2 id="appearance-settings-title">Site appearance</h2>
-    <p>Background and text colors for the public showcase.</p>
+    <p>Background colors and optional background image for the public showcase.</p>
   </div>
 
-  <form method="POST" action="?/saveAppearance" use:enhance class="appearance-form">
+  <form
+    method="POST"
+    action="?/saveAppearance"
+    enctype="multipart/form-data"
+    use:enhance
+    class="appearance-form"
+  >
     <label>
       Color preset
       <select name="preset" bind:value={presetDraft}>
@@ -82,6 +88,20 @@
     >
       <span>Preview</span>
     </div>
+
+    <label>
+      Background image (optional)
+      <span class="hint">JPG, PNG or WebP. Saved under static/images/site/background.*</span>
+      <input type="file" name="background_upload" accept="image/jpeg,image/png,image/webp" />
+    </label>
+
+    {#if appearanceForm.background_image}
+      <p class="hint">Current: {appearanceForm.background_image}</p>
+      <label class="checkbox">
+        <input type="checkbox" name="remove_background" />
+        Remove background image
+      </label>
+    {/if}
 
     <div class="actions">
       <button type="submit">Save appearance</button>

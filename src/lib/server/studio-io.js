@@ -354,6 +354,30 @@ export async function saveItemImageUpload(id, file) {
   return `/images/items/${filename}`;
 }
 
+/**
+ * @param {File} file
+ */
+export async function saveSiteBackgroundUpload(file) {
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error('Choose an image file to upload.');
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error('Image must be 5 MB or smaller.');
+  }
+
+  const extension = imageExtensionFromName(file.name);
+  const siteImagesDir = path.join(ROOT, 'static/images/site');
+  mkdirSync(siteImagesDir, { recursive: true });
+
+  const filename = `background.${extension}`;
+  const absolutePath = path.join(siteImagesDir, filename);
+  const buffer = Buffer.from(await file.arrayBuffer());
+  writeFileSync(absolutePath, buffer);
+
+  return `/images/site/${filename}`;
+}
+
 export function defaultItemImagePath(id) {
   assertContentId(id, 'Item id');
   return `/images/items/${id}.jpg`;

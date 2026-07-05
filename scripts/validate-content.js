@@ -134,6 +134,15 @@ function validateAppearance(appearance, source) {
       fail(`${source}: site.appearance.${field} must be a hex color like #f8f0e4.`);
     }
   }
+
+  if ('background_image' in appearance && appearance.background_image !== undefined) {
+    if (
+      typeof appearance.background_image !== 'string' ||
+      !appearance.background_image.startsWith('/images/site/')
+    ) {
+      fail(`${source}: site.appearance.background_image must be a path under /images/site/.`);
+    }
+  }
 }
 
 function validateCatalog() {

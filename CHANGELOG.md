@@ -4,6 +4,20 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.10 - 2026-07-05
+
+Phase 5 studio and tooling improvements (epic [#52](https://github.com/gcomneno/atelier-kit/issues/52) — partial).
+
+### Added
+
+- Studio: reorder collection items with up/down controls at `/studio/collections/[id]`.
+- Studio: optional background image upload in Site appearance (saved to `static/images/site/`).
+- Tauri desktop wrapper Phase 2 research spike at `docs/architecture/spike-tauri-desktop-phase2.md` ([#53](https://github.com/gcomneno/atelier-kit/issues/53)).
+
+### Changed
+
+- `npm run site:upgrade` detects kit version from git tag, CHANGELOG, or nearest tag + commit count ([#56](https://github.com/gcomneno/atelier-kit/issues/56)).
+
 ## v0.1.9 - 2026-07-05
 
 Closes epic [#43](https://github.com/gcomneno/atelier-kit/issues/43) — repeatable client handoff and studio completion.

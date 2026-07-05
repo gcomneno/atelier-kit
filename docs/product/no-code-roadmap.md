@@ -125,7 +125,7 @@ Deliverables:
 - [x] operator handoff playbook
 - [x] `site:upgrade` for client kit sync
 
-**Status:** client handoff epic [#43](https://github.com/gcomneno/atelier-kit/issues/43) closed in v0.1.9. Full terminal-free packaging remains research — see epic [#52](https://github.com/gcomneno/atelier-kit/issues/52).
+**Status:** client handoff epic [#43](https://github.com/gcomneno/atelier-kit/issues/43) closed in v0.1.9. Phase 5 studio/tooling shipped in v0.1.10 ([#54](https://github.com/gcomneno/atelier-kit/issues/54)–[#56](https://github.com/gcomneno/atelier-kit/issues/56)); Tauri spike documented ([#53](https://github.com/gcomneno/atelier-kit/issues/53)). Full terminal-free packaging remains — see epic [#52](https://github.com/gcomneno/atelier-kit/issues/52).
 
 ## Architecture options
 

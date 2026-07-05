@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (phase 1 implemented)
+Accepted (phase 1 implemented). **Phase 2 spike documented** — see [`spike-tauri-desktop-phase2.md`](spike-tauri-desktop-phase2.md) (issue [#53](https://github.com/gcomneno/atelier-kit/issues/53)).
 
 ## Context
 

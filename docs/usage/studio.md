@@ -95,6 +95,8 @@ site:
 
 Presets: `warm` (default), `neutral`, `dark`, or `custom` with explicit hex colors.
 
+Optional **background image** upload (JPG/PNG/WebP) saved to `static/images/site/background.*`.
+
 ## Recommended access
 
 The studio is **local authoring only**. Follow these rules:

@@ -379,13 +379,77 @@ function writeManifest(clientRoot, kitRoot, kitVersion) {
  * @param {string} kitRoot
  * @returns {string | null}
  */
+function readLatestChangelogVersion(kitRoot) {
+  const changelogPath = path.join(kitRoot, 'CHANGELOG.md');
+
+  if (!fs.existsSync(changelogPath)) {
+    return null;
+  }
+
+  const content = fs.readFileSync(changelogPath, 'utf8');
+  const match = content.match(/^## (v[0-9]+\.[0-9]+\.[0-9]+)/m);
+
+  return match ? match[1] : null;
+}
+
+/**
+ * @param {string} kitRoot
+ * @returns {string | null}
+ */
+function readKitPackageVersion(kitRoot) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(kitRoot, 'package.json'), 'utf8'));
+    return typeof pkg.version === 'string' && pkg.version.trim() !== '' ? pkg.version.trim() : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * @param {string} kitRoot
+ * @returns {string | null}
+ */
 function detectKitVersion(kitRoot) {
-  const result = spawnSync('git', ['-C', kitRoot, 'describe', '--tags', '--abbrev=0'], {
+  const exactTag = spawnSync('git', ['-C', kitRoot, 'describe', '--tags', '--exact-match'], {
     encoding: 'utf8'
   });
 
-  if (result.status === 0) {
-    return result.stdout.trim();
+  if (exactTag.status === 0) {
+    return exactTag.stdout.trim();
+  }
+
+  const changelogVersion = readLatestChangelogVersion(kitRoot);
+  const nearestTag = spawnSync('git', ['-C', kitRoot, 'describe', '--tags', '--abbrev=0'], {
+    encoding: 'utf8'
+  });
+
+  if (nearestTag.status === 0) {
+    const tag = nearestTag.stdout.trim();
+
+    if (changelogVersion && changelogVersion !== tag) {
+      return changelogVersion;
+    }
+
+    const ahead = spawnSync('git', ['-C', kitRoot, 'rev-list', `${tag}..HEAD`, '--count'], {
+      encoding: 'utf8'
+    });
+    const commitCount = Number.parseInt(String(ahead.stdout).trim(), 10);
+
+    if (Number.isFinite(commitCount) && commitCount > 0) {
+      return `${tag}+${commitCount}`;
+    }
+
+    return tag;
+  }
+
+  if (changelogVersion) {
+    return changelogVersion;
+  }
+
+  const packageVersion = readKitPackageVersion(kitRoot);
+
+  if (packageVersion) {
+    return `dev-${packageVersion}`;
   }
 
   return null;

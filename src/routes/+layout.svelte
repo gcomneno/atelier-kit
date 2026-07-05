@@ -8,9 +8,14 @@
       .map(([key, value]) => `${key}: ${value}`)
       .join('; ')
   );
+  const hasBackgroundImage = $derived(Boolean(data.appearance?.background_image));
 </script>
 
-<div class="site-root" style={appearanceStyle}>
+<div
+  class="site-root"
+  class:has-background-image={hasBackgroundImage}
+  style={`${appearanceStyle}${hasBackgroundImage ? `; --site-bg-url: url(${data.appearance.background_image})` : ''}`}
+>
   {@render children()}
 </div>
 
@@ -43,6 +48,17 @@
         color-mix(in srgb, var(--site-accent-color, #d6be9a) 35%, transparent),
         transparent 32rem
       ),
+      var(--site-base-color, #f8f0e4);
+  }
+
+  .site-root.has-background-image {
+    background:
+      radial-gradient(
+        circle at top left,
+        color-mix(in srgb, var(--site-accent-color, #d6be9a) 35%, transparent),
+        transparent 32rem
+      ),
+      var(--site-bg-url) center top / cover no-repeat,
       var(--site-base-color, #f8f0e4);
   }
 </style>

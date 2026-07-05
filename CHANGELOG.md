@@ -4,6 +4,12 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.17 - 2026-07-05
+
+### Fixed
+
+- **Atelier Desktop** ([#60](https://github.com/gcomneno/atelier-kit/issues/60)): Tauri build on Linux — remove invalid `allow-navigate` capabilities; fix `AppState` references in tray/exit dev-server shutdown. Produces `.deb`, `.rpm`, and `.AppImage`.
+
 ## v0.1.16 - 2026-07-05
 
 ### Fixed

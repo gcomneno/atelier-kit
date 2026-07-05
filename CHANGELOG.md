@@ -4,9 +4,24 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.9 - 2026-07-05
+
+Closes epic [#43](https://github.com/gcomneno/atelier-kit/issues/43) — repeatable client handoff and studio completion.
+
 ### Added
 
 - Added studio flow to create new items at `/studio/items/new`.
+- Added studio flow to create new collections at `/studio/collections/new`.
+- Added `npm run site:upgrade` to sync `src/` and `scripts/` from a newer kit without touching client config, content or item photos.
+- Added configurable site appearance (background presets and custom colors) editable from `/studio`.
+- Redesigned public item detail page layout with portrait-friendly images and a dedicated Visitor Brief zone.
+- Added recommended studio access guidance panel on `/studio` and `/studio/readiness`.
+- Added operator handoff playbook at `docs/product/operator-handoff-playbook.md`.
+
+### Changed
+
+- Scaffold templates now ship publish-ready starter copy; fresh scaffolds trigger one Content Doctor note (placeholder image) instead of many text warnings.
+- Contact email is disabled in scaffolds until the operator or wizard sets a real address.
 
 ## v0.1.8 - 2026-07-04
 

@@ -57,12 +57,12 @@ Use **Tauri 2** (not Electron) for:
 
 Minimum spike to validate feasibility:
 
-- [ ] Tauri project in `desktop/` subdirectory
-- [ ] Folder picker → verify `config/site.yaml` exists
-- [ ] Spawn `npm run studio:launch` equivalent (dev + `ATELIER_STUDIO=1`)
-- [ ] Webview navigates to `http://127.0.0.1:5173/studio`
-- [ ] Button: run `npm run publish` and display stdout
-- [ ] Document build targets: Linux, macOS, Windows
+- [x] Tauri project in `desktop/` subdirectory
+- [x] Folder picker → verify `config/site.yaml` exists
+- [x] Spawn `npm run studio:launch` equivalent (dev + `ATELIER_STUDIO=1`)
+- [x] Webview navigates to `http://127.0.0.1:5173/studio`
+- [x] System tray: open folder, preview, stop server, quit
+- [x] Document build targets: Linux, macOS, Windows
 
 Out of spike MVP:
 

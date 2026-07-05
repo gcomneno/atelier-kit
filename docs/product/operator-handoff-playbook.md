@@ -221,11 +221,32 @@ Use this agenda with the client.
 Tell the client:
 
 1. Open the site folder on their computer.
-2. Run `npm run studio:launch`.
-3. Edit in the browser; save writes to project files.
-4. When ready to go online, run `npm run publish -- --deploy` (or ask you).
+2. **Option A — Atelier Desktop (recommended):** open Atelier Desktop, choose the site folder, click **Open studio**.
+3. **Option B — Terminal:** run `npm run studio:launch`.
+4. Edit in the browser; save writes to project files.
+5. When ready to go online, use **Metti online** on `/studio/readiness` inside the studio (or run `npm run publish -- --deploy`).
 
 Studio is **local only** — never exposed on the live site.
+
+### 5.5 Atelier Desktop handoff
+
+For non-technical clients, ship the desktop app from `desktop/` after `npm run tauri build`:
+
+| OS | Bundle to ship |
+|---|---|
+| Linux | `.AppImage` or `.deb` from `desktop/src-tauri/target/release/bundle/` |
+| macOS | `.dmg` from `bundle/dmg/` |
+| Windows | `.msi` or NSIS `.exe` from `bundle/msi/` or `bundle/nsis/` |
+
+**Client machine must have:** Node.js 20+, npm, and `npm install` already run once in the site folder.
+
+**First-time setup:**
+
+1. Install Atelier Desktop (double-click installer or `chmod +x` AppImage).
+2. Open the app → **Choose site folder** → select the handed-off project directory.
+3. Click **Open studio** — no terminal required.
+
+Build prerequisites for operators are documented in [`desktop/README.md`](../../desktop/README.md).
 
 ---
 
@@ -240,6 +261,14 @@ Send this to the client after the call.
 
 ## Edit content on your computer
 
+**With Atelier Desktop (no terminal):**
+
+1. Open Atelier Desktop.
+2. Choose your site folder.
+3. Click **Open studio**.
+
+**Or with the terminal:**
+
 1. Open the project folder.
 2. Run: npm run studio:launch
 3. Browser opens at http://127.0.0.1:5173/studio
@@ -253,6 +282,8 @@ Send this to the client after the call.
 - Visitor Brief questions
 
 ## Before going live after changes
+
+Open **Pronto per pubblicare** in the studio and click **Metti online**, or run:
 
 npm run publish -- --deploy
 

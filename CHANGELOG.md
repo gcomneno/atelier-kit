@@ -4,6 +4,17 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.15 - 2026-07-05
+
+### Added
+
+- **Visitor-facing UI i18n**: public showcase labels (Collections, Catalog, back links, sidebar widgets, Visitor Brief shell) follow `site.language` (`en` / `it`) ([#66](https://github.com/gcomneno/atelier-kit/issues/66)).
+- `useVisitorI18n()` context and `visitor.*` message catalog in `src/lib/i18n/`.
+
+### Changed
+
+- ADR 0005 and configuration docs updated: `site.language` drives operator UI and visitor UI labels (YAML content text remains author-written).
+
 ## v0.1.14 - 2026-07-05
 
 Closes epic [#61](https://github.com/gcomneno/atelier-kit/issues/61) — editorial extensions for publisher-style showcases.

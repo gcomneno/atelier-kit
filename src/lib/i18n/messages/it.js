@@ -90,7 +90,38 @@ export default {
       publishRun: 'Esegui preparazione publish',
       publishRunning: 'Preparazione publish in corso…',
       publishOk: 'Preparazione publish completata.',
-      publishFailed: 'Preparazione publish non riuscita. Controlla l’output qui sotto.'
+      publishFailed: 'Preparazione publish non riuscita. Controlla l’output qui sotto.',
+      liveTitle: 'Metti online',
+      liveIntro:
+        'Salva su Git le modifiche dello studio (config, contenuti e immagini caricate), esegue push e deploy in produzione su Vercel. Richiede remote Git e Vercel CLI collegato al progetto.',
+      livePendingTitle: 'Modifiche locali in sospeso',
+      livePendingEmpty:
+        'Nessuna modifica non committata in config/, content/ o static/images/. Puoi comunque ridistribuire l’ultimo commit.',
+      liveCommitsAhead: '{count} commit locale/i non ancora pushati.',
+      liveRun: 'Metti online',
+      liveRunning: 'Pubblicazione live in corso…',
+      liveOk: 'Sito live aggiornato.',
+      liveFailed: 'Impossibile pubblicare live.',
+      liveFailedPrep: 'Preparazione publish non riuscita. Nessun commit o deploy eseguito.',
+      liveFailedCommit: 'Commit Git non riuscito. Verifica nome/email Git e riprova.',
+      liveFailedPush: 'Push Git non riuscito. Risolvi conflitti o autenticazione e riprova.',
+      liveFailedDeploy: 'Deploy Vercel non riuscito. Il push Git può essere andato a buon fine — controlla la dashboard Vercel.',
+      liveConfirm:
+        'Mettere online adesso? Verranno eseguiti publish prep, commit dei file studio, push su origin e deploy in produzione.',
+      liveCommitMessage: 'Aggiornamento da studio',
+      livePhasePrep: '→ Preparazione publish (validate, doctor, check, build)',
+      livePrepOk: 'Preparazione publish OK.',
+      livePhaseCommit: '→ Commit Git',
+      liveCommitOk: 'Commit creato.',
+      liveSkipCommit: '→ Nessun file nuovo da committare (push dei commit locali esistenti).',
+      liveNoCommitNeeded: '→ Nessun commit Git necessario.',
+      livePhasePush: '→ Push Git',
+      livePushOk: 'Push OK.',
+      livePhaseDeploy: '→ Deploy produzione Vercel',
+      liveIssues: {
+        noRepo: 'Questa cartella non è un repository Git. Inizializza Git o clona il progetto sito.',
+        noRemote: 'Manca il remote Git "origin". Aggiungi il repository GitHub prima di mettere online.'
+      }
     },
     collections: {
       pageTitle: 'Studio · Collezioni',

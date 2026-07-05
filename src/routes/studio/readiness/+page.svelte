@@ -7,7 +7,21 @@
 
   let { data, form } = $props();
 
-  let publishing = $state(false);
+  const livePreview = $derived(form?.livePreview ?? data.livePreview);
+
+  let prepRunning = $state(false);
+  let liveRunning = $state(false);
+
+  function confirmLive() {
+    const lines = livePreview.changes.map((entry) => `• ${entry.path}`);
+
+    if (livePreview.commitsAhead > 0) {
+      lines.push(`• ${t('studio.readiness.liveCommitsAhead', { count: livePreview.commitsAhead })}`);
+    }
+
+    const summary = lines.length > 0 ? `\n\n${lines.join('\n')}` : '';
+    return confirm(`${t('studio.readiness.liveConfirm')}${summary}`);
+  }
 </script>
 
 <svelte:head>
@@ -41,26 +55,82 @@
     method="POST"
     action="?/runPublishPrep"
     use:enhance={() => {
-      publishing = true;
+      prepRunning = true;
 
       return async ({ update }) => {
-        publishing = false;
+        prepRunning = false;
         await update();
       };
     }}
-    class="publish-form"
+    class="action-form"
   >
-    <button type="submit" disabled={publishing}>
-      {publishing ? t('studio.readiness.publishRunning') : t('studio.readiness.publishRun')}
+    <button type="submit" class="secondary" disabled={prepRunning || liveRunning}>
+      {prepRunning ? t('studio.readiness.publishRunning') : t('studio.readiness.publishRun')}
     </button>
   </form>
 
   {#if form?.prep}
     <p class={form.prep.ok ? 'ok' : 'review'}>{form.message}</p>
     <pre class="report">{form.prep.output}</pre>
+  {/if}
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <h2>{t('studio.readiness.liveTitle')}</h2>
+    <p>{t('studio.readiness.liveIntro')}</p>
+  </div>
+
+  {#if !livePreview.canPublish}
+    <ul class="issues">
+      {#each livePreview.issues as issue}
+        <li>{t(`studio.readiness.liveIssues.${issue}`)}</li>
+      {/each}
+    </ul>
   {:else}
-    <pre><code>npm run publish
-npm run publish -- --deploy</code></pre>
+    <div class="pending">
+      <h3>{t('studio.readiness.livePendingTitle')}</h3>
+      {#if livePreview.changes.length === 0}
+        <p>{t('studio.readiness.livePendingEmpty')}</p>
+      {:else}
+        <ul>
+          {#each livePreview.changes as change}
+            <li><code>{change.path}</code></li>
+          {/each}
+        </ul>
+      {/if}
+      {#if livePreview.commitsAhead > 0}
+        <p>{t('studio.readiness.liveCommitsAhead', { count: livePreview.commitsAhead })}</p>
+      {/if}
+    </div>
+
+    <form
+      method="POST"
+      action="?/publishLive"
+      use:enhance={() => {
+        liveRunning = true;
+
+        return async ({ update }) => {
+          liveRunning = false;
+          await update();
+        };
+      }}
+      class="action-form"
+      onsubmit={(event) => {
+        if (!confirmLive()) {
+          event.preventDefault();
+        }
+      }}
+    >
+      <button type="submit" class="primary" disabled={liveRunning || prepRunning}>
+        {liveRunning ? t('studio.readiness.liveRunning') : t('studio.readiness.liveRun')}
+      </button>
+    </form>
+  {/if}
+
+  {#if form?.live}
+    <p class={form.live.ok ? 'ok' : 'review'}>{form.message}</p>
+    <pre class="report">{form.live.output}</pre>
   {/if}
 </section>
 
@@ -89,6 +159,27 @@ npm run publish -- --deploy</code></pre>
     color: #7d684f;
   }
 
+  .pending h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+  }
+
+  .pending p,
+  .pending ul {
+    margin: 0 0 0.75rem;
+    color: #5a4632;
+  }
+
+  .pending ul {
+    padding-left: 1.2rem;
+  }
+
+  .issues {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: #6a4a1b;
+  }
+
   .ok {
     color: #2f4f35;
   }
@@ -97,8 +188,7 @@ npm run publish -- --deploy</code></pre>
     color: #6a4a1b;
   }
 
-  .report,
-  pre code {
+  .report {
     margin: 0;
     padding: 1rem;
     overflow-x: auto;
@@ -109,20 +199,29 @@ npm run publish -- --deploy</code></pre>
     line-height: 1.5;
   }
 
-  .publish-form {
+  .action-form {
     margin-bottom: 1rem;
   }
 
-  .publish-form button {
+  .action-form button {
     padding: 0.65rem 1.1rem;
     border: 1px solid rgb(47 40 31 / 0.2);
     border-radius: 0.65rem;
-    background: #f8f0e4;
-    color: #2f281f;
     cursor: pointer;
   }
 
-  .publish-form button:disabled {
+  .action-form button.secondary {
+    background: #f8f0e4;
+    color: #2f281f;
+  }
+
+  .action-form button.primary {
+    background: #2f4f35;
+    color: #f8f0e4;
+    border-color: #2f4f35;
+  }
+
+  .action-form button:disabled {
     opacity: 0.65;
     cursor: wait;
   }

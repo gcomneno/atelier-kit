@@ -130,6 +130,8 @@ npm run publish
 npm run publish -- --deploy
 ```
 
+**Publish live** on the readiness page runs publish prep, commits `config/`, `content/` and `static/images/`, pushes to Git and deploys with Vercel CLI. Requires Git `origin`, credentials and a linked Vercel project on the operator machine.
+
 See [`deploy-vercel.md`](deploy-vercel.md) and [`../product/service-package.md`](../product/service-package.md).
 
 ## Related docs

@@ -4,6 +4,10 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+### Added
+
+- Studio **Publish live** / **Metti online** on `/studio/readiness`: publish prep, Git commit/push for studio files, Vercel production deploy.
+
 ## v0.1.12 - 2026-07-05
 
 Closes [#59](https://github.com/gcomneno/atelier-kit/issues/59), [#58](https://github.com/gcomneno/atelier-kit/issues/58); partial delivery for [#52](https://github.com/gcomneno/atelier-kit/issues/52).

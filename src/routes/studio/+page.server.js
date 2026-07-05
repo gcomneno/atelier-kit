@@ -15,6 +15,7 @@ import {
   validationMessage,
   writeProjectYaml
 } from '$lib/server/studio-io.js';
+import { isValidSocialUrl, normalizeSocialId, SOCIAL_NETWORK_IDS } from '$lib/social-networks.js';
 
 function isRecord(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -76,6 +77,36 @@ function loadSiteForm() {
   };
 }
 
+function loadSocialForm() {
+  /** @type {Record<'instagram' | 'facebook' | 'x', string>} */
+  const urls = {
+    instagram: '',
+    facebook: '',
+    x: ''
+  };
+
+  const data = readProjectYaml('config/social.yaml');
+  const social = data.social;
+
+  if (!isRecord(social) || !Array.isArray(social.links)) {
+    return urls;
+  }
+
+  for (const entry of social.links) {
+    if (!isRecord(entry)) {
+      continue;
+    }
+
+    const id = normalizeSocialId(readString(entry, 'id'));
+
+    if (id) {
+      urls[id] = readString(entry, 'url');
+    }
+  }
+
+  return urls;
+}
+
 function loadContactForm() {
   const data = readProjectYaml('config/contact.yaml');
   const contact = data.contact;
@@ -118,6 +149,7 @@ export function load() {
   return {
     siteForm: loadSiteForm(),
     contactForm: loadContactForm(),
+    socialForm: loadSocialForm(),
     appearanceForm: loadAppearanceForm(),
     appearancePresets: localizedAppearancePresets(locale)
   };
@@ -216,6 +248,49 @@ export const actions = {
         contactStatus: 'error',
         contactMessage: message,
         contactForm: loadContactForm()
+      });
+    }
+  },
+
+  saveSocial: async ({ request }) => {
+    guardStudio();
+
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
+    const formData = await request.formData();
+
+    try {
+      /** @type {{ id: 'instagram' | 'facebook' | 'x', url: string }[]} */
+      const links = [];
+
+      for (const id of SOCIAL_NETWORK_IDS) {
+        const url = optionalField(formData.get(`url_${id}`));
+
+        if (url === '') {
+          continue;
+        }
+
+        if (!isValidSocialUrl(url)) {
+          throw new Error(t('errors.socialUrlInvalid', { network: id }));
+        }
+
+        links.push({ id, url });
+      }
+
+      writeProjectYaml('config/social.yaml', { social: { links } });
+      const validation = runStructuralValidation();
+
+      return {
+        socialStatus: validation.ok ? 'success' : 'warning',
+        socialMessage: saveMessage(validation, locale),
+        socialForm: loadSocialForm()
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('server.saveSocialError');
+      return fail(400, {
+        socialStatus: 'error',
+        socialMessage: message,
+        socialForm: loadSocialForm()
       });
     }
   },

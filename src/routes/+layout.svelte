@@ -1,4 +1,5 @@
 <script>
+  import SiteHeader from '$lib/components/SiteHeader.svelte';
   import { appearanceCssVariables } from '$lib/site-appearance.js';
 
   let { children, data } = $props();
@@ -16,6 +17,7 @@
   class:has-background-image={hasBackgroundImage}
   style={`${appearanceStyle}${hasBackgroundImage ? `; --site-bg-url: url(${data.appearance.background_image})` : ''}`}
 >
+  <SiteHeader site={data.site} socialLinks={data.socialLinks} />
   {@render children()}
 </div>
 

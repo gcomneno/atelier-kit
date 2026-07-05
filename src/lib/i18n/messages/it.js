@@ -76,6 +76,14 @@ export default {
         whatsappLabel: 'Etichetta pulsante WhatsApp',
         save: 'Salva contatti'
       },
+      social: {
+        title: 'Social',
+        intro: 'Link opzionali mostrati nell’header del sito. Lascia vuoto un campo per nascondere quell’icona.',
+        instagram: 'URL Instagram',
+        facebook: 'URL Facebook',
+        x: 'URL X (Twitter)',
+        save: 'Salva social'
+      },
       nextSteps: {
         title: 'Prima di pubblicare',
         intro: 'Controlla lo stato di pubblicazione nello studio o esegui lo script publish dalla cartella del progetto.',
@@ -309,6 +317,7 @@ export default {
     saveValidationProblem: 'Salvato, ma la validazione ha segnalato un problema:\n{output}',
     saveSiteError: 'Impossibile salvare le impostazioni sito.',
     saveContactError: 'Impossibile salvare i contatti.',
+    saveSocialError: 'Impossibile salvare i link social.',
     saveAppearanceError: 'Impossibile salvare l’aspetto.',
     saveAboutError: 'Impossibile salvare la pagina Chi siamo.',
     saveCatalogError: 'Impossibile salvare le impostazioni catalogo.',
@@ -338,7 +347,8 @@ export default {
     missingSite: 'config/site.yaml non contiene un oggetto site.',
     aboutTitleRequired: 'Il titolo pagina Chi siamo è obbligatorio quando la pagina è abilitata.',
     contactEmailRequired: 'L’email di contatto è obbligatoria quando il contatto email è abilitato.',
-    contactWhatsappRequired: 'Il numero WhatsApp è obbligatorio quando il contatto WhatsApp è abilitato.'
+    contactWhatsappRequired: 'Il numero WhatsApp è obbligatorio quando il contatto WhatsApp è abilitato.',
+    socialUrlInvalid: 'Inserisci un URL http o https valido per {network}.'
   },
   doctor: {
     foundCount: 'Content Doctor ha trovato {count} elemento/i da rivedere prima di pubblicare:',
@@ -511,6 +521,11 @@ export default {
     missingContactObject: '{source}: manca l’oggetto "contact".',
     contactEmailMustBeObject: '{source}: "contact.email" deve essere un oggetto quando presente.',
     contactWhatsappMustBeObject: '{source}: "contact.whatsapp" deve essere un oggetto quando presente.',
+    missingSocialObject: '{source}: manca l’oggetto "social".',
+    socialLinksMustBeArray: '{source}: "social.links" deve essere un array.',
+    socialLinkMustBeObject: '{source}: il link deve essere un oggetto.',
+    socialLinkIdInvalid: '{source}: id deve essere uno tra: instagram, facebook, x (ricevuto "{id}").',
+    socialLinkUrlInvalid: '{source}: url deve essere un URL http o https valido.',
     itemsDirMissing: 'La cartella content/items non esiste.',
     itemsDirEmpty: 'content/items deve contenere almeno un file .yaml pezzo.',
     imageFileMustStartWithSlash: '{source}: image_file deve iniziare con "/".',

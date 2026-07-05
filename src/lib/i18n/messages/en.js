@@ -76,6 +76,14 @@ export default {
         whatsappLabel: 'WhatsApp button label',
         save: 'Save contact settings'
       },
+      social: {
+        title: 'Social links',
+        intro: 'Optional profile links shown in the site header. Leave a field empty to hide that icon.',
+        instagram: 'Instagram URL',
+        facebook: 'Facebook URL',
+        x: 'X (Twitter) URL',
+        save: 'Save social links'
+      },
       nextSteps: {
         title: 'Before publishing',
         intro: 'Review publish readiness in the studio or run the publish script from the project folder.',
@@ -308,6 +316,7 @@ export default {
     saveValidationProblem: 'Saved, but validation reported a problem:\n{output}',
     saveSiteError: 'Could not save site settings.',
     saveContactError: 'Could not save contact settings.',
+    saveSocialError: 'Could not save social links.',
     saveAppearanceError: 'Could not save appearance.',
     saveAboutError: 'Could not save about page.',
     saveCatalogError: 'Could not save catalog settings.',
@@ -337,7 +346,8 @@ export default {
     missingSite: 'config/site.yaml is missing a site object.',
     aboutTitleRequired: 'About page title is required when the page is enabled.',
     contactEmailRequired: 'Contact email is required when email contact is enabled.',
-    contactWhatsappRequired: 'WhatsApp phone number is required when WhatsApp contact is enabled.'
+    contactWhatsappRequired: 'WhatsApp phone number is required when WhatsApp contact is enabled.',
+    socialUrlInvalid: 'Enter a valid http or https URL for {network}.'
   },
   doctor: {
     foundCount: 'Atelier-Kit content doctor found {count} thing(s) to review before publishing:',
@@ -510,6 +520,11 @@ export default {
     missingContactObject: '{source}: missing "contact" object.',
     contactEmailMustBeObject: '{source}: "contact.email" must be an object when provided.',
     contactWhatsappMustBeObject: '{source}: "contact.whatsapp" must be an object when provided.',
+    missingSocialObject: '{source}: missing "social" object.',
+    socialLinksMustBeArray: '{source}: "social.links" must be an array.',
+    socialLinkMustBeObject: '{source}: link must be an object.',
+    socialLinkIdInvalid: '{source}: id must be one of: instagram, facebook, x (got "{id}").',
+    socialLinkUrlInvalid: '{source}: url must be a valid http or https URL.',
     itemsDirMissing: 'content/items directory does not exist.',
     itemsDirEmpty: 'content/items must contain at least one .yaml item.',
     imageFileMustStartWithSlash: '{source}: image_file must start with "/".',

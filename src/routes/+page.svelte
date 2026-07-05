@@ -1,4 +1,5 @@
 <script>
+  import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
   import ItemCard from '$lib/components/ItemCard.svelte';
 
   let { data } = $props();
@@ -9,65 +10,95 @@
   <meta name="description" content={data.site.tagline} />
 </svelte:head>
 
-<main>
-  <section class="hero">
-    <h1>{data.site.name}</h1>
-    <p class="tagline">{data.site.tagline}</p>
+<!-- Sidebar layout applies on home (`/`) only; see getCatalogSidebarPageData() in showcase.js -->
+<div class="page-shell" class:with-sidebar={data.sidebarActive}>
+  <main>
+    <section class="hero">
+      <h1>{data.site.name}</h1>
+      <p class="tagline">{data.site.tagline}</p>
 
-    {#if data.site.notice}
-      <p class="notice">{data.site.notice}</p>
+      {#if data.site.notice}
+        <p class="notice">{data.site.notice}</p>
+      {/if}
+    </section>
+
+    {#if data.collections.length > 0}
+      <section class="collections" aria-labelledby="collections-title">
+        <div class="section-heading">
+          <p class="eyebrow">Collections</p>
+          <h2 id="collections-title">Curated pages</h2>
+        </div>
+
+        <div class="collection-grid">
+          {#each data.collections as collection}
+            <a class="collection-card" href={`/collections/${collection.id}`}>
+              <h3>{collection.title}</h3>
+              <p>{collection.description}</p>
+              <span>{collection.items.length} {collection.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</span>
+            </a>
+          {/each}
+        </div>
+
+        <p class="text-link"><a href="/collections">View all collections</a></p>
+      </section>
     {/if}
-  </section>
 
-  {#if data.collections.length > 0}
-    <section class="collections" aria-labelledby="collections-title">
+    <section class="catalog" aria-labelledby="catalog-title">
       <div class="section-heading">
-        <p class="eyebrow">Collections</p>
-        <h2 id="collections-title">Curated pages</h2>
+        <p class="eyebrow">Catalog</p>
+        <h2 id="catalog-title">{data.items.length} {data.catalog.item_name_plural}</h2>
       </div>
 
-      <div class="collection-grid">
-        {#each data.collections as collection}
-          <a class="collection-card" href={`/collections/${collection.id}`}>
-            <h3>{collection.title}</h3>
-            <p>{collection.description}</p>
-            <span>{collection.items.length} {collection.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</span>
-          </a>
+      <div class="grid">
+        {#each data.items as item}
+          <ItemCard {item} catalog={data.catalog} />
         {/each}
       </div>
-
-      <p class="text-link"><a href="/collections">View all collections</a></p>
     </section>
+
+    {#if !data.footerActive}
+      <footer>
+        <p>{data.site.footer_note}</p>
+        {#if data.aboutAvailable}
+          <p class="footer-link"><a href="/about">About the studio</a></p>
+        {/if}
+      </footer>
+    {/if}
+  </main>
+
+  {#if data.sidebarActive && data.sidebar}
+    <CatalogSidebar
+      collections={data.sidebar.collections}
+      about={data.sidebar.about}
+      newsPosts={data.sidebar.newsPosts}
+      widgets={data.layout.sidebar}
+      site={data.site}
+    />
   {/if}
-
-  <section class="catalog" aria-labelledby="catalog-title">
-    <div class="section-heading">
-      <p class="eyebrow">Catalog</p>
-      <h2 id="catalog-title">{data.items.length} {data.catalog.item_name_plural}</h2>
-    </div>
-
-    <div class="grid">
-      {#each data.items as item}
-        <ItemCard {item} catalog={data.catalog} />
-      {/each}
-    </div>
-  </section>
-
-  {#if !data.footerActive}
-    <footer>
-      <p>{data.site.footer_note}</p>
-      {#if data.aboutAvailable}
-        <p class="footer-link"><a href="/about">About the studio</a></p>
-      {/if}
-    </footer>
-  {/if}
-</main>
+</div>
 
 <style>
-  main {
+  .page-shell {
     width: min(1120px, calc(100% - 2rem));
     margin: 0 auto;
     padding: 4rem 0 2rem;
+  }
+
+  .page-shell.with-sidebar {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  @media (min-width: 960px) {
+    .page-shell.with-sidebar {
+      grid-template-columns: minmax(0, 1fr) 280px;
+    }
+  }
+
+  main {
+    min-width: 0;
   }
 
   .hero {

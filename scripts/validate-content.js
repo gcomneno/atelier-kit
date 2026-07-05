@@ -4,6 +4,7 @@ import { parse } from 'yaml';
 import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
 import { isValidFooterHref } from '../src/lib/footer-links.js';
+import { isLayoutPreset, MAX_LATEST_NEWS_COUNT } from '../src/lib/layout-presets.js';
 import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
 
 const ROOT = process.cwd();
@@ -421,6 +422,56 @@ function validateFooter() {
   }
 }
 
+function validateLayout() {
+  const source = 'config/layout.yaml';
+
+  if (!existsSync(path.join(ROOT, source))) {
+    return;
+  }
+
+  const data = readYaml(source);
+  const layout = data.layout;
+
+  if (!layout || typeof layout !== 'object' || Array.isArray(layout)) {
+    failKey('missingLayoutObject', { source });
+    return;
+  }
+
+  if ('preset' in layout && layout.preset !== undefined && !isLayoutPreset(layout.preset)) {
+    failKey('layoutPresetInvalid', { source });
+  }
+
+  const sidebar = layout.sidebar;
+
+  if (sidebar === undefined) {
+    return;
+  }
+
+  if (!sidebar || typeof sidebar !== 'object' || Array.isArray(sidebar)) {
+    failKey('layoutSidebarMustBeObject', { source });
+    return;
+  }
+
+  for (const field of ['collections', 'about', 'latest_news']) {
+    if (field in sidebar && sidebar[field] !== undefined && typeof sidebar[field] !== 'boolean') {
+      failKey('layoutSidebarFlagInvalid', { source, field });
+    }
+  }
+
+  if ('latest_news_count' in sidebar && sidebar.latest_news_count !== undefined) {
+    const count = sidebar.latest_news_count;
+
+    if (
+      typeof count !== 'number' ||
+      !Number.isInteger(count) ||
+      count < 1 ||
+      count > MAX_LATEST_NEWS_COUNT
+    ) {
+      failKey('layoutLatestNewsCountInvalid', { source, max: MAX_LATEST_NEWS_COUNT });
+    }
+  }
+}
+
 function validateLegal() {
   const source = 'config/legal.yaml';
 
@@ -628,6 +679,7 @@ validateSignalClouds();
 validateContact();
 validateSocial();
 validateFooter();
+validateLayout();
 validateLegal();
 const itemIds = validateItems();
 validateCollections(itemIds);

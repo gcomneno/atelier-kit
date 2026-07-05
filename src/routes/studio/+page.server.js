@@ -6,6 +6,13 @@ import { appearanceFromForm, resolveSiteAppearance } from '$lib/site-appearance.
 import { localizedAppearancePresets } from '$lib/i18n/index.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 import {
+  DEFAULT_LATEST_NEWS_COUNT,
+  DEFAULT_LAYOUT_PRESET,
+  isLayoutPreset,
+  LAYOUT_PRESETS,
+  MAX_LATEST_NEWS_COUNT
+} from '$lib/layout-presets.js';
+import {
   checkboxEnabled,
   optionalField,
   readProjectYaml,
@@ -123,6 +130,49 @@ function emptyFooterForm() {
   };
 }
 
+function loadLayoutForm() {
+  const form = {
+    preset: DEFAULT_LAYOUT_PRESET,
+    collections: true,
+    about: true,
+    latest_news: true,
+    latest_news_count: DEFAULT_LATEST_NEWS_COUNT
+  };
+
+  try {
+    const data = readProjectYaml('config/layout.yaml');
+    const layout = data.layout;
+
+    if (!isRecord(layout)) {
+      return form;
+    }
+
+    const preset = readString(layout, 'preset', DEFAULT_LAYOUT_PRESET);
+
+    if (isLayoutPreset(preset)) {
+      form.preset = preset;
+    }
+
+    const sidebar = isRecord(layout.sidebar) ? layout.sidebar : {};
+
+    form.collections = sidebar.collections !== false;
+    form.about = sidebar.about !== false;
+    form.latest_news = sidebar.latest_news !== false;
+
+    if (
+      typeof sidebar.latest_news_count === 'number' &&
+      Number.isInteger(sidebar.latest_news_count) &&
+      sidebar.latest_news_count >= 1
+    ) {
+      form.latest_news_count = Math.min(sidebar.latest_news_count, MAX_LATEST_NEWS_COUNT);
+    }
+  } catch {
+    return form;
+  }
+
+  return form;
+}
+
 function loadFooterForm() {
   const form = emptyFooterForm();
 
@@ -211,6 +261,8 @@ export function load() {
     contactForm: loadContactForm(),
     socialForm: loadSocialForm(),
     footerForm: loadFooterForm(),
+    layoutForm: loadLayoutForm(),
+    layoutPresets: LAYOUT_PRESETS,
     footerColumnCount: MAX_FOOTER_COLUMNS,
     footerLinkCount: MAX_FOOTER_LINKS,
     appearanceForm: loadAppearanceForm(),
@@ -423,6 +475,59 @@ export const actions = {
         footerStatus: 'error',
         footerMessage: message,
         footerForm: loadFooterForm()
+      });
+    }
+  },
+
+  saveLayout: async ({ request }) => {
+    guardStudio();
+
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
+    const formData = await request.formData();
+
+    try {
+      const preset = optionalField(formData.get('preset'), DEFAULT_LAYOUT_PRESET);
+
+      if (!isLayoutPreset(preset)) {
+        throw new Error(t('errors.layoutPresetInvalid'));
+      }
+
+      const latestNewsCountRaw = optionalField(formData.get('latest_news_count'), String(DEFAULT_LATEST_NEWS_COUNT));
+      const latestNewsCount = Number.parseInt(latestNewsCountRaw, 10);
+
+      if (
+        !Number.isInteger(latestNewsCount) ||
+        latestNewsCount < 1 ||
+        latestNewsCount > MAX_LATEST_NEWS_COUNT
+      ) {
+        throw new Error(t('errors.layoutLatestNewsCountInvalid', { max: MAX_LATEST_NEWS_COUNT }));
+      }
+
+      const layout = {
+        preset,
+        sidebar: {
+          collections: checkboxEnabled(formData.get('collections')),
+          about: checkboxEnabled(formData.get('about')),
+          latest_news: checkboxEnabled(formData.get('latest_news')),
+          latest_news_count: latestNewsCount
+        }
+      };
+
+      writeProjectYaml('config/layout.yaml', { layout });
+      const validation = runStructuralValidation();
+
+      return {
+        layoutStatus: validation.ok ? 'success' : 'warning',
+        layoutMessage: saveMessage(validation, locale),
+        layoutForm: loadLayoutForm()
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('server.saveLayoutError');
+      return fail(400, {
+        layoutStatus: 'error',
+        layoutMessage: message,
+        layoutForm: loadLayoutForm()
       });
     }
   },

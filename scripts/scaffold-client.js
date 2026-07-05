@@ -238,6 +238,7 @@ legal:
 }
 
 function applyWritingTemplate(targetRoot) {
+  // Optional catalog sidebar: add config/layout.yaml with preset catalog-sidebar (ADR 0006).
   resetScaffoldContent(targetRoot);
 
   writeFile(targetRoot, 'config/site.yaml', `

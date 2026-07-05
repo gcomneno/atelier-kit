@@ -12,6 +12,7 @@
   const contactForm = $derived(form?.contactForm ?? data.contactForm);
   const socialForm = $derived(form?.socialForm ?? data.socialForm);
   const footerForm = $derived(form?.footerForm ?? data.footerForm);
+  const layoutForm = $derived(form?.layoutForm ?? data.layoutForm);
   const appearanceForm = $derived(form?.appearanceForm ?? data.appearanceForm);
   const appearancePresets = $derived(data.appearancePresets);
   let presetDraft = $state('warm');
@@ -238,6 +239,62 @@
 
     {#if form?.socialMessage}
       <p class={`status ${form.socialStatus || 'info'}`}>{form.socialMessage}</p>
+    {/if}
+  </form>
+</section>
+
+<section class="panel" aria-labelledby="layout-settings-title">
+  <div class="panel-heading">
+    <h2 id="layout-settings-title">{t('studio.site.layout.title')}</h2>
+    <p>{t('studio.site.layout.intro')}</p>
+  </div>
+
+  <form method="POST" action="?/saveLayout" use:enhance>
+    <label>
+      {t('studio.site.layout.preset')}
+      <select name="preset" value={layoutForm.preset}>
+        {#each data.layoutPresets as preset}
+          <option value={preset}>{t(`studio.site.layout.presets.${preset}`)}</option>
+        {/each}
+      </select>
+    </label>
+
+    <fieldset>
+      <legend>{t('studio.site.layout.widgetsLegend')}</legend>
+
+      <label class="checkbox">
+        <input type="checkbox" name="collections" checked={layoutForm.collections} />
+        {t('studio.site.layout.collections')}
+      </label>
+
+      <label class="checkbox">
+        <input type="checkbox" name="about" checked={layoutForm.about} />
+        {t('studio.site.layout.about')}
+      </label>
+
+      <label class="checkbox">
+        <input type="checkbox" name="latest_news" checked={layoutForm.latest_news} />
+        {t('studio.site.layout.latestNews')}
+      </label>
+
+      <label>
+        {t('studio.site.layout.latestNewsCount')}
+        <input
+          name="latest_news_count"
+          type="number"
+          min="1"
+          max="10"
+          value={layoutForm.latest_news_count}
+        />
+      </label>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit">{t('studio.site.layout.save')}</button>
+    </div>
+
+    {#if form?.layoutMessage}
+      <p class={`status ${form.layoutStatus || 'info'}`}>{form.layoutMessage}</p>
     {/if}
   </form>
 </section>

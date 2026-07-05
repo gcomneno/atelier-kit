@@ -1,11 +1,23 @@
-import { getAboutConfig, getCatalogConfig, getCollections, getItems, getSiteConfig } from '$lib/server/showcase.js';
+import {
+  getAboutConfig,
+  getCatalogConfig,
+  getCatalogSidebarPageData,
+  getCollections,
+  getItems,
+  getLayoutConfig,
+  getSiteConfig
+} from '$lib/server/showcase.js';
 
 export function load() {
+  const layout = getLayoutConfig();
+  const sidebarPage = getCatalogSidebarPageData(layout);
+
   return {
     site: getSiteConfig(),
     catalog: getCatalogConfig(),
     collections: getCollections(),
     items: getItems(),
-    aboutAvailable: getAboutConfig() !== null
+    aboutAvailable: getAboutConfig() !== null,
+    ...sidebarPage
   };
 }

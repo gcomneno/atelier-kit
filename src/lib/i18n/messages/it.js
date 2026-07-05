@@ -99,6 +99,22 @@ export default {
         linkHref: 'URL o percorso link',
         save: 'Salva footer'
       },
+      layout: {
+        title: 'Sidebar catalogo',
+        intro:
+          'Sidebar opzionale sulla home e sull’indice collezioni. Pagine pezzo, dettaglio collezione, news, Chi siamo e legali restano a colonna singola.',
+        preset: 'Preset layout',
+        presets: {
+          'single-column': 'Colonna singola (predefinito)',
+          'catalog-sidebar': 'Catalogo con sidebar'
+        },
+        widgetsLegend: 'Widget sidebar',
+        collections: 'Link collezioni',
+        about: 'Anteprima Chi siamo',
+        latestNews: 'Ultime news',
+        latestNewsCount: 'Numero ultime news',
+        save: 'Salva layout'
+      },
       nextSteps: {
         title: 'Prima di pubblicare',
         intro: 'Controlla lo stato di pubblicazione nello studio o esegui lo script publish dalla cartella del progetto.',
@@ -386,6 +402,7 @@ export default {
     saveContactError: 'Impossibile salvare i contatti.',
     saveSocialError: 'Impossibile salvare i link social.',
     saveFooterError: 'Impossibile salvare il footer.',
+    saveLayoutError: 'Impossibile salvare il layout.',
     saveAppearanceError: 'Impossibile salvare l’aspetto.',
     saveAboutError: 'Impossibile salvare la pagina Chi siamo.',
     saveCatalogError: 'Impossibile salvare le impostazioni catalogo.',
@@ -424,7 +441,9 @@ export default {
     socialUrlInvalid: 'Inserisci un URL http o https valido per {network}.',
     footerLinkHrefRequired: 'Il link "{label}" nella colonna "{column}" richiede un URL o percorso.',
     footerLinkHrefInvalid:
-      'Il link "{label}" nella colonna "{column}" deve iniziare con "/" o essere un URL http o https valido.'
+      'Il link "{label}" nella colonna "{column}" deve iniziare con "/" o essere un URL http o https valido.',
+    layoutPresetInvalid: 'Il preset layout deve essere single-column o catalog-sidebar.',
+    layoutLatestNewsCountInvalid: 'Il numero di ultime news deve essere un intero da 1 a {max}.'
   },
   doctor: {
     foundCount: 'Content Doctor ha trovato {count} elemento/i da rivedere prima di pubblicare:',
@@ -635,6 +654,13 @@ export default {
     footerLinkLabelRequired: '{source}: l’etichetta del link non può essere vuota se href è impostato.',
     footerFieldMustBeString: '{source}: footer.{field} deve essere una stringa se presente.',
     footerShowSocialInvalid: '{source}: footer.show_social deve essere true o false se presente.',
+    missingLayoutObject: '{source}: manca l’oggetto "layout".',
+    layoutPresetInvalid: '{source}: layout.preset deve essere "single-column" o "catalog-sidebar".',
+    layoutSidebarMustBeObject: '{source}: layout.sidebar deve essere un oggetto quando presente.',
+    layoutSidebarFlagInvalid:
+      '{source}: layout.sidebar.{field} deve essere true o false quando presente.',
+    layoutLatestNewsCountInvalid:
+      '{source}: layout.sidebar.latest_news_count deve essere un intero da 1 a {max} quando presente.',
     missingLegalObject: '{source}: manca l’oggetto "legal".',
     legalPagesMustBeObject: '{source}: "legal.pages" deve essere un oggetto.',
     legalPageMustBeObject: '{source}: la pagina deve essere un oggetto.',

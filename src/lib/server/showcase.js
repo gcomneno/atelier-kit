@@ -1,5 +1,11 @@
 import { parse } from 'yaml';
 import { isValidFooterHref } from '$lib/footer-links.js';
+import {
+  DEFAULT_LATEST_NEWS_COUNT,
+  DEFAULT_LAYOUT_PRESET,
+  isLayoutPreset,
+  MAX_LATEST_NEWS_COUNT
+} from '$lib/layout-presets.js';
 import { isValidSocialUrl, normalizeSocialId } from '$lib/social-networks.js';
 import { resolveSiteAppearance } from '$lib/site-appearance.js';
 
@@ -630,4 +636,116 @@ export function getNewsPosts() {
  */
 export function getNewsPost(id) {
   return getNewsPosts().find((post) => post.id === id);
+}
+
+/**
+ * @typedef {{
+ *   collections: boolean,
+ *   about: boolean,
+ *   latest_news: boolean,
+ *   latest_news_count: number
+ * }} SidebarWidgetConfig
+ * @typedef {{
+ *   preset: import('$lib/layout-presets.js').LayoutPreset,
+ *   sidebar: SidebarWidgetConfig
+ * }} LayoutConfig
+ */
+
+/** @type {LayoutConfig} */
+const DEFAULT_LAYOUT_CONFIG = {
+  preset: DEFAULT_LAYOUT_PRESET,
+  sidebar: {
+    collections: true,
+    about: true,
+    latest_news: true,
+    latest_news_count: DEFAULT_LATEST_NEWS_COUNT
+  }
+};
+
+/**
+ * @param {unknown} value
+ * @param {number} fallback
+ * @returns {number}
+ */
+function optionalPositiveInt(value, fallback) {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 1) {
+    return fallback;
+  }
+
+  return Math.min(value, MAX_LATEST_NEWS_COUNT);
+}
+
+export function getLayoutConfig() {
+  const raw = configFiles['/config/layout.yaml'];
+
+  if (typeof raw !== 'string') {
+    return DEFAULT_LAYOUT_CONFIG;
+  }
+
+  const data = parseYaml('/config/layout.yaml', raw);
+  const layout = data.layout;
+
+  if (!isRecord(layout)) {
+    throw new Error('config/layout.yaml: missing "layout" object.');
+  }
+
+  const presetValue = optionalString(layout, 'preset', DEFAULT_LAYOUT_PRESET);
+
+  if (!isLayoutPreset(presetValue)) {
+    throw new Error(
+      'config/layout.yaml: layout.preset must be "single-column" or "catalog-sidebar".'
+    );
+  }
+
+  const sidebar = isRecord(layout.sidebar) ? layout.sidebar : {};
+
+  return {
+    preset: presetValue,
+    sidebar: {
+      collections: sidebar.collections !== false,
+      about: sidebar.about !== false,
+      latest_news: sidebar.latest_news !== false,
+      latest_news_count: optionalPositiveInt(
+        sidebar.latest_news_count,
+        DEFAULT_LATEST_NEWS_COUNT
+      )
+    }
+  };
+}
+
+/**
+ * @param {LayoutConfig} layout
+ */
+export function isCatalogSidebarActive(layout) {
+  return layout.preset === 'catalog-sidebar';
+}
+
+/**
+ * Sidebar applies on home (`/`) and the collections index (`/collections`) only.
+ * Item detail, collection detail, news, about and legal pages stay single-column.
+ *
+ * @param {LayoutConfig} layout
+ */
+export function getCatalogSidebarPageData(layout) {
+  if (!isCatalogSidebarActive(layout)) {
+    return {
+      sidebarActive: false,
+      layout,
+      sidebar: null
+    };
+  }
+
+  const { sidebar } = layout;
+
+  return {
+    sidebarActive: true,
+    layout,
+    sidebar: {
+      collections: sidebar.collections ? getCollections() : [],
+      about: sidebar.about ? getAboutConfig() : null,
+      newsPosts: sidebar.latest_news
+        ? getNewsPosts().slice(0, sidebar.latest_news_count)
+        : []
+    }
+  };
 }

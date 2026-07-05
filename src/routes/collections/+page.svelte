@@ -1,4 +1,6 @@
 <script>
+  import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
+
   let { data } = $props();
 </script>
 
@@ -7,37 +9,67 @@
   <meta name="description" content={`Curated collections from ${data.site.name}.`} />
 </svelte:head>
 
-<main>
-  <nav aria-label="Breadcrumb">
-    <a href="/">Home</a>
-  </nav>
+<!-- Sidebar layout applies on `/collections` index only; see getCatalogSidebarPageData() in showcase.js -->
+<div class="page-shell" class:with-sidebar={data.sidebarActive}>
+  <main>
+    <nav aria-label="Breadcrumb">
+      <a href="/">Home</a>
+    </nav>
 
-  <header>
-    <p class="eyebrow">Collections</p>
-    <h1>Curated pages</h1>
-    <p>Small file-based selections built from existing {data.catalog.item_name_plural}.</p>
-  </header>
+    <header>
+      <p class="eyebrow">Collections</p>
+      <h1>Curated pages</h1>
+      <p>Small file-based selections built from existing {data.catalog.item_name_plural}.</p>
+    </header>
 
-  {#if data.collections.length > 0}
-    <div class="grid">
-      {#each data.collections as collection}
-        <a class="collection-card" href={`/collections/${collection.id}`}>
-          <h2>{collection.title}</h2>
-          <p>{collection.description}</p>
-          <span>{collection.items.length} {collection.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</span>
-        </a>
-      {/each}
-    </div>
-  {:else}
-    <p>No collections yet.</p>
+    {#if data.collections.length > 0}
+      <div class="grid">
+        {#each data.collections as collection}
+          <a class="collection-card" href={`/collections/${collection.id}`}>
+            <h2>{collection.title}</h2>
+            <p>{collection.description}</p>
+            <span>{collection.items.length} {collection.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</span>
+          </a>
+        {/each}
+      </div>
+    {:else}
+      <p>No collections yet.</p>
+    {/if}
+  </main>
+
+  {#if data.sidebarActive && data.sidebar}
+    <CatalogSidebar
+      collections={data.sidebar.collections}
+      about={data.sidebar.about}
+      newsPosts={data.sidebar.newsPosts}
+      widgets={data.layout.sidebar}
+      site={data.site}
+    />
   {/if}
-</main>
+</div>
 
 <style>
-  main {
+  .page-shell {
     width: min(1120px, calc(100% - 2rem));
     margin: 0 auto;
     padding: 3rem 0 4rem;
+  }
+
+  .page-shell.with-sidebar {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  @media (min-width: 960px) {
+    .page-shell.with-sidebar {
+      grid-template-columns: minmax(0, 1fr) 280px;
+    }
+  }
+
+  main {
+    min-width: 0;
   }
 
   nav {

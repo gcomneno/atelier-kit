@@ -99,6 +99,22 @@ export default {
         linkHref: 'Link URL or path',
         save: 'Save footer'
       },
+      layout: {
+        title: 'Catalog sidebar',
+        intro:
+          'Optional sidebar on the home page and collections index. Item, collection detail, news, about and legal pages stay single-column.',
+        preset: 'Layout preset',
+        presets: {
+          'single-column': 'Single column (default)',
+          'catalog-sidebar': 'Catalog with sidebar'
+        },
+        widgetsLegend: 'Sidebar widgets',
+        collections: 'Collection links',
+        about: 'About snippet',
+        latestNews: 'Latest news',
+        latestNewsCount: 'Latest news count',
+        save: 'Save layout'
+      },
       nextSteps: {
         title: 'Before publishing',
         intro: 'Review publish readiness in the studio or run the publish script from the project folder.',
@@ -384,6 +400,7 @@ export default {
     saveContactError: 'Could not save contact settings.',
     saveSocialError: 'Could not save social links.',
     saveFooterError: 'Could not save footer.',
+    saveLayoutError: 'Could not save layout.',
     saveAppearanceError: 'Could not save appearance.',
     saveAboutError: 'Could not save about page.',
     saveCatalogError: 'Could not save catalog settings.',
@@ -422,7 +439,9 @@ export default {
     socialUrlInvalid: 'Enter a valid http or https URL for {network}.',
     footerLinkHrefRequired: 'Link "{label}" in column "{column}" needs a URL or path.',
     footerLinkHrefInvalid:
-      'Link "{label}" in column "{column}" must start with "/" or be a valid http or https URL.'
+      'Link "{label}" in column "{column}" must start with "/" or be a valid http or https URL.',
+    layoutPresetInvalid: 'Layout preset must be single-column or catalog-sidebar.',
+    layoutLatestNewsCountInvalid: 'Latest news count must be an integer from 1 to {max}.'
   },
   doctor: {
     foundCount: 'Atelier-Kit content doctor found {count} thing(s) to review before publishing:',
@@ -633,6 +652,12 @@ export default {
     footerLinkLabelRequired: '{source}: link label must not be empty when href is set.',
     footerFieldMustBeString: '{source}: footer.{field} must be a string when provided.',
     footerShowSocialInvalid: '{source}: footer.show_social must be true or false when provided.',
+    missingLayoutObject: '{source}: missing "layout" object.',
+    layoutPresetInvalid: '{source}: layout.preset must be "single-column" or "catalog-sidebar".',
+    layoutSidebarMustBeObject: '{source}: layout.sidebar must be an object when provided.',
+    layoutSidebarFlagInvalid: '{source}: layout.sidebar.{field} must be true or false when provided.',
+    layoutLatestNewsCountInvalid:
+      '{source}: layout.sidebar.latest_news_count must be an integer from 1 to {max} when provided.',
     missingLegalObject: '{source}: missing "legal" object.',
     legalPagesMustBeObject: '{source}: "legal.pages" must be an object.',
     legalPageMustBeObject: '{source}: page must be an object.',

@@ -4,6 +4,18 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.14 - 2026-07-05
+
+Closes epic [#61](https://github.com/gcomneno/atelier-kit/issues/61) — editorial extensions for publisher-style showcases.
+
+### Added
+
+- **Social links in header** via `config/social.yaml`, `SiteHeader`, and studio editor ([#64](https://github.com/gcomneno/atelier-kit/issues/64)).
+- **Multi-column footer** with legal page links and static `/legal/[slug]` routes ([#63](https://github.com/gcomneno/atelier-kit/issues/63)).
+- **News posts** in `content/news/` with `/news` routes and studio CRUD ([#62](https://github.com/gcomneno/atelier-kit/issues/62)).
+- **Optional catalog-sidebar layout** via `config/layout.yaml` and `CatalogSidebar` ([#65](https://github.com/gcomneno/atelier-kit/issues/65)).
+- ADR 0006 documenting editorial extensions architecture.
+
 ## v0.1.13 - 2026-07-05
 
 ### Added

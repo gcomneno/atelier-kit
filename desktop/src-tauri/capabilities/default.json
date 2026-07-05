@@ -8,8 +8,6 @@
     "core:window:allow-create",
     "core:window:allow-close",
     "core:window:allow-set-focus",
-    "core:window:allow-navigate",
-    "core:webview:allow-navigate",
     "dialog:default",
     "opener:default"
   ]

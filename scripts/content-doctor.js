@@ -127,7 +127,13 @@ const FIELD_LABEL_KEYS = {
   'item.image_file': 'doctor.fields.itemImageAlt',
   'item.image_alt': 'doctor.fields.itemImageAlt',
   'item.notice': 'doctor.fields.itemNotice',
-  'item.status': 'doctor.fields.itemStatus'
+  'item.status': 'doctor.fields.itemStatus',
+  'news.id': 'doctor.fields.newsId',
+  'news.title': 'doctor.fields.newsTitle',
+  'news.excerpt': 'doctor.fields.newsExcerpt',
+  'news.body': 'doctor.fields.newsBody',
+  'news.image_file': 'doctor.fields.newsImageAlt',
+  'news.image_alt': 'doctor.fields.newsImageAlt'
 };
 
 function labelForPath(pathLabel) {
@@ -493,6 +499,93 @@ function inspectItems() {
   }
 }
 
+function inspectNews() {
+  const newsDir = path.join(ROOT, 'content/news');
+
+  if (!existsSync(newsDir)) {
+    return;
+  }
+
+  const files = readdirSync(newsDir)
+    .filter((file) => file.endsWith('.yaml'))
+    .sort();
+
+  if (files.length === 0) {
+    return;
+  }
+
+  for (const file of files) {
+    const source = `content/news/${file}`;
+    const post = readYaml(source);
+
+    if (!post) {
+      continue;
+    }
+
+    const id = typeof post.id === 'string' ? post.id : file.replace(/\.yaml$/, '');
+    const postTitle = typeof post.title === 'string' && post.title.trim() !== '' ? post.title.trim() : id;
+    const imageFile = typeof post.image_file === 'string' ? post.image_file : '';
+    const body = typeof post.body === 'string' ? post.body.trim() : '';
+
+    for (const [key, value] of Object.entries(post)) {
+      if (key === 'image_file' || key === 'date') {
+        continue;
+      }
+
+      if (typeof value !== 'string' || !textLooksStarter(value)) {
+        continue;
+      }
+
+      const fieldTitle = labelForPath(`news.${key}`);
+
+      addWarning({
+        source,
+        title: t('doctor.warnings.newsFieldStarter.title', { fieldTitle, postTitle }),
+        problem: t('doctor.warnings.newsFieldStarter.problem', { fieldTitle }),
+        action: t('doctor.warnings.newsFieldStarter.action', {
+          source,
+          fieldTitle: fieldTitle.toLowerCase()
+        }),
+        detail: value,
+        technical: `news.${key} still looks like starter/demo text: "${value}"`
+      });
+    }
+
+    if (/(^|[-_])(test|smoke|sample)([-_]|$)/i.test(id)) {
+      addWarning({
+        source,
+        title: t('doctor.warnings.newsTestId.title', { postTitle }),
+        problem: t('doctor.warnings.newsTestId.problem'),
+        action: t('doctor.warnings.newsTestId.action'),
+        detail: id,
+        technical: `News id "${id}" looks like a test/smoke/sample post.`
+      });
+    }
+
+    if (imageFile.toLowerCase().includes('placeholder')) {
+      addWarning({
+        source,
+        title: t('doctor.warnings.newsPlaceholderImage.title', { postTitle }),
+        problem: t('doctor.warnings.newsPlaceholderImage.problem'),
+        action: t('doctor.warnings.newsPlaceholderImage.action'),
+        detail: imageFile,
+        technical: 'News post still uses a starter placeholder image.'
+      });
+    }
+
+    if (body.length > 0 && body.length < 40) {
+      addWarning({
+        source,
+        title: t('doctor.warnings.newsShortBody.title', { postTitle }),
+        problem: t('doctor.warnings.newsShortBody.problem'),
+        action: t('doctor.warnings.newsShortBody.action'),
+        detail: body,
+        technical: 'News body is quite short. Consider adding more useful context.'
+      });
+    }
+  }
+}
+
 function printWarnings() {
   console.log(t('doctor.foundCount', { count: warnings.length }));
   console.log('');
@@ -529,6 +622,7 @@ inspectSite();
 inspectContact();
 inspectSignalClouds();
 inspectItems();
+inspectNews();
 
 if (warnings.length === 0) {
   console.log(t('doctor.foundNothing'));

@@ -559,6 +559,68 @@ function validateCollections(itemIds) {
   assertUnique(collectionIds, 'collection id');
 }
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+function validateNews() {
+  const newsDir = path.join(ROOT, 'content/news');
+
+  if (!existsSync(newsDir)) {
+    return;
+  }
+
+  const files = readdirSync(newsDir).filter((file) => file.endsWith('.yaml'));
+
+  if (files.length === 0) {
+    return;
+  }
+
+  const ids = [];
+
+  for (const file of files) {
+    const source = `content/news/${file}`;
+    const post = readYaml(source);
+    const id = requireString(post, 'id', source);
+    const expectedId = file.replace(/\.yaml$/, '');
+
+    ids.push(id);
+
+    if (!isValidId(id)) {
+      failKey('newsIdInvalid', { source });
+    }
+
+    if (id !== expectedId) {
+      failKey('newsIdFilenameMismatch', { source, expectedId });
+    }
+
+    requireString(post, 'title', source);
+
+    const date = requireString(post, 'date', source);
+
+    if (!ISO_DATE.test(date)) {
+      failKey('newsDateInvalid', { source });
+    }
+
+    requireString(post, 'body', source);
+
+    if (typeof post.image_file === 'string' && post.image_file.trim() !== '') {
+      const imageFile = post.image_file.trim();
+
+      if (!imageFile.startsWith('/')) {
+        failKey('imageFileMustStartWithSlash', { source });
+        continue;
+      }
+
+      const staticImagePath = path.join(ROOT, 'static', imageFile.slice(1));
+
+      if (!existsSync(staticImagePath)) {
+        failKey('imageFileMissing', { source, imageFile });
+      }
+    }
+  }
+
+  assertUnique(ids, 'news id');
+}
+
 validateSite();
 validateCatalog();
 validateAbout();
@@ -569,6 +631,7 @@ validateFooter();
 validateLegal();
 const itemIds = validateItems();
 validateCollections(itemIds);
+validateNews();
 
 if (process.exitCode) {
   process.exit();

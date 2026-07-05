@@ -21,6 +21,7 @@
       <a href="/studio/about">{t('studio.layout.nav.about')}</a>
       <a href="/studio/catalog">{t('studio.layout.nav.catalog')}</a>
       <a href="/studio/items">{t('studio.layout.nav.items')}</a>
+      <a href="/studio/news">{t('studio.layout.nav.news')}</a>
       <a href="/studio/collections">{t('studio.layout.nav.collections')}</a>
       <a href="/studio/signal-clouds">{t('studio.layout.nav.signals')}</a>
       <a href="/studio/readiness">{t('studio.layout.nav.readiness')}</a>

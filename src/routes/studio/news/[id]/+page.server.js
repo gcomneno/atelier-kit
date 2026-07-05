@@ -1,0 +1,126 @@
+// @ts-nocheck
+
+import { error, fail } from '@sveltejs/kit';
+import { guardStudio } from '$lib/server/studio-guard.js';
+import {
+  assertContentId,
+  optionalField,
+  readNewsRecord,
+  requiredField,
+  runStructuralValidation,
+  saveNewsImageUpload,
+  validationMessage,
+  writeNewsRecord
+} from '$lib/server/studio-io.js';
+import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
+
+function readString(record, key, fallback = '') {
+  const value = record[key];
+  return typeof value === 'string' ? value : fallback;
+}
+
+function loadNewsForm(id) {
+  const post = readNewsRecord(id);
+
+  return {
+    id: readString(post, 'id', id),
+    title: readString(post, 'title'),
+    date: readString(post, 'date'),
+    excerpt: readString(post, 'excerpt'),
+    body: readString(post, 'body'),
+    image_file: readString(post, 'image_file'),
+    image_alt: readString(post, 'image_alt')
+  };
+}
+
+export function load({ params }) {
+  guardStudio();
+  const locale = getOperatorLocale();
+  const t = getOperatorTranslator();
+
+  try {
+    assertContentId(params.id, t('fields.newsId'), locale);
+    return {
+      newsForm: loadNewsForm(params.id)
+    };
+  } catch {
+    error(404, t('server.newsNotFound'));
+  }
+}
+
+/** @type {import('./$types').Actions} */
+export const actions = {
+  saveNews: async ({ params, request }) => {
+    guardStudio();
+
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
+
+    try {
+      assertContentId(params.id, t('fields.newsId'), locale);
+      const original = readNewsRecord(params.id);
+      const formData = await request.formData();
+      const upload = formData.get('image_upload');
+      let imageFile = optionalField(formData.get('image_file'));
+
+      if (upload instanceof File && upload.size > 0) {
+        imageFile = await saveNewsImageUpload(params.id, upload, locale);
+      } else if (imageFile === '') {
+        imageFile = readString(original, 'image_file');
+      }
+
+      const date = requiredField(formData.get('date'), t('fields.newsDate'), locale);
+
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        throw new Error(t('errors.newsDateInvalid'));
+      }
+
+      /** @type {Record<string, unknown>} */
+      const post = {
+        id: readString(original, 'id', params.id),
+        title: requiredField(formData.get('title'), t('fields.newsTitle'), locale),
+        date,
+        body: requiredField(formData.get('body'), t('fields.newsBody'), locale)
+      };
+
+      const excerpt = optionalField(formData.get('excerpt'));
+      const imageAlt = optionalField(formData.get('image_alt'));
+
+      if (excerpt !== '') {
+        post.excerpt = excerpt;
+      }
+
+      if (imageFile !== '') {
+        post.image_file = imageFile;
+
+        if (imageAlt !== '') {
+          post.image_alt = imageAlt;
+        }
+      }
+
+      writeNewsRecord(params.id, post);
+      const validation = runStructuralValidation();
+
+      return {
+        newsStatus: validation.ok ? 'success' : 'warning',
+        newsMessage: validationMessage(validation, locale),
+        newsForm: loadNewsForm(params.id)
+      };
+    } catch (saveError) {
+      const message = saveError instanceof Error ? saveError.message : t('server.saveNewsError');
+
+      try {
+        return fail(400, {
+          newsStatus: 'error',
+          newsMessage: message,
+          newsForm: loadNewsForm(params.id)
+        });
+      } catch {
+        return fail(400, {
+          newsStatus: 'error',
+          newsMessage: message
+        });
+      }
+    }
+  }
+};

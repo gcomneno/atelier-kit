@@ -357,6 +357,16 @@ description: "A first curated group of writing projects."
 items:
   - first-draft
 `);
+
+  writeFile(targetRoot, 'content/news/spring-announcement.yaml', `
+id: "spring-announcement"
+title: "Spring collection preview"
+date: "2026-03-15"
+excerpt: "Short teaser for the list page."
+body: |
+  Full post body as plain text with newlines preserved.
+  Update this sample news post in Studio or replace it with your own announcements.
+`);
 }
 
 function applyArtworkTemplate(targetRoot) {

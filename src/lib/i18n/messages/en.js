@@ -9,6 +9,7 @@ export default {
         about: 'About',
         catalog: 'Catalog',
         items: 'Items',
+        news: 'News',
         collections: 'Collections',
         signals: 'Signals',
         readiness: 'Readiness',
@@ -238,6 +239,53 @@ export default {
       save: 'Save item',
       back: 'Back to items'
     },
+    news: {
+      pageTitle: 'Studio · News',
+      intro: 'Choose a news post to edit, or create a new announcement.',
+      title: 'News',
+      count: '{count} post file(s) in content/news/',
+      createLink: '+ Create new post',
+      empty: 'No news posts yet.',
+      createFirst: 'Create your first post'
+    },
+    newsNew: {
+      pageTitle: 'Studio · New post',
+      intro:
+        'Create a new post under content/news/. Use lowercase letters, numbers and hyphens for the post id, for example spring-announcement.',
+      title: 'New post',
+      introPanel: 'Posts appear on /news, newest first.',
+      id: 'Post id',
+      idHint: 'Cannot be changed later. Becomes the file name and URL slug.',
+      idPattern: 'Use lowercase letters, numbers and hyphens only.',
+      titleField: 'Post title',
+      date: 'Publication date',
+      dateHint: 'Use YYYY-MM-DD format.',
+      excerpt: 'Excerpt (optional)',
+      excerptHint: 'Short teaser shown on the news list page.',
+      body: 'Body',
+      photo: 'Photo (optional)',
+      photoHint: 'JPG, PNG or WebP. Saved as static/images/news/{id}.jpg',
+      imageAlt: 'Image description',
+      create: 'Create post',
+      cancel: 'Cancel'
+    },
+    newsEdit: {
+      intro: 'Edit this post’s public content. Upload a photo here or keep the image path field for advanced use.',
+      preview: 'Preview post',
+      postId: 'Post id: {id}',
+      uploadPhoto: 'Upload photo',
+      uploadHint:
+        'Saved as static/images/news/{id}.jpg (or .png / .webp). The image path updates automatically.',
+      imagePath: 'Image path',
+      imageAlt: 'Image description',
+      titleField: 'Post title',
+      date: 'Publication date',
+      excerpt: 'Excerpt',
+      excerptHint: 'Short teaser shown on the news list page. Leave empty to use the first line of the body.',
+      body: 'Body',
+      save: 'Save post',
+      back: 'Back to news'
+    },
     about: {
       pageTitle: 'Studio · About',
       intro: 'Edit the public about page at /about. Use it for studio story, process and background.',
@@ -320,6 +368,10 @@ export default {
     collectionTitle: 'Collection title',
     collectionDescription: 'Collection description',
     itemTitle: 'Item title',
+    newsId: 'Post id',
+    newsTitle: 'Post title',
+    newsDate: 'Publication date',
+    newsBody: 'Post body',
     description: 'Description',
     itemNameSingular: 'Item name (singular)',
     itemNamePlural: 'Item name (plural)',
@@ -342,8 +394,11 @@ export default {
     saveCollectionError: 'Could not save collection.',
     createItemError: 'Could not create item.',
     createCollectionError: 'Could not create collection.',
+    createNewsError: 'Could not create news post.',
     itemNotFound: 'Item not found',
-    collectionNotFound: 'Collection not found'
+    collectionNotFound: 'Collection not found',
+    saveNewsError: 'Could not save news post.',
+    newsNotFound: 'News post not found'
   },
   errors: {
     required: '{label} is required.',
@@ -352,6 +407,8 @@ export default {
     itemExists: 'An item with id "{id}" already exists.',
     collectionExists: 'A collection with id "{id}" already exists.',
     collectionNeedsItems: 'Choose at least one item for this collection.',
+    newsExists: 'A news post with id "{id}" already exists.',
+    newsDateInvalid: 'Publication date must use YYYY-MM-DD format.',
     imageType: 'Use a JPG, PNG or WebP image.',
     imageRequired: 'Choose an image file to upload.',
     imageSize: 'Image must be 5 MB or smaller.',
@@ -406,6 +463,10 @@ export default {
       itemStatus: 'Item status',
       itemNotice: 'Item notice',
       itemImageAlt: 'Image description',
+      newsId: 'Post id',
+      newsTitle: 'Post title',
+      newsExcerpt: 'Post excerpt',
+      newsBody: 'Post body',
       metaLabel: 'Detail field',
       signalQuestion: 'Visitor question',
       signalHint: 'Visitor question hint',
@@ -496,6 +557,26 @@ export default {
         title: 'Details for "{itemTitle}"',
         problem: 'This item has no extra detail fields yet.',
         action: 'Add helpful details such as material, dimensions, availability or technique in the item file.'
+      },
+      newsFieldStarter: {
+        title: '{fieldTitle} for "{postTitle}"',
+        problem: '{fieldTitle} still looks like starter or placeholder text.',
+        action: 'Open {source} and update {fieldTitle} with real content.'
+      },
+      newsTestId: {
+        title: 'Post id for "{postTitle}"',
+        problem: 'This post id still looks like a test or sample entry.',
+        action: 'Rename the post id and file before publishing, or confirm it is intentional.'
+      },
+      newsPlaceholderImage: {
+        title: 'Image for "{postTitle}"',
+        problem: 'This post still uses a placeholder image path.',
+        action: 'Upload a real photo in Studio or update image_file in the post file.'
+      },
+      newsShortBody: {
+        title: 'Body for "{postTitle}"',
+        problem: 'The post body is very short.',
+        action: 'Add more context so visitors understand the announcement.'
       }
     }
   },
@@ -563,7 +644,10 @@ export default {
     collectionIdFilenameMismatch: '{source}: id must match filename "{expectedId}".',
     collectionItemsRequired: '{source}: "items" must be a non-empty array.',
     collectionItemRefInvalid: '{itemSource}: item reference must be a non-empty string.',
-    collectionItemRefUnknown: '{itemSource}: unknown item id "{itemId}".'
+    collectionItemRefUnknown: '{itemSource}: unknown item id "{itemId}".',
+    newsIdInvalid: '{source}: id must use lowercase letters, numbers and single hyphens only.',
+    newsIdFilenameMismatch: '{source}: id must match filename "{expectedId}".',
+    newsDateInvalid: '{source}: date must use YYYY-MM-DD format.'
   },
   wizard: {
     usageTitle: 'Usage:',

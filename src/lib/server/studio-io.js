@@ -412,6 +412,118 @@ export function defaultItemImagePath(id) {
   return `/images/items/${id}.jpg`;
 }
 
+export function listNewsSummaries() {
+  const dir = path.join(ROOT, 'content/news');
+
+  if (!existsSync(dir)) {
+    return [];
+  }
+
+  return readdirSync(dir)
+    .filter((file) => file.endsWith('.yaml'))
+    .map((file) => {
+      const fallbackId = file.replace(/\.yaml$/, '');
+      const post = readProjectYaml(`content/news/${file}`);
+
+      return {
+        id: typeof post.id === 'string' ? post.id : fallbackId,
+        title: typeof post.title === 'string' ? post.title : fallbackId,
+        date: typeof post.date === 'string' ? post.date : ''
+      };
+    })
+    .sort((left, right) => right.date.localeCompare(left.date));
+}
+
+export function readNewsRecord(id) {
+  return readProjectYaml(recordPath('content/news', id));
+}
+
+/**
+ * @param {string} id
+ */
+export function newsRecordExists(id) {
+  assertContentId(id, 'News id');
+  return existsSync(path.join(ROOT, recordPath('content/news', id)));
+}
+
+/**
+ * @param {{ id: string, title?: string, date: string, body: string, excerpt?: string }} input
+ * @param {string} [locale]
+ */
+export function createNewsRecord(input, locale = 'en') {
+  const id = requiredField(String(input.id ?? ''), translate('fields.newsId', locale), locale);
+  assertContentId(id, translate('fields.newsId', locale), locale);
+
+  const titleInput = String(input.title ?? '').trim();
+  const title = titleInput || titleFromItemId(id);
+  const date = requiredField(String(input.date ?? ''), translate('fields.newsDate', locale), locale);
+  const body = requiredField(String(input.body ?? ''), translate('fields.newsBody', locale), locale);
+  const excerpt =
+    typeof input.excerpt === 'string' && input.excerpt.trim() !== '' ? input.excerpt.trim() : '';
+
+  if (newsRecordExists(id)) {
+    throw new Error(translate('errors.newsExists', locale, { id }));
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error(translate('errors.newsDateInvalid', locale));
+  }
+
+  mkdirSync(path.join(ROOT, 'content/news'), { recursive: true });
+
+  /** @type {Record<string, unknown>} */
+  const post = {
+    id,
+    title,
+    date,
+    body
+  };
+
+  if (excerpt !== '') {
+    post.excerpt = excerpt;
+  }
+
+  writeNewsRecord(id, post);
+
+  return post;
+}
+
+/**
+ * @param {string} id
+ * @param {Record<string, unknown>} post
+ */
+export function writeNewsRecord(id, post) {
+  writeProjectYaml(recordPath('content/news', id), post);
+}
+
+/**
+ * @param {string} id
+ * @param {File} file
+ * @param {string} [locale]
+ */
+export async function saveNewsImageUpload(id, file, locale = 'en') {
+  assertContentId(id, translate('fields.newsId', locale), locale);
+
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error(translate('errors.imageRequired', locale));
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error(translate('errors.imageSize', locale));
+  }
+
+  const extension = imageExtensionFromName(file.name, locale);
+  const imagesDir = path.join(ROOT, 'static/images/news');
+  mkdirSync(imagesDir, { recursive: true });
+
+  const filename = `${id}.${extension}`;
+  const absolutePath = path.join(imagesDir, filename);
+  const buffer = Buffer.from(await file.arrayBuffer());
+  writeFileSync(absolutePath, buffer);
+
+  return `/images/news/${filename}`;
+}
+
 export function loadCatalogForm(locale = 'en') {
   const data = readProjectYaml('config/catalog.yaml');
   const catalog = data.catalog;

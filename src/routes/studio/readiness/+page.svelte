@@ -1,6 +1,5 @@
 <script>
   import { enhance } from '$app/forms';
-  import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
   import { useI18n } from '$lib/i18n/context.js';
 
   const t = useI18n();
@@ -27,8 +26,6 @@
 <svelte:head>
   <title>{t('studio.readiness.pageTitle')}</title>
 </svelte:head>
-
-<StudioAccessGuide />
 
 <p class="intro">
   {t('studio.readiness.intro')}

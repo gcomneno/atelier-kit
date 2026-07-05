@@ -67,6 +67,7 @@ The studio does **not** yet:
 | `/studio/collections/[id]` | Edit one collection |
 | `/studio/signal-clouds` | Visitor questions and answer labels |
 | `/studio/readiness` | Content Doctor publish review |
+| `/studio/help` | Safe studio access and publishing guidance |
 
 ## Item photos
 
@@ -112,7 +113,7 @@ The studio is **local authoring only**. Follow these rules:
 5. Publish with `npm run publish -- --deploy` when ready.
 6. Keep Git backups before large edits. Item photos live in `static/images/items/`.
 
-The studio home and readiness pages repeat this guidance in the UI.
+Open `/studio/help` for this guidance in the studio UI.
 
 ## What the studio does not do
 

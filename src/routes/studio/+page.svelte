@@ -1,6 +1,5 @@
 <script>
   import { enhance } from '$app/forms';
-  import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { APPEARANCE_PRESETS, isAppearancePreset } from '$lib/site-appearance.js';
 
@@ -31,8 +30,6 @@
 <svelte:head>
   <title>{t('studio.site.pageTitle')}</title>
 </svelte:head>
-
-<StudioAccessGuide />
 
 <p class="intro">
   {t('studio.site.intro')}

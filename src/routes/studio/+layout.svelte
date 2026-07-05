@@ -24,6 +24,7 @@
       <a href="/studio/collections">{t('studio.layout.nav.collections')}</a>
       <a href="/studio/signal-clouds">{t('studio.layout.nav.signals')}</a>
       <a href="/studio/readiness">{t('studio.layout.nav.readiness')}</a>
+      <a href="/studio/help">{t('studio.layout.nav.help')}</a>
       <a href="/" target="_blank" rel="noreferrer">{t('studio.layout.nav.preview')}</a>
     </nav>
   </header>

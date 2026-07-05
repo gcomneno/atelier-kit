@@ -12,6 +12,7 @@ export default {
         collections: 'Collezioni',
         signals: 'Segnali',
         readiness: 'Pubblicazione',
+        help: 'Aiuto',
         preview: 'Anteprima'
       }
     },
@@ -28,6 +29,9 @@ export default {
         'Esegui npm run publish -- --deploy dalla cartella del progetto per inviare le modifiche a Vercel.',
       keepBackups:
         'Fai commit su Git (o copia la cartella) prima di modifiche grandi. Le foto sono in static/images/items/.'
+    },
+    help: {
+      pageTitle: 'Studio · Aiuto'
     },
     site: {
       pageTitle: 'Studio · Impostazioni sito',

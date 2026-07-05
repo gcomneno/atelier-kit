@@ -12,6 +12,11 @@ function fail(message) {
   process.exitCode = 1;
 }
 
+/** @param {string} key @param {Record<string, string | number>} [params] */
+function failKey(key, params = {}) {
+  fail(t(`validate.${key}`, params));
+}
+
 function readYaml(relativePath) {
   const absolutePath = path.join(ROOT, relativePath);
 
@@ -20,13 +25,13 @@ function readYaml(relativePath) {
     const data = parse(raw);
 
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
-      fail(`${relativePath} must contain a YAML object.`);
+      failKey('yamlMustBeObject', { path: relativePath });
       return {};
     }
 
     return data;
   } catch (error) {
-    fail(`Cannot read ${relativePath}: ${error.message}`);
+    failKey('yamlReadError', { path: relativePath, message: error.message });
     return {};
   }
 }
@@ -35,7 +40,7 @@ function requireString(record, field, source) {
   const value = record[field];
 
   if (typeof value !== 'string' || value.trim() === '') {
-    fail(`${source}: missing or invalid "${field}".`);
+    failKey('missingField', { source, field });
     return '';
   }
 
@@ -51,7 +56,7 @@ function assertUnique(values, label) {
 
   for (const value of values) {
     if (seen.has(value)) {
-      fail(`Duplicate ${label}: ${value}`);
+      failKey('duplicate', { label, value });
     }
 
     seen.add(value);
@@ -64,7 +69,7 @@ function validateMetaEntries(entries, source, pathLabel = 'meta') {
   }
 
   if (!Array.isArray(entries)) {
-    fail(`${source}: "${pathLabel}" must be an array when provided.`);
+    failKey('metaMustBeArray', { source, pathLabel });
     return;
   }
 
@@ -72,7 +77,7 @@ function validateMetaEntries(entries, source, pathLabel = 'meta') {
     const entryPath = `${pathLabel}[${index}]`;
 
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-      fail(`${source}: "${entryPath}" must be an object.`);
+      failKey('metaEntryMustBeObject', { source, entryPath });
       return;
     }
 
@@ -82,7 +87,7 @@ function validateMetaEntries(entries, source, pathLabel = 'meta') {
     const hasChildren = Array.isArray(entry.children) && entry.children.length > 0;
 
     if (!hasValue && !hasChildren) {
-      fail(`${source}:${entryPath}: meta entry must have either a non-empty "value" or non-empty "children".`);
+      failKey('metaEntryNeedsValueOrChildren', { source, entryPath });
     }
 
     if (entry.children !== undefined) {
@@ -97,7 +102,7 @@ function validateSite() {
   const site = data.site;
 
   if (!site || typeof site !== 'object' || Array.isArray(site)) {
-    fail(`${source}: missing "site" object.`);
+    failKey('missingSiteObject', { source });
     return;
   }
 
@@ -118,13 +123,13 @@ const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
  */
 function validateAppearance(appearance, source) {
   if (!appearance || typeof appearance !== 'object' || Array.isArray(appearance)) {
-    fail(`${source}: site.appearance must be an object when present.`);
+    failKey('appearanceMustBeObject', { source });
     return;
   }
 
   if ('preset' in appearance && appearance.preset !== undefined) {
     if (typeof appearance.preset !== 'string' || !APPEARANCE_PRESETS.has(appearance.preset)) {
-      fail(`${source}: site.appearance.preset must be one of: warm, neutral, dark, custom.`);
+      failKey('appearancePresetInvalid', { source });
     }
   }
 
@@ -134,7 +139,7 @@ function validateAppearance(appearance, source) {
     }
 
     if (typeof appearance[field] !== 'string' || !HEX_COLOR.test(appearance[field].trim())) {
-      fail(`${source}: site.appearance.${field} must be a hex color like #f8f0e4.`);
+      failKey('appearanceColorInvalid', { source, field });
     }
   }
 
@@ -143,7 +148,7 @@ function validateAppearance(appearance, source) {
       typeof appearance.background_image !== 'string' ||
       !appearance.background_image.startsWith('/images/site/')
     ) {
-      fail(`${source}: site.appearance.background_image must be a path under /images/site/.`);
+      failKey('appearanceBackgroundInvalid', { source });
     }
   }
 }
@@ -154,7 +159,7 @@ function validateCatalog() {
   const catalog = data.catalog;
 
   if (!catalog || typeof catalog !== 'object' || Array.isArray(catalog)) {
-    fail(`${source}: missing "catalog" object.`);
+    failKey('missingCatalogObject', { source });
     return;
   }
 
@@ -162,7 +167,7 @@ function validateCatalog() {
   requireString(catalog, 'item_name_plural', source);
 
   if ('route_segment' in catalog) {
-    fail(`${source}: route_segment is intentionally not supported in Atelier-Kit 1.0. Items live under /items.`);
+    failKey('routeSegmentUnsupported', { source });
   }
 }
 
@@ -172,7 +177,7 @@ function validateSignalClouds() {
   const clouds = data.signal_clouds;
 
   if (!Array.isArray(clouds)) {
-    fail(`${source}: missing "signal_clouds" array.`);
+    failKey('missingSignalCloudsArray', { source });
     return;
   }
 
@@ -183,7 +188,7 @@ function validateSignalClouds() {
 
   for (const cloud of clouds) {
     if (!cloud || typeof cloud !== 'object' || Array.isArray(cloud)) {
-      fail(`${source}: every cloud must be an object.`);
+      failKey('cloudMustBeObject', { source });
       continue;
     }
 
@@ -191,7 +196,7 @@ function validateSignalClouds() {
     requireString(cloud, 'question', `${source}:${cloudId}`);
 
     if (!Array.isArray(cloud.options) || cloud.options.length === 0) {
-      fail(`${source}:${cloudId}: options must be a non-empty array.`);
+      failKey('cloudOptionsRequired', { source, cloudId });
       continue;
     }
 
@@ -202,7 +207,7 @@ function validateSignalClouds() {
 
     for (const option of cloud.options) {
       if (!option || typeof option !== 'object' || Array.isArray(option)) {
-        fail(`${source}:${cloudId}: every option must be an object.`);
+        failKey('optionMustBeObject', { source, cloudId });
         continue;
       }
 
@@ -224,7 +229,7 @@ function validateAbout() {
   const about = data.about;
 
   if (!about || typeof about !== 'object' || Array.isArray(about)) {
-    fail(`${source}: missing "about" object.`);
+    failKey('missingAboutObject', { source });
     return;
   }
 
@@ -239,7 +244,7 @@ function validateAbout() {
       const sectionSource = `${source}:sections[${index}]`;
 
       if (!section || typeof section !== 'object' || Array.isArray(section)) {
-        fail(`${sectionSource}: section must be an object.`);
+        failKey('sectionMustBeObject', { sectionSource });
         return;
       }
 
@@ -260,7 +265,7 @@ function validateContact() {
   const contact = data.contact;
 
   if (!contact || typeof contact !== 'object' || Array.isArray(contact)) {
-    fail(`${source}: missing "contact" object.`);
+    failKey('missingContactObject', { source });
     return;
   }
 
@@ -268,7 +273,7 @@ function validateContact() {
 
   if (email !== undefined) {
     if (!email || typeof email !== 'object' || Array.isArray(email)) {
-      fail(`${source}: "contact.email" must be an object when provided.`);
+      failKey('contactEmailMustBeObject', { source });
     } else if (email.enabled === true) {
       requireString(email, 'address', `${source}:contact.email`);
     }
@@ -278,7 +283,7 @@ function validateContact() {
 
   if (whatsapp !== undefined) {
     if (!whatsapp || typeof whatsapp !== 'object' || Array.isArray(whatsapp)) {
-      fail(`${source}: "contact.whatsapp" must be an object when provided.`);
+      failKey('contactWhatsappMustBeObject', { source });
     } else if (whatsapp.enabled === true) {
       requireString(whatsapp, 'phone', `${source}:contact.whatsapp`);
     }
@@ -290,14 +295,14 @@ function validateItems() {
   const itemsDir = path.join(ROOT, 'content/items');
 
   if (!existsSync(itemsDir)) {
-    fail('content/items directory does not exist.');
+    failKey('itemsDirMissing');
     return new Set();
   }
 
   const files = readdirSync(itemsDir).filter((file) => file.endsWith('.yaml'));
 
   if (files.length === 0) {
-    fail('content/items must contain at least one .yaml item.');
+    failKey('itemsDirEmpty');
     return new Set();
   }
 
@@ -317,14 +322,14 @@ function validateItems() {
     const imageFile = requireString(item, 'image_file', source);
 
     if (!imageFile.startsWith('/')) {
-      fail(`${source}: image_file must start with "/".`);
+      failKey('imageFileMustStartWithSlash', { source });
       continue;
     }
 
     const staticImagePath = path.join(ROOT, 'static', imageFile.slice(1));
 
     if (!existsSync(staticImagePath)) {
-      fail(`${source}: image_file does not exist in static/: ${imageFile}`);
+      failKey('imageFileMissing', { source, imageFile });
     }
   }
 
@@ -353,18 +358,18 @@ function validateCollections(itemIds) {
     collectionIds.push(id);
 
     if (!isValidId(id)) {
-      fail(`${source}: id must use lowercase letters, numbers and single hyphens only.`);
+      failKey('collectionIdInvalid', { source });
     }
 
     if (id !== expectedId) {
-      fail(`${source}: id must match filename "${expectedId}".`);
+      failKey('collectionIdFilenameMismatch', { source, expectedId });
     }
 
     requireString(collection, 'title', source);
     requireString(collection, 'description', source);
 
     if (!Array.isArray(collection.items) || collection.items.length === 0) {
-      fail(`${source}: "items" must be a non-empty array.`);
+      failKey('collectionItemsRequired', { source });
       continue;
     }
 
@@ -374,14 +379,14 @@ function validateCollections(itemIds) {
       const itemSource = `${source}:items[${index}]`;
 
       if (typeof itemId !== 'string' || itemId.trim() === '') {
-        fail(`${itemSource}: item reference must be a non-empty string.`);
+        failKey('collectionItemRefInvalid', { itemSource });
         return;
       }
 
       references.push(itemId);
 
       if (!itemIds.has(itemId)) {
-        fail(`${itemSource}: unknown item id "${itemId}".`);
+        failKey('collectionItemRefUnknown', { itemSource, itemId });
       }
     });
 

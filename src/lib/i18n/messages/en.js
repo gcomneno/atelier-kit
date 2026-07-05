@@ -86,7 +86,11 @@ export default {
       doctorOk: 'Nothing obvious to review.',
       doctorReview: 'Review the notes below before publishing.',
       publishTitle: 'Publish commands',
-      publishIntro: 'From the project folder:'
+      publishIntro: 'From the project folder:',
+      publishRun: 'Run publish prep',
+      publishRunning: 'Running publish prep…',
+      publishOk: 'Publish prep completed successfully.',
+      publishFailed: 'Publish prep failed. Review the output below.'
     },
     collections: {
       pageTitle: 'Studio · Collections',
@@ -211,7 +215,11 @@ export default {
       question: 'Question',
       hint: 'Hint',
       answer: 'Answer · {id}',
-      save: 'Save Signal Clouds'
+      save: 'Save Signal Clouds',
+      enabled: 'Show on item pages',
+      remove: 'Remove signal',
+      removeConfirm:
+        'Remove signal "{id}"? It will be deleted from config/signal-clouds.yaml. Restore from Git if needed.'
     },
     common: {
       preview: 'Preview',
@@ -270,6 +278,8 @@ export default {
     saveAboutError: 'Could not save about page.',
     saveCatalogError: 'Could not save catalog settings.',
     saveCloudsError: 'Could not save Signal Clouds.',
+    removeCloudError: 'Could not remove signal.',
+    cloudRemoved: 'Signal removed. Refresh the preview to confirm item pages.',
     saveItemError: 'Could not save item.',
     saveCollectionError: 'Could not save collection.',
     createItemError: 'Could not create item.',
@@ -340,6 +350,91 @@ export default {
       signalAnswer: 'Answer choice',
       signalQuestionId: 'Visitor question id',
       contentField: 'Content field'
+    },
+    warnings: {
+      starterText: {
+        problem: '{title} still looks like starter or placeholder text.',
+        action: 'Open {source} and update {field} with real content.'
+      },
+      defaultQuestionLabel: 'Question {index}',
+      metaFallbackLabel: 'Detail {index}',
+      siteDemoTitle: {
+        title: 'Site title',
+        problem: 'The public site title still contains the word "demo".',
+        action: 'Open config/site.yaml and set the real name visitors should see.'
+      },
+      siteNoticeStarter: {
+        title: 'Site notice banner',
+        problem: 'Visitors still see a starter notice at the top of the site.',
+        action:
+          'Open config/site.yaml and replace the notice with real text, or clear it if you do not need a banner.'
+      },
+      siteNoticeActive: {
+        title: 'Site notice banner',
+        problem: 'A notice banner is still visible to visitors.',
+        action: 'Open config/site.yaml and confirm the notice text is intentional before publishing.'
+      },
+      contactEmailPlaceholder: {
+        title: 'Contact email',
+        problem: 'Visitors would still contact the starter address hello@example.com.',
+        action: 'Open config/contact.yaml and set the real email address for Visitor Brief messages.'
+      },
+      whatsappMissingPhone: {
+        title: 'WhatsApp contact',
+        problem: 'WhatsApp contact is turned on, but no usable phone number is set.',
+        action: 'Open config/contact.yaml and add a phone number, or turn WhatsApp contact off.'
+      },
+      signalCloudOptions: {
+        title: 'Visitor question "{label}"',
+        problem: 'This visitor question needs at least two answer choices.',
+        action: 'Open config/signal-clouds.yaml and add more answer options for this question.'
+      },
+      metaPlaceholder: {
+        title: '{label} on "{itemTitle}"',
+        problem: '"{label}" still looks like placeholder text.',
+        action: 'Open {source} and replace "{label}" with real information about this item.'
+      },
+      itemsFolderMissing: {
+        title: 'Items folder',
+        problem: 'The site does not have an items folder yet.',
+        action: 'Create at least one item with npm run item:new or add a YAML file under content/items/.'
+      },
+      itemsFolderEmpty: {
+        title: 'Items folder',
+        problem: 'The site does not contain any items yet.',
+        action: 'Create at least one item with npm run item:new before publishing.'
+      },
+      itemFieldStarter: {
+        title: '{fieldTitle} for "{itemTitle}"',
+        problem: '{fieldTitle} still looks like starter or placeholder text.',
+        action: 'Open {source} and update {fieldTitle} with real content.'
+      },
+      itemTestId: {
+        title: 'Item "{itemTitle}"',
+        problem: 'This item id looks like a test or sample entry.',
+        action: 'Create a real item with npm run item:new or rename this item id before publishing.'
+      },
+      itemPlaceholderImage: {
+        title: 'Image for "{itemTitle}"',
+        problem: 'This item still uses the neutral placeholder image.',
+        action: 'Add a real photo to static/images/items/ and update the image path in this item file.'
+      },
+      itemDraftStatus: {
+        title: 'Publication status for "{itemTitle}"',
+        problem: 'This item is still marked as "{status}".',
+        action:
+          'Open this item file and set a public-ready status such as "available", or remove the status if you do not use it.'
+      },
+      itemShortDescription: {
+        title: 'Description for "{itemTitle}"',
+        problem: 'The item description is very short and may feel unfinished to visitors.',
+        action: 'Open this item file and add a clearer description of the object, artwork or project.'
+      },
+      itemNoMeta: {
+        title: 'Details for "{itemTitle}"',
+        problem: 'This item has no extra detail fields yet.',
+        action: 'Add helpful details such as material, dimensions, availability or technique in the item file.'
+      }
     }
   },
   publish: {
@@ -355,6 +450,80 @@ export default {
     deployHint: 'Deploy to Vercel with: npm run publish -- --deploy'
   },
   validate: {
-    ok: 'Atelier-Kit content validation OK.'
+    ok: 'Atelier-Kit content validation OK.',
+    yamlMustBeObject: '{path} must contain a YAML object.',
+    yamlReadError: 'Cannot read {path}: {message}',
+    missingField: '{source}: missing or invalid "{field}".',
+    duplicate: 'Duplicate {label}: {value}',
+    metaMustBeArray: '{source}: "{pathLabel}" must be an array when provided.',
+    metaEntryMustBeObject: '{source}: "{entryPath}" must be an object.',
+    metaEntryNeedsValueOrChildren:
+      '{source}:{entryPath}: meta entry must have either a non-empty "value" or non-empty "children".',
+    missingSiteObject: '{source}: missing "site" object.',
+    appearanceMustBeObject: '{source}: site.appearance must be an object when present.',
+    appearancePresetInvalid: '{source}: site.appearance.preset must be one of: warm, neutral, dark, custom.',
+    appearanceColorInvalid: '{source}: site.appearance.{field} must be a hex color like #f8f0e4.',
+    appearanceBackgroundInvalid: '{source}: site.appearance.background_image must be a path under /images/site/.',
+    missingCatalogObject: '{source}: missing "catalog" object.',
+    routeSegmentUnsupported:
+      '{source}: route_segment is intentionally not supported in Atelier-Kit 1.0. Items live under /items.',
+    missingSignalCloudsArray: '{source}: missing "signal_clouds" array.',
+    cloudMustBeObject: '{source}: every cloud must be an object.',
+    cloudOptionsRequired: '{source}:{cloudId}: options must be a non-empty array.',
+    optionMustBeObject: '{source}:{cloudId}: every option must be an object.',
+    missingAboutObject: '{source}: missing "about" object.',
+    sectionMustBeObject: '{sectionSource}: section must be an object.',
+    missingContactObject: '{source}: missing "contact" object.',
+    contactEmailMustBeObject: '{source}: "contact.email" must be an object when provided.',
+    contactWhatsappMustBeObject: '{source}: "contact.whatsapp" must be an object when provided.',
+    itemsDirMissing: 'content/items directory does not exist.',
+    itemsDirEmpty: 'content/items must contain at least one .yaml item.',
+    imageFileMustStartWithSlash: '{source}: image_file must start with "/".',
+    imageFileMissing: '{source}: image_file does not exist in static/: {imageFile}',
+    collectionIdInvalid: '{source}: id must use lowercase letters, numbers and single hyphens only.',
+    collectionIdFilenameMismatch: '{source}: id must match filename "{expectedId}".',
+    collectionItemsRequired: '{source}: "items" must be a non-empty array.',
+    collectionItemRefInvalid: '{itemSource}: item reference must be a non-empty string.',
+    collectionItemRefUnknown: '{itemSource}: unknown item id "{itemId}".'
+  },
+  wizard: {
+    usageTitle: 'Usage:',
+    fieldRequired: 'This field is required.',
+    chooseUseCase: 'Choose a use case:',
+    templatePrompt: 'Template number or id:',
+    chooseValidTemplate: 'Choose a valid template number or id.',
+    setupSummary: 'Setup summary:',
+    mode: 'Mode',
+    target: 'Target',
+    template: 'Template',
+    siteTitle: 'Site title',
+    tagline: 'Tagline',
+    language: 'Language',
+    email: 'Email',
+    whatsapp: 'WhatsApp',
+    whatsappDisabled: 'disabled',
+    firstItemTitle: 'First item title',
+    collectionTitle: 'Collection title',
+    complete: 'Guided setup complete.',
+    nextSteps: 'Next steps:',
+    replaceBeforePublish: 'Replace starter images and any remaining placeholder text before publishing.',
+    strictDoctorHint: 'For a public launch pass, run: npm run content:doctor -- --strict',
+    validationSkipped: 'Validation skipped until dependencies are installed in the new client site.',
+    introTitle: 'Atelier-Kit guided setup',
+    introBody: 'Answer a few questions to generate starter site content.',
+    introNote: 'You can still edit files later if needed.',
+    targetFolder: 'Target folder (relative path)',
+    whatsappPhone: 'WhatsApp phone number (optional)',
+    notice: 'Public site notice (optional, empty hides it)',
+    firstItemOptional: 'First item title (optional)',
+    collectionOptional: 'Collection title (optional)',
+    confirmProceed: 'Proceed with this setup?',
+    templates: {
+      writing: 'Writing / author showcase',
+      artwork: 'Artwork / visual art showcase',
+      handmade: 'Handmade / craft showcase',
+      jewelry: 'Jewelry showcase',
+      furniture: 'Furniture / object design showcase'
+    }
   }
 };

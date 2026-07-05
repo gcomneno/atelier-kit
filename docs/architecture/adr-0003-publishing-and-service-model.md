@@ -78,7 +78,8 @@ For a small creative showcase (5–20 items, no shop, no accounts):
 | Vercel Pro | ~$20/month if commercial team hosting is required |
 | Custom domain | ~€10–15/year optional |
 | Database | €0 — not used |
-| Atelier-Kit service setup | €300–800 one-time (operator-defined) |
+| Atelier-Kit service setup (full handoff) | €300–800 one-time (operator-defined) |
+| Kit setup light (client provides materials) | ~€50 typical — operator-defined; see [`service-package.md`](../product/service-package.md) |
 
 ### 5. Non-goals
 

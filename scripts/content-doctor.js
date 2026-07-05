@@ -157,7 +157,7 @@ function labelForPath(pathLabel) {
 }
 
 function defaultAction(source, title) {
-  return `Open ${source} and update ${title.toLowerCase()} with real content.`;
+  return t('doctor.warnings.starterText.action', { source, field: title.toLowerCase() });
 }
 
 function inspectStarterString(source, pathLabel, value) {
@@ -170,7 +170,7 @@ function inspectStarterString(source, pathLabel, value) {
   addWarning({
     source,
     title,
-    problem: `${title} still looks like starter or placeholder text.`,
+    problem: t('doctor.warnings.starterText.problem', { title }),
     action: defaultAction(source, title),
     detail: value,
     technical: `${pathLabel} still looks like starter/demo text: "${value}"`
@@ -218,9 +218,9 @@ function inspectSite() {
   if (typeof site.name === 'string' && site.name.toLowerCase().includes('demo')) {
     addWarning({
       source,
-      title: 'Site title',
-      problem: 'The public site title still contains the word "demo".',
-      action: 'Open config/site.yaml and set the real name visitors should see.',
+      title: t('doctor.warnings.siteDemoTitle.title'),
+      problem: t('doctor.warnings.siteDemoTitle.problem'),
+      action: t('doctor.warnings.siteDemoTitle.action'),
       detail: site.name,
       technical: 'Site name still contains "demo".'
     });
@@ -230,18 +230,18 @@ function inspectSite() {
     if (textLooksStarter(site.notice)) {
       addWarning({
         source,
-        title: 'Site notice banner',
-        problem: 'Visitors still see a starter notice at the top of the site.',
-        action: 'Open config/site.yaml and replace the notice with real text, or clear it if you do not need a banner.',
+        title: t('doctor.warnings.siteNoticeStarter.title'),
+        problem: t('doctor.warnings.siteNoticeStarter.problem'),
+        action: t('doctor.warnings.siteNoticeStarter.action'),
         detail: site.notice,
         technical: 'Site notice still looks like starter/demo text.'
       });
     } else {
       addWarning({
         source,
-        title: 'Site notice banner',
-        problem: 'A notice banner is still visible to visitors.',
-        action: 'Open config/site.yaml and confirm the notice text is intentional before publishing.',
+        title: t('doctor.warnings.siteNoticeActive.title'),
+        problem: t('doctor.warnings.siteNoticeActive.problem'),
+        action: t('doctor.warnings.siteNoticeActive.action'),
         detail: site.notice,
         technical: 'Site notice is enabled. Check that it is intentional before publishing.'
       });
@@ -272,9 +272,9 @@ function inspectContact() {
     if (address === 'hello@example.com') {
       addWarning({
         source,
-        title: 'Contact email',
-        problem: 'Visitors would still contact the starter address hello@example.com.',
-        action: 'Open config/contact.yaml and set the real email address for Visitor Brief messages.',
+        title: t('doctor.warnings.contactEmailPlaceholder.title'),
+        problem: t('doctor.warnings.contactEmailPlaceholder.problem'),
+        action: t('doctor.warnings.contactEmailPlaceholder.action'),
         detail: email.address,
         technical: 'Email contact address is still hello@example.com.'
       });
@@ -291,9 +291,9 @@ function inspectContact() {
     if (!phone) {
       addWarning({
         source,
-        title: 'WhatsApp contact',
-        problem: 'WhatsApp contact is turned on, but no usable phone number is set.',
-        action: 'Open config/contact.yaml and add a phone number, or turn WhatsApp contact off.',
+        title: t('doctor.warnings.whatsappMissingPhone.title'),
+        problem: t('doctor.warnings.whatsappMissingPhone.problem'),
+        action: t('doctor.warnings.whatsappMissingPhone.action'),
         technical: 'WhatsApp contact action is enabled but phone is empty or invalid.'
       });
     }
@@ -317,18 +317,24 @@ function inspectSignalClouds() {
       return;
     }
 
+    if (cloud.enabled === false) {
+      return;
+    }
+
     const cloudLabel = typeof cloud.question === 'string' && cloud.question.trim() !== ''
       ? cloud.question
-      : (typeof cloud.id === 'string' ? cloud.id : `Question ${cloudIndex + 1}`);
+      : (typeof cloud.id === 'string'
+        ? cloud.id
+        : t('doctor.warnings.defaultQuestionLabel', { index: cloudIndex + 1 }));
 
     inspectDeepStrings(source, `signal_clouds[${cloudIndex}]`, cloud);
 
     if (Array.isArray(cloud.options) && cloud.options.length < 2) {
       addWarning({
         source,
-        title: `Visitor question "${cloudLabel}"`,
-        problem: 'This visitor question needs at least two answer choices.',
-        action: 'Open config/signal-clouds.yaml and add more answer options for this question.',
+        title: t('doctor.warnings.signalCloudOptions.title', { label: cloudLabel }),
+        problem: t('doctor.warnings.signalCloudOptions.problem'),
+        action: t('doctor.warnings.signalCloudOptions.action'),
         technical: `Signal cloud "${cloud.id ?? cloudIndex}" has fewer than two options.`
       });
     }
@@ -347,14 +353,14 @@ function inspectMetaEntries(source, itemTitle, entries, parentLabel = '') {
 
     const label = typeof entry.label === 'string' && entry.label.trim() !== ''
       ? entry.label
-      : `${parentLabel || 'Detail'} ${index + 1}`;
+      : t('doctor.warnings.metaFallbackLabel', { index: index + 1 });
 
     if (typeof entry.value === 'string' && textLooksStarter(entry.value)) {
       addWarning({
         source,
-        title: `${label} on "${itemTitle}"`,
-        problem: `"${label}" still looks like placeholder text.`,
-        action: `Open ${source} and replace "${label}" with real information about this item.`,
+        title: t('doctor.warnings.metaPlaceholder.title', { label, itemTitle }),
+        problem: t('doctor.warnings.metaPlaceholder.problem', { label }),
+        action: t('doctor.warnings.metaPlaceholder.action', { source, label }),
         detail: entry.value,
         technical: `item.meta label "${label}" still looks like starter/demo text: "${entry.value}"`
       });
@@ -372,9 +378,9 @@ function inspectItems() {
   if (!existsSync(itemsDir)) {
     addWarning({
       source: 'content/items',
-      title: 'Items folder',
-      problem: 'The site does not have an items folder yet.',
-      action: 'Create at least one item with npm run item:new or add a YAML file under content/items/.',
+      title: t('doctor.warnings.itemsFolderMissing.title'),
+      problem: t('doctor.warnings.itemsFolderMissing.problem'),
+      action: t('doctor.warnings.itemsFolderMissing.action'),
       technical: 'Items directory does not exist.'
     });
     return;
@@ -387,9 +393,9 @@ function inspectItems() {
   if (files.length === 0) {
     addWarning({
       source: 'content/items',
-      title: 'Items folder',
-      problem: 'The site does not contain any items yet.',
-      action: 'Create at least one item with npm run item:new before publishing.',
+      title: t('doctor.warnings.itemsFolderEmpty.title'),
+      problem: t('doctor.warnings.itemsFolderEmpty.problem'),
+      action: t('doctor.warnings.itemsFolderEmpty.action'),
       technical: 'No item YAML files found.'
     });
     return;
@@ -421,9 +427,9 @@ function inspectItems() {
 
       addWarning({
         source,
-        title: `${fieldTitle} for "${itemTitle}"`,
-        problem: `${fieldTitle} still looks like starter or placeholder text.`,
-        action: `Open ${source} and update ${fieldTitle.toLowerCase()} with real content.`,
+        title: t('doctor.warnings.itemFieldStarter.title', { fieldTitle, itemTitle }),
+        problem: t('doctor.warnings.itemFieldStarter.problem', { fieldTitle }),
+        action: t('doctor.warnings.itemFieldStarter.action', { source, fieldTitle: fieldTitle.toLowerCase() }),
         detail: value,
         technical: `item.${key} still looks like starter/demo text: "${value}"`
       });
@@ -434,9 +440,9 @@ function inspectItems() {
     if (/(^|[-_])(test|smoke|sample)([-_]|$)/i.test(id)) {
       addWarning({
         source,
-        title: `Item "${itemTitle}"`,
-        problem: 'This item id looks like a test or sample entry.',
-        action: 'Create a real item with npm run item:new or rename this item id before publishing.',
+        title: t('doctor.warnings.itemTestId.title', { itemTitle }),
+        problem: t('doctor.warnings.itemTestId.problem'),
+        action: t('doctor.warnings.itemTestId.action'),
         detail: id,
         technical: `Item id "${id}" looks like a test/smoke/sample item.`
       });
@@ -445,9 +451,9 @@ function inspectItems() {
     if (imageFile.toLowerCase().includes('placeholder')) {
       addWarning({
         source,
-        title: `Image for "${itemTitle}"`,
-        problem: 'This item still uses the neutral placeholder image.',
-        action: 'Add a real photo to static/images/items/ and update the image path in this item file.',
+        title: t('doctor.warnings.itemPlaceholderImage.title', { itemTitle }),
+        problem: t('doctor.warnings.itemPlaceholderImage.problem'),
+        action: t('doctor.warnings.itemPlaceholderImage.action'),
         detail: imageFile,
         technical: 'Item still uses a starter placeholder image.'
       });
@@ -456,9 +462,9 @@ function inspectItems() {
     if (typeof item.status === 'string' && ['demo', 'draft'].includes(item.status.toLowerCase())) {
       addWarning({
         source,
-        title: `Publication status for "${itemTitle}"`,
-        problem: `This item is still marked as "${item.status}".`,
-        action: 'Open this item file and set a public-ready status such as "available", or remove the status if you do not use it.',
+        title: t('doctor.warnings.itemDraftStatus.title', { itemTitle }),
+        problem: t('doctor.warnings.itemDraftStatus.problem', { status: item.status }),
+        action: t('doctor.warnings.itemDraftStatus.action'),
         detail: item.status,
         technical: `Item status is "${item.status}". Check before publishing.`
       });
@@ -467,9 +473,9 @@ function inspectItems() {
     if (description.length > 0 && description.length < 40) {
       addWarning({
         source,
-        title: `Description for "${itemTitle}"`,
-        problem: 'The item description is very short and may feel unfinished to visitors.',
-        action: 'Open this item file and add a clearer description of the object, artwork or project.',
+        title: t('doctor.warnings.itemShortDescription.title', { itemTitle }),
+        problem: t('doctor.warnings.itemShortDescription.problem'),
+        action: t('doctor.warnings.itemShortDescription.action'),
         detail: description,
         technical: 'Description is quite short. Consider adding more useful context.'
       });
@@ -478,9 +484,9 @@ function inspectItems() {
     if (!Array.isArray(item.meta) || item.meta.length === 0) {
       addWarning({
         source,
-        title: `Details for "${itemTitle}"`,
-        problem: 'This item has no extra detail fields yet.',
-        action: 'Add helpful details such as material, dimensions, availability or technique in the item file.',
+        title: t('doctor.warnings.itemNoMeta.title', { itemTitle }),
+        problem: t('doctor.warnings.itemNoMeta.problem'),
+        action: t('doctor.warnings.itemNoMeta.action'),
         technical: 'Item has no meta information.'
       });
     }

@@ -86,7 +86,11 @@ export default {
       doctorOk: 'Niente di evidente da rivedere.',
       doctorReview: 'Rivedi le note qui sotto prima di pubblicare.',
       publishTitle: 'Comandi publish',
-      publishIntro: 'Dalla cartella del progetto:'
+      publishIntro: 'Dalla cartella del progetto:',
+      publishRun: 'Esegui preparazione publish',
+      publishRunning: 'Preparazione publish in corso…',
+      publishOk: 'Preparazione publish completata.',
+      publishFailed: 'Preparazione publish non riuscita. Controlla l’output qui sotto.'
     },
     collections: {
       pageTitle: 'Studio · Collezioni',
@@ -211,7 +215,11 @@ export default {
       question: 'Domanda',
       hint: 'Suggerimento',
       answer: 'Risposta · {id}',
-      save: 'Salva Signal Clouds'
+      save: 'Salva Signal Clouds',
+      enabled: 'Mostra sulle pagine pezzo',
+      remove: 'Rimuovi signal',
+      removeConfirm:
+        'Rimuovere il signal "{id}"? Verrà eliminato da config/signal-clouds.yaml. Ripristina da Git se serve.'
     },
     common: {
       preview: 'Anteprima',
@@ -270,6 +278,8 @@ export default {
     saveAboutError: 'Impossibile salvare la pagina Chi siamo.',
     saveCatalogError: 'Impossibile salvare le impostazioni catalogo.',
     saveCloudsError: 'Impossibile salvare Signal Clouds.',
+    removeCloudError: 'Impossibile rimuovere il signal.',
+    cloudRemoved: 'Signal rimosso. Aggiorna l’anteprima per verificare le pagine pezzo.',
     saveItemError: 'Impossibile salvare il pezzo.',
     saveCollectionError: 'Impossibile salvare la collezione.',
     createItemError: 'Impossibile creare il pezzo.',
@@ -340,6 +350,91 @@ export default {
       signalAnswer: 'Scelta risposta',
       signalQuestionId: 'Id domanda visitatore',
       contentField: 'Campo contenuto'
+    },
+    warnings: {
+      starterText: {
+        problem: '{title} sembra ancora testo segnaposto o demo.',
+        action: 'Apri {source} e aggiorna {field} con contenuto reale.'
+      },
+      defaultQuestionLabel: 'Domanda {index}',
+      metaFallbackLabel: 'Dettaglio {index}',
+      siteDemoTitle: {
+        title: 'Titolo sito',
+        problem: 'Il titolo pubblico contiene ancora la parola "demo".',
+        action: 'Apri config/site.yaml e imposta il nome reale che i visitatori devono vedere.'
+      },
+      siteNoticeStarter: {
+        title: 'Banner avviso sito',
+        problem: 'I visitatori vedono ancora un avviso demo in cima al sito.',
+        action:
+          'Apri config/site.yaml e sostituisci l’avviso con testo reale, oppure svuotalo se non ti serve un banner.'
+      },
+      siteNoticeActive: {
+        title: 'Banner avviso sito',
+        problem: 'Un banner avviso è ancora visibile ai visitatori.',
+        action: 'Apri config/site.yaml e conferma che il testo dell’avviso sia intenzionale prima di pubblicare.'
+      },
+      contactEmailPlaceholder: {
+        title: 'Email contatto',
+        problem: 'I visitatori contatterebbero ancora l’indirizzo demo hello@example.com.',
+        action: 'Apri config/contact.yaml e imposta l’email reale per i messaggi Visitor Brief.'
+      },
+      whatsappMissingPhone: {
+        title: 'Contatto WhatsApp',
+        problem: 'Il contatto WhatsApp è attivo, ma non c’è un numero utilizzabile.',
+        action: 'Apri config/contact.yaml e aggiungi un numero, oppure disattiva WhatsApp.'
+      },
+      signalCloudOptions: {
+        title: 'Domanda visitatore "{label}"',
+        problem: 'Questa domanda visitatore richiede almeno due scelte di risposta.',
+        action: 'Apri config/signal-clouds.yaml e aggiungi altre opzioni di risposta per questa domanda.'
+      },
+      metaPlaceholder: {
+        title: '{label} su "{itemTitle}"',
+        problem: '"{label}" sembra ancora testo segnaposto.',
+        action: 'Apri {source} e sostituisci "{label}" con informazioni reali su questo pezzo.'
+      },
+      itemsFolderMissing: {
+        title: 'Cartella pezzi',
+        problem: 'Il sito non ha ancora una cartella pezzi.',
+        action: 'Crea almeno un pezzo con npm run item:new oppure aggiungi un file YAML in content/items/.'
+      },
+      itemsFolderEmpty: {
+        title: 'Cartella pezzi',
+        problem: 'Il sito non contiene ancora pezzi.',
+        action: 'Crea almeno un pezzo con npm run item:new prima di pubblicare.'
+      },
+      itemFieldStarter: {
+        title: '{fieldTitle} per "{itemTitle}"',
+        problem: '{fieldTitle} sembra ancora testo segnaposto o demo.',
+        action: 'Apri {source} e aggiorna {fieldTitle} con contenuto reale.'
+      },
+      itemTestId: {
+        title: 'Pezzo "{itemTitle}"',
+        problem: 'Questo id pezzo sembra una voce di test o esempio.',
+        action: 'Crea un pezzo reale con npm run item:new oppure rinomina l’id prima di pubblicare.'
+      },
+      itemPlaceholderImage: {
+        title: 'Immagine per "{itemTitle}"',
+        problem: 'Questo pezzo usa ancora l’immagine segnaposto neutra.',
+        action: 'Aggiungi una foto reale in static/images/items/ e aggiorna il percorso nel file pezzo.'
+      },
+      itemDraftStatus: {
+        title: 'Stato pubblicazione per "{itemTitle}"',
+        problem: 'Questo pezzo è ancora contrassegnato come "{status}".',
+        action:
+          'Apri il file pezzo e imposta uno stato pronto per il pubblico, ad es. "available", oppure rimuovi lo stato se non lo usi.'
+      },
+      itemShortDescription: {
+        title: 'Descrizione per "{itemTitle}"',
+        problem: 'La descrizione del pezzo è molto breve e può sembrare incompleta ai visitatori.',
+        action: 'Apri il file pezzo e aggiungi una descrizione più chiara dell’oggetto, opera o progetto.'
+      },
+      itemNoMeta: {
+        title: 'Dettagli per "{itemTitle}"',
+        problem: 'Questo pezzo non ha ancora campi dettaglio aggiuntivi.',
+        action: 'Aggiungi dettagli utili come materiale, dimensioni, disponibilità o tecnica nel file pezzo.'
+      }
     }
   },
   publish: {
@@ -355,6 +450,80 @@ export default {
     deployHint: 'Deploy su Vercel con: npm run publish -- --deploy'
   },
   validate: {
-    ok: 'Validazione contenuti Atelier-Kit OK.'
+    ok: 'Validazione contenuti Atelier-Kit OK.',
+    yamlMustBeObject: '{path} deve contenere un oggetto YAML.',
+    yamlReadError: 'Impossibile leggere {path}: {message}',
+    missingField: '{source}: "{field}" mancante o non valido.',
+    duplicate: '{label} duplicato: {value}',
+    metaMustBeArray: '{source}: "{pathLabel}" deve essere un array quando presente.',
+    metaEntryMustBeObject: '{source}: "{entryPath}" deve essere un oggetto.',
+    metaEntryNeedsValueOrChildren:
+      '{source}:{entryPath}: la voce meta deve avere un "value" non vuoto oppure "children" non vuoti.',
+    missingSiteObject: '{source}: manca l’oggetto "site".',
+    appearanceMustBeObject: '{source}: site.appearance deve essere un oggetto quando presente.',
+    appearancePresetInvalid: '{source}: site.appearance.preset deve essere uno tra: warm, neutral, dark, custom.',
+    appearanceColorInvalid: '{source}: site.appearance.{field} deve essere un colore hex come #f8f0e4.',
+    appearanceBackgroundInvalid: '{source}: site.appearance.background_image deve essere un percorso sotto /images/site/.',
+    missingCatalogObject: '{source}: manca l’oggetto "catalog".',
+    routeSegmentUnsupported:
+      '{source}: route_segment non è supportato in Atelier-Kit 1.0. I pezzi stanno sotto /items.',
+    missingSignalCloudsArray: '{source}: manca l’array "signal_clouds".',
+    cloudMustBeObject: '{source}: ogni cloud deve essere un oggetto.',
+    cloudOptionsRequired: '{source}:{cloudId}: options deve essere un array non vuoto.',
+    optionMustBeObject: '{source}:{cloudId}: ogni option deve essere un oggetto.',
+    missingAboutObject: '{source}: manca l’oggetto "about".',
+    sectionMustBeObject: '{sectionSource}: la sezione deve essere un oggetto.',
+    missingContactObject: '{source}: manca l’oggetto "contact".',
+    contactEmailMustBeObject: '{source}: "contact.email" deve essere un oggetto quando presente.',
+    contactWhatsappMustBeObject: '{source}: "contact.whatsapp" deve essere un oggetto quando presente.',
+    itemsDirMissing: 'La cartella content/items non esiste.',
+    itemsDirEmpty: 'content/items deve contenere almeno un file .yaml pezzo.',
+    imageFileMustStartWithSlash: '{source}: image_file deve iniziare con "/".',
+    imageFileMissing: '{source}: image_file non esiste in static/: {imageFile}',
+    collectionIdInvalid: '{source}: id deve usare solo lettere minuscole, numeri e trattini singoli.',
+    collectionIdFilenameMismatch: '{source}: id deve corrispondere al nome file "{expectedId}".',
+    collectionItemsRequired: '{source}: "items" deve essere un array non vuoto.',
+    collectionItemRefInvalid: '{itemSource}: il riferimento pezzo deve essere una stringa non vuota.',
+    collectionItemRefUnknown: '{itemSource}: id pezzo sconosciuto "{itemId}".'
+  },
+  wizard: {
+    usageTitle: 'Utilizzo:',
+    fieldRequired: 'Questo campo è obbligatorio.',
+    chooseUseCase: 'Scegli un caso d’uso:',
+    templatePrompt: 'Numero o id template:',
+    chooseValidTemplate: 'Scegli un numero o id template valido.',
+    setupSummary: 'Riepilogo configurazione:',
+    mode: 'Modalità',
+    target: 'Destinazione',
+    template: 'Template',
+    siteTitle: 'Titolo sito',
+    tagline: 'Sottotitolo',
+    language: 'Lingua',
+    email: 'Email',
+    whatsapp: 'WhatsApp',
+    whatsappDisabled: 'disattivato',
+    firstItemTitle: 'Titolo primo pezzo',
+    collectionTitle: 'Titolo collezione',
+    complete: 'Configurazione guidata completata.',
+    nextSteps: 'Prossimi passi:',
+    replaceBeforePublish: 'Sostituisci immagini demo e testo segnaposto rimanente prima di pubblicare.',
+    strictDoctorHint: 'Per un controllo pre-lancio, esegui: npm run content:doctor -- --strict',
+    validationSkipped: 'Validazione saltata finché non installi le dipendenze nel nuovo sito cliente.',
+    introTitle: 'Configurazione guidata Atelier-Kit',
+    introBody: 'Rispondi a poche domande per generare contenuti iniziali del sito.',
+    introNote: 'Potrai modificare i file in seguito se serve.',
+    targetFolder: 'Cartella destinazione (percorso relativo)',
+    whatsappPhone: 'Numero WhatsApp (opzionale)',
+    notice: 'Avviso pubblico sito (opzionale, vuoto = nascosto)',
+    firstItemOptional: 'Titolo primo pezzo (opzionale)',
+    collectionOptional: 'Titolo collezione (opzionale)',
+    confirmProceed: 'Procedere con questa configurazione?',
+    templates: {
+      writing: 'Scrittura / vetrina autore',
+      artwork: 'Arte visiva / vetrina opere',
+      handmade: 'Artigianato / craft',
+      jewelry: 'Gioielli',
+      furniture: 'Mobili / design oggetti'
+    }
   }
 };

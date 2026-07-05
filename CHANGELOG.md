@@ -4,6 +4,23 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.12 - 2026-07-05
+
+Closes [#59](https://github.com/gcomneno/atelier-kit/issues/59), [#58](https://github.com/gcomneno/atelier-kit/issues/58); partial delivery for [#52](https://github.com/gcomneno/atelier-kit/issues/52).
+
+### Added
+
+- Studio Signal Clouds: **Show on item pages** checkbox (`enabled`) and **Remove signal** with confirmation ([#59](https://github.com/gcomneno/atelier-kit/issues/59)).
+- Public item pages filter disabled Signal Clouds via `getSignalClouds()`.
+- i18n follow-up: Content Doctor warning bodies, `content:validate` messages, `site:wizard` prompts ([#58](https://github.com/gcomneno/atelier-kit/issues/58)).
+- Scaffold locale packs (`scripts/scaffold-locales/`) with `--language it` for contact labels and site footer.
+- Studio **Run publish prep** on `/studio/readiness` (validate, doctor, check, build) ([#52](https://github.com/gcomneno/atelier-kit/issues/52)).
+- `desktop/README.md` documenting terminal-free packaging phases.
+
+### Changed
+
+- Service model docs: €50 setup-light tier and GitHub Sponsors donation path.
+
 ## v0.1.11 - 2026-07-05
 
 Closes epic [#57](https://github.com/gcomneno/atelier-kit/issues/57) — operator UI internationalization (Phase A–C).

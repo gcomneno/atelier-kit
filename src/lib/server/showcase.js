@@ -209,7 +209,9 @@ export function getSignalClouds() {
     throw new Error('config/signal-clouds.yaml: missing "signal_clouds" array.');
   }
 
-  return clouds.map((cloud, cloudIndex) => {
+  return clouds
+    .filter((cloud) => isRecord(cloud) && cloud.enabled !== false)
+    .map((cloud, cloudIndex) => {
     const source = `config/signal-clouds.yaml:signal_clouds[${cloudIndex}]`;
 
     if (!isRecord(cloud)) {

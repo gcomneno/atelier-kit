@@ -7,6 +7,7 @@ All notable changes to Atelier-Kit will be documented in this file.
 ### Added
 
 - Studio **Publish live** / **Metti online** on `/studio/readiness`: publish prep, Git commit/push for studio files, Vercel production deploy.
+- **Atelier Desktop** Tauri MVP in `desktop/` ([#60](https://github.com/gcomneno/atelier-kit/issues/60)): folder picker, dev server lifecycle, studio webview, system tray.
 
 ## v0.1.12 - 2026-07-05
 

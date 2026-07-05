@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atelier Desktop</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <p class="eyebrow">Atelier Desktop</p>
+        <h1>Local studio for your site</h1>
+        <p class="intro">
+          Choose your Atelier-Kit site folder, start the local dev server and open the studio
+          without using the terminal.
+        </p>
+      </header>
+
+      <section class="status" aria-live="polite">
+        <p><strong>Site folder:</strong> <span id="site-path">—</span></p>
+        <p><strong>Dev server:</strong> <span id="server-status">stopped</span></p>
+      </section>
+
+      <div class="actions">
+        <button type="button" id="pick-folder">Choose site folder…</button>
+        <button type="button" id="start-studio" disabled>Open studio</button>
+        <button type="button" id="open-preview" disabled>Open preview</button>
+        <button type="button" id="stop-server" disabled>Stop dev server</button>
+      </div>
+
+      <p id="message" class="message" hidden></p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

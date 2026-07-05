@@ -1,30 +1,125 @@
-# Atelier Desktop (terminal-free packaging)
+# Atelier Desktop
 
-Phase 2 packaging for epic [#52](https://github.com/gcomneno/atelier-kit/issues/52).
+Tauri 2 wrapper for local Atelier-Kit client sites ([#60](https://github.com/gcomneno/atelier-kit/issues/60)).
 
-## Current status
+Hides the terminal for day-to-day maintenance: pick a site folder, start the dev server and open `/studio` in a native window.
 
-**Phase 1 (shipped):** `npm run studio:launch` opens the local studio in the browser without manual URL copy/paste.
+## Prerequisites
 
-**Phase 1.5 (shipped):** `/studio/readiness` includes **Run publish prep** — validation, Content Doctor, check and build from the studio UI (no terminal for the operator during day-to-day edits).
+### All platforms
 
-**Phase 2 (planned):** Tauri desktop wrapper — see [spike doc](../docs/architecture/spike-tauri-desktop-phase2.md).
+- [Node.js](https://nodejs.org/) 20+ and npm (client site must have run `npm install` once)
+- [Rust](https://rustup.rs/) stable (`rustup default stable`)
 
-## Operator workflow today
+### Linux (Ubuntu / Debian)
 
-1. Scaffold or hand off the client site folder.
-2. Client runs `npm run studio:launch` (or operator starts it during maintenance).
-3. Client edits content in `/studio/*`.
-4. Client opens **Publish readiness** and clicks **Run publish prep** before deploy.
-5. Operator runs `npm run publish -- --deploy` or uses Vercel until in-app deploy exists.
+```bash
+sudo apt update
+sudo apt install -y \
+  libwebkit2gtk-4.1-dev \
+  libgtk-3-dev \
+  libayatana-appindicator3-dev \
+  librsvg2-dev \
+  build-essential \
+  curl \
+  wget \
+  file \
+  libssl-dev \
+  pkg-config
+```
 
-## Desktop MVP (future)
+See [Tauri Linux prerequisites](https://v2.tauri.app/start/prerequisites/#linux).
 
-The `desktop/` Tauri project will:
+### macOS
 
-- pick the site folder;
-- start the dev server with `ATELIER_STUDIO=1`;
-- open `/studio` in a native webview;
-- expose publish prep and upgrade actions without a visible terminal.
+```bash
+xcode-select --install
+```
 
-Track progress on issue #52.
+See [Tauri macOS prerequisites](https://v2.tauri.app/start/prerequisites/#macos).
+
+### Windows
+
+- [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+- [WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (usually preinstalled on Windows 11)
+
+See [Tauri Windows prerequisites](https://v2.tauri.app/start/prerequisites/#windows).
+
+## Development
+
+From the **atelier-kit** repository root:
+
+```bash
+cd desktop
+npm install
+npm run tauri dev
+```
+
+The shell window opens on port `1420`. Choose a client site folder (e.g. `../luna-argento`) and click **Open studio**.
+
+## Production build
+
+```bash
+cd desktop
+npm run tauri build
+```
+
+### Linux output
+
+- Binary: `src-tauri/target/release/atelier-desktop`
+- AppImage: `src-tauri/target/release/bundle/appimage/atelier-desktop_0.1.0_amd64.AppImage`
+- `.deb`: `src-tauri/target/release/bundle/deb/`
+
+### macOS output
+
+- `.app` and `.dmg` under `src-tauri/target/release/bundle/dmg/`
+
+### Windows output
+
+- `.msi` and `.exe` under `src-tauri/target/release/bundle/msi/` and `nsis/`
+
+Ship the bundle appropriate for the client OS during operator handoff.
+
+## Client workflow
+
+1. Operator scaffolds the site, runs first deploy and installs dependencies (`npm install`).
+2. Operator installs **Atelier Desktop** on the client machine (or ships an AppImage / installer).
+3. Client opens Atelier Desktop → **Choose site folder** → selects their project folder.
+4. Client clicks **Open studio** — dev server starts with `ATELIER_STUDIO=1` on `127.0.0.1:5173`.
+5. Studio opens at `http://127.0.0.1:5173/studio` in a dedicated window.
+6. **Open preview** shows the public site at `/` in the default browser.
+7. **Publish live** remains in `/studio/readiness` inside the studio webview (Git + Vercel).
+
+### System tray
+
+Right-click the tray icon:
+
+- **Open site folder** — reveal project files in the file manager
+- **Open preview** — public site in browser
+- **Stop dev server** — stop `npm run dev`
+- **Quit**
+
+The last chosen site folder is remembered between sessions.
+
+## Technical notes
+
+Matches `scripts/studio-launch.js`:
+
+```bash
+npm run dev -- --host 127.0.0.1 --port 5173
+# env: ATELIER_STUDIO=1
+```
+
+Validates `config/site.yaml` before starting.
+
+## Out of scope (v0.1.0)
+
+- Bundled Node.js runtime
+- Auto-updater
+- In-app Vercel OAuth
+
+## Related
+
+- [ADR 0004 Phase 2](../docs/architecture/adr-0004-desktop-wrapper-research.md)
+- [Spike doc](../docs/architecture/spike-tauri-desktop-phase2.md)
+- [Operator handoff playbook](../docs/product/operator-handoff-playbook.md)

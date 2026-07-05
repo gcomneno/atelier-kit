@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Atelier Desktop main window",
+  "windows": ["main", "studio"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-create",
+    "core:window:allow-close",
+    "core:window:allow-set-focus",
+    "core:window:allow-navigate",
+    "core:webview:allow-navigate",
+    "dialog:default",
+    "opener:default"
+  ]
+}

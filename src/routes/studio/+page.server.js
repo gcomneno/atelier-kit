@@ -2,7 +2,9 @@
 
 import { fail } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
-import { appearanceFromForm, APPEARANCE_PRESET_OPTIONS, resolveSiteAppearance } from '$lib/site-appearance.js';
+import { appearanceFromForm, resolveSiteAppearance } from '$lib/site-appearance.js';
+import { localizedAppearancePresets } from '$lib/i18n/index.js';
+import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 import {
   checkboxEnabled,
   optionalField,
@@ -104,19 +106,20 @@ function loadContactForm() {
   };
 }
 
-/** @param {{ ok: boolean, output: string }} validation */
-function saveMessage(validation) {
-  return validationMessage(validation);
+/** @param {{ ok: boolean, output: string }} validation @param {string} locale */
+function saveMessage(validation, locale) {
+  return validationMessage(validation, locale);
 }
 
 export function load() {
   guardStudio();
+  const locale = getOperatorLocale();
 
   return {
     siteForm: loadSiteForm(),
     contactForm: loadContactForm(),
     appearanceForm: loadAppearanceForm(),
-    appearancePresets: APPEARANCE_PRESET_OPTIONS
+    appearancePresets: localizedAppearancePresets(locale)
   };
 }
 
@@ -125,12 +128,14 @@ export const actions = {
   saveSite: async ({ request }) => {
     guardStudio();
 
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
     const formData = await request.formData();
 
     try {
       const site = {
-        name: requiredField(formData.get('name'), 'Site title'),
-        tagline: requiredField(formData.get('tagline'), 'Tagline'),
+        name: requiredField(formData.get('name'), t('fields.siteTitle'), locale),
+        tagline: requiredField(formData.get('tagline'), t('fields.tagline'), locale),
         language: optionalField(formData.get('language'), 'en'),
         notice: optionalField(formData.get('notice')),
         footer_note: optionalField(formData.get('footer_note'))
@@ -141,11 +146,11 @@ export const actions = {
 
       return {
         siteStatus: validation.ok ? 'success' : 'warning',
-        siteMessage: saveMessage(validation),
+        siteMessage: saveMessage(validation, locale),
         siteForm: site
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not save site settings.';
+      const message = error instanceof Error ? error.message : t('server.saveSiteError');
       return fail(400, {
         siteStatus: 'error',
         siteMessage: message,
@@ -157,6 +162,8 @@ export const actions = {
   saveContact: async ({ request }) => {
     guardStudio();
 
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
     const formData = await request.formData();
 
     try {
@@ -166,11 +173,11 @@ export const actions = {
       const whatsappPhone = optionalField(formData.get('whatsapp_phone'));
 
       if (emailEnabled && emailAddress === '') {
-        throw new Error('Contact email is required when email contact is enabled.');
+        throw new Error(t('errors.contactEmailRequired'));
       }
 
       if (whatsappEnabled && whatsappPhone === '') {
-        throw new Error('WhatsApp phone number is required when WhatsApp contact is enabled.');
+        throw new Error(t('errors.contactWhatsappRequired'));
       }
 
       const contact = {
@@ -192,7 +199,7 @@ export const actions = {
 
       return {
         contactStatus: validation.ok ? 'success' : 'warning',
-        contactMessage: saveMessage(validation),
+        contactMessage: saveMessage(validation, locale),
         contactForm: {
           email_enabled: contact.email.enabled,
           email_label: contact.email.label,
@@ -204,7 +211,7 @@ export const actions = {
         }
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not save contact settings.';
+      const message = error instanceof Error ? error.message : t('server.saveContactError');
       return fail(400, {
         contactStatus: 'error',
         contactMessage: message,
@@ -216,6 +223,8 @@ export const actions = {
   saveAppearance: async ({ request }) => {
     guardStudio();
 
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
     const formData = await request.formData();
 
     try {
@@ -228,7 +237,7 @@ export const actions = {
       const data = readProjectYaml('config/site.yaml');
 
       if (!isRecord(data.site)) {
-        throw new Error('config/site.yaml is missing a site object.');
+        throw new Error(t('errors.missingSite'));
       }
 
       const site = { ...data.site };
@@ -245,7 +254,7 @@ export const actions = {
       const backgroundUpload = formData.get('background_upload');
 
       if (backgroundUpload instanceof File && backgroundUpload.size > 0) {
-        backgroundImage = await saveSiteBackgroundUpload(backgroundUpload);
+        backgroundImage = await saveSiteBackgroundUpload(backgroundUpload, locale);
       }
 
       site.appearance = buildAppearanceYaml(appearance, backgroundImage);
@@ -255,11 +264,11 @@ export const actions = {
 
       return {
         appearanceStatus: validation.ok ? 'success' : 'warning',
-        appearanceMessage: saveMessage(validation),
+        appearanceMessage: saveMessage(validation, locale),
         appearanceForm: loadAppearanceForm()
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not save appearance.';
+      const message = error instanceof Error ? error.message : t('server.saveAppearanceError');
       return fail(400, {
         appearanceStatus: 'error',
         appearanceMessage: message,

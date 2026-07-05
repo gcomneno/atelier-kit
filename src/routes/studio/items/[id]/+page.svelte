@@ -1,5 +1,8 @@
 <script>
   import { enhance } from '$app/forms';
+  import { useI18n } from '$lib/i18n/context.js';
+
+  const t = useI18n();
 
   let { data, form } = $props();
 
@@ -11,14 +14,14 @@
 </svelte:head>
 
 <p class="intro">
-  Edit this item’s public content. Upload a photo here or keep the image path field for advanced use.
-  <a href={`/items/${itemForm.id}`} target="_blank" rel="noreferrer">Preview item</a>
+  {t('studio.itemsEdit.intro')}
+  <a href={`/items/${itemForm.id}`} target="_blank" rel="noreferrer">{t('studio.itemsEdit.preview')}</a>
 </p>
 
 <section class="panel">
   <div class="panel-heading">
     <h2>{itemForm.title}</h2>
-    <p>Item id: {itemForm.id}</p>
+    <p>{t('studio.itemsEdit.itemId', { id: itemForm.id })}</p>
   </div>
 
   <form method="POST" action="?/saveItem" enctype="multipart/form-data" use:enhance class="studio-form">
@@ -27,55 +30,55 @@
     </div>
 
     <label>
-      Upload photo
-      <span class="hint">Saved as static/images/items/{itemForm.id}.jpg (or .png / .webp). The image path updates automatically.</span>
+      {t('studio.itemsEdit.uploadPhoto')}
+      <span class="hint">{t('studio.itemsEdit.uploadHint', { id: itemForm.id })}</span>
       <input type="file" name="image_upload" accept="image/jpeg,image/png,image/webp" />
     </label>
 
     <label>
-      Image path
+      {t('studio.itemsEdit.imagePath')}
       <input name="image_file" value={itemForm.image_file} required />
     </label>
 
     <label>
-      Image description
+      {t('studio.itemsEdit.imageAlt')}
       <input name="image_alt" value={itemForm.image_alt} />
     </label>
 
     <label>
-      Item title
+      {t('studio.itemsEdit.titleField')}
       <input name="title" value={itemForm.title} required />
     </label>
 
     <label>
-      Subtitle
+      {t('studio.itemsEdit.subtitle')}
       <input name="subtitle" value={itemForm.subtitle} />
     </label>
 
     <label>
-      Status
+      {t('studio.itemsEdit.status')}
       <input name="status" value={itemForm.status} />
     </label>
 
     <label>
-      Price mode
+      {t('studio.itemsEdit.priceMode')}
       <input name="price_mode" value={itemForm.price_mode} />
     </label>
 
     <label>
-      Description
+      {t('studio.itemsEdit.description')}
       <textarea name="description" rows="5" required>{itemForm.description}</textarea>
     </label>
 
     <label>
-      Item notice
-      <span class="hint">Leave empty to hide the notice on the item page.</span>
+      {t('studio.itemsEdit.notice')}
+      <span class="hint">{t('studio.itemsEdit.noticeHint')}</span>
       <textarea name="notice" rows="2">{itemForm.notice}</textarea>
     </label>
 
     {#if itemForm.meta.length > 0}
       <fieldset>
-        <legend>Item details</legend>
+        <legend>{t('studio.itemsEdit.details')}</legend>
 
         {#each itemForm.meta as entry, index}
           {#if typeof entry.value === 'string'}
@@ -103,8 +106,8 @@
     {/if}
 
     <div class="actions">
-      <button type="submit">Save item</button>
-      <a class="secondary-link" href="/studio/items">Back to items</a>
+      <button type="submit">{t('studio.itemsEdit.save')}</button>
+      <a class="secondary-link" href="/studio/items">{t('studio.itemsEdit.back')}</a>
     </div>
 
     {#if form?.itemMessage}

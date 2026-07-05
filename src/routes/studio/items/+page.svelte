@@ -1,24 +1,31 @@
 <script>
+  import { useI18n } from '$lib/i18n/context.js';
+
+  const t = useI18n();
+
   let { data } = $props();
 </script>
 
 <svelte:head>
-  <title>Studio · Items</title>
+  <title>{t('studio.items.pageTitle')}</title>
 </svelte:head>
 
 <p class="intro">
-  Choose an item to edit, or create a new one for the catalog.
+  {t('studio.items.intro')}
 </p>
 
 <section class="panel">
   <div class="panel-heading">
-    <h2>Items</h2>
-    <p>{data.items.length} item file(s) in content/items/</p>
-    <p class="create-link"><a href="/studio/items/new">+ Create new item</a></p>
+    <h2>{t('studio.items.title')}</h2>
+    <p>{t('studio.items.count', { count: data.items.length })}</p>
+    <p class="create-link"><a href="/studio/items/new">{t('studio.items.createLink')}</a></p>
   </div>
 
   {#if data.items.length === 0}
-    <p class="empty">No items yet. <a href="/studio/items/new">Create your first item</a>.</p>
+    <p class="empty">
+      {t('studio.items.empty')}
+      <a href="/studio/items/new">{t('studio.items.createFirst')}</a>.
+    </p>
   {:else}
     <ul class="record-list">
       {#each data.items as item}

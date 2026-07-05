@@ -1,5 +1,8 @@
 <script>
   import { enhance } from '$app/forms';
+  import { useI18n } from '$lib/i18n/context.js';
+
+  const t = useI18n();
 
   let { data, form } = $props();
 
@@ -7,47 +10,46 @@
 </script>
 
 <svelte:head>
-  <title>Studio · About</title>
+  <title>{t('studio.about.pageTitle')}</title>
 </svelte:head>
 
 <p class="intro">
-  Edit the public about page at <a href="/about" target="_blank" rel="noreferrer">/about</a>.
-  Use it for studio story, process and background.
+  {t('studio.about.intro')}
 </p>
 
 <section class="panel">
   <form method="POST" action="?/saveAbout" use:enhance class="studio-form">
     <label class="checkbox">
       <input type="checkbox" name="enabled" checked={aboutForm.enabled} />
-      Show about page on the public site
+      {t('studio.about.enabled')}
     </label>
 
     <label>
-      Page title
+      {t('studio.about.titleField')}
       <input name="title" value={aboutForm.title} />
     </label>
 
     <label>
-      Introduction
+      {t('studio.about.introField')}
       <textarea name="intro" rows="5">{aboutForm.intro}</textarea>
     </label>
 
     <fieldset>
-      <legend>Optional section</legend>
+      <legend>{t('studio.about.sectionLegend')}</legend>
 
       <label>
-        Section heading
+        {t('studio.about.sectionHeading')}
         <input name="section_heading" value={aboutForm.section_heading} />
       </label>
 
       <label>
-        Section body
+        {t('studio.about.sectionBody')}
         <textarea name="section_body" rows="5">{aboutForm.section_body}</textarea>
       </label>
     </fieldset>
 
     <div class="actions">
-      <button type="submit">Save about page</button>
+      <button type="submit">{t('studio.about.save')}</button>
     </div>
 
     {#if form?.aboutMessage}

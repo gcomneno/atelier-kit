@@ -1,5 +1,8 @@
 <script>
   import { enhance } from '$app/forms';
+  import { useI18n } from '$lib/i18n/context.js';
+
+  const t = useI18n();
 
   let { data, form } = $props();
 
@@ -15,39 +18,39 @@
 </script>
 
 <svelte:head>
-  <title>Studio · New item</title>
+  <title>{t('studio.itemsNew.pageTitle')}</title>
 </svelte:head>
 
 <p class="intro">
-  Create a new item file under <code>content/items/</code>. Use lowercase letters, numbers and hyphens for the item id, for example <code>silver-ring</code>.
+  {t('studio.itemsNew.intro')}
 </p>
 
 <section class="panel">
   <div class="panel-heading">
-    <h2>New item</h2>
-    <p>Starter meta fields come from the preset you choose.</p>
+    <h2>{t('studio.itemsNew.title')}</h2>
+    <p>{t('studio.itemsNew.introPanel')}</p>
   </div>
 
   <form method="POST" action="?/createItem" enctype="multipart/form-data" use:enhance class="studio-form">
     <label>
-      Item id
-      <span class="hint">Cannot be changed later. Becomes the file name and URL slug.</span>
+      {t('studio.itemsNew.id')}
+      <span class="hint">{t('studio.itemsNew.idHint')}</span>
       <input
         name="id"
         value={itemForm.id}
         required
         pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-        title="Use lowercase letters, numbers and hyphens only."
+        title={t('studio.itemsNew.idPattern')}
       />
     </label>
 
     <label>
-      Item title
+      {t('studio.itemsNew.titleField')}
       <input name="title" value={itemForm.title} required />
     </label>
 
     <label>
-      Meta preset
+      {t('studio.itemsNew.preset')}
       <select name="preset" value={itemForm.preset}>
         {#each presets as preset}
           <option value={preset.id}>{preset.label}</option>
@@ -56,19 +59,19 @@
     </label>
 
     <label>
-      Description
+      {t('studio.itemsNew.description')}
       <textarea name="description" rows="4">{itemForm.description}</textarea>
     </label>
 
     <label>
-      Photo (optional)
-      <span class="hint">JPG, PNG or WebP. Saved as static/images/items/{itemForm.id || 'item-id'}.jpg</span>
+      {t('studio.itemsNew.photo')}
+      <span class="hint">{t('studio.itemsNew.photoHint', { id: itemForm.id || 'item-id' })}</span>
       <input type="file" name="image_upload" accept="image/jpeg,image/png,image/webp" />
     </label>
 
     <div class="actions">
-      <button type="submit">Create item</button>
-      <a class="secondary-link" href="/studio/items">Cancel</a>
+      <button type="submit">{t('studio.itemsNew.create')}</button>
+      <a class="secondary-link" href="/studio/items">{t('studio.itemsNew.cancel')}</a>
     </div>
 
     {#if form?.createMessage}

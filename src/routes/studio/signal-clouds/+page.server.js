@@ -9,9 +9,10 @@ import {
   validationMessage,
   writeSignalCloudRecords
 } from '$lib/server/studio-io.js';
+import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 
-function loadSignalCloudForm() {
-  return readSignalCloudRecords().map((cloud) => ({
+function loadSignalCloudForm(locale) {
+  return readSignalCloudRecords(locale).map((cloud) => ({
     id: cloud.id,
     question: typeof cloud.question === 'string' ? cloud.question : '',
     hint: typeof cloud.hint === 'string' ? cloud.hint : '',
@@ -26,9 +27,10 @@ function loadSignalCloudForm() {
 
 export function load() {
   guardStudio();
+  const locale = getOperatorLocale();
 
   return {
-    clouds: loadSignalCloudForm()
+    clouds: loadSignalCloudForm(locale)
   };
 }
 
@@ -37,9 +39,12 @@ export const actions = {
   saveSignalClouds: async ({ request }) => {
     guardStudio();
 
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
+
     try {
       const formData = await request.formData();
-      const original = readSignalCloudRecords();
+      const original = readSignalCloudRecords(locale);
       const clouds = applySignalCloudsFromForm(original, formData);
 
       writeSignalCloudRecords(clouds);
@@ -47,14 +52,14 @@ export const actions = {
 
       return {
         cloudStatus: validation.ok ? 'success' : 'warning',
-        cloudMessage: validationMessage(validation),
-        clouds: loadSignalCloudForm()
+        cloudMessage: validationMessage(validation, locale),
+        clouds: loadSignalCloudForm(locale)
       };
     } catch (error) {
       return fail(400, {
         cloudStatus: 'error',
-        cloudMessage: error instanceof Error ? error.message : 'Could not save Signal Clouds.',
-        clouds: loadSignalCloudForm()
+        cloudMessage: error instanceof Error ? error.message : t('server.saveCloudsError'),
+        clouds: loadSignalCloudForm(locale)
       });
     }
   }

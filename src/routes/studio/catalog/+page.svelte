@@ -1,5 +1,8 @@
 <script>
   import { enhance } from '$app/forms';
+  import { useI18n } from '$lib/i18n/context.js';
+
+  const t = useI18n();
 
   let { data, form } = $props();
 
@@ -7,61 +10,61 @@
 </script>
 
 <svelte:head>
-  <title>Studio · Catalog</title>
+  <title>{t('studio.catalog.pageTitle')}</title>
 </svelte:head>
 
 <p class="intro">
-  Choose how items are named on the public site and which detail fields appear on cards and item pages.
+  {t('studio.catalog.intro')}
 </p>
 
 <section class="panel">
   <form method="POST" action="?/saveCatalog" use:enhance class="studio-form">
     <label>
-      Item name (singular)
+      {t('studio.catalog.singular')}
       <input name="item_name_singular" value={catalogForm.item_name_singular} required />
     </label>
 
     <label>
-      Item name (plural)
+      {t('studio.catalog.plural')}
       <input name="item_name_plural" value={catalogForm.item_name_plural} required />
     </label>
 
     <fieldset>
-      <legend>Visible fields</legend>
+      <legend>{t('studio.catalog.visibleFields')}</legend>
 
       <label class="checkbox">
         <input type="checkbox" name="show_price" checked={catalogForm.show_price} />
-        Show price mode
+        {t('studio.catalog.showPrice')}
       </label>
 
       <label class="checkbox">
         <input type="checkbox" name="show_availability" checked={catalogForm.show_availability} />
-        Show availability
+        {t('studio.catalog.showAvailability')}
       </label>
 
       <label class="checkbox">
         <input type="checkbox" name="show_material" checked={catalogForm.show_material} />
-        Show material
+        {t('studio.catalog.showMaterial')}
       </label>
 
       <label class="checkbox">
         <input type="checkbox" name="show_dimensions" checked={catalogForm.show_dimensions} />
-        Show dimensions
+        {t('studio.catalog.showDimensions')}
       </label>
 
       <label class="checkbox">
         <input type="checkbox" name="show_status" checked={catalogForm.show_status} />
-        Show status
+        {t('studio.catalog.showStatus')}
       </label>
 
       <label class="checkbox">
         <input type="checkbox" name="show_meta" checked={catalogForm.show_meta} />
-        Show item details block
+        {t('studio.catalog.showMeta')}
       </label>
     </fieldset>
 
     <div class="actions">
-      <button type="submit">Save catalog settings</button>
+      <button type="submit">{t('studio.catalog.save')}</button>
     </div>
 
     {#if form?.catalogMessage}

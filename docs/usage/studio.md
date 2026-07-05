@@ -97,6 +97,10 @@ Presets: `warm` (default), `neutral`, `dark`, or `custom` with explicit hex colo
 
 Optional **background image** upload (JPG/PNG/WebP) saved to `static/images/site/background.*`.
 
+## Operator language
+
+Studio labels, save messages, Content Doctor output and `npm run publish` banners follow `site.language` in `config/site.yaml`. Supported operator locales: **English** (`en`) and **Italian** (`it`). See [ADR 0005](../architecture/adr-0005-operator-ui-i18n.md).
+
 ## Recommended access
 
 The studio is **local authoring only**. Follow these rules:

@@ -1,5 +1,8 @@
 <script>
   import { enhance } from '$app/forms';
+  import { useI18n } from '$lib/i18n/context.js';
+
+  const t = useI18n();
 
   let { data, form } = $props();
 
@@ -7,11 +10,11 @@
 </script>
 
 <svelte:head>
-  <title>Studio · Signal Clouds</title>
+  <title>{t('studio.signals.pageTitle')}</title>
 </svelte:head>
 
 <p class="intro">
-  Edit visitor questions and answer labels. Question ids and answer ids stay fixed so existing item pages remain stable.
+  {t('studio.signals.intro')}
 </p>
 
 <section class="panel">
@@ -21,18 +24,18 @@
         <legend>{cloud.id}</legend>
 
         <label>
-          Question
+          {t('studio.signals.question')}
           <input name={`cloud_${cloudIndex}_question`} value={cloud.question} required />
         </label>
 
         <label>
-          Hint
+          {t('studio.signals.hint')}
           <input name={`cloud_${cloudIndex}_hint`} value={cloud.hint} />
         </label>
 
         {#each cloud.options as option, optionIndex}
           <label>
-            Answer · {option.id}
+            {t('studio.signals.answer', { id: option.id })}
             <input
               name={`cloud_${cloudIndex}_option_${optionIndex}_label`}
               value={option.label}
@@ -44,7 +47,7 @@
     {/each}
 
     <div class="actions">
-      <button type="submit">Save Signal Clouds</button>
+      <button type="submit">{t('studio.signals.save')}</button>
     </div>
 
     {#if form?.cloudMessage}

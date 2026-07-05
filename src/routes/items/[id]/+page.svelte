@@ -19,62 +19,63 @@
   <a class="back-link" href="/">← Back to showcase</a>
 
   <article class="item-detail">
-    <div class="visual-column">
-      <div class="image-frame">
-        <img src={item.image_file} alt={item.image_alt || item.title} />
+    <section class="hero" aria-labelledby="item-title">
+      <div class="image-column">
+        <div class="image-frame">
+          <img src={item.image_file} alt={item.image_alt || item.title} />
+        </div>
       </div>
 
-      {#if signalClouds.length > 0}
-        <section class="signals" aria-labelledby="signals-heading">
-          <h2 id="signals-heading">Signal Clouds</h2>
+      <div class="content-column">
+        <header class="item-header">
+          {#if item.status}
+            <p class="status">{item.status}</p>
+          {/if}
 
+          <h1 id="item-title">{item.title}</h1>
+
+          {#if item.subtitle}
+            <p class="subtitle">{item.subtitle}</p>
+          {/if}
+        </header>
+
+        <p class="description">{item.description}</p>
+
+        <MetaInfo meta={item.meta} />
+
+        {#if item.notice}
+          <p class="notice">{item.notice}</p>
+        {/if}
+      </div>
+    </section>
+
+    {#if signalClouds.length > 0}
+      <section class="visitor-zone" aria-labelledby="visitor-zone-title">
+        <header class="visitor-header">
+          <p class="eyebrow">Visitor Brief</p>
+          <h2 id="visitor-zone-title">Talk about this piece</h2>
+          <p class="visitor-intro">
+            Choose a few preferences below. Atelier-Kit will assemble a message you can copy or send by email or WhatsApp.
+          </p>
+        </header>
+
+        <div class="visitor-grid">
           <div class="signal-list">
             {#each signalClouds as cloud}
               <SignalCloud itemId={item.id} {cloud} />
             {/each}
           </div>
-        </section>
 
-        <VisitorBrief {item} {signalClouds} contact={data.contact} />
-      {/if}
-    </div>
-
-    <div class="content">
-      <header>
-        {#if item.status}
-          <p class="status">{item.status}</p>
-        {/if}
-
-        <h1>{item.title}</h1>
-
-        {#if item.subtitle}
-          <p class="subtitle">{item.subtitle}</p>
-        {/if}
-      </header>
-
-      <p class="description">{item.description}</p>
-
-      <MetaInfo meta={item.meta} />
-
-      {#if item.notice}
-        <p class="notice">{item.notice}</p>
-      {/if}
-
-      {#if signalClouds.length > 0}
-        <aside class="contact-callout">
-          <p class="callout-title">Interested in this piece?</p>
-          <p class="callout-copy">
-            Use the Signal Clouds and Visitor Brief on the left to write a message with your preferences already included.
-          </p>
-        </aside>
-      {/if}
-    </div>
+          <VisitorBrief {item} {signalClouds} contact={data.contact} />
+        </div>
+      </section>
+    {/if}
   </article>
 </main>
 
 <style>
   .item-page {
-    width: min(1080px, calc(100% - 2rem));
+    width: min(1120px, calc(100% - 2rem));
     margin: 0 auto;
     padding: 2rem 0 4rem;
   }
@@ -93,41 +94,52 @@
 
   .item-detail {
     display: grid;
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-    gap: 2rem;
+    gap: 2.5rem;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: clamp(1.5rem, 4vw, 3rem);
     align-items: start;
   }
 
-  .visual-column,
-  .content {
+  .image-column,
+  .content-column {
     display: grid;
     gap: 1.25rem;
   }
 
   .image-frame {
+    display: grid;
+    place-items: center;
     overflow: hidden;
-    border-radius: 1.25rem;
-    border: 1px solid rgba(20, 20, 20, 0.12);
-    background: rgba(255, 255, 255, 0.72);
+    min-height: 18rem;
+    max-height: min(72vh, 42rem);
+    padding: 1rem;
+    border-radius: 1.35rem;
+    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent);
+    background: var(--site-surface-color, rgb(255 255 255 / 0.72));
+    box-shadow: 0 24px 60px rgb(36 27 18 / 0.08);
   }
 
   img {
     display: block;
     width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
+    max-height: min(68vh, 40rem);
+    object-fit: contain;
   }
 
-  header {
+  .item-header {
     display: grid;
-    gap: 0.35rem;
+    gap: 0.5rem;
   }
 
   h1 {
     margin: 0;
-    font-size: clamp(2rem, 7vw, 4rem);
-    line-height: 0.95;
-    letter-spacing: -0.06em;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
   }
 
   .subtitle,
@@ -138,23 +150,24 @@
   }
 
   .subtitle {
-    color: rgba(20, 20, 20, 0.68);
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 68%, transparent);
     font-size: 1.1rem;
   }
 
   .description {
-    color: rgba(20, 20, 20, 0.82);
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 82%, transparent);
     font-size: 1.05rem;
-    line-height: 1.65;
+    line-height: 1.7;
+    max-width: 38rem;
   }
 
   .status {
     width: fit-content;
-    border: 1px solid rgba(20, 20, 20, 0.16);
+    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 16%, transparent);
     border-radius: 999px;
     padding: 0.3rem 0.65rem;
-    background: rgba(255, 255, 255, 0.72);
-    color: rgba(20, 20, 20, 0.62);
+    background: var(--site-surface-color, rgb(255 255 255 / 0.72));
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 62%, transparent);
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -162,38 +175,51 @@
   }
 
   .notice {
-    border-left: 3px solid rgba(20, 20, 20, 0.24);
+    border-left: 3px solid color-mix(in srgb, var(--site-text-color, #2f281f) 24%, transparent);
     padding-left: 0.85rem;
-    color: rgba(20, 20, 20, 0.68);
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 68%, transparent);
     line-height: 1.5;
   }
 
-  .contact-callout {
-    padding: 1rem 1.1rem;
-    border-radius: 1rem;
-    background: rgb(248 240 228 / 0.9);
-    border: 1px solid rgb(47 40 31 / 0.12);
-  }
-
-  .callout-title {
-    margin: 0 0 0.35rem;
-    font-weight: 700;
-  }
-
-  .callout-copy {
-    margin: 0;
-    color: rgba(20, 20, 20, 0.68);
-    line-height: 1.5;
-  }
-
-  .signals {
+  .visitor-zone {
     display: grid;
-    gap: 0.85rem;
+    gap: 1.5rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border-radius: 1.35rem;
+    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent);
+    background: var(--site-card-color, rgb(255 250 242 / 0.88));
   }
 
-  .signals > h2 {
+  .visitor-header {
+    display: grid;
+    gap: 0.45rem;
+    max-width: 42rem;
+  }
+
+  .eyebrow {
     margin: 0;
-    font-size: 1.15rem;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 55%, transparent);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .visitor-header h2 {
+    margin: 0;
+    font-size: clamp(1.35rem, 3vw, 1.85rem);
+  }
+
+  .visitor-intro {
+    margin: 0;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 68%, transparent);
+    line-height: 1.55;
+  }
+
+  .visitor-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
+    gap: 1.5rem;
+    align-items: start;
   }
 
   .signal-list {
@@ -201,9 +227,17 @@
     gap: 1rem;
   }
 
-  @media (max-width: 820px) {
-    .item-detail {
+  @media (max-width: 900px) {
+    .hero {
       grid-template-columns: 1fr;
+    }
+
+    .visitor-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .image-frame {
+      max-height: none;
     }
   }
 </style>

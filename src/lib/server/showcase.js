@@ -1,4 +1,5 @@
 import { parse } from 'yaml';
+import { resolveSiteAppearance } from '$lib/site-appearance.js';
 
 const configFiles = import.meta.glob('/config/*.yaml', {
   query: '?raw',
@@ -171,7 +172,8 @@ export function getSiteConfig() {
     tagline: requiredString(site, 'tagline', 'config/site.yaml'),
     language: optionalString(site, 'language', 'en'),
     notice: optionalString(site, 'notice'),
-    footer_note: optionalString(site, 'footer_note')
+    footer_note: optionalString(site, 'footer_note'),
+    appearance: resolveSiteAppearance(isRecord(site.appearance) ? site.appearance : undefined)
   };
 }
 

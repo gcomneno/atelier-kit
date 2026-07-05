@@ -1,10 +1,14 @@
 <script>
+  import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
+
   let { data } = $props();
 </script>
 
 <svelte:head>
   <title>Studio · Publish readiness</title>
 </svelte:head>
+
+<StudioAccessGuide />
 
 <p class="intro">
   Content Doctor checks for placeholder text, missing images and other pre-launch notes in plain language.

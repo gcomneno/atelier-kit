@@ -3,6 +3,7 @@ import path from 'node:path';
 import { parse } from 'yaml';
 import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
+import { isValidFooterHref } from '../src/lib/footer-links.js';
 import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
 
 const ROOT = process.cwd();
@@ -342,6 +343,117 @@ function validateSocial() {
   assertUnique(linkIds, 'social link id');
 }
 
+function validateFooter() {
+  const source = 'config/footer.yaml';
+
+  if (!existsSync(path.join(ROOT, source))) {
+    return;
+  }
+
+  const data = readYaml(source);
+  const footer = data.footer;
+
+  if (!footer || typeof footer !== 'object' || Array.isArray(footer)) {
+    failKey('missingFooterObject', { source });
+    return;
+  }
+
+  if (footer.columns !== undefined) {
+    if (!Array.isArray(footer.columns)) {
+      failKey('footerColumnsMustBeArray', { source });
+      return;
+    }
+
+    footer.columns.forEach((column, columnIndex) => {
+      const columnSource = `${source}:columns[${columnIndex}]`;
+
+      if (!column || typeof column !== 'object' || Array.isArray(column)) {
+        failKey('footerColumnMustBeObject', { source: columnSource });
+        return;
+      }
+
+      const title =
+        typeof column.title === 'string' ? column.title.trim() : '';
+
+      if (title === '') {
+        return;
+      }
+
+      if (!Array.isArray(column.links)) {
+        failKey('footerColumnLinksMustBeArray', { source: columnSource });
+        return;
+      }
+
+      column.links.forEach((link, linkIndex) => {
+        const linkSource = `${columnSource}:links[${linkIndex}]`;
+
+        if (!link || typeof link !== 'object' || Array.isArray(link)) {
+          failKey('footerLinkMustBeObject', { source: linkSource });
+          return;
+        }
+
+        const label = requireString(link, 'label', linkSource);
+        const href = requireString(link, 'href', linkSource);
+
+        if (!isValidFooterHref(href)) {
+          failKey('footerLinkHrefInvalid', { source: linkSource });
+        }
+
+        if (label === '') {
+          failKey('footerLinkLabelRequired', { source: linkSource });
+        }
+      });
+    });
+  }
+
+  for (const field of ['copyright', 'legal_line']) {
+    if (!(field in footer) || footer[field] === undefined) {
+      continue;
+    }
+
+    if (typeof footer[field] !== 'string') {
+      failKey('footerFieldMustBeString', { source, field });
+    }
+  }
+
+  if ('show_social' in footer && footer.show_social !== undefined && typeof footer.show_social !== 'boolean') {
+    failKey('footerShowSocialInvalid', { source });
+  }
+}
+
+function validateLegal() {
+  const source = 'config/legal.yaml';
+
+  if (!existsSync(path.join(ROOT, source))) {
+    return;
+  }
+
+  const data = readYaml(source);
+  const legal = data.legal;
+
+  if (!legal || typeof legal !== 'object' || Array.isArray(legal)) {
+    failKey('missingLegalObject', { source });
+    return;
+  }
+
+  if (!legal.pages || typeof legal.pages !== 'object' || Array.isArray(legal.pages)) {
+    failKey('legalPagesMustBeObject', { source });
+    return;
+  }
+
+  for (const [slug, page] of Object.entries(legal.pages)) {
+    const pageSource = `${source}:pages.${slug}`;
+
+    if (!page || typeof page !== 'object' || Array.isArray(page)) {
+      failKey('legalPageMustBeObject', { source: pageSource });
+      continue;
+    }
+
+    requireString(page, 'title', pageSource);
+    requireString(page, 'body', pageSource);
+  }
+}
+
 function validateItems() {
   const itemsDir = path.join(ROOT, 'content/items');
 
@@ -453,6 +565,8 @@ validateAbout();
 validateSignalClouds();
 validateContact();
 validateSocial();
+validateFooter();
+validateLegal();
 const itemIds = validateItems();
 validateCollections(itemIds);
 

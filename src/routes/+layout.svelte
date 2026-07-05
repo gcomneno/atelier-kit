@@ -1,4 +1,5 @@
 <script>
+  import SiteFooter from '$lib/components/SiteFooter.svelte';
   import SiteHeader from '$lib/components/SiteHeader.svelte';
   import { appearanceCssVariables } from '$lib/site-appearance.js';
 
@@ -19,6 +20,12 @@
 >
   <SiteHeader site={data.site} socialLinks={data.socialLinks} />
   {@render children()}
+  {#if data.footerActive && data.footer}
+    <SiteFooter
+      footer={data.footer}
+      socialLinks={data.footer.show_social ? data.socialLinks : []}
+    />
+  {/if}
 </div>
 
 <style>
@@ -42,6 +49,8 @@
   }
 
   .site-root {
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
     color: var(--site-text-color, #2f281f);
     background:

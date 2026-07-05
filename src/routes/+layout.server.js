@@ -1,8 +1,9 @@
-import { getSiteConfig, getSocialConfig } from '$lib/server/showcase.js';
+import { getFooterConfig, getSiteConfig, getSocialConfig, isFooterActive } from '$lib/server/showcase.js';
 
 export function load() {
   const site = getSiteConfig();
   const social = getSocialConfig();
+  const footer = getFooterConfig();
 
   return {
     lang: site.language || 'en',
@@ -10,6 +11,8 @@ export function load() {
     site: {
       name: site.name
     },
-    socialLinks: social.links
+    socialLinks: social.links,
+    footer,
+    footerActive: isFooterActive(footer)
   };
 }

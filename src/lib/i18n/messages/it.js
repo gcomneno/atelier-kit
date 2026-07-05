@@ -84,6 +84,20 @@ export default {
         x: 'URL X (Twitter)',
         save: 'Salva social'
       },
+      footer: {
+        title: 'Footer legale',
+        intro:
+          'Footer multi-colonna con copyright e riga legale. Visibile su tutto il sito se c’è almeno una colonna, copyright o riga legale. Modifica i testi legali in config/legal.yaml.',
+        copyright: 'Riga copyright',
+        legalLine: 'Riga legale (es. P.IVA)',
+        showSocial: 'Mostra icone social nel footer',
+        columnLegend: 'Colonna {number}',
+        columnTitle: 'Titolo colonna',
+        columnTitleHint: 'Lascia vuoto per saltare questa colonna.',
+        linkLabel: 'Etichetta link {number}',
+        linkHref: 'URL o percorso link',
+        save: 'Salva footer'
+      },
       nextSteps: {
         title: 'Prima di pubblicare',
         intro: 'Controlla lo stato di pubblicazione nello studio o esegui lo script publish dalla cartella del progetto.',
@@ -318,6 +332,7 @@ export default {
     saveSiteError: 'Impossibile salvare le impostazioni sito.',
     saveContactError: 'Impossibile salvare i contatti.',
     saveSocialError: 'Impossibile salvare i link social.',
+    saveFooterError: 'Impossibile salvare il footer.',
     saveAppearanceError: 'Impossibile salvare l’aspetto.',
     saveAboutError: 'Impossibile salvare la pagina Chi siamo.',
     saveCatalogError: 'Impossibile salvare le impostazioni catalogo.',
@@ -348,7 +363,10 @@ export default {
     aboutTitleRequired: 'Il titolo pagina Chi siamo è obbligatorio quando la pagina è abilitata.',
     contactEmailRequired: 'L’email di contatto è obbligatoria quando il contatto email è abilitato.',
     contactWhatsappRequired: 'Il numero WhatsApp è obbligatorio quando il contatto WhatsApp è abilitato.',
-    socialUrlInvalid: 'Inserisci un URL http o https valido per {network}.'
+    socialUrlInvalid: 'Inserisci un URL http o https valido per {network}.',
+    footerLinkHrefRequired: 'Il link "{label}" nella colonna "{column}" richiede un URL o percorso.',
+    footerLinkHrefInvalid:
+      'Il link "{label}" nella colonna "{column}" deve iniziare con "/" o essere un URL http o https valido.'
   },
   doctor: {
     foundCount: 'Content Doctor ha trovato {count} elemento/i da rivedere prima di pubblicare:',
@@ -526,6 +544,18 @@ export default {
     socialLinkMustBeObject: '{source}: il link deve essere un oggetto.',
     socialLinkIdInvalid: '{source}: id deve essere uno tra: instagram, facebook, x (ricevuto "{id}").',
     socialLinkUrlInvalid: '{source}: url deve essere un URL http o https valido.',
+    missingFooterObject: '{source}: manca l’oggetto "footer".',
+    footerColumnsMustBeArray: '{source}: "footer.columns" deve essere un array se presente.',
+    footerColumnMustBeObject: '{source}: la colonna deve essere un oggetto.',
+    footerColumnLinksMustBeArray: '{source}: links deve essere un array se presente.',
+    footerLinkMustBeObject: '{source}: il link deve essere un oggetto.',
+    footerLinkHrefInvalid: '{source}: href deve iniziare con "/" o essere un URL http o https valido.',
+    footerLinkLabelRequired: '{source}: l’etichetta del link non può essere vuota se href è impostato.',
+    footerFieldMustBeString: '{source}: footer.{field} deve essere una stringa se presente.',
+    footerShowSocialInvalid: '{source}: footer.show_social deve essere true o false se presente.',
+    missingLegalObject: '{source}: manca l’oggetto "legal".',
+    legalPagesMustBeObject: '{source}: "legal.pages" deve essere un oggetto.',
+    legalPageMustBeObject: '{source}: la pagina deve essere un oggetto.',
     itemsDirMissing: 'La cartella content/items non esiste.',
     itemsDirEmpty: 'content/items deve contenere almeno un file .yaml pezzo.',
     imageFileMustStartWithSlash: '{source}: image_file deve iniziare con "/".',

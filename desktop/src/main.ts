@@ -1,4 +1,7 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invoke, isTauri } from "@tauri-apps/api/core";
+
+const NOT_TAURI_MESSAGE =
+  "Apri Atelier Desktop come app nativa, non nel browser: cd desktop && npm run tauri dev";
 
 interface DesktopStatus {
   site_path: string | null;
@@ -40,6 +43,10 @@ function applyStatus(status: DesktopStatus) {
 }
 
 async function refreshStatus() {
+  if (!isTauri()) {
+    return;
+  }
+
   const status = await invoke<DesktopStatus>("get_status");
   applyStatus(status);
 }
@@ -60,6 +67,11 @@ async function withBusy(button: HTMLButtonElement, action: () => Promise<void>) 
 }
 
 pickFolderBtn.addEventListener("click", () => {
+  if (!isTauri()) {
+    showMessage(NOT_TAURI_MESSAGE, true);
+    return;
+  }
+
   withBusy(pickFolderBtn, async () => {
     clearMessage();
 
@@ -117,6 +129,15 @@ stopServerBtn.addEventListener("click", () => {
 });
 
 window.addEventListener("DOMContentLoaded", () => {
+  if (!isTauri()) {
+    pickFolderBtn.disabled = true;
+    startStudioBtn.disabled = true;
+    openPreviewBtn.disabled = true;
+    stopServerBtn.disabled = true;
+    showMessage(NOT_TAURI_MESSAGE, true);
+    return;
+  }
+
   refreshStatus().catch((error) => {
     showMessage(String(error), true);
   });

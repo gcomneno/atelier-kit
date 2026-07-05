@@ -4,6 +4,12 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.18 - 2026-07-05
+
+### Fixed
+
+- **Atelier Desktop**: detect non-Tauri context (browser on `localhost:1420`) and show a clear message instead of `invoke` TypeError; document that `npm run tauri dev` is required.
+
 ## v0.1.17 - 2026-07-05
 
 ### Fixed

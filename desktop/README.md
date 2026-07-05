@@ -55,6 +55,8 @@ npm install
 npm run tauri dev
 ```
 
+**Do not** open `http://localhost:1420` in a normal browser (`npm run dev` alone). The UI needs the Tauri webview to call the Rust backend (`invoke`). In a browser you will see `Cannot read properties of undefined (reading 'invoke')`.
+
 The shell window opens on port `1420`. Choose a client site folder (e.g. `../luna-argento`) and click **Open studio**.
 
 ## Production build

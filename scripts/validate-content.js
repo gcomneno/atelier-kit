@@ -100,6 +100,40 @@ function validateSite() {
 
   requireString(site, 'name', source);
   requireString(site, 'tagline', source);
+
+  if ('appearance' in site && site.appearance !== undefined) {
+    validateAppearance(site.appearance, source);
+  }
+}
+
+const APPEARANCE_PRESETS = new Set(['warm', 'neutral', 'dark', 'custom']);
+const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+
+/**
+ * @param {unknown} appearance
+ * @param {string} source
+ */
+function validateAppearance(appearance, source) {
+  if (!appearance || typeof appearance !== 'object' || Array.isArray(appearance)) {
+    fail(`${source}: site.appearance must be an object when present.`);
+    return;
+  }
+
+  if ('preset' in appearance && appearance.preset !== undefined) {
+    if (typeof appearance.preset !== 'string' || !APPEARANCE_PRESETS.has(appearance.preset)) {
+      fail(`${source}: site.appearance.preset must be one of: warm, neutral, dark, custom.`);
+    }
+  }
+
+  for (const field of ['base_color', 'accent_color', 'text_color']) {
+    if (!(field in appearance) || appearance[field] === undefined) {
+      continue;
+    }
+
+    if (typeof appearance[field] !== 'string' || !HEX_COLOR.test(appearance[field].trim())) {
+      fail(`${source}: site.appearance.${field} must be a hex color like #f8f0e4.`);
+    }
+  }
 }
 
 function validateCatalog() {

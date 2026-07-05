@@ -53,8 +53,8 @@
     overflow: hidden;
     color: inherit;
     text-decoration: none;
-    background: #fffaf2;
-    border: 1px solid #e4d8c7;
+    background: var(--site-card-color, #fffaf2);
+    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 14%, transparent);
     border-radius: 28px;
     box-shadow: 0 20px 70px rgb(36 27 18 / 0.08);
     transition:
@@ -71,7 +71,7 @@
 
   .image-wrap {
     aspect-ratio: 4 / 3;
-    background: #f3eadc;
+    background: color-mix(in srgb, var(--site-base-color, #f8f0e4) 88%, white);
   }
 
   img {

@@ -4,6 +4,7 @@ export function load() {
   const site = getSiteConfig();
 
   return {
-    lang: site.language || 'en'
+    lang: site.language || 'en',
+    appearance: site.appearance
   };
 }

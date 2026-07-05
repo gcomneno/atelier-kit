@@ -38,72 +38,87 @@
   <section class="meta-info" aria-labelledby="item-meta-heading">
     <h2 id="item-meta-heading">Details</h2>
 
-    <ul class="meta-tree">
+    <dl class="meta-list">
       {#each rows as row (row.path)}
-        <li class:branch={!row.value} style={`--depth: ${row.depth}`}>
-          <span class="meta-label">{row.label}</span>
-
-          {#if row.value}
-            <span class="meta-value">{row.value}</span>
-          {/if}
-        </li>
+        {#if row.value}
+          <div class="meta-row" style={`--depth: ${row.depth}`}>
+            <dt>{row.label}</dt>
+            <dd>{row.value}</dd>
+          </div>
+        {:else}
+          <div class="meta-group" style={`--depth: ${row.depth}`}>
+            <h3>{row.label}</h3>
+          </div>
+        {/if}
       {/each}
-    </ul>
+    </dl>
   </section>
 {/if}
 
 <style>
   .meta-info {
     display: grid;
-    gap: 0.85rem;
-    border: 1px solid rgba(20, 20, 20, 0.12);
+    gap: 1rem;
+    padding: 1.15rem 1.25rem;
     border-radius: 1rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent);
+    background: var(--site-surface-color, rgb(255 255 255 / 0.72));
   }
 
   h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 58%, transparent);
   }
 
-  .meta-tree {
+  .meta-list {
     display: grid;
-    gap: 0.55rem;
+    gap: 0;
     margin: 0;
-    padding: 0;
-    list-style: none;
   }
 
-  li {
+  .meta-row {
     display: grid;
-    grid-template-columns: minmax(8rem, 0.55fr) minmax(0, 1fr);
-    gap: 0.75rem;
+    grid-template-columns: minmax(7rem, 0.42fr) minmax(0, 1fr);
+    gap: 1rem;
     align-items: baseline;
-    padding-left: calc(var(--depth) * 1.15rem);
+    padding: 0.75rem 0;
+    padding-left: calc(var(--depth) * 0.85rem);
+    border-top: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 10%, transparent);
   }
 
-  li.branch {
-    grid-template-columns: 1fr;
-    margin-top: 0.35rem;
+  .meta-row:first-of-type {
+    border-top: 0;
+    padding-top: 0;
   }
 
-  li.branch .meta-label {
-    font-weight: 800;
+  .meta-group {
+    padding-top: calc(0.5rem + var(--depth) * 0.25rem);
+    padding-left: calc(var(--depth) * 0.85rem);
   }
 
-  .meta-label {
-    color: rgba(20, 20, 20, 0.62);
+  .meta-group h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  dt {
+    margin: 0;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 62%, transparent);
     font-size: 0.92rem;
   }
 
-  .meta-value {
-    color: rgba(20, 20, 20, 0.88);
+  dd {
+    margin: 0;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 88%, transparent);
     line-height: 1.45;
   }
 
   @media (max-width: 640px) {
-    li {
+    .meta-row {
       grid-template-columns: 1fr;
       gap: 0.2rem;
     }

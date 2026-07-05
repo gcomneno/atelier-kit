@@ -2,6 +2,7 @@
 
 import { fail } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
+import { appearanceFromForm, APPEARANCE_PRESET_OPTIONS, resolveSiteAppearance } from '$lib/site-appearance.js';
 import {
   checkboxEnabled,
   optionalField,
@@ -19,6 +20,17 @@ function isRecord(value) {
 function readString(record, key, fallback = '') {
   const value = record[key];
   return typeof value === 'string' ? value : fallback;
+}
+
+function loadAppearanceForm() {
+  const data = readProjectYaml('config/site.yaml');
+  const site = data.site;
+
+  if (!isRecord(site)) {
+    throw new Error('config/site.yaml is missing a site object.');
+  }
+
+  return resolveSiteAppearance(isRecord(site.appearance) ? site.appearance : undefined);
 }
 
 function loadSiteForm() {
@@ -78,7 +90,9 @@ export function load() {
 
   return {
     siteForm: loadSiteForm(),
-    contactForm: loadContactForm()
+    contactForm: loadContactForm(),
+    appearanceForm: loadAppearanceForm(),
+    appearancePresets: APPEARANCE_PRESET_OPTIONS
   };
 }
 
@@ -171,6 +185,54 @@ export const actions = {
         contactStatus: 'error',
         contactMessage: message,
         contactForm: loadContactForm()
+      });
+    }
+  },
+
+  saveAppearance: async ({ request }) => {
+    guardStudio();
+
+    const formData = await request.formData();
+
+    try {
+      const appearance = appearanceFromForm(
+        formData.get('preset'),
+        formData.get('base_color'),
+        formData.get('accent_color'),
+        formData.get('text_color')
+      );
+      const data = readProjectYaml('config/site.yaml');
+
+      if (!isRecord(data.site)) {
+        throw new Error('config/site.yaml is missing a site object.');
+      }
+
+      const site = { ...data.site };
+
+      site.appearance =
+        appearance.preset === 'custom'
+          ? {
+              preset: 'custom',
+              base_color: appearance.base_color,
+              accent_color: appearance.accent_color,
+              text_color: appearance.text_color
+            }
+          : { preset: appearance.preset };
+
+      writeProjectYaml('config/site.yaml', { site });
+      const validation = runStructuralValidation();
+
+      return {
+        appearanceStatus: validation.ok ? 'success' : 'warning',
+        appearanceMessage: saveMessage(validation),
+        appearanceForm: loadAppearanceForm()
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not save appearance.';
+      return fail(400, {
+        appearanceStatus: 'error',
+        appearanceMessage: message,
+        appearanceForm: loadAppearanceForm()
       });
     }
   }

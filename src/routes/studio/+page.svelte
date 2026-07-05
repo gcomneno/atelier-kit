@@ -1,20 +1,97 @@
 <script>
   import { enhance } from '$app/forms';
+  import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
+  import { APPEARANCE_PRESETS, isAppearancePreset } from '$lib/site-appearance.js';
 
   let { data, form } = $props();
 
   const siteForm = $derived(form?.siteForm ?? data.siteForm);
   const contactForm = $derived(form?.contactForm ?? data.contactForm);
+  const appearanceForm = $derived(form?.appearanceForm ?? data.appearanceForm);
+  const appearancePresets = $derived(data.appearancePresets);
+  let presetDraft = $state('warm');
+
+  $effect(() => {
+    presetDraft = appearanceForm.preset;
+  });
+
+  const showCustomColors = $derived(presetDraft === 'custom');
+  const previewColors = $derived(
+    presetDraft === 'custom'
+      ? appearanceForm
+      : isAppearancePreset(presetDraft) && presetDraft !== 'custom'
+        ? APPEARANCE_PRESETS[presetDraft]
+        : appearanceForm
+  );
 </script>
 
 <svelte:head>
   <title>Studio · Site settings</title>
 </svelte:head>
 
+<StudioAccessGuide />
+
 <p class="intro">
-  Edit the public site identity and contact actions here. Changes are saved directly to the project files.
+  Edit the public site identity, appearance and contact actions here. Changes are saved directly to the project files.
   After saving, refresh the preview tab if the homepage does not update immediately.
 </p>
+
+<section class="panel" aria-labelledby="appearance-settings-title">
+  <div class="panel-heading">
+    <h2 id="appearance-settings-title">Site appearance</h2>
+    <p>Background and text colors for the public showcase.</p>
+  </div>
+
+  <form method="POST" action="?/saveAppearance" use:enhance class="appearance-form">
+    <label>
+      Color preset
+      <select name="preset" bind:value={presetDraft}>
+        {#each appearancePresets as preset}
+          <option value={preset.id}>{preset.label}</option>
+        {/each}
+      </select>
+    </label>
+
+    {#if showCustomColors}
+      <div class="color-fields">
+        <label>
+          Base background
+          <input name="base_color" type="color" value={appearanceForm.base_color} />
+        </label>
+
+        <label>
+          Accent glow
+          <input name="accent_color" type="color" value={appearanceForm.accent_color} />
+        </label>
+
+        <label>
+          Text color
+          <input name="text_color" type="color" value={appearanceForm.text_color} />
+        </label>
+      </div>
+    {:else}
+      <input type="hidden" name="base_color" value={appearanceForm.base_color} />
+      <input type="hidden" name="accent_color" value={appearanceForm.accent_color} />
+      <input type="hidden" name="text_color" value={appearanceForm.text_color} />
+    {/if}
+
+    <div
+      class="appearance-preview"
+      style={`--preview-base: ${previewColors.base_color}; --preview-accent: ${previewColors.accent_color}; --preview-text: ${previewColors.text_color}`}
+      aria-hidden="true"
+    >
+      <span>Preview</span>
+    </div>
+
+    <div class="actions">
+      <button type="submit">Save appearance</button>
+    </div>
+
+    {#if form?.appearanceMessage}
+      <p class={`status ${form.appearanceStatus || 'info'}`}>{form.appearanceMessage}</p>
+    {/if}
+  </form>
+</section>
 
 <section class="panel" aria-labelledby="site-settings-title">
   <div class="panel-heading">
@@ -155,7 +232,8 @@ npm run publish -- --deploy</code></pre>
     color: #7d684f;
   }
 
-  form {
+  form,
+  .appearance-form {
     display: grid;
     gap: 1rem;
   }
@@ -190,8 +268,46 @@ npm run publish -- --deploy</code></pre>
     font-size: 0.85rem;
   }
 
+  .color-fields {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  }
+
+  input[type='color'] {
+    width: 100%;
+    height: 2.75rem;
+    padding: 0.2rem;
+    cursor: pointer;
+  }
+
+  .appearance-preview {
+    display: grid;
+    place-items: center;
+    min-height: 4.5rem;
+    border-radius: 0.85rem;
+    border: 1px solid rgb(47 40 31 / 0.12);
+    color: var(--preview-text);
+    background:
+      radial-gradient(
+        circle at top left,
+        color-mix(in srgb, var(--preview-accent) 35%, transparent),
+        transparent 12rem
+      ),
+      var(--preview-base);
+  }
+
+  .appearance-preview span {
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--preview-base) 72%, white);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
   input,
-  textarea {
+  textarea,
+  select {
     width: 100%;
     padding: 0.7rem 0.8rem;
     border: 1px solid rgb(47 40 31 / 0.18);

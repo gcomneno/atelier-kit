@@ -30,6 +30,7 @@ Studio write routes remain disabled outside development unless `ATELIER_STUDIO=1
 The studio edits:
 
 - site identity (`config/site.yaml`)
+- site appearance — background and text colors (`config/site.yaml` → `appearance`)
 - contact actions (`config/contact.yaml`)
 - about page (`config/about.yaml`)
 - catalog labels and visible fields (`config/catalog.yaml`)
@@ -56,7 +57,7 @@ The studio does **not** yet:
 
 | Route | Purpose |
 |---|---|
-| `/studio` | Site identity and contact settings |
+| `/studio` | Site identity, appearance, contact settings |
 | `/studio/about` | About page |
 | `/studio/catalog` | Catalog vocabulary and visible fields |
 | `/studio/items` | List items |
@@ -80,6 +81,32 @@ static/images/items/anello-onda.jpg
 ```yaml
 image_file: /images/items/anello-onda.jpg
 ```
+
+## Site appearance
+
+From `/studio`, choose a color preset or set custom base, accent and text colors. Values are saved under `config/site.yaml`:
+
+```yaml
+site:
+  name: "My Studio"
+  appearance:
+    preset: warm
+```
+
+Presets: `warm` (default), `neutral`, `dark`, or `custom` with explicit hex colors.
+
+## Recommended access
+
+The studio is **local authoring only**. Follow these rules:
+
+1. Start with `npm run studio:launch` from the client site folder (not from Atelier-Kit itself).
+2. Bind to localhost only — do not expose the dev server on your network.
+3. `/studio` write routes are disabled in production builds. Never set `ATELIER_STUDIO=1` on Vercel or other hosted environments.
+4. Preview visitor pages at `http://127.0.0.1:5173/` in a separate tab after saving.
+5. Publish with `npm run publish -- --deploy` when ready.
+6. Keep Git backups before large edits. Item photos live in `static/images/items/`.
+
+The studio home and readiness pages repeat this guidance in the UI.
 
 ## What the studio does not do
 

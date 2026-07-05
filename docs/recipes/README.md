@@ -19,6 +19,7 @@ Use it to collect project identity, audience, tone, first items, collections, Si
 - [Handmade object showcase](handmade-object-showcase.md)
 - [Artist portfolio](artist-portfolio.md)
 - [Jewelry mini-catalog](jewelry-mini-catalog.md)
+- [Collector showcase](collector-showcase.md) — cards, figurines, swaps via Signal Clouds + offline meetup
 - [Small collection launch](small-collection-launch.md)
 - [No-textarea contact flow](no-textarea-contact-flow.md)
 - [Private preview before public launch](private-preview.md)

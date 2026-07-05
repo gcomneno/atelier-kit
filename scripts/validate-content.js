@@ -1,8 +1,11 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { parse } from 'yaml';
+import { createTranslator } from '../src/lib/i18n/index.js';
+import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
 
 const ROOT = process.cwd();
+const t = createTranslator(loadOperatorLocale());
 
 function fail(message) {
   console.error(`ERROR: ${message}`);
@@ -400,4 +403,4 @@ if (process.exitCode) {
   process.exit();
 }
 
-console.log('Atelier-Kit content validation OK.');
+console.log(t('validate.ok'));

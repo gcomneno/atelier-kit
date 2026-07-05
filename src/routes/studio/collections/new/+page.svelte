@@ -1,5 +1,8 @@
 <script>
   import { enhance } from '$app/forms';
+  import { useI18n } from '$lib/i18n/context.js';
+
+  const t = useI18n();
 
   let { data, form } = $props();
 
@@ -16,47 +19,50 @@
 </script>
 
 <svelte:head>
-  <title>Studio · New collection</title>
+  <title>{t('studio.collectionsNew.pageTitle')}</title>
 </svelte:head>
 
 <p class="intro">
-  Create a new collection file under <code>content/collections/</code>. Use lowercase letters, numbers and hyphens for the collection id, for example <code>summer-pieces</code>.
+  {t('studio.collectionsNew.intro')}
 </p>
 
 <section class="panel">
   <div class="panel-heading">
-    <h2>New collection</h2>
-    <p>Choose which items belong in this curated group.</p>
+    <h2>{t('studio.collectionsNew.title')}</h2>
+    <p>{t('studio.collectionsNew.introPanel')}</p>
   </div>
 
   <form method="POST" action="?/createCollection" use:enhance class="studio-form">
     <label>
-      Collection id
-      <span class="hint">Cannot be changed later. Becomes the file name and URL slug.</span>
+      {t('studio.collectionsNew.id')}
+      <span class="hint">{t('studio.collectionsNew.idHint')}</span>
       <input
         name="id"
         value={collectionForm.id}
         required
         pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-        title="Use lowercase letters, numbers and hyphens only."
+        title={t('studio.collectionsNew.idPattern')}
       />
     </label>
 
     <label>
-      Collection title
+      {t('studio.collectionsNew.titleField')}
       <input name="title" value={collectionForm.title} required />
     </label>
 
     <label>
-      Collection description
+      {t('studio.collectionsNew.description')}
       <textarea name="description" rows="4" required>{collectionForm.description}</textarea>
     </label>
 
     <fieldset>
-      <legend>Included items</legend>
+      <legend>{t('studio.collectionsNew.includedItems')}</legend>
 
       {#if items.length === 0}
-        <p class="hint">No items available. <a href="/studio/items/new">Create an item first</a>.</p>
+        <p class="hint">
+          {t('studio.collectionsNew.noItems')}
+          <a href="/studio/items/new">{t('studio.collectionsNew.createItemFirst')}</a>.
+        </p>
       {:else}
         <div class="checkbox-list">
           {#each items as item}
@@ -76,8 +82,8 @@
     </fieldset>
 
     <div class="actions">
-      <button type="submit" disabled={items.length === 0}>Create collection</button>
-      <a class="secondary-link" href="/studio/collections">Cancel</a>
+      <button type="submit" disabled={items.length === 0}>{t('studio.collectionsNew.create')}</button>
+      <a class="secondary-link" href="/studio/collections">{t('studio.collectionsNew.cancel')}</a>
     </div>
 
     {#if form?.createMessage}

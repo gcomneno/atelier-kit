@@ -1,10 +1,14 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { parse } from 'yaml';
+import { createTranslator } from '../src/lib/i18n/index.js';
+import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
 
 const ROOT = process.cwd();
 const STRICT_MODE = process.argv.includes('--strict');
 const VERBOSE_MODE = process.argv.includes('--verbose');
+const locale = loadOperatorLocale();
+const t = createTranslator(locale);
 
 /** @type {{ source: string, title: string, problem: string, action: string, detail?: string, technical?: string }[]} */
 const warnings = [];
@@ -40,9 +44,9 @@ function readYaml(relativePath) {
   if (!existsSync(absolutePath)) {
     addWarning({
       source: relativePath,
-      title: 'Missing file',
-      problem: 'A required content file is missing.',
-      action: 'Restore the file or recreate the site content from the Atelier-Kit docs.',
+      title: t('doctor.missingFile.title'),
+      problem: t('doctor.missingFile.problem'),
+      action: t('doctor.missingFile.action'),
       technical: 'File does not exist.'
     });
     return null;
@@ -55,9 +59,9 @@ function readYaml(relativePath) {
     if (!isRecord(data)) {
       addWarning({
         source: relativePath,
-        title: 'Unreadable file',
-        problem: 'This file could not be read as a normal content file.',
-        action: 'Open the file and check that the content structure matches the other config or item files.',
+        title: t('doctor.unreadableFile.title'),
+        problem: t('doctor.unreadableFile.problemStructure'),
+        action: t('doctor.unreadableFile.actionStructure'),
         technical: 'File does not contain a YAML object.'
       });
       return null;
@@ -67,9 +71,9 @@ function readYaml(relativePath) {
   } catch (error) {
     addWarning({
       source: relativePath,
-      title: 'Unreadable file',
-      problem: 'This file contains a formatting problem.',
-      action: 'Open the file and fix the formatting issue shown below, or compare it with a working example file.',
+      title: t('doctor.unreadableFile.title'),
+      problem: t('doctor.unreadableFile.problemFormat'),
+      action: t('doctor.unreadableFile.actionFormat'),
       detail: error.message,
       technical: `Could not read or parse YAML: ${error.message}`
     });
@@ -105,51 +109,51 @@ function textLooksStarter(value) {
   ].some((needle) => text.includes(needle));
 }
 
-const FIELD_LABELS = {
-  'site.name': 'Site title',
-  'site.tagline': 'Site tagline',
-  'site.notice': 'Site notice',
-  'site.footer_note': 'Footer note',
-  'site.language': 'Site language',
-  'contact.email.label': 'Email button label',
-  'contact.email.address': 'Contact email',
-  'contact.email.subject_prefix': 'Email subject prefix',
-  'contact.whatsapp.label': 'WhatsApp button label',
-  'contact.whatsapp.phone': 'WhatsApp phone number',
-  'item.id': 'Item id',
-  'item.title': 'Item title',
-  'item.subtitle': 'Item subtitle',
-  'item.description': 'Item description',
-  'item.image_file': 'Item image path',
-  'item.image_alt': 'Image description',
-  'item.notice': 'Item notice',
-  'item.status': 'Item status'
+const FIELD_LABEL_KEYS = {
+  'site.name': 'doctor.fields.siteName',
+  'site.tagline': 'doctor.fields.siteTagline',
+  'site.notice': 'doctor.fields.siteNotice',
+  'site.footer_note': 'doctor.fields.siteFooter',
+  'site.language': 'doctor.fields.siteLanguage',
+  'contact.email.label': 'doctor.fields.emailLabel',
+  'contact.email.address': 'doctor.fields.emailAddress',
+  'contact.email.subject_prefix': 'doctor.fields.emailSubject',
+  'contact.whatsapp.label': 'doctor.fields.whatsappLabel',
+  'contact.whatsapp.phone': 'doctor.fields.whatsappPhone',
+  'item.id': 'doctor.fields.itemId',
+  'item.title': 'doctor.fields.itemTitle',
+  'item.subtitle': 'doctor.fields.itemSubtitle',
+  'item.description': 'doctor.fields.itemDescription',
+  'item.image_file': 'doctor.fields.itemImageAlt',
+  'item.image_alt': 'doctor.fields.itemImageAlt',
+  'item.notice': 'doctor.fields.itemNotice',
+  'item.status': 'doctor.fields.itemStatus'
 };
 
 function labelForPath(pathLabel) {
-  if (FIELD_LABELS[pathLabel]) {
-    return FIELD_LABELS[pathLabel];
+  if (FIELD_LABEL_KEYS[pathLabel]) {
+    return t(FIELD_LABEL_KEYS[pathLabel]);
   }
 
   if (pathLabel.startsWith('signal_clouds[')) {
     if (pathLabel.endsWith('.question')) {
-      return 'Visitor question';
+      return t('doctor.fields.signalQuestion');
     }
 
     if (pathLabel.endsWith('.hint')) {
-      return 'Visitor question hint';
+      return t('doctor.fields.signalHint');
     }
 
     if (pathLabel.includes('.options[') && pathLabel.endsWith('.label')) {
-      return 'Answer choice';
+      return t('doctor.fields.signalAnswer');
     }
 
     if (pathLabel.endsWith('.id')) {
-      return 'Visitor question id';
+      return t('doctor.fields.signalQuestionId');
     }
   }
 
-  return 'Content field';
+  return t('doctor.fields.contentField');
 }
 
 function defaultAction(source, title) {
@@ -484,7 +488,7 @@ function inspectItems() {
 }
 
 function printWarnings() {
-  console.log(`Atelier-Kit content doctor found ${warnings.length} thing(s) to review before publishing:`);
+  console.log(t('doctor.foundCount', { count: warnings.length }));
   console.log('');
 
   warnings.forEach((warning, index) => {
@@ -494,10 +498,10 @@ function printWarnings() {
     }
 
     console.log(`${index + 1}. ${warning.title}`);
-    console.log(`   File: ${warning.source}`);
+    console.log(t('doctor.fileLabel', { source: warning.source }));
 
     if (warning.detail) {
-      console.log(`   Current: "${warning.detail}"`);
+      console.log(t('doctor.currentLabel', { detail: warning.detail }));
     }
 
     console.log(`   ${warning.problem}`);
@@ -509,10 +513,10 @@ function printWarnings() {
     console.log('');
   }
 
-  console.log('These notes are reminders, not errors. The site may still run locally.');
-  console.log('Check structure with: npm run content:validate');
-  console.log('Fail on these notes before launch with: npm run content:doctor -- --strict');
-  console.log('Show technical details with: npm run content:doctor -- --verbose');
+  console.log(t('doctor.footerReminders'));
+  console.log(t('doctor.footerValidate'));
+  console.log(t('doctor.footerStrict'));
+  console.log(t('doctor.footerVerbose'));
 }
 
 inspectSite();
@@ -521,7 +525,7 @@ inspectSignalClouds();
 inspectItems();
 
 if (warnings.length === 0) {
-  console.log('Atelier-Kit content doctor found nothing obvious to review before publishing.');
+  console.log(t('doctor.foundNothing'));
   process.exit(0);
 }
 

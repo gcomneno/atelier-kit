@@ -10,6 +10,7 @@ import {
   normalizeItemPreset,
   titleFromItemId
 } from '$lib/item-presets.js';
+import { translate } from '$lib/i18n/index.js';
 
 const ROOT = process.cwd();
 const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -58,10 +59,11 @@ export function runStructuralValidation() {
 /**
  * @param {FormDataEntryValue | null} value
  * @param {string} label
+ * @param {string} [locale]
  */
-export function requiredField(value, label) {
+export function requiredField(value, label, locale = 'en') {
   if (typeof value !== 'string' || value.trim() === '') {
-    throw new Error(`${label} is required.`);
+    throw new Error(translate('errors.required', locale, { label }));
   }
 
   return value.trim();
@@ -86,22 +88,23 @@ export function checkboxEnabled(value) {
   return value === 'on' || value === 'true' || value === '1';
 }
 
-/** @param {{ ok: boolean, output: string }} validation */
-export function validationMessage(validation) {
+/** @param {{ ok: boolean, output: string }} validation @param {string} [locale] */
+export function validationMessage(validation, locale = 'en') {
   if (validation.ok) {
-    return 'Saved successfully. Structural validation passed. Refresh the preview tab to see changes.';
+    return translate('server.saveSuccess', locale);
   }
 
-  return `Saved, but validation reported a problem:\n${validation.output}`;
+  return translate('server.saveValidationProblem', locale, { output: validation.output });
 }
 
 /**
  * @param {string} id
  * @param {string} [label]
+ * @param {string} [locale]
  */
-export function assertContentId(id, label = 'Id') {
+export function assertContentId(id, label = 'Id', locale = 'en') {
   if (!ID_PATTERN.test(id)) {
-    throw new Error(`${label} must use lowercase letters, numbers and hyphens only.`);
+    throw new Error(translate('errors.idFormat', locale, { label }));
   }
 }
 
@@ -150,14 +153,15 @@ export function itemRecordExists(id) {
 
 /**
  * @param {{ id: string, title: string, preset?: string, description?: string, notice?: string }} input
+ * @param {string} [locale]
  */
-export function createItemRecord(input) {
-  const id = requiredField(String(input.id ?? ''), 'Item id');
-  const title = requiredField(String(input.title ?? ''), 'Item title').trim() || titleFromItemId(id);
+export function createItemRecord(input, locale = 'en') {
+  const id = requiredField(String(input.id ?? ''), translate('fields.itemId', locale), locale);
+  const title = requiredField(String(input.title ?? ''), translate('fields.itemTitle', locale), locale).trim() || titleFromItemId(id);
   const preset = normalizeItemPreset(String(input.preset ?? 'default'));
 
   if (itemRecordExists(id)) {
-    throw new Error(`An item with id "${id}" already exists.`);
+    throw new Error(translate('errors.itemExists', locale, { id }));
   }
 
   mkdirSync(path.join(ROOT, 'content/items'), { recursive: true });
@@ -223,24 +227,29 @@ export function collectionRecordExists(id) {
 
 /**
  * @param {{ id: string, title: string, description: string, items?: string[] }} input
+ * @param {string} [locale]
  */
-export function createCollectionRecord(input) {
-  const id = requiredField(String(input.id ?? ''), 'Collection id');
-  assertContentId(id, 'Collection id');
+export function createCollectionRecord(input, locale = 'en') {
+  const id = requiredField(String(input.id ?? ''), translate('fields.collectionId', locale), locale);
+  assertContentId(id, translate('fields.collectionId', locale), locale);
 
   const titleInput = String(input.title ?? '').trim();
   const title = titleInput || titleFromItemId(id);
-  const description = requiredField(String(input.description ?? ''), 'Collection description');
+  const description = requiredField(
+    String(input.description ?? ''),
+    translate('fields.collectionDescription', locale),
+    locale
+  );
   const items = Array.isArray(input.items)
     ? input.items.map((itemId) => String(itemId).trim()).filter(Boolean)
     : [];
 
   if (collectionRecordExists(id)) {
-    throw new Error(`A collection with id "${id}" already exists.`);
+    throw new Error(translate('errors.collectionExists', locale, { id }));
   }
 
   if (items.length === 0) {
-    throw new Error('Choose at least one item for this collection.');
+    throw new Error(translate('errors.collectionNeedsItems', locale));
   }
 
   mkdirSync(path.join(ROOT, 'content/collections'), { recursive: true });
@@ -309,19 +318,20 @@ export function runContentDoctorReport() {
   const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
 
   return {
-    ok: output.includes('found nothing obvious'),
+    ok: output.includes('found nothing obvious') || output.includes('nulla di evidente'),
     output
   };
 }
 
 /**
  * @param {string} filename
+ * @param {string} [locale]
  */
-function imageExtensionFromName(filename) {
+function imageExtensionFromName(filename, locale = 'en') {
   const match = filename.toLowerCase().match(/\.([a-z0-9]+)$/);
 
   if (!match || !IMAGE_EXTENSIONS.has(match[1])) {
-    throw new Error('Use a JPG, PNG or WebP image.');
+    throw new Error(translate('errors.imageType', locale));
   }
 
   return match[1] === 'jpeg' ? 'jpg' : match[1];
@@ -330,19 +340,20 @@ function imageExtensionFromName(filename) {
 /**
  * @param {string} id
  * @param {File} file
+ * @param {string} [locale]
  */
-export async function saveItemImageUpload(id, file) {
-  assertContentId(id, 'Item id');
+export async function saveItemImageUpload(id, file, locale = 'en') {
+  assertContentId(id, translate('fields.itemId', locale), locale);
 
   if (!(file instanceof File) || file.size === 0) {
-    throw new Error('Choose an image file to upload.');
+    throw new Error(translate('errors.imageRequired', locale));
   }
 
   if (file.size > MAX_IMAGE_BYTES) {
-    throw new Error('Image must be 5 MB or smaller.');
+    throw new Error(translate('errors.imageSize', locale));
   }
 
-  const extension = imageExtensionFromName(file.name);
+  const extension = imageExtensionFromName(file.name, locale);
   const imagesDir = path.join(ROOT, 'static/images/items');
   mkdirSync(imagesDir, { recursive: true });
 
@@ -356,17 +367,18 @@ export async function saveItemImageUpload(id, file) {
 
 /**
  * @param {File} file
+ * @param {string} [locale]
  */
-export async function saveSiteBackgroundUpload(file) {
+export async function saveSiteBackgroundUpload(file, locale = 'en') {
   if (!(file instanceof File) || file.size === 0) {
-    throw new Error('Choose an image file to upload.');
+    throw new Error(translate('errors.imageRequired', locale));
   }
 
   if (file.size > MAX_IMAGE_BYTES) {
-    throw new Error('Image must be 5 MB or smaller.');
+    throw new Error(translate('errors.imageSize', locale));
   }
 
-  const extension = imageExtensionFromName(file.name);
+  const extension = imageExtensionFromName(file.name, locale);
   const siteImagesDir = path.join(ROOT, 'static/images/site');
   mkdirSync(siteImagesDir, { recursive: true });
 
@@ -383,12 +395,12 @@ export function defaultItemImagePath(id) {
   return `/images/items/${id}.jpg`;
 }
 
-export function loadCatalogForm() {
+export function loadCatalogForm(locale = 'en') {
   const data = readProjectYaml('config/catalog.yaml');
   const catalog = data.catalog;
 
   if (!catalog || typeof catalog !== 'object' || Array.isArray(catalog)) {
-    throw new Error('config/catalog.yaml is missing a catalog object.');
+    throw new Error(translate('errors.missingCatalog', locale));
   }
 
   const fields = catalog.fields && typeof catalog.fields === 'object' ? catalog.fields : {};
@@ -407,17 +419,18 @@ export function loadCatalogForm() {
 
 /**
  * @param {Record<string, unknown>} catalogForm
+ * @param {string} [locale]
  */
-export function writeCatalogForm(catalogForm) {
+export function writeCatalogForm(catalogForm, locale = 'en') {
   const singular = String(catalogForm.item_name_singular ?? '').trim();
   const plural = String(catalogForm.item_name_plural ?? '').trim();
 
   if (singular === '') {
-    throw new Error('Item name (singular) is required.');
+    throw new Error(translate('errors.required', locale, { label: translate('fields.itemNameSingular', locale) }));
   }
 
   if (plural === '') {
-    throw new Error('Item name (plural) is required.');
+    throw new Error(translate('errors.required', locale, { label: translate('fields.itemNamePlural', locale) }));
   }
 
   writeProjectYaml('config/catalog.yaml', {
@@ -436,7 +449,7 @@ export function writeCatalogForm(catalogForm) {
   });
 }
 
-export function loadAboutForm() {
+export function loadAboutForm(locale = 'en') {
   const aboutPath = path.join(ROOT, 'config/about.yaml');
 
   if (!existsSync(aboutPath)) {
@@ -453,7 +466,7 @@ export function loadAboutForm() {
   const about = data.about;
 
   if (!about || typeof about !== 'object' || Array.isArray(about)) {
-    throw new Error('config/about.yaml is missing an about object.');
+    throw new Error(translate('errors.missingAbout', locale));
   }
 
   const sections = Array.isArray(about.sections) ? about.sections : [];
@@ -470,8 +483,9 @@ export function loadAboutForm() {
 
 /**
  * @param {Record<string, unknown>} aboutForm
+ * @param {string} [locale]
  */
-export function writeAboutForm(aboutForm) {
+export function writeAboutForm(aboutForm, locale = 'en') {
   const enabled = aboutForm.enabled === true;
   const title = optionalField(String(aboutForm.title ?? ''));
   const intro = optionalField(String(aboutForm.intro ?? ''));
@@ -479,7 +493,7 @@ export function writeAboutForm(aboutForm) {
   const sectionBody = optionalField(String(aboutForm.section_body ?? ''));
 
   if (enabled && title === '') {
-    throw new Error('About page title is required when the page is enabled.');
+    throw new Error(translate('errors.aboutTitleRequired', locale));
   }
 
   /** @type {Record<string, unknown>} */
@@ -501,12 +515,12 @@ export function writeAboutForm(aboutForm) {
   writeProjectYaml('config/about.yaml', { about });
 }
 
-export function readSignalCloudRecords() {
+export function readSignalCloudRecords(locale = 'en') {
   const data = readProjectYaml('config/signal-clouds.yaml');
   const clouds = data.signal_clouds;
 
   if (!Array.isArray(clouds)) {
-    throw new Error('config/signal-clouds.yaml is missing signal_clouds.');
+    throw new Error(translate('errors.missingSignalClouds', locale));
   }
 
   return clouds;

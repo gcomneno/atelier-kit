@@ -1,29 +1,35 @@
+<script>
+  import { useI18n } from '$lib/i18n/context.js';
+
+  const t = useI18n();
+</script>
+
 <section class="access-guide" aria-labelledby="access-guide-title">
   <div class="panel-heading">
-    <h2 id="access-guide-title">Recommended access</h2>
-    <p>How to use the studio safely and publish changes online.</p>
+    <h2 id="access-guide-title">{t('studio.accessGuide.title')}</h2>
+    <p>{t('studio.accessGuide.intro')}</p>
   </div>
 
   <ul>
     <li>
-      <strong>Local only.</strong>
-      Start with <code>npm run studio:launch</code> from the site folder. Do not expose the dev server on your network.
+      <strong>{t('studio.common.localOnly')}</strong>
+      {t('studio.accessGuide.localOnly')}
     </li>
     <li>
-      <strong>Production is read-only.</strong>
-      <code>/studio</code> is disabled on the live Vercel site. Never set <code>ATELIER_STUDIO=1</code> in production.
+      <strong>{t('studio.common.productionReadonly')}</strong>
+      {t('studio.accessGuide.productionReadonly')}
     </li>
     <li>
-      <strong>Preview first.</strong>
-      Open <a href="/" target="_blank" rel="noreferrer">Preview</a> in another tab to check visitor-facing pages after each save.
+      <strong>{t('studio.common.previewFirst')}</strong>
+      {t('studio.accessGuide.previewFirst')}
     </li>
     <li>
-      <strong>Publish when ready.</strong>
-      Run <code>npm run publish -- --deploy</code> from the project folder to push changes to Vercel.
+      <strong>{t('studio.common.publishWhenReady')}</strong>
+      {t('studio.accessGuide.publishWhenReady')}
     </li>
     <li>
-      <strong>Keep backups.</strong>
-      Commit to Git (or copy the folder) before large edits. Photos live in <code>static/images/items/</code>.
+      <strong>{t('studio.common.keepBackups')}</strong>
+      {t('studio.accessGuide.keepBackups')}
     </li>
   </ul>
 </section>
@@ -58,17 +64,5 @@
 
   li strong {
     color: #2f281f;
-  }
-
-  code {
-    font-size: 0.88em;
-    padding: 0.1rem 0.35rem;
-    border-radius: 0.35rem;
-    background: rgb(47 40 31 / 0.08);
-  }
-
-  a {
-    color: #5a4632;
-    font-weight: 600;
   }
 </style>

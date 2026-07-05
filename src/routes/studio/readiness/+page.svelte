@@ -1,25 +1,27 @@
 <script>
   import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
+  import { useI18n } from '$lib/i18n/context.js';
+
+  const t = useI18n();
 
   let { data } = $props();
 </script>
 
 <svelte:head>
-  <title>Studio · Publish readiness</title>
+  <title>{t('studio.readiness.pageTitle')}</title>
 </svelte:head>
 
 <StudioAccessGuide />
 
 <p class="intro">
-  Content Doctor checks for placeholder text, missing images and other pre-launch notes in plain language.
-  Run the publish script when you are ready to build and deploy.
+  {t('studio.readiness.intro')}
 </p>
 
 <section class="panel">
   <div class="panel-heading">
-    <h2>Content Doctor</h2>
+    <h2>{t('studio.readiness.doctorTitle')}</h2>
     <p class={data.report.ok ? 'ok' : 'review'}>
-      {data.report.ok ? 'Nothing obvious to review.' : 'Review the notes below before publishing.'}
+      {data.report.ok ? t('studio.readiness.doctorOk') : t('studio.readiness.doctorReview')}
     </p>
   </div>
 
@@ -28,8 +30,8 @@
 
 <section class="panel">
   <div class="panel-heading">
-    <h2>Publish commands</h2>
-    <p>From the project folder:</p>
+    <h2>{t('studio.readiness.publishTitle')}</h2>
+    <p>{t('studio.readiness.publishIntro')}</p>
   </div>
 
   <pre><code>npm run publish

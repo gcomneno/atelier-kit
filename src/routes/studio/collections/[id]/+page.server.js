@@ -12,6 +12,8 @@ import {
   validationMessage,
   writeCollectionRecord
 } from '$lib/server/studio-io.js';
+import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
+import { translate } from '$lib/i18n/index.js';
 
 function readString(record, key, fallback = '') {
   const value = record[key];
@@ -33,16 +35,18 @@ function loadCollectionForm(id) {
 
 export function load({ params }) {
   guardStudio();
+  const locale = getOperatorLocale();
+  const t = getOperatorTranslator();
 
   try {
-    assertContentId(params.id, 'Collection id');
+    assertContentId(params.id, t('fields.collectionId'), locale);
 
     return {
       collectionForm: loadCollectionForm(params.id),
       items: listItemSummaries()
     };
   } catch {
-    error(404, 'Collection not found');
+    error(404, t('server.collectionNotFound'));
   }
 }
 
@@ -51,19 +55,22 @@ export const actions = {
   saveCollection: async ({ params, request }) => {
     guardStudio();
 
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
+
     try {
-      assertContentId(params.id, 'Collection id');
+      assertContentId(params.id, t('fields.collectionId'), locale);
       const formData = await request.formData();
       const itemIds = formData.getAll('item_ids').map((value) => String(value).trim()).filter(Boolean);
 
       if (itemIds.length === 0) {
-        throw new Error('Choose at least one item for this collection.');
+        throw new Error(translate('errors.collectionNeedsItems', locale));
       }
 
       const collection = {
         id: params.id,
-        title: requiredField(formData.get('title'), 'Collection title'),
-        description: requiredField(formData.get('description'), 'Collection description'),
+        title: requiredField(formData.get('title'), t('fields.collectionTitle'), locale),
+        description: requiredField(formData.get('description'), t('fields.collectionDescription'), locale),
         items: itemIds
       };
 
@@ -72,12 +79,12 @@ export const actions = {
 
       return {
         collectionStatus: validation.ok ? 'success' : 'warning',
-        collectionMessage: validationMessage(validation),
+        collectionMessage: validationMessage(validation, locale),
         collectionForm: loadCollectionForm(params.id),
         items: listItemSummaries()
       };
     } catch (saveError) {
-      const message = saveError instanceof Error ? saveError.message : 'Could not save collection.';
+      const message = saveError instanceof Error ? saveError.message : t('server.saveCollectionError');
 
       try {
         return fail(400, {

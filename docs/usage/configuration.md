@@ -34,7 +34,7 @@ Example:
 site:
   name: "My Handmade Studio"
   tagline: "Small handmade objects for quiet homes"
-  language: "en"
+  language: "en"   # operator UI locale (en, it) and <html lang>
   notice: "Demo content. Replace before publishing."
   footer_note: "Built with Atelier-Kit"
 ```
@@ -43,7 +43,7 @@ Fields:
 
 - `name` appears as the main site name.
 - `tagline` appears near the site heading.
-- `language` sets the site language metadata.
+- `language` sets `<html lang="…">` **and** the studio / CLI operator UI locale (`en`, `it`, `it-IT`, etc.).
 - `notice` can be used for demo warnings or short publishing notes.
 - `footer_note` appears in the footer.
 

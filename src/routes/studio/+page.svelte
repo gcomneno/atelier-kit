@@ -1,7 +1,10 @@
 <script>
   import { enhance } from '$app/forms';
   import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
+  import { useI18n } from '$lib/i18n/context.js';
   import { APPEARANCE_PRESETS, isAppearancePreset } from '$lib/site-appearance.js';
+
+  const t = useI18n();
 
   let { data, form } = $props();
 
@@ -26,20 +29,19 @@
 </script>
 
 <svelte:head>
-  <title>Studio · Site settings</title>
+  <title>{t('studio.site.pageTitle')}</title>
 </svelte:head>
 
 <StudioAccessGuide />
 
 <p class="intro">
-  Edit the public site identity, appearance and contact actions here. Changes are saved directly to the project files.
-  After saving, refresh the preview tab if the homepage does not update immediately.
+  {t('studio.site.intro')}
 </p>
 
 <section class="panel" aria-labelledby="appearance-settings-title">
   <div class="panel-heading">
-    <h2 id="appearance-settings-title">Site appearance</h2>
-    <p>Background colors and optional background image for the public showcase.</p>
+    <h2 id="appearance-settings-title">{t('studio.site.appearance.title')}</h2>
+    <p>{t('studio.site.appearance.intro')}</p>
   </div>
 
   <form
@@ -50,7 +52,7 @@
     class="appearance-form"
   >
     <label>
-      Color preset
+      {t('studio.site.appearance.preset')}
       <select name="preset" bind:value={presetDraft}>
         {#each appearancePresets as preset}
           <option value={preset.id}>{preset.label}</option>
@@ -61,17 +63,17 @@
     {#if showCustomColors}
       <div class="color-fields">
         <label>
-          Base background
+          {t('studio.site.appearance.baseColor')}
           <input name="base_color" type="color" value={appearanceForm.base_color} />
         </label>
 
         <label>
-          Accent glow
+          {t('studio.site.appearance.accentColor')}
           <input name="accent_color" type="color" value={appearanceForm.accent_color} />
         </label>
 
         <label>
-          Text color
+          {t('studio.site.appearance.textColor')}
           <input name="text_color" type="color" value={appearanceForm.text_color} />
         </label>
       </div>
@@ -86,25 +88,25 @@
       style={`--preview-base: ${previewColors.base_color}; --preview-accent: ${previewColors.accent_color}; --preview-text: ${previewColors.text_color}`}
       aria-hidden="true"
     >
-      <span>Preview</span>
+      <span>{t('studio.site.appearance.preview')}</span>
     </div>
 
     <label>
-      Background image (optional)
-      <span class="hint">JPG, PNG or WebP. Saved under static/images/site/background.*</span>
+      {t('studio.site.appearance.backgroundImage')}
+      <span class="hint">{t('studio.site.appearance.backgroundHint')}</span>
       <input type="file" name="background_upload" accept="image/jpeg,image/png,image/webp" />
     </label>
 
     {#if appearanceForm.background_image}
-      <p class="hint">Current: {appearanceForm.background_image}</p>
+      <p class="hint">{t('studio.site.appearance.currentBackground', { path: appearanceForm.background_image })}</p>
       <label class="checkbox">
         <input type="checkbox" name="remove_background" />
-        Remove background image
+        {t('studio.site.appearance.removeBackground')}
       </label>
     {/if}
 
     <div class="actions">
-      <button type="submit">Save appearance</button>
+      <button type="submit">{t('studio.site.appearance.save')}</button>
     </div>
 
     {#if form?.appearanceMessage}
@@ -115,39 +117,39 @@
 
 <section class="panel" aria-labelledby="site-settings-title">
   <div class="panel-heading">
-    <h2 id="site-settings-title">Site identity</h2>
-    <p>Title, tagline and visitor-facing notice text.</p>
+    <h2 id="site-settings-title">{t('studio.site.identity.title')}</h2>
+    <p>{t('studio.site.identity.intro')}</p>
   </div>
 
   <form method="POST" action="?/saveSite" use:enhance>
     <label>
-      Site title
+      {t('studio.site.identity.siteTitle')}
       <input name="name" value={siteForm.name} required />
     </label>
 
     <label>
-      Tagline
+      {t('studio.site.identity.tagline')}
       <input name="tagline" value={siteForm.tagline} required />
     </label>
 
     <label>
-      Language
+      {t('studio.site.identity.language')}
       <input name="language" value={siteForm.language} />
     </label>
 
     <label>
-      Public notice
-      <span class="hint">Leave empty to hide the notice banner.</span>
+      {t('studio.site.identity.notice')}
+      <span class="hint">{t('studio.site.identity.noticeHint')}</span>
       <textarea name="notice" rows="3">{siteForm.notice}</textarea>
     </label>
 
     <label>
-      Footer note
+      {t('studio.site.identity.footerNote')}
       <input name="footer_note" value={siteForm.footer_note} />
     </label>
 
     <div class="actions">
-      <button type="submit">Save site settings</button>
+      <button type="submit">{t('studio.site.identity.save')}</button>
     </div>
 
     {#if form?.siteMessage}
@@ -158,56 +160,56 @@
 
 <section class="panel" aria-labelledby="contact-settings-title">
   <div class="panel-heading">
-    <h2 id="contact-settings-title">Contact actions</h2>
-    <p>Visitor Brief email and optional WhatsApp contact.</p>
+    <h2 id="contact-settings-title">{t('studio.site.contact.title')}</h2>
+    <p>{t('studio.site.contact.intro')}</p>
   </div>
 
   <form method="POST" action="?/saveContact" use:enhance>
     <fieldset>
-      <legend>Email</legend>
+      <legend>{t('studio.site.contact.emailLegend')}</legend>
 
       <label class="checkbox">
         <input type="checkbox" name="email_enabled" checked={contactForm.email_enabled} />
-        Enable email contact
+        {t('studio.site.contact.emailEnabled')}
       </label>
 
       <label>
-        Contact email
+        {t('studio.site.contact.emailAddress')}
         <input name="email_address" type="email" value={contactForm.email_address} />
       </label>
 
       <label>
-        Email button label
+        {t('studio.site.contact.emailLabel')}
         <input name="email_label" value={contactForm.email_label} />
       </label>
 
       <label>
-        Email subject prefix
+        {t('studio.site.contact.emailSubjectPrefix')}
         <input name="email_subject_prefix" value={contactForm.email_subject_prefix} />
       </label>
     </fieldset>
 
     <fieldset>
-      <legend>WhatsApp</legend>
+      <legend>{t('studio.site.contact.whatsappLegend')}</legend>
 
       <label class="checkbox">
         <input type="checkbox" name="whatsapp_enabled" checked={contactForm.whatsapp_enabled} />
-        Enable WhatsApp contact
+        {t('studio.site.contact.whatsappEnabled')}
       </label>
 
       <label>
-        WhatsApp phone number
+        {t('studio.site.contact.whatsappPhone')}
         <input name="whatsapp_phone" value={contactForm.whatsapp_phone} />
       </label>
 
       <label>
-        WhatsApp button label
+        {t('studio.site.contact.whatsappLabel')}
         <input name="whatsapp_label" value={contactForm.whatsapp_label} />
       </label>
     </fieldset>
 
     <div class="actions">
-      <button type="submit">Save contact settings</button>
+      <button type="submit">{t('studio.site.contact.save')}</button>
     </div>
 
     {#if form?.contactMessage}
@@ -218,11 +220,11 @@
 
 <section class="panel next-steps" aria-labelledby="next-steps-title">
   <div class="panel-heading">
-    <h2 id="next-steps-title">Before publishing</h2>
-    <p>Review publish readiness in the studio or run the publish script from the project folder.</p>
+    <h2 id="next-steps-title">{t('studio.site.nextSteps.title')}</h2>
+    <p>{t('studio.site.nextSteps.intro')}</p>
   </div>
 
-  <p><a href="/studio/readiness">Open publish readiness</a></p>
+  <p><a href="/studio/readiness">{t('studio.site.nextSteps.link')}</a></p>
   <pre><code>npm run publish
 npm run publish -- --deploy</code></pre>
 </section>

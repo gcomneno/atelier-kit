@@ -1,24 +1,31 @@
 <script>
+  import { useI18n } from '$lib/i18n/context.js';
+
+  const t = useI18n();
+
   let { data } = $props();
 </script>
 
 <svelte:head>
-  <title>Studio · Collections</title>
+  <title>{t('studio.collections.pageTitle')}</title>
 </svelte:head>
 
 <p class="intro">
-  Choose a collection to edit, or create a new curated group.
+  {t('studio.collections.intro')}
 </p>
 
 <section class="panel">
   <div class="panel-heading">
-    <h2>Collections</h2>
-    <p>{data.collections.length} collection file(s) in content/collections/</p>
-    <p class="create-link"><a href="/studio/collections/new">+ Create new collection</a></p>
+    <h2>{t('studio.collections.title')}</h2>
+    <p>{t('studio.collections.count', { count: data.collections.length })}</p>
+    <p class="create-link"><a href="/studio/collections/new">{t('studio.collections.createLink')}</a></p>
   </div>
 
   {#if data.collections.length === 0}
-    <p class="empty">No collections yet. <a href="/studio/collections/new">Create your first collection</a>.</p>
+    <p class="empty">
+      {t('studio.collections.empty')}
+      <a href="/studio/collections/new">{t('studio.collections.createFirst')}</a>.
+    </p>
   {:else}
     <ul class="record-list">
       {#each data.collections as collection}
@@ -26,7 +33,7 @@
           <a href={`/studio/collections/${collection.id}`}>
             <strong>{collection.title}</strong>
             <span>{collection.id}</span>
-            <span>{collection.itemCount} item(s)</span>
+            <span>{t('studio.collections.itemCount', { count: collection.itemCount })}</span>
           </a>
         </li>
       {/each}

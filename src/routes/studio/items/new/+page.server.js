@@ -4,19 +4,21 @@ import { fail, redirect } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
 import {
   createItemRecord,
-  listItemPresetOptions,
   runStructuralValidation,
   saveItemImageUpload,
   validationMessage,
   writeItemRecord
 } from '$lib/server/studio-io.js';
+import { localizedItemPresets } from '$lib/i18n/index.js';
+import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 import { titleFromItemId } from '$lib/item-presets.js';
 
 export function load() {
   guardStudio();
+  const locale = getOperatorLocale();
 
   return {
-    presets: listItemPresetOptions(),
+    presets: localizedItemPresets(locale),
     defaultPreset: 'default'
   };
 }
@@ -26,6 +28,8 @@ export const actions = {
   createItem: async ({ request }) => {
     guardStudio();
 
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
     const formData = await request.formData();
     const id = String(formData.get('id') ?? '').trim();
     const titleInput = String(formData.get('title') ?? '').trim();
@@ -35,17 +39,20 @@ export const actions = {
     const form = { id, title, preset, description };
 
     try {
-      const item = createItemRecord({
-        id,
-        title,
-        preset,
-        description
-      });
+      const item = createItemRecord(
+        {
+          id,
+          title,
+          preset,
+          description
+        },
+        locale
+      );
 
       const upload = formData.get('image_upload');
 
       if (upload instanceof File && upload.size > 0) {
-        const imageFile = await saveItemImageUpload(id, upload);
+        const imageFile = await saveItemImageUpload(id, upload, locale);
         writeItemRecord(id, {
           ...item,
           image_file: imageFile
@@ -57,7 +64,7 @@ export const actions = {
       if (!validation.ok) {
         return fail(400, {
           createStatus: 'warning',
-          createMessage: validationMessage(validation),
+          createMessage: validationMessage(validation, locale),
           form
         });
       }
@@ -70,7 +77,7 @@ export const actions = {
 
       return fail(400, {
         createStatus: 'error',
-        createMessage: error instanceof Error ? error.message : 'Could not create item.',
+        createMessage: error instanceof Error ? error.message : t('server.createItemError'),
         form
       });
     }

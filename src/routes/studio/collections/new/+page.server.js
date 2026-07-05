@@ -8,6 +8,7 @@ import {
   runStructuralValidation,
   validationMessage
 } from '$lib/server/studio-io.js';
+import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 import { titleFromItemId } from '$lib/item-presets.js';
 
 export function load() {
@@ -23,6 +24,8 @@ export const actions = {
   createCollection: async ({ request }) => {
     guardStudio();
 
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
     const formData = await request.formData();
     const id = String(formData.get('id') ?? '').trim();
     const titleInput = String(formData.get('title') ?? '').trim();
@@ -32,19 +35,22 @@ export const actions = {
     const form = { id, title, description, item_ids: itemIds };
 
     try {
-      createCollectionRecord({
-        id,
-        title,
-        description,
-        items: itemIds
-      });
+      createCollectionRecord(
+        {
+          id,
+          title,
+          description,
+          items: itemIds
+        },
+        locale
+      );
 
       const validation = runStructuralValidation();
 
       if (!validation.ok) {
         return fail(400, {
           createStatus: 'warning',
-          createMessage: validationMessage(validation),
+          createMessage: validationMessage(validation, locale),
           form,
           items: listItemSummaries()
         });
@@ -58,7 +64,7 @@ export const actions = {
 
       return fail(400, {
         createStatus: 'error',
-        createMessage: error instanceof Error ? error.message : 'Could not create collection.',
+        createMessage: error instanceof Error ? error.message : t('server.createCollectionError'),
         form,
         items: listItemSummaries()
       });

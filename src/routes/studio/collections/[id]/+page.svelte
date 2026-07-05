@@ -1,7 +1,10 @@
 <script>
   import { enhance } from '$app/forms';
+  import { useI18n } from '$lib/i18n/context.js';
 
   /** @typedef {{ id: string, title: string }} ItemSummary */
+
+  const t = useI18n();
 
   let { data, form } = $props();
 
@@ -66,33 +69,33 @@
 </svelte:head>
 
 <p class="intro">
-  Edit this collection’s public text, choose items and set their order on the public collection page.
-  <a href={`/collections/${collectionForm.id}`} target="_blank" rel="noreferrer">Preview collection</a>
+  {t('studio.collectionsEdit.intro')}
+  <a href={`/collections/${collectionForm.id}`} target="_blank" rel="noreferrer">{t('studio.collectionsEdit.preview')}</a>
 </p>
 
 <section class="panel">
   <div class="panel-heading">
     <h2>{collectionForm.title}</h2>
-    <p>Collection id: {collectionForm.id}</p>
+    <p>{t('studio.collectionsEdit.collectionId', { id: collectionForm.id })}</p>
   </div>
 
   <form method="POST" action="?/saveCollection" use:enhance class="studio-form">
     <label>
-      Collection title
+      {t('studio.collectionsEdit.titleField')}
       <input name="title" value={collectionForm.title} required />
     </label>
 
     <label>
-      Collection description
+      {t('studio.collectionsEdit.description')}
       <textarea name="description" rows="4" required>{collectionForm.description}</textarea>
     </label>
 
     <fieldset>
-      <legend>Item order</legend>
-      <p class="hint">The order below is used on the public collection page.</p>
+      <legend>{t('studio.collectionsEdit.itemOrder')}</legend>
+      <p class="hint">{t('studio.collectionsEdit.orderHint')}</p>
 
       {#if orderedIds.length === 0}
-        <p class="hint">No items selected yet. Add items from the list below.</p>
+        <p class="hint">{t('studio.collectionsEdit.noItemsSelected')}</p>
       {:else}
         <ol class="ordered-list">
           {#each orderedIds as itemId, index (itemId)}
@@ -108,7 +111,7 @@
                   onclick={() => moveDown(index)}
                   disabled={index === orderedIds.length - 1}>↓</button
                 >
-                <button type="button" class="remove" onclick={() => removeItem(itemId)}>Remove</button>
+                <button type="button" class="remove" onclick={() => removeItem(itemId)}>{t('studio.collectionsEdit.remove')}</button>
               </div>
             </li>
           {/each}
@@ -118,12 +121,12 @@
 
     {#if availableItems.length > 0}
       <fieldset>
-        <legend>Add items</legend>
+        <legend>{t('studio.collectionsEdit.addItems')}</legend>
         <ul class="available-list">
           {#each availableItems as item}
             <li>
               <span>{item.title} <span class="order-id">({item.id})</span></span>
-              <button type="button" onclick={() => addItem(item.id)}>Add</button>
+              <button type="button" onclick={() => addItem(item.id)}>{t('studio.collectionsEdit.add')}</button>
             </li>
           {/each}
         </ul>
@@ -131,8 +134,8 @@
     {/if}
 
     <div class="actions">
-      <button type="submit">Save collection</button>
-      <a class="secondary-link" href="/studio/collections">Back to collections</a>
+      <button type="submit">{t('studio.collectionsEdit.save')}</button>
+      <a class="secondary-link" href="/studio/collections">{t('studio.collectionsEdit.back')}</a>
     </div>
 
     {#if form?.collectionMessage}

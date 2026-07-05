@@ -4,6 +4,21 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.11 - 2026-07-05
+
+Closes epic [#57](https://github.com/gcomneno/atelier-kit/issues/57) — operator UI internationalization (Phase A–C).
+
+### Added
+
+- In-house i18n catalog with English and Italian operator locales (`src/lib/i18n/`).
+- ADR 0005 documenting locale resolution via `config/site.yaml` → `site.language`.
+- Studio UI, save messages, Content Doctor shell, `publish` and `content:validate` output follow operator locale.
+
+### Notes
+
+- Content Doctor warning bodies for individual items remain English in some edge cases; full doctor i18n and Italian scaffold packs are follow-ups.
+- Visitor-facing multi-locale sites remain out of scope.
+
 ## v0.1.10 - 2026-07-05
 
 Phase 5 studio and tooling improvements (epic [#52](https://github.com/gcomneno/atelier-kit/issues/52) — partial).

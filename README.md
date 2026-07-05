@@ -32,11 +32,13 @@ No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 - About page (`config/about.yaml`, `/about`).
 - Publish prep script (`npm run publish`).
 - Client site scaffolds and guided `site:wizard`.
+- Client site upgrade command (`npm run site:upgrade`).
+- Configurable site appearance from studio.
 - Item meta presets for common creative showcase types.
 
 ## Current release
 
-Latest release: **v0.1.7** — studio item and collection editors.
+Latest release: **v0.1.9** — client handoff epic, site appearance, item layout, `site:upgrade`.
 
 See [GitHub Releases](https://github.com/gcomneno/atelier-kit/releases) for highlights and validation notes.
 

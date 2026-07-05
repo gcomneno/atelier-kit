@@ -120,10 +120,12 @@ Deliverables:
 - [x] ADR 0003 publishing and service model
 - [x] service package documentation
 - [x] `npm run publish` script
-- [ ] desktop wrapper research
-- [ ] deploy button template for client repos
+- [x] desktop wrapper research (ADR 0004 phase 1: `studio:launch`)
+- [x] deploy button template for client repos
+- [x] operator handoff playbook
+- [x] `site:upgrade` for client kit sync
 
-**Status:** guided publish available; full terminal-free packaging remains research.
+**Status:** client handoff epic [#43](https://github.com/gcomneno/atelier-kit/issues/43) closed in v0.1.9. Full terminal-free packaging remains research — see epic [#52](https://github.com/gcomneno/atelier-kit/issues/52).
 
 ## Architecture options
 

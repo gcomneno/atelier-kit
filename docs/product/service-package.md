@@ -2,7 +2,7 @@
 
 This document defines the default commercial delivery model for real clients.
 
-It supports ADR 0003 and epic [#35](https://github.com/gcomneno/atelier-kit/issues/35).
+It supports ADR 0003 and epic [#43](https://github.com/gcomneno/atelier-kit/issues/43).
 
 ## Positioning
 
@@ -26,20 +26,14 @@ The service sells **clarity and handoff**, not hosting lock-in.
 
 ### Operator workflow
 
-```bash
-npm run site:wizard -- --yes --template jewelry --target ../client-site ...
-cd ../client-site
-npm install
-npm run studio
-npm run publish
-npm run publish -- --deploy   # when Vercel is connected
-```
+See the full step-by-step checklist in [`operator-handoff-playbook.md`](operator-handoff-playbook.md).
 
 ### Client handoff
 
 The client receives:
 
 - public URL;
+- [`operator-handoff-playbook.md`](operator-handoff-playbook.md) client checklist section;
 - short note on editing through studio;
 - reminder that photos upload in studio;
 - contact actions via Visitor Brief (no backend form).
@@ -88,6 +82,7 @@ The package succeeds when:
 
 ## Related docs
 
+- [`operator-handoff-playbook.md`](operator-handoff-playbook.md)
 - [`product-levels.md`](product-levels.md)
 - [`positioning.md`](positioning.md)
 - [`studio.md`](../usage/studio.md)

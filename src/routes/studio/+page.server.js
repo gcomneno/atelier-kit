@@ -16,6 +16,10 @@ import {
   writeProjectYaml
 } from '$lib/server/studio-io.js';
 import { isValidSocialUrl, normalizeSocialId, SOCIAL_NETWORK_IDS } from '$lib/social-networks.js';
+import { isValidFooterHref } from '$lib/footer-links.js';
+
+const MAX_FOOTER_COLUMNS = 3;
+const MAX_FOOTER_LINKS = 5;
 
 function isRecord(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -107,6 +111,62 @@ function loadSocialForm() {
   return urls;
 }
 
+function emptyFooterForm() {
+  return {
+    copyright: '',
+    legal_line: '',
+    show_social: false,
+    columns: Array.from({ length: MAX_FOOTER_COLUMNS }, () => ({
+      title: '',
+      links: Array.from({ length: MAX_FOOTER_LINKS }, () => ({ label: '', href: '' }))
+    }))
+  };
+}
+
+function loadFooterForm() {
+  const form = emptyFooterForm();
+
+  try {
+    const data = readProjectYaml('config/footer.yaml');
+    const footer = data.footer;
+
+    if (!isRecord(footer)) {
+      return form;
+    }
+
+    form.copyright = readString(footer, 'copyright');
+    form.legal_line = readString(footer, 'legal_line');
+    form.show_social = footer.show_social === true;
+
+    if (Array.isArray(footer.columns)) {
+      footer.columns.slice(0, MAX_FOOTER_COLUMNS).forEach((column, columnIndex) => {
+        if (!isRecord(column)) {
+          return;
+        }
+
+        form.columns[columnIndex].title = readString(column, 'title');
+
+        if (Array.isArray(column.links)) {
+          column.links.slice(0, MAX_FOOTER_LINKS).forEach((link, linkIndex) => {
+            if (!isRecord(link)) {
+              return;
+            }
+
+            form.columns[columnIndex].links[linkIndex] = {
+              label: readString(link, 'label'),
+              href: readString(link, 'href')
+            };
+          });
+        }
+      });
+    }
+  } catch {
+    return form;
+  }
+
+  return form;
+}
+
 function loadContactForm() {
   const data = readProjectYaml('config/contact.yaml');
   const contact = data.contact;
@@ -150,6 +210,9 @@ export function load() {
     siteForm: loadSiteForm(),
     contactForm: loadContactForm(),
     socialForm: loadSocialForm(),
+    footerForm: loadFooterForm(),
+    footerColumnCount: MAX_FOOTER_COLUMNS,
+    footerLinkCount: MAX_FOOTER_LINKS,
     appearanceForm: loadAppearanceForm(),
     appearancePresets: localizedAppearancePresets(locale)
   };
@@ -291,6 +354,75 @@ export const actions = {
         socialStatus: 'error',
         socialMessage: message,
         socialForm: loadSocialForm()
+      });
+    }
+  },
+
+  saveFooter: async ({ request }) => {
+    guardStudio();
+
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
+    const formData = await request.formData();
+
+    try {
+      /** @type {{ title: string, links: { label: string, href: string }[] }[]} */
+      const columns = [];
+
+      for (let columnIndex = 0; columnIndex < MAX_FOOTER_COLUMNS; columnIndex += 1) {
+        const title = optionalField(formData.get(`column_${columnIndex}_title`));
+
+        if (title === '') {
+          continue;
+        }
+
+        /** @type {{ label: string, href: string }[]} */
+        const links = [];
+
+        for (let linkIndex = 0; linkIndex < MAX_FOOTER_LINKS; linkIndex += 1) {
+          const label = optionalField(formData.get(`column_${columnIndex}_link_${linkIndex}_label`));
+
+          if (label === '') {
+            continue;
+          }
+
+          const href = optionalField(formData.get(`column_${columnIndex}_link_${linkIndex}_href`));
+
+          if (href === '') {
+            throw new Error(t('errors.footerLinkHrefRequired', { column: title, label }));
+          }
+
+          if (!isValidFooterHref(href)) {
+            throw new Error(t('errors.footerLinkHrefInvalid', { column: title, label }));
+          }
+
+          links.push({ label, href });
+        }
+
+        columns.push({ title, links });
+      }
+
+      const footer = {
+        columns,
+        copyright: optionalField(formData.get('copyright')),
+        legal_line: optionalField(formData.get('legal_line')),
+        show_social: checkboxEnabled(formData.get('show_social'))
+      };
+
+      writeProjectYaml('config/footer.yaml', { footer });
+      const validation = runStructuralValidation();
+
+      return {
+        footerStatus: validation.ok ? 'success' : 'warning',
+        footerMessage: saveMessage(validation, locale),
+        footerForm: loadFooterForm()
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('server.saveFooterError');
+      return fail(400, {
+        footerStatus: 'error',
+        footerMessage: message,
+        footerForm: loadFooterForm()
       });
     }
   },

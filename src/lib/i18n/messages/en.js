@@ -84,6 +84,20 @@ export default {
         x: 'X (Twitter) URL',
         save: 'Save social links'
       },
+      footer: {
+        title: 'Legal footer',
+        intro:
+          'Multi-column footer with copyright and legal line. Shown site-wide when at least one column, copyright or legal line is set. Edit legal page text in config/legal.yaml.',
+        copyright: 'Copyright line',
+        legalLine: 'Legal line (e.g. P.IVA)',
+        showSocial: 'Show social icons in footer',
+        columnLegend: 'Column {number}',
+        columnTitle: 'Column title',
+        columnTitleHint: 'Leave empty to skip this column.',
+        linkLabel: 'Link {number} label',
+        linkHref: 'Link URL or path',
+        save: 'Save footer'
+      },
       nextSteps: {
         title: 'Before publishing',
         intro: 'Review publish readiness in the studio or run the publish script from the project folder.',
@@ -317,6 +331,7 @@ export default {
     saveSiteError: 'Could not save site settings.',
     saveContactError: 'Could not save contact settings.',
     saveSocialError: 'Could not save social links.',
+    saveFooterError: 'Could not save footer.',
     saveAppearanceError: 'Could not save appearance.',
     saveAboutError: 'Could not save about page.',
     saveCatalogError: 'Could not save catalog settings.',
@@ -347,7 +362,10 @@ export default {
     aboutTitleRequired: 'About page title is required when the page is enabled.',
     contactEmailRequired: 'Contact email is required when email contact is enabled.',
     contactWhatsappRequired: 'WhatsApp phone number is required when WhatsApp contact is enabled.',
-    socialUrlInvalid: 'Enter a valid http or https URL for {network}.'
+    socialUrlInvalid: 'Enter a valid http or https URL for {network}.',
+    footerLinkHrefRequired: 'Link "{label}" in column "{column}" needs a URL or path.',
+    footerLinkHrefInvalid:
+      'Link "{label}" in column "{column}" must start with "/" or be a valid http or https URL.'
   },
   doctor: {
     foundCount: 'Atelier-Kit content doctor found {count} thing(s) to review before publishing:',
@@ -525,6 +543,18 @@ export default {
     socialLinkMustBeObject: '{source}: link must be an object.',
     socialLinkIdInvalid: '{source}: id must be one of: instagram, facebook, x (got "{id}").',
     socialLinkUrlInvalid: '{source}: url must be a valid http or https URL.',
+    missingFooterObject: '{source}: missing "footer" object.',
+    footerColumnsMustBeArray: '{source}: "footer.columns" must be an array when provided.',
+    footerColumnMustBeObject: '{source}: column must be an object.',
+    footerColumnLinksMustBeArray: '{source}: links must be an array when provided.',
+    footerLinkMustBeObject: '{source}: link must be an object.',
+    footerLinkHrefInvalid: '{source}: href must start with "/" or be a valid http or https URL.',
+    footerLinkLabelRequired: '{source}: link label must not be empty when href is set.',
+    footerFieldMustBeString: '{source}: footer.{field} must be a string when provided.',
+    footerShowSocialInvalid: '{source}: footer.show_social must be true or false when provided.',
+    missingLegalObject: '{source}: missing "legal" object.',
+    legalPagesMustBeObject: '{source}: "legal.pages" must be an object.',
+    legalPageMustBeObject: '{source}: page must be an object.',
     itemsDirMissing: 'content/items directory does not exist.',
     itemsDirEmpty: 'content/items must contain at least one .yaml item.',
     imageFileMustStartWithSlash: '{source}: image_file must start with "/".',

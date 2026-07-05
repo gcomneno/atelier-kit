@@ -1,4 +1,5 @@
 import { parse } from 'yaml';
+import { isValidFooterHref } from '$lib/footer-links.js';
 import { isValidSocialUrl, normalizeSocialId } from '$lib/social-networks.js';
 import { resolveSiteAppearance } from '$lib/site-appearance.js';
 
@@ -312,6 +313,160 @@ export function getContactConfig() {
       phone: whatsappPhone
     }
   };
+}
+
+/**
+ * @typedef {{ label: string, href: string }} FooterLink
+ * @typedef {{ title: string, links: FooterLink[] }} FooterColumn
+ * @typedef {{ columns: FooterColumn[], copyright: string, legal_line: string, show_social: boolean }} FooterConfig
+ * @typedef {{ slug: string, title: string, body: string }} LegalPage
+ */
+
+/**
+ * @param {unknown} footer
+ * @returns {footer is FooterConfig}
+ */
+export function isFooterActive(footer) {
+  if (!footer || typeof footer !== 'object') {
+    return false;
+  }
+
+  const config = /** @type {FooterConfig} */ (footer);
+
+  return (
+    config.columns.length > 0 ||
+    config.copyright.trim() !== '' ||
+    config.legal_line.trim() !== ''
+  );
+}
+
+/**
+ * @param {unknown} entry
+ * @param {string} source
+ * @returns {FooterLink | null}
+ */
+function normalizeFooterLink(entry, source) {
+  if (!isRecord(entry)) {
+    throw new Error(`${source}: link must be an object.`);
+  }
+
+  const label = optionalString(entry, 'label');
+  const href = optionalString(entry, 'href');
+
+  if (label === '' || href === '') {
+    return null;
+  }
+
+  if (!isValidFooterHref(href)) {
+    throw new Error(`${source}: href must start with "/" or be a valid http or https URL.`);
+  }
+
+  return { label, href };
+}
+
+/**
+ * @param {unknown} column
+ * @param {string} source
+ * @returns {FooterColumn | null}
+ */
+function normalizeFooterColumn(column, source) {
+  if (!isRecord(column)) {
+    throw new Error(`${source}: column must be an object.`);
+  }
+
+  const title = optionalString(column, 'title');
+
+  if (title === '') {
+    return null;
+  }
+
+  if (!Array.isArray(column.links)) {
+    throw new Error(`${source}: links must be an array when provided.`);
+  }
+
+  const links = column.links
+    .map((link, index) => normalizeFooterLink(link, `${source}.links[${index}]`))
+    .filter((link) => link !== null);
+
+  if (links.length === 0) {
+    return null;
+  }
+
+  return { title, links: /** @type {FooterLink[]} */ (links) };
+}
+
+export function getFooterConfig() {
+  const raw = configFiles['/config/footer.yaml'];
+
+  if (typeof raw !== 'string') {
+    return null;
+  }
+
+  const data = parseYaml('/config/footer.yaml', raw);
+  const footer = data.footer;
+
+  if (!isRecord(footer)) {
+    throw new Error('config/footer.yaml: missing "footer" object.');
+  }
+
+  /** @type {FooterColumn[]} */
+  const columns = [];
+
+  if (Array.isArray(footer.columns)) {
+    footer.columns.forEach((column, index) => {
+      const normalized = normalizeFooterColumn(column, `config/footer.yaml:columns[${index}]`);
+
+      if (normalized) {
+        columns.push(normalized);
+      }
+    });
+  }
+
+  return {
+    columns,
+    copyright: optionalString(footer, 'copyright'),
+    legal_line: optionalString(footer, 'legal_line'),
+    show_social: footer.show_social === true
+  };
+}
+
+export function getLegalPages() {
+  const raw = configFiles['/config/legal.yaml'];
+
+  if (typeof raw !== 'string') {
+    return [];
+  }
+
+  const data = parseYaml('/config/legal.yaml', raw);
+  const legal = data.legal;
+
+  if (!isRecord(legal) || !isRecord(legal.pages)) {
+    return [];
+  }
+
+  return Object.entries(legal.pages)
+    .map(([slug, page]) => {
+      const source = `config/legal.yaml:pages.${slug}`;
+
+      if (!isRecord(page)) {
+        throw new Error(`${source}: page must be an object.`);
+      }
+
+      return {
+        slug,
+        title: requiredString(page, 'title', source),
+        body: requiredString(page, 'body', source)
+      };
+    })
+    .sort((left, right) => left.title.localeCompare(right.title));
+}
+
+/**
+ * @param {string} slug
+ * @returns {LegalPage | null}
+ */
+export function getLegalPage(slug) {
+  return getLegalPages().find((page) => page.slug === slug) ?? null;
 }
 
 export function getSocialConfig() {

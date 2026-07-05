@@ -53,12 +53,14 @@
     </div>
   </section>
 
-  <footer>
-    <p>{data.site.footer_note}</p>
-    {#if data.aboutAvailable}
-      <p class="footer-link"><a href="/about">About the studio</a></p>
-    {/if}
-  </footer>
+  {#if !data.footerActive}
+    <footer>
+      <p>{data.site.footer_note}</p>
+      {#if data.aboutAvailable}
+        <p class="footer-link"><a href="/about">About the studio</a></p>
+      {/if}
+    </footer>
+  {/if}
 </main>
 
 <style>

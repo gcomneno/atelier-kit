@@ -206,6 +206,37 @@ social:
 `);
 }
 
+function writeScaffoldFooter(targetRoot) {
+  writeFile(targetRoot, 'config/footer.yaml', `
+footer:
+  columns:
+    - title: Links
+      links:
+        - label: Privacy
+          href: /legal/privacy
+        - label: About
+          href: /about
+  copyright: "© 2026 Studio Name"
+  legal_line: "P.IVA 12345678901"
+  show_social: false
+`);
+}
+
+function writeScaffoldLegal(targetRoot) {
+  writeFile(targetRoot, 'config/legal.yaml', `
+legal:
+  pages:
+    privacy:
+      title: Privacy Policy
+      body: |
+        Multi-line plain text for your privacy policy.
+    cookie:
+      title: Cookie Policy
+      body: |
+        Multi-line plain text for your cookie policy.
+`);
+}
+
 function applyWritingTemplate(targetRoot) {
   resetScaffoldContent(targetRoot);
 

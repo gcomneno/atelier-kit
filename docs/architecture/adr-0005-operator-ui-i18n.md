@@ -36,9 +36,12 @@ The same field drives `<html lang="…">` for visitors **and** operator UI local
 | In scope | Out of scope (future) |
 |---|---|
 | Studio `/studio/*` UI | Multi-locale visitor sites (hreflang) |
-| Save/validation messages | Machine translation |
-| Content Doctor output | RTL layout |
+| Visitor showcase UI labels (home, catalog, collections, news, item detail, errors) | Machine translation |
+| Save/validation messages | RTL layout |
+| Content Doctor output | Translating YAML content (titles, bodies) |
 | `publish`, `content:validate` CLI banners | |
+
+`site.language` drives operator UI **and** visitor-facing chrome labels via `visitor.*` keys in `src/lib/i18n/messages/`.
 
 ## Consequences
 

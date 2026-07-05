@@ -1,5 +1,8 @@
 <script>
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+
   let { data } = $props();
+  const t = useVisitorI18n();
 
   function formatDate(/** @type {string} */ value) {
     const parsed = new Date(`${value}T12:00:00`);
@@ -27,20 +30,20 @@
 </script>
 
 <svelte:head>
-  <title>News · {data.site.name}</title>
-  <meta name="description" content="News and updates from {data.site.name}." />
+  <title>{t('news.pageTitle')} · {data.site.name}</title>
+  <meta name="description" content={t('news.metaDescription', { siteName: data.site.name })} />
 </svelte:head>
 
 <main class="news-page">
-  <a class="back-link" href="/">← Back to showcase</a>
+  <a class="back-link" href="/">{t('common.backToShowcase')}</a>
 
   <header class="page-header">
     <p class="eyebrow">{data.site.name}</p>
-    <h1>News</h1>
+    <h1>{t('news.title')}</h1>
   </header>
 
   {#if data.posts.length === 0}
-    <p class="empty">No news posts yet.</p>
+    <p class="empty">{t('news.empty')}</p>
   {:else}
     <ul class="post-list">
       {#each data.posts as post}

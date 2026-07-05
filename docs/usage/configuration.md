@@ -34,7 +34,7 @@ Example:
 site:
   name: "My Handmade Studio"
   tagline: "Small handmade objects for quiet homes"
-  language: "en"   # operator UI locale (en, it) and <html lang>
+  language: "en"   # operator + visitor UI locale (en, it) and <html lang>
   notice: "Demo content. Replace before publishing."
   footer_note: "Built with Atelier-Kit"
 ```
@@ -43,7 +43,7 @@ Fields:
 
 - `name` appears as the main site name.
 - `tagline` appears near the site heading.
-- `language` sets `<html lang="…">` **and** the studio / CLI operator UI locale (`en`, `it`, `it-IT`, etc.).
+- `language` sets `<html lang="…">`, the studio / CLI operator UI locale, **and** visitor-facing UI labels (`en`, `it`, `it-IT`, etc.). YAML content (item titles, about text, news bodies) is not auto-translated.
 - `notice` can be used for demo warnings or short publishing notes.
 - `footer_note` appears in the footer.
 

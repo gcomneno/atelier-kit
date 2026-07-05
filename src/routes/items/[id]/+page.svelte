@@ -2,9 +2,12 @@
   import MetaInfo from '$lib/components/MetaInfo.svelte';
   import SignalCloud from '$lib/components/SignalCloud.svelte';
   import VisitorBrief from '$lib/components/VisitorBrief.svelte';
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   /** @type {import('./$types').PageData} */
   export let data;
+
+  const t = useVisitorI18n();
 
   $: item = /** @type {NonNullable<import('./$types').PageData['item']>} */ (data.item);
   $: signalClouds = data.signalClouds;
@@ -16,7 +19,7 @@
 </svelte:head>
 
 <main class="item-page">
-  <a class="back-link" href="/">← Back to showcase</a>
+  <a class="back-link" href="/">{t('common.backToShowcase')}</a>
 
   <article class="item-detail">
     <section class="hero" aria-labelledby="item-title">
@@ -52,10 +55,10 @@
     {#if signalClouds.length > 0}
       <section class="visitor-zone" aria-labelledby="visitor-zone-title">
         <header class="visitor-header">
-          <p class="eyebrow">Visitor Brief</p>
-          <h2 id="visitor-zone-title">Talk about this piece</h2>
+          <p class="eyebrow">{t('item.visitorBriefEyebrow')}</p>
+          <h2 id="visitor-zone-title">{t('item.talkAboutTitle')}</h2>
           <p class="visitor-intro">
-            Choose a few preferences below. Atelier-Kit will assemble a message you can copy or send by email or WhatsApp.
+            {t('item.talkAboutIntro')}
           </p>
         </header>
 

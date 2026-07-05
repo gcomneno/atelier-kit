@@ -1,5 +1,8 @@
 <script>
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+
   let { data } = $props();
+  const t = useVisitorI18n();
 </script>
 
 <svelte:head>
@@ -7,7 +10,7 @@
 </svelte:head>
 
 <main class="legal-page">
-  <a class="back-link" href="/">← Back to showcase</a>
+  <a class="back-link" href="/">{t('common.backToShowcase')}</a>
 
   <article>
     <header>

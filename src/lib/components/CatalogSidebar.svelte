@@ -1,4 +1,6 @@
 <script>
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+
   /** @typedef {{ id: string, title: string, description: string, items: unknown[] }} Collection */
   /** @typedef {{ title: string, intro: string, sections: { heading: string, body: string }[] }} AboutConfig */
   /** @typedef {{ id: string, title: string, date: string, excerpt?: string, body: string }} NewsPost */
@@ -29,6 +31,8 @@
     },
     site = { language: 'en' }
   } = $props();
+
+  const t = useVisitorI18n();
 
   const showCollections = $derived(widgets.collections && collections.length > 0);
   const showAbout = $derived(Boolean(widgets.about && about));
@@ -72,10 +76,10 @@
 </script>
 
 {#if showCollections || showAbout || showNews}
-  <aside class="catalog-sidebar" aria-label="Catalog sidebar">
+  <aside class="catalog-sidebar" aria-label={t('catalog.sidebarAriaLabel')}>
     {#if showCollections}
       <section class="widget">
-        <h2 class="widget-title">Collections</h2>
+        <h2 class="widget-title">{t('catalog.collections')}</h2>
         <ul class="link-list">
           {#each collections as collection (collection.id)}
             <li>
@@ -84,7 +88,7 @@
           {/each}
         </ul>
         <p class="widget-footer">
-          <a href="/collections">View all collections</a>
+          <a href="/collections">{t('common.viewAllCollections')}</a>
         </p>
       </section>
     {/if}
@@ -96,14 +100,14 @@
           <p class="about-snippet">{aboutSnippet}</p>
         {/if}
         <p class="widget-footer">
-          <a href="/about">Read more</a>
+          <a href="/about">{t('common.readMore')}</a>
         </p>
       </section>
     {/if}
 
     {#if showNews}
       <section class="widget">
-        <h2 class="widget-title">Latest news</h2>
+        <h2 class="widget-title">{t('catalog.latestNews')}</h2>
         <ul class="news-list">
           {#each newsPosts as post (post.id)}
             <li>
@@ -118,7 +122,7 @@
           {/each}
         </ul>
         <p class="widget-footer">
-          <a href="/news">All news</a>
+          <a href="/news">{t('common.allNews')}</a>
         </p>
       </section>
     {/if}

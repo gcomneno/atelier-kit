@@ -1,4 +1,6 @@
 <script>
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+
   /** @typedef {{ id: string, url: string }} SocialLink */
 
   /** @type {{ name: string, links?: SocialLink[] }} */
@@ -7,12 +9,14 @@
   /** @type {SocialLink[]} */
   export let socialLinks = [];
 
+  const t = useVisitorI18n();
+
   /** @param {string} id */
   function ariaLabel(id) {
     const labels = {
-      instagram: 'Instagram',
-      facebook: 'Facebook',
-      x: 'X (Twitter)'
+      instagram: t('social.instagram'),
+      facebook: t('social.facebook'),
+      x: t('social.x')
     };
 
     return labels[/** @type {keyof typeof labels} */ (id)] ?? id;
@@ -23,7 +27,7 @@
   <a class="site-name" href="/">{site.name}</a>
 
   {#if socialLinks.length > 0}
-    <nav class="social-nav" aria-label="Social links">
+    <nav class="social-nav" aria-label={t('common.socialLinks')}>
       {#each socialLinks as link (link.id)}
         <a
           class="social-link"

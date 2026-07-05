@@ -1,4 +1,6 @@
 <script>
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+
   /**
    * @typedef {{ label: string, value?: string, children?: MetaInfoEntry[] }} MetaInfoEntry
    * @typedef {{ path: string, label: string, value: string, depth: number }} MetaInfoRow
@@ -6,6 +8,8 @@
 
   /** @type {MetaInfoEntry[]} */
   export let meta = [];
+
+  const t = useVisitorI18n();
 
   /**
    * @param {MetaInfoEntry[]} entries
@@ -36,7 +40,7 @@
 
 {#if rows.length > 0}
   <section class="meta-info" aria-labelledby="item-meta-heading">
-    <h2 id="item-meta-heading">Details</h2>
+    <h2 id="item-meta-heading">{t('item.details')}</h2>
 
     <dl class="meta-list">
       {#each rows as row (row.path)}

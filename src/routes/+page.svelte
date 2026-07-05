@@ -1,8 +1,10 @@
 <script>
   import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
   import ItemCard from '$lib/components/ItemCard.svelte';
+  import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
+  const t = useVisitorI18n();
 </script>
 
 <svelte:head>
@@ -25,8 +27,8 @@
     {#if data.collections.length > 0}
       <section class="collections" aria-labelledby="collections-title">
         <div class="section-heading">
-          <p class="eyebrow">Collections</p>
-          <h2 id="collections-title">Curated pages</h2>
+          <p class="eyebrow">{t('home.collectionsEyebrow')}</p>
+          <h2 id="collections-title">{t('home.collectionsTitle')}</h2>
         </div>
 
         <div class="collection-grid">
@@ -39,13 +41,13 @@
           {/each}
         </div>
 
-        <p class="text-link"><a href="/collections">View all collections</a></p>
+        <p class="text-link"><a href="/collections">{t('common.viewAllCollections')}</a></p>
       </section>
     {/if}
 
     <section class="catalog" aria-labelledby="catalog-title">
       <div class="section-heading">
-        <p class="eyebrow">Catalog</p>
+        <p class="eyebrow">{t('home.catalogEyebrow')}</p>
         <h2 id="catalog-title">{data.items.length} {data.catalog.item_name_plural}</h2>
       </div>
 
@@ -60,7 +62,7 @@
       <footer>
         <p>{data.site.footer_note}</p>
         {#if data.aboutAvailable}
-          <p class="footer-link"><a href="/about">About the studio</a></p>
+          <p class="footer-link"><a href="/about">{t('home.aboutStudio')}</a></p>
         {/if}
       </footer>
     {/if}

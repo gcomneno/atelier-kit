@@ -171,6 +171,22 @@ function patchPackageJson(targetRoot) {
   fs.writeFileSync(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 }
 
+function writeScaffoldContact(targetRoot) {
+  writeFile(targetRoot, 'config/contact.yaml', `
+contact:
+  email:
+    enabled: false
+    label: "Email this brief"
+    address: ""
+    subject_prefix: "Interest in"
+
+  whatsapp:
+    enabled: false
+    label: "WhatsApp this brief"
+    phone: ""
+`);
+}
+
 function applyWritingTemplate(targetRoot) {
   resetScaffoldContent(targetRoot);
 
@@ -179,7 +195,7 @@ site:
   name: "Noir writing showcase"
   tagline: "Stories, drafts and narrative projects in a darker key."
   language: "en"
-  notice: "Starter writing scaffold. Replace with real author copy before publishing."
+  notice: ""
   footer_note: "Built with Atelier-Kit"
 `);
 
@@ -248,52 +264,39 @@ signal_clouds:
         label: "restrained"
 `);
 
-  writeFile(targetRoot, 'config/contact.yaml', `
-contact:
-  email:
-    enabled: true
-    label: "Email this brief"
-    address: "hello@example.com"
-    subject_prefix: "Interest in"
-
-  whatsapp:
-    enabled: false
-    label: "WhatsApp this brief"
-    phone: ""
-`);
+  writeScaffoldContact(targetRoot);
 
   writeFile(targetRoot, 'content/items/first-draft.yaml', `
 id: "first-draft"
 title: "First Draft"
-subtitle: "A writing project placeholder"
-status: "draft"
+subtitle: "Novel project in progress"
+status: "available"
 price_mode: "hidden"
 image_file: "/images/items/placeholder.svg"
-image_alt: "Neutral placeholder image for a writing project"
-description: "Replace this placeholder with a real novel, short story or narrative project."
-notice: "Writing scaffold placeholder. Replace before publishing."
+image_alt: "Cover-style view awaiting final artwork"
+description: "A narrative project entry for the writing desk collection. Update the title, description and detail fields to match your published novel, short story or hybrid work."
 
 meta:
   - label: "Format"
-    value: "Novel, short story or narrative project"
+    value: "Novel or short story"
 
   - label: "Genre"
-    value: "Noir"
+    value: "Literary fiction"
 
   - label: "Language"
-    value: "Replace with language"
+    value: "English"
 
   - label: "Length"
-    value: "Replace with length or stage"
+    value: "Novel-length draft"
 
   - label: "Reading status"
-    value: "Replace with public reading status"
+    value: "Work in progress"
 
   - label: "Availability"
-    value: "Replace with availability"
+    value: "Reading excerpts on request"
 
   - label: "Notes"
-    value: "Replace with writing notes"
+    value: "Sample entry for the writing showcase template"
 `);
 
   writeFile(targetRoot, 'content/collections/writing-desk.yaml', `
@@ -313,7 +316,7 @@ site:
   name: "Studio artwork showcase"
   tagline: "Paintings, sculptures and visual works"
   language: "en"
-  notice: "Starter artwork scaffold. Replace with real studio copy before publishing."
+  notice: ""
   footer_note: "Built with Atelier-Kit"
 `);
 
@@ -382,52 +385,39 @@ signal_clouds:
         label: "the process"
 `);
 
-  writeFile(targetRoot, 'config/contact.yaml', `
-contact:
-  email:
-    enabled: true
-    label: "Email this brief"
-    address: "hello@example.com"
-    subject_prefix: "Interest in"
-
-  whatsapp:
-    enabled: false
-    label: "WhatsApp this brief"
-    phone: ""
-`);
+  writeScaffoldContact(targetRoot);
 
   writeFile(targetRoot, 'content/items/studio-study.yaml', `
 id: "studio-study"
 title: "Studio Study"
-subtitle: "An artwork placeholder"
-status: "draft"
+subtitle: "Oil study on canvas"
+status: "available"
 price_mode: "hidden"
 image_file: "/images/items/placeholder.svg"
-image_alt: "Neutral placeholder image for an artwork"
-description: "Replace this placeholder with a real painting, sculpture, installation or visual work."
-notice: "Artwork scaffold placeholder. Replace before publishing."
+image_alt: "Studio photograph awaiting final installation shot"
+description: "A visual work entry for the recent works collection. Swap the title, description and detail fields for your painting, sculpture, installation or other artwork."
 
 meta:
   - label: "Technique"
-    value: "Replace with technique"
+    value: "Oil on canvas"
 
   - label: "Support"
-    value: "Replace with support"
+    value: "Stretched canvas"
 
   - label: "Dimensions"
-    value: "Replace with dimensions"
+    value: "40 × 50 cm"
 
   - label: "Year"
-    value: "Replace with year"
+    value: "2026"
 
   - label: "Frame"
-    value: "Replace with frame details"
+    value: "Unframed"
 
   - label: "Availability"
-    value: "Replace with availability"
+    value: "Available for viewing"
 
   - label: "Notes"
-    value: "Replace with artwork notes"
+    value: "Sample entry for the artwork showcase template"
 `);
 
   writeFile(targetRoot, 'content/collections/recent-works.yaml', `
@@ -447,7 +437,7 @@ site:
   name: "Quiet craft showcase"
   tagline: "Handmade objects for everyday use and quiet homes"
   language: "en"
-  notice: "Starter handmade scaffold. Replace with real maker copy before publishing."
+  notice: ""
   footer_note: "Built with Atelier-Kit"
 `);
 
@@ -532,54 +522,41 @@ signal_clouds:
         label: "collaboration"
 `);
 
-  writeFile(targetRoot, 'config/contact.yaml', `
-contact:
-  email:
-    enabled: true
-    label: "Email this brief"
-    address: "hello@example.com"
-    subject_prefix: "Interest in"
-
-  whatsapp:
-    enabled: false
-    label: "WhatsApp this brief"
-    phone: ""
-`);
+  writeScaffoldContact(targetRoot);
 
   writeFile(targetRoot, 'content/items/maker-piece.yaml', `
 id: "maker-piece"
 title: "Maker Piece"
-subtitle: "A handmade object placeholder"
-status: "draft"
+subtitle: "Stoneware vessel for daily use"
+status: "available"
 price_mode: "hidden"
 image_file: "/images/items/placeholder.svg"
-image_alt: "Neutral placeholder image for a handmade object"
-description: "Replace this placeholder with a real ceramic, textile, carved or other handmade object."
-notice: "Handmade scaffold placeholder. Replace before publishing."
+image_alt: "Studio photograph awaiting final product shot"
+description: "A handmade object entry for the curated selection. Update the title, description and detail fields to match your ceramic, textile, carved or other craft piece."
 
 meta:
   - label: "Material"
-    value: "Replace with material"
+    value: "Stoneware clay"
 
   - label: "Dimensions"
-    value: "Replace with dimensions"
+    value: "12 × 10 cm"
 
   - label: "Finish"
-    value: "Replace with finish"
+    value: "Matte glaze"
 
   - label: "Care"
-    value: "Replace with care instructions"
+    value: "Hand wash only"
 
   - label: "Availability"
-    value: "Replace with availability"
+    value: "Made to order in small batches"
 
   - label: "Object details"
     children:
       - label: "Technique"
-        value: "Replace with technique"
+        value: "Wheel-thrown"
 
       - label: "Made in"
-        value: "Replace with origin or studio note"
+        value: "Small studio batch"
 `);
 
   writeFile(targetRoot, 'content/collections/curated-selection.yaml', `
@@ -599,7 +576,7 @@ site:
   name: "Small jewelry showcase"
   tagline: "Rings, pendants and wearable pieces in quiet batches"
   language: "en"
-  notice: "Starter jewelry scaffold. Replace with real studio copy before publishing."
+  notice: ""
   footer_note: "Built with Atelier-Kit"
 `);
 
@@ -684,49 +661,36 @@ signal_clouds:
         label: "the process"
 `);
 
-  writeFile(targetRoot, 'config/contact.yaml', `
-contact:
-  email:
-    enabled: true
-    label: "Email this brief"
-    address: "hello@example.com"
-    subject_prefix: "Interest in"
-
-  whatsapp:
-    enabled: false
-    label: "WhatsApp this brief"
-    phone: ""
-`);
+  writeScaffoldContact(targetRoot);
 
   writeFile(targetRoot, 'content/items/jewelry-piece.yaml', `
 id: "jewelry-piece"
 title: "Jewelry Piece"
-subtitle: "A wearable piece placeholder"
-status: "draft"
+subtitle: "Sterling silver ring with soft lines"
+status: "available"
 price_mode: "hidden"
 image_file: "/images/items/placeholder.svg"
-image_alt: "Neutral placeholder image for a jewelry piece"
-description: "Replace this placeholder with a real ring, pendant, earring or other wearable piece."
-notice: "Jewelry scaffold placeholder. Replace before publishing."
+image_alt: "Studio photograph awaiting final product shot"
+description: "A wearable piece entry for the available pieces collection. Update the title, description and detail fields to match your ring, pendant, earring or other jewelry work."
 
 meta:
   - label: "Material"
-    value: "Replace with material"
+    value: "Sterling silver"
 
   - label: "Size"
-    value: "Replace with size"
+    value: "Ring size 54 (EU)"
 
   - label: "Finish"
-    value: "Replace with finish"
+    value: "Brushed satin"
 
   - label: "Stone or detail"
-    value: "Replace with stone or detail"
+    value: "No stone"
 
   - label: "Care"
-    value: "Replace with care instructions"
+    value: "Store dry; polish with a soft cloth"
 
   - label: "Availability"
-    value: "Replace with availability"
+    value: "Available or made to size"
 `);
 
   writeFile(targetRoot, 'content/collections/available-pieces.yaml', `
@@ -746,7 +710,7 @@ site:
   name: "Small furniture showcase"
   tagline: "Furniture pieces and object design for quiet interiors"
   language: "en"
-  notice: "Starter furniture scaffold. Replace with real studio copy before publishing."
+  notice: ""
   footer_note: "Built with Atelier-Kit"
 `);
 
@@ -831,49 +795,36 @@ signal_clouds:
         label: "the process"
 `);
 
-  writeFile(targetRoot, 'config/contact.yaml', `
-contact:
-  email:
-    enabled: true
-    label: "Email this brief"
-    address: "hello@example.com"
-    subject_prefix: "Interest in"
-
-  whatsapp:
-    enabled: false
-    label: "WhatsApp this brief"
-    phone: ""
-`);
+  writeScaffoldContact(targetRoot);
 
   writeFile(targetRoot, 'content/items/furniture-piece.yaml', `
 id: "furniture-piece"
 title: "Furniture Piece"
-subtitle: "A furniture or object design placeholder"
-status: "draft"
+subtitle: "Oak side table for quiet rooms"
+status: "available"
 price_mode: "hidden"
 image_file: "/images/items/placeholder.svg"
-image_alt: "Neutral placeholder image for a furniture piece"
-description: "Replace this placeholder with a real chair, table, shelf, lamp or other interior object."
-notice: "Furniture scaffold placeholder. Replace before publishing."
+image_alt: "Studio photograph awaiting final product shot"
+description: "A furniture or object design entry for the room selection. Update the title, description and detail fields to match your chair, table, shelf, lamp or interior object."
 
 meta:
   - label: "Material"
-    value: "Replace with material"
+    value: "Solid oak"
 
   - label: "Dimensions"
-    value: "Replace with dimensions"
+    value: "45 × 40 × 50 cm"
 
   - label: "Finish"
-    value: "Replace with finish"
+    value: "Natural oil"
 
   - label: "Use"
-    value: "Replace with intended use"
+    value: "Bedside or entry table"
 
   - label: "Care"
-    value: "Replace with care instructions"
+    value: "Wipe with a dry cloth"
 
   - label: "Availability"
-    value: "Replace with availability"
+    value: "Made to order"
 `);
 
   writeFile(targetRoot, 'content/collections/room-selection.yaml', `
@@ -936,7 +887,7 @@ function printNextSteps(targetRoot, template) {
   console.log('  npm run publish');
   console.log('');
   console.log('See DEPLOY.md for Vercel deploy button instructions.');
-  console.log('Then replace scaffold placeholders before publishing.');
+  console.log('Add real contact details and item photos before publishing.');
 }
 
 function main() {

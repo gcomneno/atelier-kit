@@ -1,4 +1,5 @@
 import { parse } from 'yaml';
+import { isValidSocialUrl, normalizeSocialId } from '$lib/social-networks.js';
 import { resolveSiteAppearance } from '$lib/site-appearance.js';
 
 const configFiles = import.meta.glob('/config/*.yaml', {
@@ -310,6 +311,47 @@ export function getContactConfig() {
       label: optionalString(whatsapp, 'label', 'WhatsApp this brief'),
       phone: whatsappPhone
     }
+  };
+}
+
+export function getSocialConfig() {
+  const raw = configFiles['/config/social.yaml'];
+
+  if (typeof raw !== 'string') {
+    return { links: [] };
+  }
+
+  const data = parseYaml('/config/social.yaml', raw);
+  const social = data.social;
+
+  if (!isRecord(social) || !Array.isArray(social.links)) {
+    return { links: [] };
+  }
+
+  return {
+    links: social.links
+      .map((entry, index) => {
+        const source = `config/social.yaml:links[${index}]`;
+
+        if (!isRecord(entry)) {
+          throw new Error(`${source}: link must be an object.`);
+        }
+
+        const idValue = requiredString(entry, 'id', source);
+        const id = normalizeSocialId(idValue);
+
+        if (!id) {
+          throw new Error(`${source}: id must be one of: instagram, facebook, x.`);
+        }
+
+        const url = requiredString(entry, 'url', source);
+
+        if (!isValidSocialUrl(url)) {
+          throw new Error(`${source}: url must be a valid http or https URL.`);
+        }
+
+        return { id, url };
+      })
   };
 }
 

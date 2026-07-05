@@ -199,6 +199,13 @@ contact:
 `);
 }
 
+function writeScaffoldSocial(targetRoot) {
+  writeFile(targetRoot, 'config/social.yaml', `
+social:
+  links: []
+`);
+}
+
 function applyWritingTemplate(targetRoot) {
   resetScaffoldContent(targetRoot);
 
@@ -277,6 +284,7 @@ signal_clouds:
 `);
 
   writeScaffoldContact(targetRoot);
+  writeScaffoldSocial(targetRoot);
 
   writeFile(targetRoot, 'content/items/first-draft.yaml', `
 id: "first-draft"
@@ -398,6 +406,7 @@ signal_clouds:
 `);
 
   writeScaffoldContact(targetRoot);
+  writeScaffoldSocial(targetRoot);
 
   writeFile(targetRoot, 'content/items/studio-study.yaml', `
 id: "studio-study"
@@ -535,6 +544,7 @@ signal_clouds:
 `);
 
   writeScaffoldContact(targetRoot);
+  writeScaffoldSocial(targetRoot);
 
   writeFile(targetRoot, 'content/items/maker-piece.yaml', `
 id: "maker-piece"
@@ -674,6 +684,7 @@ signal_clouds:
 `);
 
   writeScaffoldContact(targetRoot);
+  writeScaffoldSocial(targetRoot);
 
   writeFile(targetRoot, 'content/items/jewelry-piece.yaml', `
 id: "jewelry-piece"
@@ -808,6 +819,7 @@ signal_clouds:
 `);
 
   writeScaffoldContact(targetRoot);
+  writeScaffoldSocial(targetRoot);
 
   writeFile(targetRoot, 'content/items/furniture-piece.yaml', `
 id: "furniture-piece"

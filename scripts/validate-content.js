@@ -3,6 +3,7 @@ import path from 'node:path';
 import { parse } from 'yaml';
 import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
+import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
 
 const ROOT = process.cwd();
 const t = createTranslator(loadOperatorLocale());
@@ -291,6 +292,56 @@ function validateContact() {
 }
 
 
+function validateSocial() {
+  const source = 'config/social.yaml';
+
+  if (!existsSync(path.join(ROOT, source))) {
+    return;
+  }
+
+  const data = readYaml(source);
+  const social = data.social;
+
+  if (!social || typeof social !== 'object' || Array.isArray(social)) {
+    failKey('missingSocialObject', { source });
+    return;
+  }
+
+  if (!Array.isArray(social.links)) {
+    failKey('socialLinksMustBeArray', { source });
+    return;
+  }
+
+  const linkIds = [];
+
+  social.links.forEach((entry, index) => {
+    const entrySource = `${source}:links[${index}]`;
+
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      failKey('socialLinkMustBeObject', { source: entrySource });
+      return;
+    }
+
+    const idValue = requireString(entry, 'id', entrySource);
+    const id = normalizeSocialId(idValue);
+
+    if (!id) {
+      failKey('socialLinkIdInvalid', { source: entrySource, id: idValue });
+      return;
+    }
+
+    const url = requireString(entry, 'url', entrySource);
+
+    if (!isValidSocialUrl(url)) {
+      failKey('socialLinkUrlInvalid', { source: entrySource });
+    }
+
+    linkIds.push(id);
+  });
+
+  assertUnique(linkIds, 'social link id');
+}
+
 function validateItems() {
   const itemsDir = path.join(ROOT, 'content/items');
 
@@ -401,6 +452,7 @@ validateCatalog();
 validateAbout();
 validateSignalClouds();
 validateContact();
+validateSocial();
 const itemIds = validateItems();
 validateCollections(itemIds);
 

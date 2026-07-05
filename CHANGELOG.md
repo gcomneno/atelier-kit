@@ -4,6 +4,13 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.16 - 2026-07-05
+
+### Fixed
+
+- **`html lang` attribute**: `hooks.server.js` replaces `%lang%` in `app.html` from `site.language` (was left as literal `%lang%` on deployed sites).
+- **Footer `mailto:` links** accepted in validation and studio save.
+
 ## v0.1.15 - 2026-07-05
 
 ### Added

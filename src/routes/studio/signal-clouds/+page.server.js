@@ -4,6 +4,7 @@ import { fail } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
 import {
   applySignalCloudsFromForm,
+  optionalField,
   readSignalCloudRecords,
   runStructuralValidation,
   validationMessage,
@@ -14,6 +15,7 @@ import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 function loadSignalCloudForm(locale) {
   return readSignalCloudRecords(locale).map((cloud) => ({
     id: cloud.id,
+    enabled: cloud.enabled !== false,
     question: typeof cloud.question === 'string' ? cloud.question : '',
     hint: typeof cloud.hint === 'string' ? cloud.hint : '',
     options: Array.isArray(cloud.options)
@@ -59,6 +61,39 @@ export const actions = {
       return fail(400, {
         cloudStatus: 'error',
         cloudMessage: error instanceof Error ? error.message : t('server.saveCloudsError'),
+        clouds: loadSignalCloudForm(locale)
+      });
+    }
+  },
+
+  removeCloud: async ({ request }) => {
+    guardStudio();
+
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
+
+    try {
+      const formData = await request.formData();
+      const cloudId = optionalField(formData.get('cloud_id'));
+
+      if (!cloudId) {
+        throw new Error(t('server.removeCloudError'));
+      }
+
+      const clouds = readSignalCloudRecords(locale).filter((cloud) => cloud.id !== cloudId);
+
+      writeSignalCloudRecords(clouds);
+      const validation = runStructuralValidation();
+
+      return {
+        cloudStatus: validation.ok ? 'success' : 'warning',
+        cloudMessage: t('server.cloudRemoved'),
+        clouds: loadSignalCloudForm(locale)
+      };
+    } catch (error) {
+      return fail(400, {
+        cloudStatus: 'error',
+        cloudMessage: error instanceof Error ? error.message : t('server.removeCloudError'),
         clouds: loadSignalCloudForm(locale)
       });
     }

@@ -6,14 +6,13 @@ import path from 'node:path';
 import process from 'node:process';
 import readline from 'node:readline/promises';
 import { parse, stringify } from 'yaml';
+import { createTranslator } from '../src/lib/i18n/index.js';
+import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
+import { getScaffoldLocalePack } from './scaffold-locales/index.js';
 
-const TEMPLATES = [
-  { id: 'writing', label: 'Writing / author showcase' },
-  { id: 'artwork', label: 'Artwork / visual art showcase' },
-  { id: 'handmade', label: 'Handmade / craft showcase' },
-  { id: 'jewelry', label: 'Jewelry showcase' },
-  { id: 'furniture', label: 'Furniture / object design showcase' }
-];
+const t = createTranslator(loadOperatorLocale());
+
+const TEMPLATE_IDS = ['writing', 'artwork', 'handmade', 'jewelry', 'furniture'];
 
 const TEMPLATE_STARTER = {
   writing: { itemId: 'first-draft', collectionId: 'writing-desk' },
@@ -166,7 +165,7 @@ function parseArgs(argv) {
   }
 
   if (options.template && !TEMPLATE_STARTER[options.template]) {
-    throw new Error(`Unknown template: ${options.template}. Available templates: ${TEMPLATES.map((entry) => entry.id).join(', ')}`);
+    throw new Error(`Unknown template: ${options.template}. Available templates: ${TEMPLATE_IDS.join(', ')}`);
   }
 
   options.nonInteractive = Boolean(
@@ -193,7 +192,7 @@ function writeYamlFile(root, relativePath, data) {
 function runValidation(root, inPlace) {
   if (!inPlace && !existsSync(path.join(root, 'node_modules'))) {
     console.log('');
-    console.log('Validation skipped until dependencies are installed in the new client site.');
+    console.log(t('wizard.validationSkipped'));
     return true;
   }
 
@@ -205,10 +204,10 @@ function runValidation(root, inPlace) {
   return result.status === 0;
 }
 
-function runScaffold(sourceRoot, targetRoot, template) {
+function runScaffold(sourceRoot, targetRoot, template, language) {
   const result = spawnSync(
     process.execPath,
-    ['scripts/scaffold-client.js', targetRoot, '--template', template, '--force'],
+    ['scripts/scaffold-client.js', targetRoot, '--template', template, '--language', language, '--force'],
     {
       cwd: sourceRoot,
       stdio: 'inherit'
@@ -234,7 +233,7 @@ async function askRequired(rl, label) {
       return answer;
     }
 
-    console.log('This field is required.');
+    console.log(t('wizard.fieldRequired'));
   }
 }
 
@@ -249,25 +248,25 @@ async function chooseTemplate(rl, preset) {
   }
 
   console.log('');
-  console.log('Choose a use case:');
+  console.log(t('wizard.chooseUseCase'));
 
-  TEMPLATES.forEach((entry, index) => {
-    console.log(`  ${index + 1}. ${entry.label} (${entry.id})`);
+  TEMPLATE_IDS.forEach((id, index) => {
+    console.log(`  ${index + 1}. ${t(`wizard.templates.${id}`)} (${id})`);
   });
 
   while (true) {
-    const answer = (await rl.question('Template number or id: ')).trim().toLowerCase();
+    const answer = (await rl.question(`${t('wizard.templatePrompt')} `)).trim().toLowerCase();
     const numeric = Number.parseInt(answer, 10);
 
-    if (!Number.isNaN(numeric) && numeric >= 1 && numeric <= TEMPLATES.length) {
-      return TEMPLATES[numeric - 1].id;
+    if (!Number.isNaN(numeric) && numeric >= 1 && numeric <= TEMPLATE_IDS.length) {
+      return TEMPLATE_IDS[numeric - 1];
     }
 
     if (TEMPLATE_STARTER[answer]) {
       return answer;
     }
 
-    console.log('Choose a valid template number or id.');
+    console.log(t('wizard.chooseValidTemplate'));
   }
 }
 
@@ -287,6 +286,7 @@ function patchSiteIdentity(root, answers) {
 
 function patchContact(root, answers) {
   const data = readYamlFile(root, 'config/contact.yaml');
+  const pack = getScaffoldLocalePack(answers.language);
 
   if (!data.contact || typeof data.contact !== 'object') {
     throw new Error('config/contact.yaml is missing a contact object.');
@@ -294,14 +294,14 @@ function patchContact(root, answers) {
 
   data.contact.email = {
     enabled: true,
-    label: 'Email this brief',
+    label: pack.contact.emailLabel,
     address: answers.email,
-    subject_prefix: 'Interest in'
+    subject_prefix: pack.contact.subjectPrefix
   };
 
   data.contact.whatsapp = {
     enabled: answers.whatsappEnabled,
-    label: 'WhatsApp this brief',
+    label: pack.contact.whatsappLabel,
     phone: answers.whatsappEnabled ? answers.whatsappPhone : ''
   };
 
@@ -337,24 +337,26 @@ function patchStarterCollection(root, template, collectionTitle) {
 
 function printSummary(answers) {
   console.log('');
-  console.log('Setup summary:');
-  console.log(`  Mode: ${answers.mode}`);
+  console.log(t('wizard.setupSummary'));
+  console.log(`  ${t('wizard.mode')}: ${answers.mode}`);
   if (answers.targetRoot) {
-    console.log(`  Target: ${answers.targetRoot}`);
+    console.log(`  ${t('wizard.target')}: ${answers.targetRoot}`);
   }
   if (answers.template) {
-    console.log(`  Template: ${answers.template}`);
+    console.log(`  ${t('wizard.template')}: ${answers.template}`);
   }
-  console.log(`  Site title: ${answers.siteTitle}`);
-  console.log(`  Tagline: ${answers.tagline}`);
-  console.log(`  Language: ${answers.language}`);
-  console.log(`  Email: ${answers.email}`);
-  console.log(`  WhatsApp: ${answers.whatsappEnabled ? answers.whatsappPhone : 'disabled'}`);
+  console.log(`  ${t('wizard.siteTitle')}: ${answers.siteTitle}`);
+  console.log(`  ${t('wizard.tagline')}: ${answers.tagline}`);
+  console.log(`  ${t('wizard.language')}: ${answers.language}`);
+  console.log(`  ${t('wizard.email')}: ${answers.email}`);
+  console.log(
+    `  ${t('wizard.whatsapp')}: ${answers.whatsappEnabled ? answers.whatsappPhone : t('wizard.whatsappDisabled')}`
+  );
   if (answers.firstItemTitle) {
-    console.log(`  First item title: ${answers.firstItemTitle}`);
+    console.log(`  ${t('wizard.firstItemTitle')}: ${answers.firstItemTitle}`);
   }
   if (answers.collectionTitle) {
-    console.log(`  Collection title: ${answers.collectionTitle}`);
+    console.log(`  ${t('wizard.collectionTitle')}: ${answers.collectionTitle}`);
   }
 }
 
@@ -362,9 +364,9 @@ function printNextSteps(targetRoot, inPlace) {
   const relativeTarget = inPlace ? '.' : path.relative(process.cwd(), targetRoot) || targetRoot;
 
   console.log('');
-  console.log('Guided setup complete.');
+  console.log(t('wizard.complete'));
   console.log('');
-  console.log('Next steps:');
+  console.log(t('wizard.nextSteps'));
 
   if (!inPlace) {
     console.log(`  cd ${relativeTarget}`);
@@ -376,8 +378,8 @@ function printNextSteps(targetRoot, inPlace) {
   console.log('  npm run check');
   console.log('  npm run build');
   console.log('');
-  console.log('Replace starter images and any remaining placeholder text before publishing.');
-  console.log('For a public launch pass, run: npm run content:doctor -- --strict');
+  console.log(t('wizard.replaceBeforePublish'));
+  console.log(t('wizard.strictDoctorHint'));
 }
 
 function buildAnswersFromOptions(options) {
@@ -411,9 +413,9 @@ function buildAnswersFromOptions(options) {
 
 async function collectAnswersInteractively(rl, options) {
   console.log('');
-  console.log('Atelier-Kit guided setup');
-  console.log('Answer a few questions to generate starter site content.');
-  console.log('You can still edit files later if needed.');
+  console.log(t('wizard.introTitle'));
+  console.log(t('wizard.introBody'));
+  console.log(t('wizard.introNote'));
 
   const answers = {
     mode: options.inPlace ? 'in-place' : 'new client site',
@@ -422,20 +424,20 @@ async function collectAnswersInteractively(rl, options) {
   };
 
   if (!options.inPlace) {
-    answers.targetRoot = path.resolve(process.cwd(), await askRequired(rl, 'Target folder (relative path)'));
+    answers.targetRoot = path.resolve(process.cwd(), await askRequired(rl, t('wizard.targetFolder')));
   }
 
-  answers.siteTitle = await askRequired(rl, 'Site title');
-  answers.tagline = await askRequired(rl, 'Tagline');
-  answers.language = await askOptional(rl, 'Language', 'en');
-  answers.email = await askRequired(rl, 'Contact email');
+  answers.siteTitle = await askRequired(rl, t('wizard.siteTitle'));
+  answers.tagline = await askRequired(rl, t('wizard.tagline'));
+  answers.language = await askOptional(rl, t('wizard.language'), 'en');
+  answers.email = await askRequired(rl, t('wizard.email'));
   answers.whatsappEnabled = /^y(es)?$/i.test(await askOptional(rl, 'Enable WhatsApp contact? (y/N)', 'n'));
   answers.whatsappPhone = answers.whatsappEnabled
-    ? await askRequired(rl, 'WhatsApp phone number')
+    ? await askRequired(rl, t('wizard.whatsappPhone'))
     : '';
-  answers.notice = (await askOptional(rl, 'Public site notice (leave empty to hide)', '')).trim();
-  answers.firstItemTitle = options.inPlace ? '' : await askOptional(rl, 'First item title (optional)');
-  answers.collectionTitle = options.inPlace ? '' : await askOptional(rl, 'Collection title (optional)');
+  answers.notice = (await askOptional(rl, t('wizard.notice'), '')).trim();
+  answers.firstItemTitle = options.inPlace ? '' : await askOptional(rl, t('wizard.firstItemOptional'));
+  answers.collectionTitle = options.inPlace ? '' : await askOptional(rl, t('wizard.collectionOptional'));
 
   return answers;
 }
@@ -449,7 +451,7 @@ async function applySetup(options, answers) {
 
   const sourceRoot = process.cwd();
 
-  if (!runScaffold(sourceRoot, answers.targetRoot, answers.template)) {
+  if (!runScaffold(sourceRoot, answers.targetRoot, answers.template, answers.language)) {
     throw new Error('Scaffold step failed.');
   }
 

@@ -323,6 +323,23 @@ export function runContentDoctorReport() {
   };
 }
 
+/** @returns {{ ok: boolean, output: string }} */
+export function runPublishPrepReport() {
+  const result = spawnSync(process.execPath, ['scripts/publish.js'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    env: { ...process.env, FORCE_COLOR: '0' },
+    timeout: 600_000
+  });
+
+  const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
+
+  return {
+    ok: result.status === 0,
+    output: output || (result.status === 0 ? 'OK' : 'Publish prep failed.')
+  };
+}
+
 /**
  * @param {string} filename
  * @param {string} [locale]
@@ -537,7 +554,7 @@ export function applySignalCloudsFromForm(originalClouds, formData) {
   return originalClouds.map((cloud, cloudIndex) => {
     const updated = {
       id: cloud.id,
-      enabled: cloud.enabled !== false,
+      enabled: checkboxEnabled(formData.get(`cloud_${cloudIndex}_enabled`)),
       question: optionalField(formData.get(`cloud_${cloudIndex}_question`), cloud.question),
       hint: optionalField(formData.get(`cloud_${cloudIndex}_hint`), cloud.hint ?? ''),
       options: Array.isArray(cloud.options)

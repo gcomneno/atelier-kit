@@ -7,6 +7,13 @@
   let { data, form } = $props();
 
   const clouds = $derived(form?.clouds ?? data.clouds);
+
+  /**
+   * @param {string} id
+   */
+  function confirmRemove(id) {
+    return confirm(t('studio.signals.removeConfirm', { id }));
+  }
 </script>
 
 <svelte:head>
@@ -22,6 +29,15 @@
     {#each clouds as cloud, cloudIndex}
       <fieldset>
         <legend>{cloud.id}</legend>
+
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            name={`cloud_${cloudIndex}_enabled`}
+            checked={cloud.enabled}
+          />
+          {t('studio.signals.enabled')}
+        </label>
 
         <label>
           {t('studio.signals.question')}
@@ -43,6 +59,21 @@
             />
           </label>
         {/each}
+
+        <button
+          type="submit"
+          class="remove-button"
+          name="cloud_id"
+          value={cloud.id}
+          formaction="?/removeCloud"
+          onclick={(event) => {
+            if (!confirmRemove(cloud.id)) {
+              event.preventDefault();
+            }
+          }}
+        >
+          {t('studio.signals.remove')}
+        </button>
       </fieldset>
     {/each}
 
@@ -99,6 +130,12 @@
     font-size: 0.95rem;
   }
 
+  .checkbox {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
   input {
     width: 100%;
     padding: 0.7rem 0.8rem;
@@ -109,7 +146,21 @@
     font: inherit;
   }
 
-  button {
+  .checkbox input {
+    width: auto;
+  }
+
+  .remove-button {
+    border: 1px solid rgb(132 46 46 / 0.35);
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    background: rgb(132 46 46 / 0.08);
+    color: #6d2a2a;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .actions button[type='submit'] {
     border: 0;
     border-radius: 999px;
     padding: 0.75rem 1.2rem;

@@ -51,13 +51,30 @@ First launch: **half day to one day** with operator support.
 
 ### Suggested pricing (operator-defined)
 
-| Package | Indicative range |
-|---|---|
-| Setup only | €300–500 |
-| Setup + first content batch | €500–800 |
-| Later content updates | €50–150 / session |
+These ranges are **defaults for a full-service handoff**. Individual operators may charge less when the client already supplies content, photos and copy.
 
-Infrastructure for a small showcase is usually **€0–20/month**.
+| Package | Indicative range | When it fits |
+|---|---|---|
+| **Kit setup light** | **€50** (typical) | Client provides texts, photos and materials; operator scaffolds, configures Atelier-Kit, runs `publish`, first deploy and a short handoff. Very low labour — studio + scripts do the work. |
+| Setup only | €300–500 | Operator also shapes identity, structure and first editorial pass |
+| Setup + first content batch | €500–800 | Operator writes/edits most copy and prepares photos |
+| Later content updates | €50–150 / session | Ad-hoc studio sessions or deploy help |
+
+**Infrastructure is always paid by the client** (Vercel account, domain, any Pro plan). The operator quote covers labour only unless explicitly agreed otherwise.
+
+Infrastructure for a small showcase is usually **€0–20/month** on the client side.
+
+### Operator compensation (optional practice)
+
+Some operators collect small setup fees (**e.g. €50**) as a **donation via [GitHub Sponsors](https://github.com/sponsors)** rather than invoiced professional services — especially when the amount is symbolic and the relationship is informal.
+
+If you use this model:
+
+- state clearly to the client that the payment is a **voluntary donation / sponsor support**, not a VAT invoice for a commercial package;
+- keep scope minimal and documented (what you do vs what the client provides);
+- **verify local tax rules yourself** (Italy: donazioni occasionali, prestazioni occasionali, partita IVA, etc.) — this doc is not legal or tax advice.
+
+The Atelier-Kit project (MIT) never takes a cut of operator fees or donations.
 
 ## What stays out of scope
 

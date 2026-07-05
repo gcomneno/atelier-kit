@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { applyScaffoldLocalePack } from './scaffold-locales/index.js';
 
 const EXCLUDED_NAMES = new Set([
   '.git',
@@ -50,6 +51,7 @@ function parseArgs(argv) {
   let targetDir = '';
   let template = 'writing';
   let force = false;
+  let language = 'en';
 
   while (args.length > 0) {
     const arg = args.shift();
@@ -77,6 +79,16 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === '--language') {
+      language = args.shift() || 'en';
+      continue;
+    }
+
+    if (arg.startsWith('--language=')) {
+      language = arg.slice('--language='.length) || 'en';
+      continue;
+    }
+
     if (arg.startsWith('--')) {
       throw new Error(`Unknown option: ${arg}`);
     }
@@ -97,7 +109,7 @@ function parseArgs(argv) {
     throw new Error(`Unknown template: ${template}. Available templates: ${[...SUPPORTED_TEMPLATES].join(', ')}`);
   }
 
-  return { targetDir, template, force, help: false };
+  return { targetDir, template, force, language, help: false };
 }
 
 function ensureInsideReasonableTarget(sourceRoot, targetRoot) {
@@ -926,6 +938,8 @@ function main() {
     writeSourcePointer(targetRoot, sourceRoot);
 
     TEMPLATE_APPLIERS[options.template](targetRoot);
+
+    applyScaffoldLocalePack(targetRoot, options.language);
 
     patchPackageJson(targetRoot);
     writeDeployGuide(targetRoot);

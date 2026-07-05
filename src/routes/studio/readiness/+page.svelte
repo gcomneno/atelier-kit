@@ -1,10 +1,13 @@
 <script>
+  import { enhance } from '$app/forms';
   import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
   import { useI18n } from '$lib/i18n/context.js';
 
   const t = useI18n();
 
-  let { data } = $props();
+  let { data, form } = $props();
+
+  let publishing = $state(false);
 </script>
 
 <svelte:head>
@@ -34,8 +37,31 @@
     <p>{t('studio.readiness.publishIntro')}</p>
   </div>
 
-  <pre><code>npm run publish
+  <form
+    method="POST"
+    action="?/runPublishPrep"
+    use:enhance={() => {
+      publishing = true;
+
+      return async ({ update }) => {
+        publishing = false;
+        await update();
+      };
+    }}
+    class="publish-form"
+  >
+    <button type="submit" disabled={publishing}>
+      {publishing ? t('studio.readiness.publishRunning') : t('studio.readiness.publishRun')}
+    </button>
+  </form>
+
+  {#if form?.prep}
+    <p class={form.prep.ok ? 'ok' : 'review'}>{form.message}</p>
+    <pre class="report">{form.prep.output}</pre>
+  {:else}
+    <pre><code>npm run publish
 npm run publish -- --deploy</code></pre>
+  {/if}
 </section>
 
 <style>
@@ -81,5 +107,23 @@ npm run publish -- --deploy</code></pre>
     color: #f8f0e4;
     white-space: pre-wrap;
     line-height: 1.5;
+  }
+
+  .publish-form {
+    margin-bottom: 1rem;
+  }
+
+  .publish-form button {
+    padding: 0.65rem 1.1rem;
+    border: 1px solid rgb(47 40 31 / 0.2);
+    border-radius: 0.65rem;
+    background: #f8f0e4;
+    color: #2f281f;
+    cursor: pointer;
+  }
+
+  .publish-form button:disabled {
+    opacity: 0.65;
+    cursor: wait;
   }
 </style>

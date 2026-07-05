@@ -333,7 +333,7 @@ fn handle_tray_menu(app: &AppHandle, id: &str) {
                     .opener()
                     .open_url(preview_url(), None::<&str>);
             } else if let Some(site_path) = state.site_path.lock().expect("site path lock").clone() {
-                if start_dev_server_state(state, &site_path).is_ok() {
+                if start_dev_server_state(state.inner(), &site_path).is_ok() {
                     let _ = app
                         .opener()
                         .open_url(preview_url(), None::<&str>);
@@ -341,7 +341,7 @@ fn handle_tray_menu(app: &AppHandle, id: &str) {
             }
         }
         "stop-server" => {
-            stop_dev_server_state(state);
+            stop_dev_server_state(state.inner());
         }
         _ => {}
     }
@@ -387,7 +387,7 @@ pub fn run() {
         .expect("error while running Atelier Desktop")
         .run(|app, event| {
             if let tauri::RunEvent::ExitRequested { .. } = event {
-                stop_dev_server_state(app.state::<AppState>());
+                stop_dev_server_state(app.state::<AppState>().inner());
             }
         });
 }

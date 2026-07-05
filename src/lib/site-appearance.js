@@ -1,6 +1,6 @@
 /** @typedef {'warm' | 'neutral' | 'dark' | 'custom'} AppearancePreset */
 
-/** @typedef {{ preset: AppearancePreset, base_color: string, accent_color: string, text_color: string }} SiteAppearance */
+/** @typedef {{ preset: AppearancePreset, base_color: string, accent_color: string, text_color: string, background_image?: string }} SiteAppearance */
 
 export const APPEARANCE_PRESET_OPTIONS = [
   { id: 'warm', label: 'Warm atelier (default)' },
@@ -76,7 +76,10 @@ export function resolveSiteAppearance(appearance) {
     preset,
     base_color: normalizeHex(appearance.base_color, presetDefaults.base_color),
     accent_color: normalizeHex(appearance.accent_color, presetDefaults.accent_color),
-    text_color: normalizeHex(appearance.text_color, presetDefaults.text_color)
+    text_color: normalizeHex(appearance.text_color, presetDefaults.text_color),
+    ...(typeof appearance.background_image === 'string' && appearance.background_image.trim() !== ''
+      ? { background_image: appearance.background_image.trim() }
+      : {})
   };
 }
 

@@ -9,6 +9,7 @@ import {
   readProjectYaml,
   requiredField,
   runStructuralValidation,
+  saveSiteBackgroundUpload,
   validationMessage,
   writeProjectYaml
 } from '$lib/server/studio-io.js';
@@ -31,6 +32,29 @@ function loadAppearanceForm() {
   }
 
   return resolveSiteAppearance(isRecord(site.appearance) ? site.appearance : undefined);
+}
+
+/**
+ * @param {import('$lib/site-appearance.js').SiteAppearance} appearance
+ * @param {string} [backgroundImage]
+ */
+function buildAppearanceYaml(appearance, backgroundImage = '') {
+  /** @type {Record<string, string>} */
+  const record =
+    appearance.preset === 'custom'
+      ? {
+          preset: 'custom',
+          base_color: appearance.base_color,
+          accent_color: appearance.accent_color,
+          text_color: appearance.text_color
+        }
+      : { preset: appearance.preset };
+
+  if (backgroundImage) {
+    record.background_image = backgroundImage;
+  }
+
+  return record;
 }
 
 function loadSiteForm() {
@@ -208,16 +232,23 @@ export const actions = {
       }
 
       const site = { ...data.site };
+      const existingAppearance = isRecord(site.appearance) ? site.appearance : {};
+      let backgroundImage =
+        typeof existingAppearance.background_image === 'string'
+          ? existingAppearance.background_image
+          : '';
 
-      site.appearance =
-        appearance.preset === 'custom'
-          ? {
-              preset: 'custom',
-              base_color: appearance.base_color,
-              accent_color: appearance.accent_color,
-              text_color: appearance.text_color
-            }
-          : { preset: appearance.preset };
+      if (checkboxEnabled(formData.get('remove_background'))) {
+        backgroundImage = '';
+      }
+
+      const backgroundUpload = formData.get('background_upload');
+
+      if (backgroundUpload instanceof File && backgroundUpload.size > 0) {
+        backgroundImage = await saveSiteBackgroundUpload(backgroundUpload);
+      }
+
+      site.appearance = buildAppearanceYaml(appearance, backgroundImage);
 
       writeProjectYaml('config/site.yaml', { site });
       const validation = runStructuralValidation();

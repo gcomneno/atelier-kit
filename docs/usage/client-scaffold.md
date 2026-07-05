@@ -178,3 +178,5 @@ npm run site:upgrade -- --target ../luna-argento --from .
 ```
 
 After upgrading, run `npm run check` and `npm run build` in the client folder.
+
+Tag the kit release (`git tag vX.Y.Z`) before upgrading clients so `.atelier-kit-upgrade.json` records the correct version.

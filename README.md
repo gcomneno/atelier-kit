@@ -38,7 +38,7 @@ No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 
 ## Current release
 
-Latest release: **v0.1.9** — client handoff epic, site appearance, item layout, `site:upgrade`.
+Latest release: **v0.1.13** — Publish live, Atelier Desktop (Tauri), studio Help page.
 
 See [GitHub Releases](https://github.com/gcomneno/atelier-kit/releases) for highlights and validation notes.
 

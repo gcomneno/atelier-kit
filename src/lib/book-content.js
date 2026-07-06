@@ -11,6 +11,14 @@ const MONTHS =
  * }} BookBlock
  */
 
+/**
+ * @param {string} body
+ * @returns {string[]}
+ */
+/**
+ * @param {string} body
+ * @returns {string[]}
+ */
 function normalizeParagraphs(body) {
   return body
     .trim()

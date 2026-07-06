@@ -333,6 +333,8 @@ Upgrade behaviour:
 
 Prefer **small kit PRs** and cherry-pick framework fixes into preserved files when needed, instead of blind full upgrades.
 
+In local development, YAML under `config/` and `content/` is read from disk on each request — save a file and refresh the browser. Production builds still bundle YAML at compile time.
+
 ## Studio: background image vs hero banner
 
 - **Appearance → background image** — site-wide background or top strip (used by some custom homes).

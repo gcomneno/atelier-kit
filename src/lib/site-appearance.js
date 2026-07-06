@@ -118,6 +118,7 @@ export function appearanceCssVariables(appearance) {
     '--site-base-color': resolved.base_color,
     '--site-accent-color': resolved.accent_color,
     '--site-text-color': resolved.text_color,
+    '--site-color-scheme': darkBase ? 'dark' : 'light',
     '--site-surface-color': darkBase
       ? mixWithWhite(resolved.base_color, 0.07)
       : mixWithWhite(resolved.base_color, 0.72),

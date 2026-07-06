@@ -102,12 +102,13 @@
     font-size: clamp(3rem, 12vw, 7rem);
     line-height: 0.9;
     letter-spacing: -0.07em;
+    color: var(--site-text-color, #2f281f);
   }
 
   header p {
     max-width: 42rem;
     margin: 0;
-    color: #4f4236;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 82%, transparent);
     font-size: clamp(1.1rem, 3vw, 1.5rem);
     line-height: 1.4;
   }

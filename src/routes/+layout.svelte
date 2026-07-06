@@ -15,9 +15,13 @@
       .join('; ')
   );
   const hasBackgroundImage = $derived(Boolean(data.appearance?.background_image));
+  const appearanceRootStyle = $derived(
+    `:root, body { ${appearanceStyle}; color-scheme: var(--site-color-scheme, light); background-color: var(--site-base-color, #f8f0e4); color: var(--site-text-color, #2f281f); }`
+  );
 </script>
 
 <svelte:head>
+  {@html `<style id="site-appearance">${appearanceRootStyle}</style>`}
   {#if data.seo?.ogImage}
     <meta property="og:image" content={data.seo.ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
@@ -37,6 +41,7 @@
     site={data.site}
     socialLinks={data.socialLinks}
     footer={data.footerActive ? data.footer : null}
+    overlay={hasBackgroundImage}
   />
   {@render children()}
   {#if data.footerActive && data.footer}
@@ -57,8 +62,13 @@
     box-sizing: border-box;
   }
 
+  :global(html) {
+    background-color: var(--site-base-color, #f8f0e4);
+  }
+
   :global(body) {
     margin: 0;
+    min-height: 100vh;
     font-family:
       Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       sans-serif;

@@ -6,8 +6,8 @@
   /** @typedef {{ title: string, links: FooterLink[] }} FooterColumn */
   /** @typedef {{ id: string, url: string }} SocialLink */
 
-  /** @type {{ site: { name: string }, socialLinks?: SocialLink[], footer?: { columns: FooterColumn[], header_nav: FooterLink[], show_social: boolean } | null }} */
-  let { site, socialLinks = [], footer = null } = $props();
+  /** @type {{ site: { name: string }, socialLinks?: SocialLink[], footer?: { columns: FooterColumn[], header_nav: FooterLink[], show_social: boolean } | null, overlay?: boolean }} */
+  let { site, socialLinks = [], footer = null, overlay = false } = $props();
 
   const t = useVisitorI18n();
 
@@ -26,7 +26,7 @@
   }
 </script>
 
-<header class="site-header">
+<header class="site-header" class:overlay>
   <div class="header-inner">
     <a class="site-name" href="/">{site.name}</a>
 
@@ -92,6 +92,30 @@
     border-bottom: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 14%, transparent);
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 72%, transparent);
     background: color-mix(in srgb, var(--site-base-color, #f8f0e4) 88%, white);
+  }
+
+  .site-header.overlay {
+    position: relative;
+    z-index: 3;
+    border-bottom-color: color-mix(in srgb, var(--site-text-color, #e8e0d4) 18%, transparent);
+    color: color-mix(in srgb, var(--site-text-color, #e8e0d4) 88%, transparent);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--site-base-color, #0f0e0d) 72%, transparent) 0%,
+      color-mix(in srgb, var(--site-base-color, #0f0e0d) 28%, transparent) 100%
+    );
+    backdrop-filter: blur(4px);
+  }
+
+  .site-header.overlay .site-name,
+  .site-header.overlay .main-nav a {
+    color: var(--site-text-color, #e8e0d4);
+    text-shadow: 0 1px 16px rgb(0 0 0 / 0.65);
+  }
+
+  .site-header.overlay .social-link {
+    background: color-mix(in srgb, var(--site-base-color, #0f0e0d) 45%, transparent);
+    border-color: color-mix(in srgb, var(--site-text-color, #e8e0d4) 22%, transparent);
   }
 
   .header-inner {

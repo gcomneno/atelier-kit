@@ -703,7 +703,9 @@ export default {
     collectionItemRefUnknown: '{itemSource}: id pezzo sconosciuto "{itemId}".',
     newsIdInvalid: '{source}: l’id deve usare solo lettere minuscole, numeri e trattini singoli.',
     newsIdFilenameMismatch: '{source}: l’id deve corrispondere al nome file "{expectedId}".',
-    newsDateInvalid: '{source}: la data deve usare il formato YYYY-MM-DD.'
+    newsDateInvalid: '{source}: la data deve usare il formato YYYY-MM-DD.',
+    newsReadingFormatInvalid:
+      '{source}: reading_format deve essere uno tra: book (ricevuto "{value}").'
   },
   wizard: {
     usageTitle: 'Utilizzo:',

@@ -700,7 +700,9 @@ export default {
     collectionItemRefUnknown: '{itemSource}: unknown item id "{itemId}".',
     newsIdInvalid: '{source}: id must use lowercase letters, numbers and single hyphens only.',
     newsIdFilenameMismatch: '{source}: id must match filename "{expectedId}".',
-    newsDateInvalid: '{source}: date must use YYYY-MM-DD format.'
+    newsDateInvalid: '{source}: date must use YYYY-MM-DD format.',
+    newsReadingFormatInvalid:
+      '{source}: reading_format must be one of: book (got "{value}").'
   },
   wizard: {
     usageTitle: 'Usage:',

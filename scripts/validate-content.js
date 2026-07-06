@@ -5,6 +5,7 @@ import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
 import { isValidFooterHref } from '../src/lib/footer-links.js';
 import { isHomeShowMode, isLayoutPreset, MAX_LATEST_NEWS_COUNT } from '../src/lib/layout-presets.js';
+import { isReadingFormat } from '../src/lib/reading-formats.js';
 import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
 
 const ROOT = process.cwd();
@@ -751,6 +752,13 @@ function validateNews() {
     }
 
     requireString(post, 'body', source);
+
+    if (post.reading_format !== undefined && !isReadingFormat(post.reading_format)) {
+      const value =
+        typeof post.reading_format === 'string' ? post.reading_format : String(post.reading_format);
+
+      failKey('newsReadingFormatInvalid', { source, value });
+    }
 
     if (typeof post.image_file === 'string' && post.image_file.trim() !== '') {
       const imageFile = post.image_file.trim();

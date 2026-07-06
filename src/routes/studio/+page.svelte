@@ -152,6 +152,18 @@
       <input name="footer_note" value={siteForm.footer_note} />
     </label>
 
+    <label>
+      {t('studio.site.identity.siteUrl')}
+      <span class="hint">{t('studio.site.identity.siteUrlHint')}</span>
+      <input name="url" type="url" value={siteForm.url} placeholder="https://example.com" />
+    </label>
+
+    <label>
+      {t('studio.site.identity.ogImage')}
+      <span class="hint">{t('studio.site.identity.ogImageHint')}</span>
+      <input name="og_image" value={siteForm.og_image} placeholder="/images/site/og.jpg" />
+    </label>
+
     <div class="actions">
       <button type="submit">{t('studio.site.identity.save')}</button>
     </div>

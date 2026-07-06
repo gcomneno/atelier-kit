@@ -17,6 +17,17 @@
   const hasBackgroundImage = $derived(Boolean(data.appearance?.background_image));
 </script>
 
+<svelte:head>
+  {#if data.seo?.ogImage}
+    <meta property="og:image" content={data.seo.ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={data.seo.ogImage} />
+  {/if}
+  {#if data.seo?.siteName}
+    <meta property="og:site_name" content={data.seo.siteName} />
+  {/if}
+</svelte:head>
+
 <div
   class="site-root"
   class:has-background-image={hasBackgroundImage}

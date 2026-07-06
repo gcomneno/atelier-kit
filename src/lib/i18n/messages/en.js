@@ -64,6 +64,12 @@ export default {
         noticeHint: 'Leave empty to hide the notice banner.',
         footerNote: 'Footer note (optional)',
         footerNoteHint: 'Short client text on the home page when no multi-column footer is configured. The Atelier-Kit credit is added automatically and cannot be removed.',
+        siteUrl: 'Canonical site URL (optional)',
+        siteUrlHint:
+          'Public https URL used when building absolute Open Graph image links. Leave empty to use the current request host (fine on Vercel).',
+        ogImage: 'Open Graph image (optional)',
+        ogImageHint:
+          'Path under /images/… or full https URL for social previews (Facebook, Instagram, WhatsApp). Recommended size: 1200×630.',
         save: 'Save site settings'
       },
       heroBanner: {
@@ -650,6 +656,10 @@ export default {
     appearancePresetInvalid: '{source}: site.appearance.preset must be one of: warm, neutral, dark, custom.',
     appearanceColorInvalid: '{source}: site.appearance.{field} must be a hex color like #f8f0e4.',
     appearanceBackgroundInvalid: '{source}: site.appearance.background_image must be a path under /images/site/.',
+    siteUrlInvalid: '{source}: site.url must be a valid http or https URL.',
+    ogImageInvalid: '{source}: site.og_image must be a non-empty string when provided.',
+    ogImageUrlInvalid: '{source}: site.og_image must be a valid http or https URL.',
+    ogImagePathInvalid: '{source}: site.og_image must be a path under /images/ or a full https URL.',
     missingCatalogObject: '{source}: missing "catalog" object.',
     routeSegmentUnsupported:
       '{source}: route_segment is intentionally not supported in Atelier-Kit 1.0. Items live under /items.',

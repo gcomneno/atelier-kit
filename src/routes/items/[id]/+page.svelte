@@ -162,7 +162,7 @@
 
         {#if item.preview}
           <p class="preview-link">
-            <a href={item.preview.href}>{item.preview.label}</a>
+            <a href={item.preview.href} target="_blank" rel="noopener noreferrer">{item.preview.label}</a>
           </p>
         {/if}
 

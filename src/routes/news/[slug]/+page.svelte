@@ -1,5 +1,6 @@
 <script>
   import BookReading from '$lib/components/BookReading.svelte';
+  import PageSocialMeta from '$lib/components/PageSocialMeta.svelte';
   import { isBookReadingFormat } from '$lib/book-content.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
@@ -37,6 +38,12 @@
   <title>{data.post.title} · {data.site.name}</title>
   <meta name="description" content={data.post.excerpt || data.post.title} />
 </svelte:head>
+
+<PageSocialMeta
+  title={data.seo?.ogTitle}
+  description={data.seo?.ogDescription}
+  image={data.seo?.ogImage}
+/>
 
 {#if isBookLayout}
   <BookReading

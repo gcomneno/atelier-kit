@@ -1,6 +1,7 @@
 <script>
   import { onMount, tick } from 'svelte';
   import MetaInfo from '$lib/components/MetaInfo.svelte';
+  import PageSocialMeta from '$lib/components/PageSocialMeta.svelte';
   import SignalCloud from '$lib/components/SignalCloud.svelte';
   import VisitorBrief from '$lib/components/VisitorBrief.svelte';
   import { resolveItemCoverFallbackSrc, resolveItemCoverSrc } from '$lib/item-cover.js';
@@ -70,6 +71,12 @@
   <title>{item.title}</title>
   <meta name="description" content={item.description} />
 </svelte:head>
+
+<PageSocialMeta
+  title={data.seo?.ogTitle}
+  description={data.seo?.ogDescription}
+  image={data.seo?.ogImage}
+/>
 
 <main class="item-page">
   <nav class="item-nav" aria-label={t('item.pageNavAriaLabel')}>

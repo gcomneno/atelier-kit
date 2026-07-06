@@ -1,4 +1,6 @@
 import { parse } from 'yaml';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { isValidFooterHref } from '$lib/footer-links.js';
 import {
   DEFAULT_HOME_SHOW,
@@ -35,6 +37,14 @@ const newsFiles = import.meta.glob('/content/news/*.yaml', {
   eager: true
 });
 
+/** @type {Record<string, string>} */
+const bundledYamlFiles = {
+  ...configFiles,
+  ...itemFiles,
+  ...collectionFiles,
+  ...newsFiles
+};
+
 /**
  * @typedef {{ label: string, value?: string, children?: MetaInfoEntry[] }} MetaInfoEntry
  */
@@ -64,12 +74,70 @@ function parseYaml(source, raw) {
 
 /**
  * @param {string} source
+ * @returns {string | null}
+ */
+function readYamlRaw(source) {
+  if (import.meta.env.DEV) {
+    const relativePath = source.replace(/^\//, '');
+    const absolutePath = join(process.cwd(), relativePath);
+
+    if (existsSync(absolutePath)) {
+      return readFileSync(absolutePath, 'utf8');
+    }
+  }
+
+  const bundled = bundledYamlFiles[source];
+
+  return typeof bundled === 'string' ? bundled : null;
+}
+
+/**
+ * @param {Record<string, string>} globMap
+ * @param {string} directory
+ * @returns {string[]}
+ */
+function listYamlSources(globMap, directory) {
+  if (import.meta.env.DEV) {
+    const absoluteDirectory = join(process.cwd(), directory);
+
+    if (!existsSync(absoluteDirectory)) {
+      return [];
+    }
+
+    return readdirSync(absoluteDirectory)
+      .filter((filename) => filename.endsWith('.yaml'))
+      .map((filename) => `/${directory}/${filename}`)
+      .sort();
+  }
+
+  return Object.keys(globMap).sort();
+}
+
+/**
+ * @param {Record<string, string>} globMap
+ * @param {string} directory
+ * @returns {[string, string][]}
+ */
+function readContentYamlEntries(globMap, directory) {
+  return listYamlSources(globMap, directory).map((source) => {
+    const raw = readYamlRaw(source);
+
+    if (raw === null) {
+      throw new Error(`Missing YAML file: ${source}`);
+    }
+
+    return [source, raw];
+  });
+}
+
+/**
+ * @param {string} source
  * @returns {Record<string, unknown>}
  */
 function readYaml(source) {
-  const raw = configFiles[source];
+  const raw = readYamlRaw(source);
 
-  if (typeof raw !== 'string') {
+  if (raw === null) {
     throw new Error(`Missing YAML file: ${source}`);
   }
 
@@ -333,9 +401,9 @@ export function getSignalClouds() {
 }
 
 export function getAboutConfig() {
-  const raw = configFiles['/config/about.yaml'];
+  const raw = readYamlRaw('/config/about.yaml');
 
-  if (typeof raw !== 'string') {
+  if (raw === null) {
     return null;
   }
 
@@ -507,9 +575,9 @@ function normalizeFooterColumn(column, source) {
 }
 
 export function getFooterConfig() {
-  const raw = configFiles['/config/footer.yaml'];
+  const raw = readYamlRaw('/config/footer.yaml');
 
-  if (typeof raw !== 'string') {
+  if (raw === null) {
     return null;
   }
 
@@ -556,9 +624,9 @@ export function getFooterConfig() {
 }
 
 export function getLegalPages() {
-  const raw = configFiles['/config/legal.yaml'];
+  const raw = readYamlRaw('/config/legal.yaml');
 
-  if (typeof raw !== 'string') {
+  if (raw === null) {
     return [];
   }
 
@@ -595,9 +663,9 @@ export function getLegalPage(slug) {
 }
 
 export function getSocialConfig() {
-  const raw = configFiles['/config/social.yaml'];
+  const raw = readYamlRaw('/config/social.yaml');
 
-  if (typeof raw !== 'string') {
+  if (raw === null) {
     return { links: [] };
   }
 
@@ -636,7 +704,7 @@ export function getSocialConfig() {
 }
 
 export function getItems() {
-  return Object.entries(itemFiles)
+  return readContentYamlEntries(itemFiles, 'content/items')
     .map(([source, raw]) => {
       if (typeof raw !== 'string') {
         throw new Error(`${source}: expected raw YAML content.`);
@@ -706,7 +774,7 @@ export function getCollections() {
   const items = getItems();
   const itemById = new Map(items.map((item) => [item.id, item]));
 
-  return Object.entries(collectionFiles)
+  return readContentYamlEntries(collectionFiles, 'content/collections')
     .map(([source, raw]) => {
       if (typeof raw !== 'string') {
         throw new Error(`${source}: expected raw YAML content.`);
@@ -754,7 +822,7 @@ export function getCollectionById(id) {
 }
 
 export function getNewsPosts() {
-  return Object.entries(newsFiles)
+  return readContentYamlEntries(newsFiles, 'content/news')
     .map(([source, raw]) => {
       if (typeof raw !== 'string') {
         throw new Error(`${source}: expected raw YAML content.`);
@@ -827,9 +895,9 @@ function optionalPositiveInt(value, fallback) {
 }
 
 export function getLayoutConfig() {
-  const raw = configFiles['/config/layout.yaml'];
+  const raw = readYamlRaw('/config/layout.yaml');
 
-  if (typeof raw !== 'string') {
+  if (raw === null) {
     return DEFAULT_LAYOUT_CONFIG;
   }
 

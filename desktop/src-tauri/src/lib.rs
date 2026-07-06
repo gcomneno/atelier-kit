@@ -21,6 +21,7 @@ const SERVER_WAIT_SECS: u64 = 90;
 struct AppState {
     site_path: Mutex<Option<PathBuf>>,
     dev_server: Mutex<Option<Child>>,
+    dev_server_site: Mutex<Option<PathBuf>>,
 }
 
 #[derive(Serialize)]
@@ -117,6 +118,23 @@ fn wait_for_server() -> Result<(), String> {
     ))
 }
 
+fn same_site_path(a: &Path, b: &Path) -> bool {
+    match (a.canonicalize(), b.canonicalize()) {
+        (Ok(a_path), Ok(b_path)) => a_path == b_path,
+        _ => a == b,
+    }
+}
+
+fn dev_server_serves_site(state: &AppState, site_path: &Path) -> bool {
+    server_ready()
+        && state
+            .dev_server_site
+            .lock()
+            .expect("dev server site lock")
+            .as_ref()
+            .is_some_and(|active| same_site_path(active, site_path))
+}
+
 fn stop_dev_server_state(state: &AppState) {
     let mut guard = state.dev_server.lock().expect("dev server lock");
 
@@ -124,6 +142,11 @@ fn stop_dev_server_state(state: &AppState) {
         let _ = child.kill();
         let _ = child.wait();
     }
+
+    *state
+        .dev_server_site
+        .lock()
+        .expect("dev server site lock") = None;
 }
 
 fn stop_dev_server(state: &State<'_, AppState>) {
@@ -159,11 +182,29 @@ fn start_dev_server_state(state: &AppState, site_path: &Path) -> Result<(), Stri
         })?;
 
     *state.dev_server.lock().expect("dev server lock") = Some(child);
+    *state
+        .dev_server_site
+        .lock()
+        .expect("dev server site lock") = Some(site_path.to_path_buf());
+
     wait_for_server()
 }
 
-fn start_dev_server(state: &State<'_, AppState>, site_path: &Path) -> Result<(), String> {
-    start_dev_server_state(state.inner(), site_path)
+fn ensure_dev_server_for_site(state: &AppState, site_path: &Path) -> Result<(), String> {
+    if dev_server_serves_site(state, site_path) {
+        return Ok(());
+    }
+
+    stop_dev_server_state(state);
+
+    if server_ready() {
+        return Err(format!(
+            "Port {STUDIO_PORT} is already in use by another dev server (for example a previous site or a terminal session). \
+             Use Stop dev server, close the other terminal, or run: fuser -k {STUDIO_PORT}/tcp"
+        ));
+    }
+
+    start_dev_server_state(state, site_path)
 }
 
 fn build_status(state: &State<'_, AppState>) -> DesktopStatus {
@@ -227,6 +268,18 @@ async fn pick_site_folder(app: AppHandle, state: State<'_, AppState>) -> Result<
         );
     }
 
+    let path_changed = state
+        .site_path
+        .lock()
+        .expect("site path lock")
+        .as_ref()
+        .map(|current| !same_site_path(current, &site_path))
+        .unwrap_or(true);
+
+    if path_changed {
+        stop_dev_server_state(state.inner());
+    }
+
     save_site_path(&app, &site_path)?;
     *state.site_path.lock().expect("site path lock") = Some(site_path);
 
@@ -242,9 +295,7 @@ async fn start_studio(app: AppHandle, state: State<'_, AppState>) -> Result<Desk
         .clone()
         .ok_or_else(|| "Choose a site folder first.".to_string())?;
 
-    if !server_ready() {
-        start_dev_server(&state, &site_path)?;
-    }
+    ensure_dev_server_for_site(state.inner(), &site_path)?;
 
     open_studio_window(&app)?;
     let status = build_status(&state);
@@ -261,15 +312,14 @@ fn stop_studio(state: State<'_, AppState>) -> DesktopStatus {
 
 #[tauri::command]
 async fn open_preview(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
-    if !server_ready() {
-        let site_path = state
-            .site_path
-            .lock()
-            .expect("site path lock")
-            .clone()
-            .ok_or_else(|| "Choose a site folder and start the studio first.".to_string())?;
-        start_dev_server(&state, &site_path)?;
-    }
+    let site_path = state
+        .site_path
+        .lock()
+        .expect("site path lock")
+        .clone()
+        .ok_or_else(|| "Choose a site folder and start the studio first.".to_string())?;
+
+    ensure_dev_server_for_site(state.inner(), &site_path)?;
 
     app.opener()
         .open_url(preview_url(), None::<&str>)
@@ -328,12 +378,8 @@ fn handle_tray_menu(app: &AppHandle, id: &str) {
             }
         }
         "open-preview" => {
-            if server_ready() {
-                let _ = app
-                    .opener()
-                    .open_url(preview_url(), None::<&str>);
-            } else if let Some(site_path) = state.site_path.lock().expect("site path lock").clone() {
-                if start_dev_server_state(state.inner(), &site_path).is_ok() {
+            if let Some(site_path) = state.site_path.lock().expect("site path lock").clone() {
+                if ensure_dev_server_for_site(state.inner(), &site_path).is_ok() {
                     let _ = app
                         .opener()
                         .open_url(preview_url(), None::<&str>);
@@ -355,6 +401,7 @@ pub fn run() {
         .manage(AppState {
             site_path: Mutex::new(None),
             dev_server: Mutex::new(None),
+            dev_server_site: Mutex::new(None),
         })
         .setup(|app| {
             if let Some(saved) = load_saved_site_path(app.handle()) {

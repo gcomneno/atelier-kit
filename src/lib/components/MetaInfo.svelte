@@ -65,8 +65,8 @@
     gap: 1rem;
     padding: 1.15rem 1.25rem;
     border-radius: 1rem;
-    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent);
-    background: var(--site-surface-color, rgb(255 255 255 / 0.72));
+    border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent));
+    background: var(--site-card-color, var(--site-surface-color, rgb(255 255 255 / 0.72)));
   }
 
   h2 {
@@ -119,6 +119,7 @@
     margin: 0;
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 88%, transparent);
     line-height: 1.45;
+    overflow-wrap: anywhere;
   }
 
   @media (max-width: 640px) {

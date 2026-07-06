@@ -48,6 +48,8 @@ export default {
         preview: 'Anteprima',
         backgroundImage: 'Immagine di sfondo (opzionale)',
         backgroundHint: 'JPG, PNG o WebP. Salvata in static/images/site/background.*',
+        backgroundVsBanner:
+          'Usa questo campo per uno sfondo a tutta pagina o una fascia alta sotto l’header. Se il sito ha una home personalizzata, potrebbe usare solo questo asset al posto del hero banner.',
         currentBackground: 'Attuale: {path}',
         removeBackground: 'Rimuovi immagine di sfondo',
         save: 'Salva aspetto'
@@ -60,8 +62,23 @@ export default {
         language: 'Lingua',
         notice: 'Avviso pubblico',
         noticeHint: 'Lascia vuoto per nascondere il banner.',
-        footerNote: 'Nota a piè di pagina',
+        footerNote: 'Nota a piè di pagina (opzionale)',
+        footerNoteHint: 'Testo breve del cliente in home quando non c\'è footer multi-colonna. Il credito Atelier-Kit viene aggiunto automaticamente e non è rimovibile.',
         save: 'Salva impostazioni sito'
+      },
+      heroBanner: {
+        title: 'Hero banner (opzionale)',
+        intro: 'Fascia visiva sotto il testo introduttivo nella home predefinita del kit. Disattivala per nasconderla senza perdere l’immagine.',
+        show: 'Mostra hero banner in home',
+        backgroundImageActive:
+          'Hai già un’immagine di sfondo in Aspetto. Alcune home personalizzate usano solo quella e ignorano il hero banner.',
+        upload: 'Carica immagine banner',
+        uploadHint: 'JPEG, PNG o WebP. Paesaggio consigliato (circa 3:1).',
+        alt: 'Testo alternativo',
+        caption: 'Didascalia (opzionale)',
+        href: 'Link (opzionale, es. /news/anteprima)',
+        linkLabel: 'Etichetta link (se presente il link)',
+        save: 'Salva hero banner'
       },
       contact: {
         title: 'Contatti',
@@ -310,6 +327,11 @@ export default {
       enabled: 'Mostra la pagina Chi siamo sul sito pubblico',
       titleField: 'Titolo pagina',
       introField: 'Introduzione',
+      portraitLegend: 'Ritratto autore (opzionale)',
+      showPortrait: 'Mostra la foto nella pagina Chi siamo',
+      portraitUpload: 'Carica foto',
+      portraitUploadHint: 'JPEG, PNG o WebP. Se disattivi la visualizzazione, la foto resta salvata ma non compare sul sito.',
+      portraitAlt: 'Testo alternativo foto',
       sectionLegend: 'Sezione opzionale',
       sectionHeading: 'Titolo sezione',
       sectionBody: 'Testo sezione',
@@ -404,6 +426,7 @@ export default {
     saveFooterError: 'Impossibile salvare il footer.',
     saveLayoutError: 'Impossibile salvare il layout.',
     saveAppearanceError: 'Impossibile salvare l’aspetto.',
+    saveHeroBannerError: 'Impossibile salvare l’hero banner.',
     saveAboutError: 'Impossibile salvare la pagina Chi siamo.',
     saveCatalogError: 'Impossibile salvare le impostazioni catalogo.',
     saveCloudsError: 'Impossibile salvare Signal Clouds.',
@@ -436,6 +459,7 @@ export default {
     missingSignalClouds: 'config/signal-clouds.yaml non contiene signal_clouds.',
     missingSite: 'config/site.yaml non contiene un oggetto site.',
     aboutTitleRequired: 'Il titolo pagina Chi siamo è obbligatorio quando la pagina è abilitata.',
+    heroBannerImageRequired: 'Carica un’immagine banner oppure disattiva la visualizzazione.',
     contactEmailRequired: 'L’email di contatto è obbligatoria quando il contatto email è abilitato.',
     contactWhatsappRequired: 'Il numero WhatsApp è obbligatorio quando il contatto WhatsApp è abilitato.',
     socialUrlInvalid: 'Inserisci un URL http o https valido per {network}.',
@@ -654,8 +678,12 @@ export default {
     footerLinkLabelRequired: '{source}: l’etichetta del link non può essere vuota se href è impostato.',
     footerFieldMustBeString: '{source}: footer.{field} deve essere una stringa se presente.',
     footerShowSocialInvalid: '{source}: footer.show_social deve essere true o false se presente.',
+    footerHeaderNavMustBeArray: '{source}: footer.header_nav deve essere un array se presente.',
     missingLayoutObject: '{source}: manca l’oggetto "layout".',
     layoutPresetInvalid: '{source}: layout.preset deve essere "single-column" o "catalog-sidebar".',
+    layoutHomeMustBeObject: '{source}: layout.home deve essere un oggetto quando presente.',
+    layoutHomeShowInvalid:
+      '{source}: layout.home.show deve essere "collections", "catalog" o "both" quando presente.',
     layoutSidebarMustBeObject: '{source}: layout.sidebar deve essere un oggetto quando presente.',
     layoutSidebarFlagInvalid:
       '{source}: layout.sidebar.{field} deve essere true o false quando presente.',
@@ -714,6 +742,7 @@ export default {
       artwork: 'Arte visiva / vetrina opere',
       handmade: 'Artigianato / craft',
       jewelry: 'Gioielli',
+      collector: 'Collezionismo / vetrina scambi',
       furniture: 'Mobili / design oggetti'
     }
   },
@@ -727,11 +756,12 @@ export default {
       socialLinks: 'Link social',
       viewAllCollections: 'Vedi tutte le collezioni',
       readMore: 'Leggi tutto',
-      allNews: 'Tutte le notizie'
+      allNews: 'Tutte le notizie',
+      mainNav: 'Navigazione principale'
     },
     home: {
       collectionsEyebrow: 'Collezioni',
-      collectionsTitle: 'Pagine curate',
+      collectionsTitle: 'Collezioni',
       catalogEyebrow: 'Catalogo',
       aboutStudio: 'Lo studio'
     },
@@ -739,8 +769,8 @@ export default {
       pageTitle: 'Collezioni',
       metaDescription: 'Collezioni curate da {siteName}.',
       eyebrow: 'Collezioni',
-      title: 'Pagine curate',
-      intro: 'Piccole selezioni basate su file, create dai {itemPlural} esistenti.',
+      title: 'Collezioni',
+      intro: 'Gruppi di {itemPlural} selezionati per tema o serie.',
       empty: 'Nessuna collezione per ora.',
       collectionEyebrow: 'Collezione',
       selectedItemsEyebrow: '{itemPlural} selezionati'

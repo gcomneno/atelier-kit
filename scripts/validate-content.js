@@ -4,7 +4,7 @@ import { parse } from 'yaml';
 import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
 import { isValidFooterHref } from '../src/lib/footer-links.js';
-import { isLayoutPreset, MAX_LATEST_NEWS_COUNT } from '../src/lib/layout-presets.js';
+import { isHomeShowMode, isLayoutPreset, MAX_LATEST_NEWS_COUNT } from '../src/lib/layout-presets.js';
 import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
 
 const ROOT = process.cwd();
@@ -114,6 +114,37 @@ function validateSite() {
 
   if ('appearance' in site && site.appearance !== undefined) {
     validateAppearance(site.appearance, source);
+  }
+
+  if (site.hero_banner && typeof site.hero_banner === 'object' && !Array.isArray(site.hero_banner)) {
+    const banner = site.hero_banner;
+    const bannerSource = `${source}:hero_banner`;
+
+    if (banner.show === true) {
+      const imageFile = requireString(banner, 'image_file', bannerSource);
+
+      if (!imageFile.startsWith('/')) {
+        failKey('imageFileMustStartWithSlash', { source: bannerSource });
+      } else {
+        const staticImagePath = path.join(ROOT, 'static', imageFile.slice(1));
+
+        if (!existsSync(staticImagePath)) {
+          failKey('imageFileMissing', { source: bannerSource, imageFile });
+        }
+      }
+    } else if (typeof banner.image_file === 'string' && banner.image_file.trim() !== '') {
+      const imageFile = banner.image_file.trim();
+
+      if (!imageFile.startsWith('/')) {
+        failKey('imageFileMustStartWithSlash', { source: bannerSource });
+      } else {
+        const staticImagePath = path.join(ROOT, 'static', imageFile.slice(1));
+
+        if (!existsSync(staticImagePath)) {
+          failKey('imageFileMissing', { source: bannerSource, imageFile });
+        }
+      }
+    }
   }
 }
 
@@ -241,6 +272,37 @@ function validateAbout() {
   }
 
   requireString(about, 'title', source);
+
+  if (about.portrait && typeof about.portrait === 'object' && !Array.isArray(about.portrait)) {
+    const portrait = about.portrait;
+    const portraitSource = `${source}:portrait`;
+
+    if (portrait.show === true) {
+      const imageFile = requireString(portrait, 'image_file', portraitSource);
+
+      if (!imageFile.startsWith('/')) {
+        failKey('imageFileMustStartWithSlash', { source: portraitSource });
+      } else {
+        const staticImagePath = path.join(ROOT, 'static', imageFile.slice(1));
+
+        if (!existsSync(staticImagePath)) {
+          failKey('imageFileMissing', { source: portraitSource, imageFile });
+        }
+      }
+    } else if (typeof portrait.image_file === 'string' && portrait.image_file.trim() !== '') {
+      const imageFile = portrait.image_file.trim();
+
+      if (!imageFile.startsWith('/')) {
+        failKey('imageFileMustStartWithSlash', { source: portraitSource });
+      } else {
+        const staticImagePath = path.join(ROOT, 'static', imageFile.slice(1));
+
+        if (!existsSync(staticImagePath)) {
+          failKey('imageFileMissing', { source: portraitSource, imageFile });
+        }
+      }
+    }
+  }
 
   if (Array.isArray(about.sections)) {
     about.sections.forEach((section, index) => {
@@ -420,6 +482,33 @@ function validateFooter() {
   if ('show_social' in footer && footer.show_social !== undefined && typeof footer.show_social !== 'boolean') {
     failKey('footerShowSocialInvalid', { source });
   }
+
+  if (footer.header_nav !== undefined) {
+    if (!Array.isArray(footer.header_nav)) {
+      failKey('footerHeaderNavMustBeArray', { source });
+      return;
+    }
+
+    footer.header_nav.forEach((link, linkIndex) => {
+      const linkSource = `${source}:header_nav[${linkIndex}]`;
+
+      if (!link || typeof link !== 'object' || Array.isArray(link)) {
+        failKey('footerLinkMustBeObject', { source: linkSource });
+        return;
+      }
+
+      const label = requireString(link, 'label', linkSource);
+      const href = requireString(link, 'href', linkSource);
+
+      if (!isValidFooterHref(href)) {
+        failKey('footerLinkHrefInvalid', { source: linkSource });
+      }
+
+      if (label === '') {
+        failKey('footerLinkLabelRequired', { source: linkSource });
+      }
+    });
+  }
 }
 
 function validateLayout() {
@@ -439,6 +528,16 @@ function validateLayout() {
 
   if ('preset' in layout && layout.preset !== undefined && !isLayoutPreset(layout.preset)) {
     failKey('layoutPresetInvalid', { source });
+  }
+
+  const home = layout.home;
+
+  if (home !== undefined) {
+    if (!home || typeof home !== 'object' || Array.isArray(home)) {
+      failKey('layoutHomeMustBeObject', { source });
+    } else if ('show' in home && home.show !== undefined && !isHomeShowMode(home.show)) {
+      failKey('layoutHomeShowInvalid', { source });
+    }
   }
 
   const sidebar = layout.sidebar;

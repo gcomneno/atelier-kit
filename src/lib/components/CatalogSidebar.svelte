@@ -80,16 +80,27 @@
     {#if showCollections}
       <section class="widget">
         <h2 class="widget-title">{t('catalog.collections')}</h2>
-        <ul class="link-list">
-          {#each collections as collection (collection.id)}
-            <li>
-              <a href={`/collections/${collection.id}`}>{collection.title}</a>
-            </li>
-          {/each}
-        </ul>
-        <p class="widget-footer">
-          <a href="/collections">{t('common.viewAllCollections')}</a>
-        </p>
+        {#if collections.length === 1}
+          {@const collection = collections[0]}
+          <a class="collection-featured" href={`/collections/${collection.id}`}>{collection.title}</a>
+          {#if collection.description}
+            <p class="collection-snippet">{collection.description}</p>
+          {/if}
+          <p class="widget-footer">
+            <a href={`/collections/${collection.id}`}>{t('common.readMore')}</a>
+          </p>
+        {:else}
+          <ul class="link-list">
+            {#each collections as collection (collection.id)}
+              <li>
+                <a href={`/collections/${collection.id}`}>{collection.title}</a>
+              </li>
+            {/each}
+          </ul>
+          <p class="widget-footer">
+            <a href="/collections">{t('common.viewAllCollections')}</a>
+          </p>
+        {/if}
       </section>
     {/if}
 
@@ -163,13 +174,29 @@
   }
 
   .link-list a,
+  .collection-featured,
   .widget-footer a {
     color: #5f4529;
     font-weight: 700;
     text-decoration: none;
   }
 
+  .collection-featured {
+    display: block;
+    margin-bottom: 0.65rem;
+    font-size: 0.95rem;
+  }
+
+  .collection-snippet {
+    margin: 0;
+    color: #4f4236;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    white-space: pre-line;
+  }
+
   .link-list a:hover,
+  .collection-featured:hover,
   .widget-footer a:hover,
   .news-link:hover .news-title {
     text-decoration: underline;
@@ -211,5 +238,6 @@
   .widget-footer {
     margin: 0.85rem 0 0;
     font-size: 0.88rem;
+    text-align: right;
   }
 </style>

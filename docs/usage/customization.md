@@ -304,7 +304,41 @@ For a separate client site folder, use the scaffold workflow:
 - [`docs/usage/scaffold-templates.md`](scaffold-templates.md)
 - [`docs/usage/manual-client-setup.md`](manual-client-setup.md)
 
-The scaffold currently supports `writing`, `artwork`, `handmade`, `jewelry` and `furniture` starters and keeps generated sites file-based.
+The scaffold currently supports `writing`, `artwork`, `handmade`, `jewelry`, `collector` and `furniture` starters and keeps generated sites file-based.
+
+## Custom home layouts and `site:upgrade`
+
+The kit homepage (`src/routes/+page.svelte`) is meant to be customized for publisher-style clients. Treat heavily customized routes as **client-owned**.
+
+Before running `npm run site:upgrade`, list paths that must never be overwritten in:
+
+```text
+.atelier-kit-preserve
+```
+
+Example for a writer showcase with a custom home:
+
+```text
+# Custom branding and homepage layout
+src/routes/+page.svelte
+src/routes/+layout.svelte
+src/app.html
+```
+
+Upgrade behaviour:
+
+- `config/`, `content/` and `static/images/items/` are always protected.
+- Paths in `.atelier-kit-preserve` are skipped during upgrade (shown as `Preserve` in the plan).
+- Everything else under `src/` and `scripts/` syncs from the kit.
+
+Prefer **small kit PRs** and cherry-pick framework fixes into preserved files when needed, instead of blind full upgrades.
+
+## Studio: background image vs hero banner
+
+- **Appearance → background image** — site-wide background or top strip (used by some custom homes).
+- **Hero banner** — optional band on the kit default homepage below the intro text.
+
+If both are configured, custom layouts may use only the background image. The Studio panels explain this cross-reference.
 
 ## Recipes
 

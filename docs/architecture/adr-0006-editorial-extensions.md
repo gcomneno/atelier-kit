@@ -47,6 +47,7 @@ Extend the showcase kit with **static, YAML-driven editorial features**. No data
 
 - Default remains **single-column** (current sites unchanged).
 - New preset e.g. `layout: catalog-sidebar` enables sidebar on catalog/home routes only.
+- `layout.home.show` controls home main content: `collections`, `catalog` (default), or `both`.
 
 ## Consequences
 

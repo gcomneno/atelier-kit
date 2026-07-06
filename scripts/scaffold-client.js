@@ -12,13 +12,14 @@ const EXCLUDED_NAMES = new Set([
   '.vercel'
 ]);
 
-const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork', 'handmade', 'jewelry', 'furniture']);
+const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork', 'handmade', 'jewelry', 'collector', 'furniture']);
 
 const TEMPLATE_APPLIERS = {
   writing: applyWritingTemplate,
   artwork: applyArtworkTemplate,
   handmade: applyHandmadeTemplate,
   jewelry: applyJewelryTemplate,
+  collector: applyCollectorTemplate,
   furniture: applyFurnitureTemplate
 };
 
@@ -31,6 +32,7 @@ Examples:
   npm run site:scaffold -- ../artist-site --template artwork
   npm run site:scaffold -- ../quiet-clay --template handmade
   npm run site:scaffold -- ../tiny-silver --template jewelry
+  npm run site:scaffold -- ../my-shelf --template collector
   npm run site:scaffold -- ../quiet-room --template furniture
   npm run site:scaffold -- ../client-site --template writing --force
 
@@ -247,7 +249,7 @@ site:
   tagline: "Stories, drafts and narrative projects in a darker key."
   language: "en"
   notice: ""
-  footer_note: "Built with Atelier-Kit"
+  footer_note: ""
 `);
 
   writeFile(targetRoot, 'config/catalog.yaml', `
@@ -379,7 +381,7 @@ site:
   tagline: "Paintings, sculptures and visual works"
   language: "en"
   notice: ""
-  footer_note: "Built with Atelier-Kit"
+  footer_note: ""
 `);
 
   writeFile(targetRoot, 'config/catalog.yaml', `
@@ -501,7 +503,7 @@ site:
   tagline: "Handmade objects for everyday use and quiet homes"
   language: "en"
   notice: ""
-  footer_note: "Built with Atelier-Kit"
+  footer_note: ""
 `);
 
   writeFile(targetRoot, 'config/catalog.yaml', `
@@ -641,7 +643,7 @@ site:
   tagline: "Rings, pendants and wearable pieces in quiet batches"
   language: "en"
   notice: ""
-  footer_note: "Built with Atelier-Kit"
+  footer_note: ""
 `);
 
   writeFile(targetRoot, 'config/catalog.yaml', `
@@ -767,6 +769,127 @@ items:
 `);
 }
 
+function applyCollectorTemplate(targetRoot) {
+  resetScaffoldContent(targetRoot);
+
+  writeFile(targetRoot, 'config/site.yaml', `
+site:
+  name: "Personal collection showcase"
+  tagline: "My collection — open to swaps and trades"
+  language: "en"
+  notice: "Offline trades with adult supervision only. No sales on this site."
+  footer_note: ""
+`);
+
+  writeFile(targetRoot, 'config/catalog.yaml', `
+catalog:
+  item_name_singular: "collectible"
+  item_name_plural: "collectibles"
+
+  fields:
+    show_price: false
+    show_availability: true
+    show_material: false
+    show_dimensions: false
+    show_status: true
+    show_meta: true
+`);
+
+  writeFile(targetRoot, 'config/signal-clouds.yaml', `
+signal_clouds:
+  - id: trade_intent
+    enabled: true
+    question: "What interests you?"
+    hint: "Choose an option — it goes in the message to the collector."
+    options:
+      - id: swap
+        label: "I'd like to propose a swap"
+      - id: offer
+        label: "I have something to offer you (see message)"
+      - id: ask
+        label: "I'm asking about this item"
+      - id: just_browse
+        label: "just browsing"
+
+  - id: meetup
+    enabled: true
+    question: "How would you prefer to meet?"
+    hint: "Physical trades happen off-site, with agreement between adults."
+    options:
+      - id: local_adult
+        label: "meet locally with an adult present"
+      - id: school
+        label: "at school (with parent permission)"
+      - id: event
+        label: "at an event / tournament"
+      - id: mail_parent
+        label: "shipping — parent organizes only"
+
+  - id: looking_for
+    enabled: true
+    question: "On my shelf I'm mainly looking for…"
+    hint: "Helps the other person know what to offer you."
+    options:
+      - id: same_set
+        label: "items from the same set"
+      - id: missing_slot
+        label: "the number I'm missing in the album"
+      - id: rare_upgrade
+        label: "higher rarity"
+      - id: any_fair
+        label: "fair offers — message me"
+
+  - id: condition
+    enabled: true
+    question: "Your card / figurine is…"
+    hint: "Honesty before trading."
+    options:
+      - id: mint
+        label: "like new (in sleeve or equivalent)"
+      - id: near_mint
+        label: "excellent — sleeve immediately"
+      - id: played
+        label: "played but decent"
+      - id: tell_me
+        label: "I'll describe everything in the message"
+`);
+
+  writeScaffoldContact(targetRoot);
+  writeScaffoldSocial(targetRoot);
+
+  writeFile(targetRoot, 'content/items/collector-piece.yaml', `
+id: "collector-piece"
+title: "Collector Piece"
+subtitle: "Series 3 · limited edition figurine"
+status: "for-trade"
+price_mode: "hidden"
+image_file: "/images/items/placeholder.svg"
+image_alt: "Studio photograph awaiting final product shot"
+description: "A collectible entry for your personal shelf. Update the title, description and detail fields to match a trading card, figurine, sticker, pin or other small collectible."
+
+meta:
+  - label: "Set / Series"
+    value: "Series 3"
+
+  - label: "Condition"
+    value: "Near mint"
+
+  - label: "Duplicate"
+    value: "Yes — I have two"
+
+  - label: "Availability"
+    value: "For trade"
+`);
+
+  writeFile(targetRoot, 'content/collections/my-collection.yaml', `
+id: "my-collection"
+title: "My collection"
+description: "A first group of collectibles from your personal shelf — duplicates, trade bait or showcase pieces."
+items:
+  - collector-piece
+`);
+}
+
 function applyFurnitureTemplate(targetRoot) {
   resetScaffoldContent(targetRoot);
 
@@ -776,7 +899,7 @@ site:
   tagline: "Furniture pieces and object design for quiet interiors"
   language: "en"
   notice: ""
-  footer_note: "Built with Atelier-Kit"
+  footer_note: ""
 `);
 
   writeFile(targetRoot, 'config/catalog.yaml', `

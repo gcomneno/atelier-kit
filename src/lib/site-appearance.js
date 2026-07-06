@@ -84,17 +84,49 @@ export function resolveSiteAppearance(appearance) {
 }
 
 /**
+ * @param {string} hex
+ */
+function relativeLuminance(hex) {
+  const rgb = hexToRgb(hex);
+
+  if (!rgb) {
+    return 1;
+  }
+
+  const channel = (/** @type {number} */ value) => {
+    const normalized = value / 255;
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : ((normalized + 0.055) / 1.055) ** 2.4;
+  };
+
+  return (
+    0.2126 * channel(rgb.r) +
+    0.7152 * channel(rgb.g) +
+    0.0722 * channel(rgb.b)
+  );
+}
+
+/**
  * @param {SiteAppearance} appearance
  */
 export function appearanceCssVariables(appearance) {
   const resolved = resolveSiteAppearance(appearance);
+  const darkBase = relativeLuminance(resolved.base_color) < 0.2;
 
   return {
     '--site-base-color': resolved.base_color,
     '--site-accent-color': resolved.accent_color,
     '--site-text-color': resolved.text_color,
-    '--site-surface-color': mixWithWhite(resolved.base_color, 0.72),
-    '--site-card-color': mixWithWhite(resolved.base_color, 0.88)
+    '--site-surface-color': darkBase
+      ? mixWithWhite(resolved.base_color, 0.07)
+      : mixWithWhite(resolved.base_color, 0.72),
+    '--site-card-color': darkBase
+      ? mixWithWhite(resolved.base_color, 0.13)
+      : mixWithWhite(resolved.base_color, 0.88),
+    '--site-border-color': darkBase
+      ? mixWithWhite(resolved.base_color, 0.22)
+      : mixWithWhite(resolved.base_color, 0.55)
   };
 }
 

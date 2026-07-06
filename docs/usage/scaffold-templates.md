@@ -43,6 +43,7 @@ npm run site:scaffold -- ../client-site --template writing
 npm run site:scaffold -- ../artist-site --template artwork
 npm run site:scaffold -- ../quiet-clay --template handmade
 npm run site:scaffold -- ../tiny-silver --template jewelry
+npm run site:scaffold -- ../my-shelf --template collector
 npm run site:scaffold -- ../quiet-room --template furniture
 ```
 
@@ -67,6 +68,7 @@ See [`client-scaffold.md`](client-scaffold.md).
 | `artwork` | Visual artists, sculptors, painters, illustrators, installations | artwork, sculpture, piece, installation | series, recent works, available works, exhibitions |
 | `handmade` | Makers and small craft showcases | handmade object | curated selection, available pieces, seasonal group |
 | `jewelry` | Small jewelry collections | jewelry piece | collection, available pieces, custom pieces |
+| `collector` | Personal collections and swap showcases | collectible | personal shelf, set group, trade list |
 | `furniture` | Furniture and object design showcases | furniture piece or object | room, material group, available pieces, custom work |
 
 ### `writing`
@@ -107,6 +109,16 @@ Signal Clouds focus on material, size, occasion and visitor interest.
 
 Visitor Brief selections are meant to support requests about a piece, sizing, availability or custom work.
 
+### `collector`
+
+```bash
+npm run site:scaffold -- ../my-shelf --template collector
+```
+
+Signal Clouds focus on trade intent, meetup preference, looking-for and condition.
+
+Visitor Brief selections are meant to support offline swap conversations with parent-friendly meetup options.
+
 ### `furniture`
 
 ```bash
@@ -127,6 +139,8 @@ Use manual setup with item meta presets when needed, for example:
 - mixed creative catalogs spanning multiple showcase types
 - highly custom client vocabularies
 
+Collectors of cards, figurines and small objects can use the `collector` scaffold template instead of manual setup.
+
 See [`manual-client-setup.md`](manual-client-setup.md).
 
 ## When to use a scaffold template
@@ -145,6 +159,7 @@ Examples:
 - an author with novels and short stories → `writing`
 - a ceramic maker with functional objects → `handmade`
 - a jeweler with rings and pendants → `jewelry`
+- a kid or hobby collector with cards or figurines → `collector`
 - a furniture maker with chairs and tables → `furniture`
 - a photographer selling prints → manual setup with `--preset print`
 

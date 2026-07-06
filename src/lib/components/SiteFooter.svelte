@@ -1,5 +1,6 @@
 <script>
   import { isExternalFooterHref } from '$lib/footer-links.js';
+  import KitCredit from '$lib/components/KitCredit.svelte';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   /** @typedef {{ label: string, href: string }} FooterLink */
@@ -11,6 +12,9 @@
 
   /** @type {SocialLink[]} */
   export let socialLinks = [];
+
+  /** @type {string} */
+  export let locale = 'en';
 
   const t = useVisitorI18n();
 
@@ -94,6 +98,8 @@
       {#if footer.legal_line}
         <p class="legal-line">{footer.legal_line}</p>
       {/if}
+
+      <KitCredit {locale} />
     </div>
   </div>
 </footer>

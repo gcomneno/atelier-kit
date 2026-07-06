@@ -4,8 +4,5 @@ export default {
     emailLabel: 'Email this brief',
     whatsappLabel: 'WhatsApp this brief',
     subjectPrefix: 'Interest in'
-  },
-  site: {
-    footerNote: 'Built with Atelier-Kit'
   }
 };

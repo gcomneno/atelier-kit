@@ -20,6 +20,7 @@ Use it to collect project identity, audience, tone, first items, collections, Si
 - [Artist portfolio](artist-portfolio.md)
 - [Jewelry mini-catalog](jewelry-mini-catalog.md)
 - [Collector showcase](collector-showcase.md) — cards, figurines, swaps via Signal Clouds + offline meetup
+- [Zoo client handoff](zoo-client-handoff.md) — operator terminal + studio guide for a wildlife park showcase
 - [Small collection launch](small-collection-launch.md)
 - [No-textarea contact flow](no-textarea-contact-flow.md)
 - [Private preview before public launch](private-preview.md)

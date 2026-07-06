@@ -54,7 +54,7 @@
   .page-shell {
     width: min(1120px, calc(100% - 2rem));
     margin: 0 auto;
-    padding: 3rem 0 4rem;
+    padding: 0.75rem 0 4rem;
   }
 
   .page-shell.with-sidebar {
@@ -75,7 +75,7 @@
   }
 
   nav {
-    margin-bottom: 3rem;
+    margin-bottom: 1.25rem;
   }
 
   a {

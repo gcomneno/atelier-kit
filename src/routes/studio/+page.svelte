@@ -14,6 +14,7 @@
   const footerForm = $derived(form?.footerForm ?? data.footerForm);
   const layoutForm = $derived(form?.layoutForm ?? data.layoutForm);
   const appearanceForm = $derived(form?.appearanceForm ?? data.appearanceForm);
+  const heroBannerForm = $derived(form?.heroBannerForm ?? data.heroBannerForm);
   const appearancePresets = $derived(data.appearancePresets);
   let presetDraft = $state('warm');
 
@@ -100,6 +101,7 @@
 
     {#if appearanceForm.background_image}
       <p class="hint">{t('studio.site.appearance.currentBackground', { path: appearanceForm.background_image })}</p>
+      <p class="hint">{t('studio.site.appearance.backgroundVsBanner')}</p>
       <label class="checkbox">
         <input type="checkbox" name="remove_background" />
         {t('studio.site.appearance.removeBackground')}
@@ -146,6 +148,7 @@
 
     <label>
       {t('studio.site.identity.footerNote')}
+      <span class="hint">{t('studio.site.identity.footerNoteHint')}</span>
       <input name="footer_note" value={siteForm.footer_note} />
     </label>
 
@@ -155,6 +158,71 @@
 
     {#if form?.siteMessage}
       <p class={`status ${form.siteStatus || 'info'}`}>{form.siteMessage}</p>
+    {/if}
+  </form>
+</section>
+
+<section class="panel" aria-labelledby="hero-banner-settings-title">
+  <div class="panel-heading">
+    <h2 id="hero-banner-settings-title">{t('studio.site.heroBanner.title')}</h2>
+    <p>{t('studio.site.heroBanner.intro')}</p>
+    {#if appearanceForm.background_image}
+      <p class="hint">{t('studio.site.heroBanner.backgroundImageActive')}</p>
+    {/if}
+  </div>
+
+  <form
+    method="POST"
+    action="?/saveHeroBanner"
+    enctype="multipart/form-data"
+    use:enhance
+    class="studio-form"
+  >
+    <label class="checkbox">
+      <input type="checkbox" name="show_banner" checked={heroBannerForm.show} />
+      {t('studio.site.heroBanner.show')}
+    </label>
+
+    {#if heroBannerForm.image_file}
+      <div class="banner-preview">
+        <img src={heroBannerForm.image_file} alt={heroBannerForm.image_alt || siteForm.name} />
+      </div>
+    {/if}
+
+    <label>
+      {t('studio.site.heroBanner.upload')}
+      <span class="hint">{t('studio.site.heroBanner.uploadHint')}</span>
+      <input type="file" name="banner_upload" accept="image/jpeg,image/png,image/webp" />
+    </label>
+
+    <input type="hidden" name="banner_image_file" value={heroBannerForm.image_file} />
+
+    <label>
+      {t('studio.site.heroBanner.alt')}
+      <input name="banner_image_alt" value={heroBannerForm.image_alt} />
+    </label>
+
+    <label>
+      {t('studio.site.heroBanner.caption')}
+      <input name="banner_caption" value={heroBannerForm.caption} />
+    </label>
+
+    <label>
+      {t('studio.site.heroBanner.href')}
+      <input name="banner_href" value={heroBannerForm.href} />
+    </label>
+
+    <label>
+      {t('studio.site.heroBanner.linkLabel')}
+      <input name="banner_link_label" value={heroBannerForm.link_label} />
+    </label>
+
+    <div class="actions">
+      <button type="submit">{t('studio.site.heroBanner.save')}</button>
+    </div>
+
+    {#if form?.heroBannerMessage}
+      <p class={`status ${form.heroBannerStatus || 'info'}`}>{form.heroBannerMessage}</p>
     {/if}
   </form>
 </section>
@@ -478,6 +546,23 @@ npm run publish -- --deploy</code></pre>
     background: color-mix(in srgb, var(--preview-base) 72%, white);
     font-size: 0.85rem;
     font-weight: 600;
+  }
+
+  .banner-preview {
+    overflow: hidden;
+    aspect-ratio: 21 / 8;
+    max-height: 8rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgb(47 40 31 / 0.12);
+    background: #fffdf9;
+  }
+
+  .banner-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
   }
 
   input,

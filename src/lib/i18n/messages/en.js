@@ -48,6 +48,8 @@ export default {
         preview: 'Preview',
         backgroundImage: 'Background image (optional)',
         backgroundHint: 'JPG, PNG or WebP. Saved under static/images/site/background.*',
+        backgroundVsBanner:
+          'Use this for a full-page background or a top strip below the header. Custom home layouts may rely on this asset instead of the hero banner.',
         currentBackground: 'Current: {path}',
         removeBackground: 'Remove background image',
         save: 'Save appearance'
@@ -60,8 +62,23 @@ export default {
         language: 'Language',
         notice: 'Public notice',
         noticeHint: 'Leave empty to hide the notice banner.',
-        footerNote: 'Footer note',
+        footerNote: 'Footer note (optional)',
+        footerNoteHint: 'Short client text on the home page when no multi-column footer is configured. The Atelier-Kit credit is added automatically and cannot be removed.',
         save: 'Save site settings'
+      },
+      heroBanner: {
+        title: 'Hero banner (optional)',
+        intro: 'Visual band below the intro text on the kit default homepage. Turn it off to hide without losing the uploaded image.',
+        show: 'Show hero banner on home',
+        backgroundImageActive:
+          'You already have a background image under Appearance. Some custom home layouts use only that and ignore the hero banner.',
+        upload: 'Upload banner image',
+        uploadHint: 'JPEG, PNG or WebP. Landscape ratio works best (~3:1).',
+        alt: 'Alt text',
+        caption: 'Caption (optional)',
+        href: 'Link (optional, e.g. /news/preview)',
+        linkLabel: 'Link label (when a link is set)',
+        save: 'Save hero banner'
       },
       contact: {
         title: 'Contact actions',
@@ -308,6 +325,11 @@ export default {
       enabled: 'Show about page on the public site',
       titleField: 'Page title',
       introField: 'Introduction',
+      portraitLegend: 'Author portrait (optional)',
+      showPortrait: 'Show the photo on the about page',
+      portraitUpload: 'Upload photo',
+      portraitUploadHint: 'JPEG, PNG or WebP. If display is off, the photo stays saved but hidden on the public site.',
+      portraitAlt: 'Photo alt text',
       sectionLegend: 'Optional section',
       sectionHeading: 'Section heading',
       sectionBody: 'Section body',
@@ -402,6 +424,7 @@ export default {
     saveFooterError: 'Could not save footer.',
     saveLayoutError: 'Could not save layout.',
     saveAppearanceError: 'Could not save appearance.',
+    saveHeroBannerError: 'Could not save hero banner.',
     saveAboutError: 'Could not save about page.',
     saveCatalogError: 'Could not save catalog settings.',
     saveCloudsError: 'Could not save Signal Clouds.',
@@ -434,6 +457,7 @@ export default {
     missingSignalClouds: 'config/signal-clouds.yaml is missing signal_clouds.',
     missingSite: 'config/site.yaml is missing a site object.',
     aboutTitleRequired: 'About page title is required when the page is enabled.',
+    heroBannerImageRequired: 'Upload a banner image or turn off display.',
     contactEmailRequired: 'Contact email is required when email contact is enabled.',
     contactWhatsappRequired: 'WhatsApp phone number is required when WhatsApp contact is enabled.',
     socialUrlInvalid: 'Enter a valid http or https URL for {network}.',
@@ -652,8 +676,12 @@ export default {
     footerLinkLabelRequired: '{source}: link label must not be empty when href is set.',
     footerFieldMustBeString: '{source}: footer.{field} must be a string when provided.',
     footerShowSocialInvalid: '{source}: footer.show_social must be true or false when provided.',
+    footerHeaderNavMustBeArray: '{source}: footer.header_nav must be an array when provided.',
     missingLayoutObject: '{source}: missing "layout" object.',
     layoutPresetInvalid: '{source}: layout.preset must be "single-column" or "catalog-sidebar".',
+    layoutHomeMustBeObject: '{source}: layout.home must be an object when provided.',
+    layoutHomeShowInvalid:
+      '{source}: layout.home.show must be "collections", "catalog", or "both" when provided.',
     layoutSidebarMustBeObject: '{source}: layout.sidebar must be an object when provided.',
     layoutSidebarFlagInvalid: '{source}: layout.sidebar.{field} must be true or false when provided.',
     layoutLatestNewsCountInvalid:
@@ -711,6 +739,7 @@ export default {
       artwork: 'Artwork / visual art showcase',
       handmade: 'Handmade / craft showcase',
       jewelry: 'Jewelry showcase',
+      collector: 'Collector showcase',
       furniture: 'Furniture / object design showcase'
     }
   },
@@ -724,11 +753,12 @@ export default {
       socialLinks: 'Social links',
       viewAllCollections: 'View all collections',
       readMore: 'Read more',
-      allNews: 'All news'
+      allNews: 'All news',
+      mainNav: 'Main navigation'
     },
     home: {
       collectionsEyebrow: 'Collections',
-      collectionsTitle: 'Curated pages',
+      collectionsTitle: 'Collections',
       catalogEyebrow: 'Catalog',
       aboutStudio: 'About the studio'
     },
@@ -736,8 +766,8 @@ export default {
       pageTitle: 'Collections',
       metaDescription: 'Curated collections from {siteName}.',
       eyebrow: 'Collections',
-      title: 'Curated pages',
-      intro: 'Small file-based selections built from existing {itemPlural}.',
+      title: 'Collections',
+      intro: 'Groups of {itemPlural} selected by theme or series.',
       empty: 'No collections yet.',
       collectionEyebrow: 'Collection',
       selectedItemsEyebrow: 'Selected {itemPlural}'
@@ -759,6 +789,13 @@ export default {
       talkAboutIntro:
         'Choose a few preferences below. Atelier-Kit will assemble a message you can copy or send by email or WhatsApp.',
       details: 'Details',
+      synopsisReadMore: 'Read more',
+      synopsisShowLess: 'Show less',
+      pageNavAriaLabel: 'Item navigation',
+      previousItem: '← Previous',
+      previousItemAria: 'Go to {title}',
+      nextItem: 'Next →',
+      nextItemAria: 'Go to {title}',
       material: 'Material',
       dimensions: 'Dimensions',
       availability: 'Availability'

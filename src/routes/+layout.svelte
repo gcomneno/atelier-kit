@@ -1,5 +1,6 @@
 <script>
   import SiteFooter from '$lib/components/SiteFooter.svelte';
+  import KitCredit from '$lib/components/KitCredit.svelte';
   import SiteHeader from '$lib/components/SiteHeader.svelte';
   import { setVisitorI18nContext } from '$lib/i18n/visitor-context.js';
   import { appearanceCssVariables } from '$lib/site-appearance.js';
@@ -21,13 +22,22 @@
   class:has-background-image={hasBackgroundImage}
   style={`${appearanceStyle}${hasBackgroundImage ? `; --site-bg-url: url(${data.appearance.background_image})` : ''}`}
 >
-  <SiteHeader site={data.site} socialLinks={data.socialLinks} />
+  <SiteHeader
+    site={data.site}
+    socialLinks={data.socialLinks}
+    footer={data.footerActive ? data.footer : null}
+  />
   {@render children()}
   {#if data.footerActive && data.footer}
     <SiteFooter
       footer={data.footer}
       socialLinks={data.footer.show_social ? data.socialLinks : []}
+      locale={data.locale}
     />
+  {:else}
+    <footer class="site-kit-credit-bar">
+      <KitCredit locale={data.locale} />
+    </footer>
   {/if}
 </div>
 
@@ -74,5 +84,11 @@
       ),
       var(--site-bg-url) center top / cover no-repeat,
       var(--site-base-color, #f8f0e4);
+  }
+
+  .site-kit-credit-bar {
+    width: min(1120px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 0 0 1.25rem;
   }
 </style>

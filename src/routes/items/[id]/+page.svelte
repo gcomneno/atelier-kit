@@ -1,4 +1,5 @@
 <script>
+  import { onMount, tick } from 'svelte';
   import MetaInfo from '$lib/components/MetaInfo.svelte';
   import SignalCloud from '$lib/components/SignalCloud.svelte';
   import VisitorBrief from '$lib/components/VisitorBrief.svelte';
@@ -11,6 +12,57 @@
 
   $: item = /** @type {NonNullable<import('./$types').PageData['item']>} */ (data.item);
   $: signalClouds = data.signalClouds;
+  $: nextItem = data.neighbors?.next ?? null;
+  $: previousItem = data.neighbors?.previous ?? null;
+
+  let descriptionExpanded = false;
+  /** @type {HTMLParagraphElement | undefined} */
+  let descriptionEl;
+  let descriptionCanToggle = false;
+
+  $: item.id, resetDescription();
+
+  async function resetDescription() {
+    descriptionExpanded = false;
+    await tick();
+    await measureDescription();
+  }
+
+  async function measureDescription() {
+    await tick();
+
+    if (!descriptionEl) {
+      descriptionCanToggle = false;
+      return;
+    }
+
+    const wasExpanded = descriptionExpanded;
+    descriptionExpanded = false;
+    await tick();
+
+    descriptionCanToggle = descriptionEl.scrollHeight > descriptionEl.clientHeight + 2;
+    descriptionExpanded = wasExpanded;
+  }
+
+  async function toggleDescription() {
+    descriptionExpanded = !descriptionExpanded;
+  }
+
+  onMount(() => {
+    measureDescription();
+
+    const observer = new ResizeObserver(() => {
+      if (!descriptionExpanded) {
+        measureDescription();
+      }
+    });
+
+    if (descriptionEl) {
+      observer.observe(descriptionEl);
+    }
+
+    return () => observer.disconnect();
+  });
 </script>
 
 <svelte:head>
@@ -19,7 +71,29 @@
 </svelte:head>
 
 <main class="item-page">
-  <a class="back-link" href="/">{t('common.backToShowcase')}</a>
+  <nav class="item-nav" aria-label={t('item.pageNavAriaLabel')}>
+    {#if previousItem}
+      <a
+        class="nav-link back-link"
+        href={`/items/${previousItem.id}`}
+        aria-label={t('item.previousItemAria', { title: previousItem.title })}
+      >
+        {t('item.previousItem')}
+      </a>
+    {:else}
+      <a class="nav-link back-link" href="/">{t('common.backToShowcase')}</a>
+    {/if}
+
+    {#if nextItem}
+      <a
+        class="nav-link next-link"
+        href={`/items/${nextItem.id}`}
+        aria-label={t('item.nextItemAria', { title: nextItem.title })}
+      >
+        {t('item.nextItem')}
+      </a>
+    {/if}
+  </nav>
 
   <article class="item-detail">
     <section class="hero" aria-labelledby="item-title">
@@ -42,9 +116,32 @@
           {/if}
         </header>
 
-        <p class="description">{item.description}</p>
+        <div class="description-block">
+          <div class="description-shell" class:expanded={descriptionExpanded}>
+            <p class="description" bind:this={descriptionEl}>{item.description}</p>
+          </div>
 
+          {#if descriptionCanToggle}
+            <button
+              type="button"
+              class="description-toggle"
+              aria-expanded={descriptionExpanded}
+              on:click={toggleDescription}
+            >
+              {descriptionExpanded ? t('item.synopsisShowLess') : t('item.synopsisReadMore')}
+            </button>
+          {/if}
+        </div>
+      </div>
+
+      <div class="hero-footer">
         <MetaInfo meta={item.meta} />
+
+        {#if item.preview}
+          <p class="preview-link">
+            <a href={item.preview.href}>{item.preview.label}</a>
+          </p>
+        {/if}
 
         {#if item.notice}
           <p class="notice">{item.notice}</p>
@@ -83,16 +180,27 @@
     padding: 2rem 0 4rem;
   }
 
-  .back-link {
-    display: inline-flex;
+  .item-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
     margin-bottom: 1.25rem;
+  }
+
+  .nav-link {
     color: inherit;
     text-decoration: none;
     opacity: 0.72;
   }
 
-  .back-link:hover {
+  .nav-link:hover {
     opacity: 1;
+  }
+
+  .next-link {
+    margin-left: auto;
+    text-align: right;
   }
 
   .item-detail {
@@ -111,26 +219,40 @@
   .content-column {
     display: grid;
     gap: 1.25rem;
+    min-width: 0;
+  }
+
+  .hero-footer {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .image-column {
+    display: flex;
+    justify-content: center;
+    min-width: 0;
   }
 
   .image-frame {
     display: grid;
     place-items: center;
+    width: min(100%, 16.5rem);
+    aspect-ratio: 2 / 3;
     overflow: hidden;
-    min-height: 18rem;
-    max-height: min(72vh, 42rem);
-    padding: 1rem;
+    padding: 0.75rem;
     border-radius: 1.35rem;
-    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent);
+    border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent));
     background: var(--site-surface-color, rgb(255 255 255 / 0.72));
-    box-shadow: 0 24px 60px rgb(36 27 18 / 0.08);
+    box-shadow: 0 24px 60px color-mix(in srgb, var(--site-base-color, #0f0e0d) 35%, black);
   }
 
   img {
     display: block;
     width: 100%;
-    max-height: min(68vh, 40rem);
+    height: 100%;
     object-fit: contain;
+    object-position: center;
   }
 
   .item-header {
@@ -157,14 +279,71 @@
     font-size: 1.1rem;
   }
 
+  .description-block {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .description-shell {
+    position: relative;
+  }
+
+  .description-shell:not(.expanded) .description {
+    max-height: 14rem;
+    overflow: hidden;
+  }
+
+  .description-shell:not(.expanded)::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 3.5rem;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in srgb, var(--site-base-color, #0f0e0d) 88%, transparent)
+    );
+  }
+
+  .description-shell.expanded .description {
+    max-height: none;
+  }
+
   .description {
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 82%, transparent);
     font-size: 1.05rem;
     line-height: 1.7;
     max-width: 38rem;
+    white-space: pre-line;
+  }
+
+  .description-toggle {
+    width: fit-content;
+    border: 0;
+    padding: 0;
+    background: none;
+    color: var(--site-accent-color, #8c3a44);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.4;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  .description-toggle:hover {
+    color: color-mix(in srgb, var(--site-accent-color, #8c3a44) 78%, white);
+  }
+
+  .description-toggle:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 45%, transparent);
+    outline-offset: 3px;
   }
 
   .status {
+    max-width: 100%;
     width: fit-content;
     border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 16%, transparent);
     border-radius: 999px;
@@ -174,7 +353,10 @@
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.08em;
+    line-height: 1.35;
     text-transform: uppercase;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   .notice {
@@ -184,12 +366,34 @@
     line-height: 1.5;
   }
 
+  .preview-link {
+    margin: 0;
+  }
+
+  .preview-link a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--site-accent-color, #8c3a44);
+    border-radius: 999px;
+    padding: 0.65rem 1rem;
+    background: var(--site-accent-color, #8c3a44);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .preview-link a:hover {
+    background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 82%, black);
+    border-color: color-mix(in srgb, var(--site-accent-color, #8c3a44) 82%, black);
+  }
+
   .visitor-zone {
     display: grid;
     gap: 1.5rem;
     padding: clamp(1.25rem, 3vw, 2rem);
     border-radius: 1.35rem;
-    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent);
+    border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent));
     background: var(--site-card-color, rgb(255 250 242 / 0.88));
   }
 
@@ -228,6 +432,7 @@
   .signal-list {
     display: grid;
     gap: 1rem;
+    min-width: 0;
   }
 
   @media (max-width: 900px) {
@@ -235,12 +440,16 @@
       grid-template-columns: 1fr;
     }
 
+    .hero-footer {
+      grid-column: auto;
+    }
+
     .visitor-grid {
       grid-template-columns: 1fr;
     }
 
     .image-frame {
-      max-height: none;
+      width: min(100%, 14rem);
     }
   }
 </style>

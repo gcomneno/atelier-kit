@@ -19,6 +19,7 @@ import {
   requiredField,
   runStructuralValidation,
   saveSiteBackgroundUpload,
+  saveHeroBannerUpload,
   validationMessage,
   writeProjectYaml
 } from '$lib/server/studio-io.js';
@@ -69,6 +70,29 @@ function buildAppearanceYaml(appearance, backgroundImage = '') {
   }
 
   return record;
+}
+
+function loadHeroBannerForm() {
+  const data = readProjectYaml('config/site.yaml');
+  const site = data.site;
+
+  if (!isRecord(site)) {
+    throw new Error('config/site.yaml is missing a site object.');
+  }
+
+  const banner =
+    site.hero_banner && typeof site.hero_banner === 'object' && !Array.isArray(site.hero_banner)
+      ? site.hero_banner
+      : {};
+
+  return {
+    show: banner.show === true,
+    image_file: readString(banner, 'image_file'),
+    image_alt: readString(banner, 'image_alt'),
+    caption: readString(banner, 'caption'),
+    href: readString(banner, 'href'),
+    link_label: readString(banner, 'link_label')
+  };
 }
 
 function loadSiteForm() {
@@ -266,7 +290,8 @@ export function load() {
     footerColumnCount: MAX_FOOTER_COLUMNS,
     footerLinkCount: MAX_FOOTER_LINKS,
     appearanceForm: loadAppearanceForm(),
-    appearancePresets: localizedAppearancePresets(locale)
+    appearancePresets: localizedAppearancePresets(locale),
+    heroBannerForm: loadHeroBannerForm()
   };
 }
 
@@ -585,6 +610,76 @@ export const actions = {
         appearanceStatus: 'error',
         appearanceMessage: message,
         appearanceForm: loadAppearanceForm()
+      });
+    }
+  },
+
+  saveHeroBanner: async ({ request }) => {
+    guardStudio();
+
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
+    const formData = await request.formData();
+
+    try {
+      const data = readProjectYaml('config/site.yaml');
+
+      if (!isRecord(data.site)) {
+        throw new Error(t('errors.missingSite'));
+      }
+
+      const site = { ...data.site };
+      const upload = formData.get('banner_upload');
+      let imageFile = String(formData.get('banner_image_file') ?? '').trim();
+
+      if (upload instanceof File && upload.size > 0) {
+        imageFile = await saveHeroBannerUpload(upload, locale);
+      }
+
+      const show = checkboxEnabled(formData.get('show_banner'));
+      const imageAlt = optionalField(formData.get('banner_image_alt'));
+      const caption = optionalField(formData.get('banner_caption'));
+      const href = optionalField(formData.get('banner_href'));
+      const linkLabel = optionalField(formData.get('banner_link_label'));
+
+      if (show && imageFile === '') {
+        throw new Error(t('errors.heroBannerImageRequired'));
+      }
+
+      if (show && imageFile !== '') {
+        site.hero_banner = {
+          show: true,
+          image_file: imageFile,
+          ...(imageAlt !== '' ? { image_alt: imageAlt } : {}),
+          ...(caption !== '' ? { caption } : {}),
+          ...(href !== '' ? { href, ...(linkLabel !== '' ? { link_label: linkLabel } : {}) } : {})
+        };
+      } else if (imageFile !== '') {
+        site.hero_banner = {
+          show: false,
+          image_file: imageFile,
+          ...(imageAlt !== '' ? { image_alt: imageAlt } : {}),
+          ...(caption !== '' ? { caption } : {}),
+          ...(href !== '' ? { href, ...(linkLabel !== '' ? { link_label: linkLabel } : {}) } : {})
+        };
+      } else if (site.hero_banner) {
+        delete site.hero_banner;
+      }
+
+      writeProjectYaml('config/site.yaml', { site });
+      const validation = runStructuralValidation();
+
+      return {
+        heroBannerStatus: validation.ok ? 'success' : 'warning',
+        heroBannerMessage: saveMessage(validation, locale),
+        heroBannerForm: loadHeroBannerForm()
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('server.saveHeroBannerError');
+      return fail(400, {
+        heroBannerStatus: 'error',
+        heroBannerMessage: message,
+        heroBannerForm: loadHeroBannerForm()
       });
     }
   }

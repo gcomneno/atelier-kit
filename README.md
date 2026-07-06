@@ -246,6 +246,7 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 - `docs/usage/item-presets.md` explains item meta presets.
 - `docs/usage/collections.md` explains file-based collections.
 - `docs/recipes/README.md` lists practical customization recipes.
+- [`docs/recipes/zoo-client-handoff.md`](docs/recipes/zoo-client-handoff.md) — operator step-by-step for a zoo / wildlife park showcase (wizard + studio + deploy).
 - `docs/client-intake.md` provides a reusable first-site client brief.
 - `docs/usage/client-scaffold.md` explains how to create a separate client site scaffold.
 - `docs/usage/scaffold-templates.md` explains supported scaffold templates and their boundaries.

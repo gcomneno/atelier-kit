@@ -11,6 +11,7 @@ const UPGRADE_DIRS = ['src', 'scripts'];
 const SKIP_DIR_NAMES = new Set(['.git', 'node_modules', '.svelte-kit', '.vercel']);
 const SOURCE_POINTER = '.atelier-kit-source';
 const UPGRADE_MANIFEST = '.atelier-kit-upgrade.json';
+const PRESERVE_MANIFEST = '.atelier-kit-preserve';
 
 function usage() {
   console.log(`Usage:
@@ -30,6 +31,7 @@ Options:
 Notes:
   Syncs src/ and scripts/ from the kit into the client site.
   Never touches config/, content/ or static/images/items/.
+  Skips paths listed in .atelier-kit-preserve (one relative path per line).
   Merges npm scripts from the kit package.json into the client package.json.
   Writes ${SOURCE_POINTER} and ${UPGRADE_MANIFEST} in the client folder.`);
 }
@@ -200,18 +202,47 @@ function collectFiles(rootDir, prefix) {
 }
 
 /**
+ * @param {string} clientRoot
+ * @returns {Set<string>}
+ */
+function loadPreservePaths(clientRoot) {
+  const manifestPath = path.join(clientRoot, PRESERVE_MANIFEST);
+
+  if (!fs.existsSync(manifestPath)) {
+    return new Set();
+  }
+
+  return new Set(
+    fs
+      .readFileSync(manifestPath, 'utf8')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith('#'))
+  );
+}
+
+/**
  * @param {string} kitRoot
  * @param {string} clientRoot
+ * @param {Set<string>} preservePaths
  */
-function buildFilePlan(kitRoot, clientRoot) {
-  /** @type {{ add: string[], update: string[], remove: string[] }} */
-  const plan = { add: [], update: [], remove: [] };
+function buildFilePlan(kitRoot, clientRoot, preservePaths) {
+  /** @type {{ add: string[], update: string[], remove: string[], preserve: string[] }} */
+  const plan = { add: [], update: [], remove: [], preserve: [] };
 
   for (const dir of UPGRADE_DIRS) {
     const kitFiles = collectFiles(path.join(kitRoot, dir), dir);
     const clientFiles = collectFiles(path.join(clientRoot, dir), dir);
 
     for (const [rel, kitHash] of kitFiles) {
+      if (preservePaths.has(rel)) {
+        if (clientFiles.has(rel) && clientFiles.get(rel) !== kitHash) {
+          plan.preserve.push(rel);
+        }
+
+        continue;
+      }
+
       if (!clientFiles.has(rel)) {
         plan.add.push(rel);
       } else if (clientFiles.get(rel) !== kitHash) {
@@ -220,6 +251,10 @@ function buildFilePlan(kitRoot, clientRoot) {
     }
 
     for (const rel of clientFiles.keys()) {
+      if (preservePaths.has(rel)) {
+        continue;
+      }
+
       if (!kitFiles.has(rel)) {
         plan.remove.push(rel);
       }
@@ -229,6 +264,7 @@ function buildFilePlan(kitRoot, clientRoot) {
   plan.add.sort();
   plan.update.sort();
   plan.remove.sort();
+  plan.preserve.sort();
   return plan;
 }
 
@@ -253,7 +289,7 @@ function buildScriptPlan(kitRoot, clientRoot) {
 }
 
 /**
- * @param {{ add: string[], update: string[], remove: string[] }} filePlan
+ * @param {{ add: string[], update: string[], remove: string[], preserve: string[] }} filePlan
  * @param {{ key: string, from?: string, to: string }[]} scriptPlan
  * @param {string} kitRoot
  * @param {string} clientRoot
@@ -266,14 +302,27 @@ function printPlan(filePlan, scriptPlan, kitRoot, clientRoot, kitVersion) {
   console.log(`Client: ${clientRoot}`);
   console.log('');
   console.log('Protected (never touched): config/, content/, static/images/items/');
+  console.log(`Preserved (skipped when listed in ${PRESERVE_MANIFEST}):`);
   console.log('');
 
   const total =
     filePlan.add.length + filePlan.update.length + filePlan.remove.length + scriptPlan.length;
 
-  if (total === 0) {
+  if (total === 0 && filePlan.preserve.length === 0) {
     console.log('Already up to date.');
     return false;
+  }
+
+  if (total === 0 && filePlan.preserve.length > 0) {
+    console.log('No automatic updates. Preserved client files differ from kit:');
+  }
+
+  if (filePlan.preserve.length > 0) {
+    console.log(`Preserve (${filePlan.preserve.length}):`);
+
+    for (const rel of filePlan.preserve) {
+      console.log(`  = ${rel}`);
+    }
   }
 
   if (filePlan.add.length > 0) {
@@ -502,11 +551,16 @@ async function main() {
   }
 
   const kitVersion = detectKitVersion(kitRoot);
-  const filePlan = buildFilePlan(kitRoot, clientRoot);
+  const preservePaths = loadPreservePaths(clientRoot);
+  const filePlan = buildFilePlan(kitRoot, clientRoot, preservePaths);
   const scriptPlan = buildScriptPlan(kitRoot, clientRoot);
   const hasChanges = printPlan(filePlan, scriptPlan, kitRoot, clientRoot, kitVersion);
 
   if (!hasChanges) {
+    return;
+  }
+
+  if (filePlan.add.length + filePlan.update.length + filePlan.remove.length + scriptPlan.length === 0) {
     return;
   }
 

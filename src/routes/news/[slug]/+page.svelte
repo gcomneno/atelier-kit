@@ -1,8 +1,14 @@
 <script>
+  import BookReading from '$lib/components/BookReading.svelte';
+  import { isBookReadingFormat } from '$lib/book-content.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
+
+  const isBookLayout = $derived(
+    isBookReadingFormat(data.post.reading_format, data.post.id)
+  );
 
   const paragraphs = $derived(
     data.post.body
@@ -32,29 +38,37 @@
   <meta name="description" content={data.post.excerpt || data.post.title} />
 </svelte:head>
 
-<main class="news-detail">
-  <a class="back-link" href="/news">{t('common.backToNews')}</a>
+{#if isBookLayout}
+  <BookReading
+    post={data.post}
+    backHref="/news"
+    backLabel={t('common.backToNews')}
+  />
+{:else}
+  <main class="news-detail">
+    <a class="back-link" href="/news">{t('common.backToNews')}</a>
 
-  <article>
-    <header>
-      <p class="eyebrow">{data.site.name}</p>
-      <time datetime={data.post.date}>{formatDate(data.post.date)}</time>
-      <h1>{data.post.title}</h1>
-    </header>
+    <article>
+      <header>
+        <p class="eyebrow">{data.site.name}</p>
+        <time datetime={data.post.date}>{formatDate(data.post.date)}</time>
+        <h1>{data.post.title}</h1>
+      </header>
 
-    {#if data.post.image_file}
-      <figure class="hero-image">
-        <img src={data.post.image_file} alt={data.post.image_alt || data.post.title} />
-      </figure>
-    {/if}
+      {#if data.post.image_file}
+        <figure class="hero-image">
+          <img src={data.post.image_file} alt={data.post.image_alt || data.post.title} />
+        </figure>
+      {/if}
 
-    <div class="body">
-      {#each paragraphs as paragraph}
-        <p>{paragraph}</p>
-      {/each}
-    </div>
-  </article>
-</main>
+      <div class="body">
+        {#each paragraphs as paragraph}
+          <p>{paragraph}</p>
+        {/each}
+      </div>
+    </article>
+  </main>
+{/if}
 
 <style>
   .news-detail {

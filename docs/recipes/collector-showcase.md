@@ -40,7 +40,7 @@ site:
   tagline: "My collection — open to swaps"
   language: "it"
   notice: "Scambi solo con un adulto presente. Nessuna vendita sul sito."
-  footer_note: "Collezione personale · Atelier-Kit"
+  footer_note: "Collezione personale di Luca"
 ```
 
 ## 2. Catalog labels

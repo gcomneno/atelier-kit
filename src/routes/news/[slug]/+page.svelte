@@ -4,6 +4,14 @@
   let { data } = $props();
   const t = useVisitorI18n();
 
+  const paragraphs = $derived(
+    data.post.body
+      .trim()
+      .split(/\n\s*\n/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean)
+  );
+
   function formatDate(/** @type {string} */ value) {
     const parsed = new Date(`${value}T12:00:00`);
 
@@ -40,13 +48,17 @@
       </figure>
     {/if}
 
-    <div class="body">{data.post.body}</div>
+    <div class="body">
+      {#each paragraphs as paragraph}
+        <p>{paragraph}</p>
+      {/each}
+    </div>
   </article>
 </main>
 
 <style>
   .news-detail {
-    width: min(760px, calc(100% - 2rem));
+    width: min(860px, calc(100% - 2rem));
     margin: 0 auto;
     padding: 2rem 0 4rem;
   }
@@ -71,14 +83,14 @@
 
   .eyebrow {
     margin: 0;
-    color: #7d684f;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 68%, transparent);
     font-size: 0.8rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   time {
-    color: #7d684f;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 68%, transparent);
     font-size: 0.85rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -87,7 +99,7 @@
   h1 {
     margin: 0;
     font-size: clamp(2.4rem, 8vw, 4rem);
-    line-height: 0.95;
+    line-height: 1.05;
     letter-spacing: -0.05em;
   }
 
@@ -95,7 +107,7 @@
     margin: 0;
     overflow: hidden;
     border-radius: 1rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
+    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 16%, transparent);
   }
 
   .hero-image img {
@@ -106,10 +118,18 @@
   }
 
   .body {
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .body p {
     margin: 0;
-    color: #4f4236;
-    font-size: 1.05rem;
-    line-height: 1.7;
-    white-space: pre-wrap;
+    color: var(--site-text-color, #e8e0d4);
+    font-size: clamp(1.12rem, 2.4vw, 1.25rem);
+    line-height: 1.75;
+    white-space: pre-line;
+    text-align: justify;
+    text-wrap: pretty;
+    hyphens: auto;
   }
 </style>

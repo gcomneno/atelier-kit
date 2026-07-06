@@ -42,13 +42,13 @@
   main {
     width: min(1120px, calc(100% - 2rem));
     margin: 0 auto;
-    padding: 3rem 0 4rem;
+    padding: 0.75rem 0 4rem;
   }
 
   nav {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 3rem;
+    margin-bottom: 1.25rem;
   }
 
   a {
@@ -63,7 +63,7 @@
 
   .eyebrow {
     margin: 0;
-    color: #7d684f;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 68%, transparent);
     font-size: 0.8rem;
     font-weight: 800;
     letter-spacing: 0.14em;
@@ -81,9 +81,10 @@
   header p {
     max-width: 42rem;
     margin: 0;
-    color: #4f4236;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 92%, transparent);
     font-size: clamp(1.1rem, 3vw, 1.5rem);
     line-height: 1.4;
+    white-space: pre-line;
   }
 
   .section-heading {

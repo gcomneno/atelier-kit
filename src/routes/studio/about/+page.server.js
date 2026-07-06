@@ -6,6 +6,7 @@ import {
   checkboxEnabled,
   loadAboutForm,
   runStructuralValidation,
+  saveAboutPortraitUpload,
   validationMessage,
   writeAboutForm
 } from '$lib/server/studio-io.js';
@@ -30,6 +31,12 @@ export const actions = {
 
     try {
       const formData = await request.formData();
+      const upload = formData.get('portrait_upload');
+      let portraitImageFile = String(formData.get('portrait_image_file') ?? '').trim();
+
+      if (upload instanceof File && upload.size > 0) {
+        portraitImageFile = await saveAboutPortraitUpload(upload, locale);
+      }
 
       writeAboutForm(
         {
@@ -37,7 +44,10 @@ export const actions = {
           title: formData.get('title'),
           intro: formData.get('intro'),
           section_heading: formData.get('section_heading'),
-          section_body: formData.get('section_body')
+          section_body: formData.get('section_body'),
+          show_portrait: checkboxEnabled(formData.get('show_portrait')),
+          portrait_image_file: portraitImageFile,
+          portrait_image_alt: formData.get('portrait_image_alt')
         },
         locale
       );

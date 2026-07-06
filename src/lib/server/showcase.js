@@ -1,8 +1,10 @@
 import { parse } from 'yaml';
 import { isValidFooterHref } from '$lib/footer-links.js';
 import {
+  DEFAULT_HOME_SHOW,
   DEFAULT_LATEST_NEWS_COUNT,
   DEFAULT_LAYOUT_PRESET,
+  isHomeShowMode,
   isLayoutPreset,
   MAX_LATEST_NEWS_COUNT
 } from '$lib/layout-presets.js';
@@ -107,6 +109,52 @@ function optionalString(record, field, fallback = '') {
 }
 
 /**
+ * @param {Record<string, unknown>} record
+ * @param {string} field
+ * @returns {number | null}
+ */
+function optionalSortOrder(record, field) {
+  const value = record[field];
+
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * @param {unknown} preview
+ */
+function normalizeItemPreview(preview) {
+  if (!preview || typeof preview !== 'object' || Array.isArray(preview)) {
+    return null;
+  }
+
+  const record = /** @type {Record<string, unknown>} */ (preview);
+  const href = optionalString(record, 'href');
+
+  if (!href.startsWith('/')) {
+    return null;
+  }
+
+  const label = optionalString(record, 'label');
+
+  return {
+    href,
+    label: label || 'Preview'
+  };
+}
+
+/**
  * @param {unknown} entries
  * @param {string} source
  * @returns {MetaInfoEntry[]}
@@ -186,8 +234,36 @@ export function getSiteConfig() {
     tagline: requiredString(site, 'tagline', 'config/site.yaml'),
     language: optionalString(site, 'language', 'en'),
     notice: optionalString(site, 'notice'),
+    hero_intro: optionalString(site, 'hero_intro'),
     footer_note: optionalString(site, 'footer_note'),
-    appearance: resolveSiteAppearance(isRecord(site.appearance) ? site.appearance : undefined)
+    appearance: resolveSiteAppearance(isRecord(site.appearance) ? site.appearance : undefined),
+    hero_banner: parseHeroBanner(site)
+  };
+}
+
+/**
+ * @param {Record<string, unknown>} site
+ */
+function parseHeroBanner(site) {
+  const banner = site.hero_banner;
+
+  if (!isRecord(banner) || banner.show !== true) {
+    return null;
+  }
+
+  const imageFile = optionalString(banner, 'image_file');
+
+  if (!imageFile) {
+    return null;
+  }
+
+  const href = optionalString(banner, 'href');
+
+  return {
+    image_file: imageFile,
+    image_alt: optionalString(banner, 'image_alt') ?? optionalString(site, 'name') ?? 'Hero banner',
+    caption: optionalString(banner, 'caption'),
+    ...(href ? { href, link_label: optionalString(banner, 'link_label') ?? optionalString(banner, 'caption') } : {})
   };
 }
 
@@ -282,7 +358,30 @@ export function getAboutConfig() {
   return {
     title: requiredString(about, 'title', 'config/about.yaml'),
     intro: optionalString(about, 'intro'),
-    sections
+    sections,
+    portrait: parseAboutPortrait(about)
+  };
+}
+
+/**
+ * @param {Record<string, unknown>} about
+ */
+function parseAboutPortrait(about) {
+  const portrait = about.portrait;
+
+  if (!isRecord(portrait) || portrait.show !== true) {
+    return null;
+  }
+
+  const imageFile = optionalString(portrait, 'image_file');
+
+  if (!imageFile) {
+    return null;
+  }
+
+  return {
+    image_file: imageFile,
+    image_alt: optionalString(portrait, 'image_alt') ?? optionalString(about, 'title') ?? 'Portrait'
   };
 }
 
@@ -434,8 +533,22 @@ export function getFooterConfig() {
     });
   }
 
+  /** @type {FooterLink[]} */
+  const headerNav = [];
+
+  if (Array.isArray(footer.header_nav)) {
+    footer.header_nav.forEach((link, index) => {
+      const normalized = normalizeFooterLink(link, `config/footer.yaml:header_nav[${index}]`);
+
+      if (normalized) {
+        headerNav.push(normalized);
+      }
+    });
+  }
+
   return {
     columns,
+    header_nav: headerNav,
     copyright: optionalString(footer, 'copyright'),
     legal_line: optionalString(footer, 'legal_line'),
     show_social: footer.show_social === true
@@ -542,13 +655,24 @@ export function getItems() {
         image_alt: optionalString(item, 'image_alt'),
         description: requiredString(item, 'description', source),
         notice: optionalString(item, 'notice'),
+        preview: normalizeItemPreview(item.preview),
+        sort_order: optionalSortOrder(item, 'sort_order'),
         material: optionalString(item, 'material') || findMetaValue(meta, 'Material'),
         dimensions: optionalString(item, 'dimensions') || findMetaValue(meta, 'Dimensions'),
         availability: optionalString(item, 'availability') || findMetaValue(meta, 'Availability'),
         meta
       };
     })
-    .sort((left, right) => left.title.localeCompare(right.title));
+    .sort((left, right) => {
+      const leftOrder = left.sort_order ?? Number.POSITIVE_INFINITY;
+      const rightOrder = right.sort_order ?? Number.POSITIVE_INFINITY;
+
+      if (leftOrder !== rightOrder) {
+        return leftOrder - rightOrder;
+      }
+
+      return left.title.localeCompare(right.title);
+    });
 }
 
 /**
@@ -556,6 +680,26 @@ export function getItems() {
  */
 export function getItemById(id) {
   return getItems().find((item) => item.id === id);
+}
+
+/**
+ * @param {string} id
+ */
+export function getItemNeighbors(id) {
+  const items = getItems();
+  const index = items.findIndex((item) => item.id === id);
+
+  if (index === -1) {
+    return { previous: null, next: null };
+  }
+
+  const previous = index > 0 ? items[index - 1] : null;
+  const next = index < items.length - 1 ? items[index + 1] : null;
+
+  return {
+    previous: previous ? { id: previous.id, title: previous.title } : null,
+    next: next ? { id: next.id, title: next.title } : null
+  };
 }
 
 export function getCollections() {
@@ -646,7 +790,11 @@ export function getNewsPost(id) {
  *   latest_news_count: number
  * }} SidebarWidgetConfig
  * @typedef {{
+ *   show: import('$lib/layout-presets.js').HomeShowMode
+ * }} HomeConfig
+ * @typedef {{
  *   preset: import('$lib/layout-presets.js').LayoutPreset,
+ *   home: HomeConfig,
  *   sidebar: SidebarWidgetConfig
  * }} LayoutConfig
  */
@@ -654,6 +802,9 @@ export function getNewsPost(id) {
 /** @type {LayoutConfig} */
 const DEFAULT_LAYOUT_CONFIG = {
   preset: DEFAULT_LAYOUT_PRESET,
+  home: {
+    show: DEFAULT_HOME_SHOW
+  },
   sidebar: {
     collections: true,
     about: true,
@@ -697,10 +848,22 @@ export function getLayoutConfig() {
     );
   }
 
+  const home = isRecord(layout.home) ? layout.home : {};
+  const homeShowValue = optionalString(home, 'show', DEFAULT_HOME_SHOW);
+
+  if (!isHomeShowMode(homeShowValue)) {
+    throw new Error(
+      'config/layout.yaml: layout.home.show must be "collections", "catalog", or "both".'
+    );
+  }
+
   const sidebar = isRecord(layout.sidebar) ? layout.sidebar : {};
 
   return {
     preset: presetValue,
+    home: {
+      show: homeShowValue
+    },
     sidebar: {
       collections: sidebar.collections !== false,
       about: sidebar.about !== false,

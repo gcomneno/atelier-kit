@@ -1,8 +1,11 @@
 <script>
+  import { splitParagraphs } from '$lib/text-blocks.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
+
+  const paragraphs = $derived(splitParagraphs(data.legal.body));
 </script>
 
 <svelte:head>
@@ -18,7 +21,11 @@
       <h1>{data.legal.title}</h1>
     </header>
 
-    <div class="body">{data.legal.body}</div>
+    <div class="body">
+      {#each paragraphs as paragraph}
+        <p>{paragraph}</p>
+      {/each}
+    </div>
   </article>
 </main>
 
@@ -32,9 +39,12 @@
   .back-link {
     display: inline-flex;
     margin-bottom: 1.25rem;
-    color: inherit;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 72%, transparent);
     text-decoration: none;
-    opacity: 0.72;
+  }
+
+  .back-link:hover {
+    color: var(--site-text-color, #2f281f);
   }
 
   article {
@@ -49,7 +59,7 @@
 
   .eyebrow {
     margin: 0;
-    color: #7d684f;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 68%, transparent);
     font-size: 0.8rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -63,10 +73,18 @@
   }
 
   .body {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .body p {
     margin: 0;
-    color: #4f4236;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 92%, transparent);
     font-size: 1.05rem;
     line-height: 1.7;
-    white-space: pre-wrap;
+    white-space: pre-line;
+    text-align: justify;
+    text-wrap: pretty;
+    hyphens: auto;
   }
 </style>

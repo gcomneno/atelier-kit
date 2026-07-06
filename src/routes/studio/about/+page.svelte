@@ -35,6 +35,37 @@
     </label>
 
     <fieldset>
+      <legend>{t('studio.about.portraitLegend')}</legend>
+
+      <label class="checkbox">
+        <input type="checkbox" name="show_portrait" checked={aboutForm.show_portrait} />
+        {t('studio.about.showPortrait')}
+      </label>
+
+      {#if aboutForm.portrait_image_file}
+        <div class="preview">
+          <img
+            src={aboutForm.portrait_image_file}
+            alt={aboutForm.portrait_image_alt || aboutForm.title}
+          />
+        </div>
+      {/if}
+
+      <label>
+        {t('studio.about.portraitUpload')}
+        <span class="hint">{t('studio.about.portraitUploadHint')}</span>
+        <input type="file" name="portrait_upload" accept="image/jpeg,image/png,image/webp" />
+      </label>
+
+      <input type="hidden" name="portrait_image_file" value={aboutForm.portrait_image_file} />
+
+      <label>
+        {t('studio.about.portraitAlt')}
+        <input name="portrait_image_alt" value={aboutForm.portrait_image_alt} />
+      </label>
+    </fieldset>
+
+    <fieldset>
       <legend>{t('studio.about.sectionLegend')}</legend>
 
       <label>
@@ -115,6 +146,29 @@
 
   textarea {
     resize: vertical;
+  }
+
+  .preview {
+    width: min(100%, 10rem);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    border: 1px solid rgb(47 40 31 / 0.12);
+    background: #fffdf9;
+  }
+
+  .preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .hint {
+    color: #7b6a58;
+    font-size: 0.85rem;
+    line-height: 1.45;
   }
 
   button {

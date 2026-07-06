@@ -386,6 +386,56 @@ export async function saveItemImageUpload(id, file, locale = 'en') {
  * @param {File} file
  * @param {string} [locale]
  */
+export async function saveAboutPortraitUpload(file, locale = 'en') {
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error(translate('errors.imageRequired', locale));
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error(translate('errors.imageSize', locale));
+  }
+
+  const extension = imageExtensionFromName(file.name, locale);
+  const aboutImagesDir = path.join(ROOT, 'static/images/about');
+  mkdirSync(aboutImagesDir, { recursive: true });
+
+  const filename = `portrait.${extension}`;
+  const absolutePath = path.join(aboutImagesDir, filename);
+  const buffer = Buffer.from(await file.arrayBuffer());
+  writeFileSync(absolutePath, buffer);
+
+  return `/images/about/${filename}`;
+}
+
+/**
+ * @param {File} file
+ * @param {string} [locale]
+ */
+export async function saveHeroBannerUpload(file, locale = 'en') {
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error(translate('errors.imageRequired', locale));
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error(translate('errors.imageSize', locale));
+  }
+
+  const extension = imageExtensionFromName(file.name, locale);
+  const siteImagesDir = path.join(ROOT, 'static/images/site');
+  mkdirSync(siteImagesDir, { recursive: true });
+
+  const filename = `hero-banner.${extension}`;
+  const absolutePath = path.join(siteImagesDir, filename);
+  const buffer = Buffer.from(await file.arrayBuffer());
+  writeFileSync(absolutePath, buffer);
+
+  return `/images/site/${filename}`;
+}
+
+/**
+ * @param {File} file
+ * @param {string} [locale]
+ */
 export async function saveSiteBackgroundUpload(file, locale = 'en') {
   if (!(file instanceof File) || file.size === 0) {
     throw new Error(translate('errors.imageRequired', locale));
@@ -587,7 +637,10 @@ export function loadAboutForm(locale = 'en') {
       title: '',
       intro: '',
       section_heading: '',
-      section_body: ''
+      section_body: '',
+      show_portrait: false,
+      portrait_image_file: '',
+      portrait_image_alt: ''
     };
   }
 
@@ -600,13 +653,20 @@ export function loadAboutForm(locale = 'en') {
 
   const sections = Array.isArray(about.sections) ? about.sections : [];
   const firstSection = sections[0] && typeof sections[0] === 'object' ? sections[0] : {};
+  const portrait =
+    about.portrait && typeof about.portrait === 'object' && !Array.isArray(about.portrait)
+      ? about.portrait
+      : {};
 
   return {
     enabled: about.enabled !== false,
     title: typeof about.title === 'string' ? about.title : '',
     intro: typeof about.intro === 'string' ? about.intro : '',
     section_heading: typeof firstSection.heading === 'string' ? firstSection.heading : '',
-    section_body: typeof firstSection.body === 'string' ? firstSection.body : ''
+    section_body: typeof firstSection.body === 'string' ? firstSection.body : '',
+    show_portrait: portrait.show === true,
+    portrait_image_file: typeof portrait.image_file === 'string' ? portrait.image_file : '',
+    portrait_image_alt: typeof portrait.image_alt === 'string' ? portrait.image_alt : ''
   };
 }
 
@@ -615,11 +675,20 @@ export function loadAboutForm(locale = 'en') {
  * @param {string} [locale]
  */
 export function writeAboutForm(aboutForm, locale = 'en') {
+  const existing = readProjectYaml('config/about.yaml');
+  const existingAbout =
+    existing.about && typeof existing.about === 'object' && !Array.isArray(existing.about)
+      ? existing.about
+      : {};
+
   const enabled = aboutForm.enabled === true;
   const title = optionalField(String(aboutForm.title ?? ''));
   const intro = optionalField(String(aboutForm.intro ?? ''));
   const sectionHeading = optionalField(String(aboutForm.section_heading ?? ''));
   const sectionBody = optionalField(String(aboutForm.section_body ?? ''));
+  const showPortrait = aboutForm.show_portrait === true;
+  const portraitImageFile = optionalField(String(aboutForm.portrait_image_file ?? ''));
+  const portraitImageAlt = optionalField(String(aboutForm.portrait_image_alt ?? ''));
 
   if (enabled && title === '') {
     throw new Error(translate('errors.aboutTitleRequired', locale));
@@ -632,13 +701,32 @@ export function writeAboutForm(aboutForm, locale = 'en') {
     intro
   };
 
+  const existingSections = Array.isArray(existingAbout.sections) ? existingAbout.sections : [];
+
   if (sectionHeading !== '' || sectionBody !== '') {
     about.sections = [
       {
         heading: sectionHeading || 'Process',
         body: sectionBody
-      }
+      },
+      ...existingSections.slice(1)
     ];
+  } else if (existingSections.length > 0) {
+    about.sections = existingSections;
+  }
+
+  if (showPortrait && portraitImageFile !== '') {
+    about.portrait = {
+      show: true,
+      image_file: portraitImageFile,
+      ...(portraitImageAlt !== '' ? { image_alt: portraitImageAlt } : {})
+    };
+  } else if (portraitImageFile !== '') {
+    about.portrait = {
+      show: false,
+      image_file: portraitImageFile,
+      ...(portraitImageAlt !== '' ? { image_alt: portraitImageAlt } : {})
+    };
   }
 
   writeProjectYaml('config/about.yaml', { about });

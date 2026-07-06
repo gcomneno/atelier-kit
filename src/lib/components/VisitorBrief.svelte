@@ -197,16 +197,17 @@
   .visitor-brief {
     display: grid;
     gap: 0.85rem;
-    border: 2px solid rgb(47 40 31 / 0.18);
+    min-width: 0;
+    border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 18%, transparent));
     border-radius: 1rem;
     padding: 1.1rem;
-    background: linear-gradient(180deg, rgb(255 250 242 / 0.95), rgb(255 255 255 / 0.82));
-    box-shadow: 0 16px 40px rgb(36 27 18 / 0.08);
+    background: var(--site-card-color, rgb(255 250 242 / 0.88));
+    box-shadow: 0 16px 40px color-mix(in srgb, var(--site-base-color, #0f0e0d) 35%, black);
   }
 
   .eyebrow {
     margin: 0;
-    color: rgba(20, 20, 20, 0.55);
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 55%, transparent);
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.12em;
@@ -230,7 +231,7 @@
   .brief-header p,
   .empty-state,
   .copy-status {
-    color: rgba(20, 20, 20, 0.66);
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 66%, transparent);
     font-size: 0.9rem;
     line-height: 1.45;
   }
@@ -238,18 +239,18 @@
   pre {
     overflow: auto;
     margin: 0;
-    border: 1px solid rgba(20, 20, 20, 0.12);
+    border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent));
     border-radius: 0.75rem;
     padding: 0.85rem;
-    background: rgba(255, 255, 255, 0.86);
-    color: rgba(20, 20, 20, 0.82);
+    background: var(--site-surface-color, rgb(255 255 255 / 0.72));
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 82%, transparent);
     font: inherit;
     line-height: 1.5;
     white-space: pre-wrap;
   }
 
   pre:focus-visible {
-    outline: 3px solid rgba(20, 20, 20, 0.35);
+    outline: 3px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 45%, transparent);
     outline-offset: 3px;
   }
 
@@ -263,38 +264,44 @@
   .action-link {
     display: inline-flex;
     align-items: center;
-    width: fit-content;
-    border: 1px solid rgba(20, 20, 20, 0.18);
+    justify-content: center;
+    max-width: 100%;
+    border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 18%, transparent));
     border-radius: 999px;
     padding: 0.6rem 0.9rem;
     cursor: pointer;
     font: inherit;
     font-weight: 700;
-    line-height: 1;
+    line-height: 1.35;
+    text-align: center;
     text-decoration: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   button {
-    background: rgba(20, 20, 20, 0.86);
-    color: white;
+    background: var(--site-accent-color, #8c3a44);
+    border-color: var(--site-accent-color, #8c3a44);
+    color: #fff;
   }
 
   .action-link {
-    background: rgba(255, 255, 255, 0.86);
-    color: rgba(20, 20, 20, 0.86);
+    background: var(--site-surface-color, rgb(255 255 255 / 0.72));
+    color: inherit;
   }
 
   button:hover {
-    background: rgba(20, 20, 20, 0.74);
+    background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 82%, black);
+    border-color: color-mix(in srgb, var(--site-accent-color, #8c3a44) 82%, black);
   }
 
   .action-link:hover {
-    border-color: rgba(20, 20, 20, 0.42);
+    border-color: color-mix(in srgb, var(--site-accent-color, #8c3a44) 55%, var(--site-text-color, #2f281f));
   }
 
   button:focus-visible,
   .action-link:focus-visible {
-    outline: 3px solid rgba(20, 20, 20, 0.35);
+    outline: 3px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 45%, transparent);
     outline-offset: 3px;
   }
 </style>

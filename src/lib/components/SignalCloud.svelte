@@ -86,27 +86,31 @@
 
 <style>
   .signal-cloud {
-    border: 1px solid rgba(20, 20, 20, 0.12);
+    border: 1px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 55%, black);
     border-radius: 1rem;
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.72);
+    background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 62%, black);
+    color: #fff;
+    min-width: 0;
   }
 
   .cloud-header {
     display: grid;
-    gap: 0.35rem;
-    margin-bottom: 0.85rem;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
 
   h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: clamp(1.25rem, 2.8vw, 1.5rem);
+    font-weight: 700;
+    line-height: 1.25;
   }
 
   .cloud-hint {
     margin: 0;
-    color: rgba(20, 20, 20, 0.66);
-    font-size: 0.9rem;
+    color: color-mix(in srgb, white 72%, var(--site-accent-color, #8c3a44));
+    font-size: clamp(1rem, 2.2vw, 1.12rem);
     line-height: 1.45;
   }
 
@@ -120,46 +124,57 @@
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    border: 1px solid rgba(20, 20, 20, 0.18);
+    max-width: 100%;
+    border: 1px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 78%, black);
     border-radius: 999px;
     padding: 0.55rem 0.85rem;
-    background: rgba(255, 255, 255, 0.9);
-    color: inherit;
+    background: var(--site-accent-color, #8c3a44);
+    color: #fff;
     cursor: pointer;
     font: inherit;
-    line-height: 1;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+  }
+
+  button > span:first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   button:hover {
-    border-color: rgba(20, 20, 20, 0.42);
+    border-color: color-mix(in srgb, white 28%, var(--site-accent-color, #8c3a44));
+    background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 82%, white);
   }
 
   button:focus-visible {
-    outline: 3px solid rgba(20, 20, 20, 0.35);
+    outline: 3px solid color-mix(in srgb, white 45%, transparent);
     outline-offset: 3px;
   }
 
   button.selected {
-    border-color: rgba(20, 20, 20, 0.75);
-    background: rgba(20, 20, 20, 0.08);
+    border-color: #fff;
+    background: color-mix(in srgb, var(--site-text-color, #e8e0d4) 94%, white);
+    color: var(--site-base-color, #0f0e0d);
     font-weight: 700;
   }
 
   .selected-mark {
     display: inline-grid;
     place-items: center;
+    flex-shrink: 0;
     width: 1.15rem;
     height: 1.15rem;
     border-radius: 999px;
-    background: rgba(20, 20, 20, 0.86);
-    color: white;
+    background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 72%, black);
+    color: #fff;
     font-size: 0.8rem;
     line-height: 1;
   }
 
   .selection-status {
     margin: 0.85rem 0 0;
-    color: rgba(20, 20, 20, 0.66);
+    color: color-mix(in srgb, white 72%, var(--site-accent-color, #8c3a44));
     font-size: 0.9rem;
   }
 </style>

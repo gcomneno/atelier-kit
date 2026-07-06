@@ -26,7 +26,6 @@ export function applyScaffoldLocalePack(targetRoot, language) {
     const siteData = parse(readFileSync(sitePath, 'utf8'));
 
     if (siteData?.site && typeof siteData.site === 'object') {
-      siteData.site.footer_note = pack.site.footerNote;
       siteData.site.language = language === 'it' ? 'it' : 'en';
       writeFileSync(sitePath, `${stringify(siteData).trim()}\n`);
     }

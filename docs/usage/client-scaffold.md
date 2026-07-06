@@ -11,6 +11,7 @@ npm run site:scaffold -- ../atelier-noir --template writing
 npm run site:scaffold -- ../artist-site --template artwork
 npm run site:scaffold -- ../quiet-clay --template handmade
 npm run site:scaffold -- ../tiny-silver --template jewelry
+npm run site:scaffold -- ../my-shelf --template collector
 npm run site:scaffold -- ../quiet-room --template furniture
 ```
 
@@ -67,6 +68,18 @@ It maps Atelier-Kit concepts like this:
 - Signal Clouds = material, size, occasion and visitor interest.
 - Visitor Brief = request information about a piece, sizing, availability or custom work.
 - Contact actions = configured email and optional WhatsApp.
+
+### `collector`
+
+Creates a starter personal collection showcase for trading cards, figurines, stickers, pins and other small collectibles.
+
+It maps Atelier-Kit concepts like this:
+
+- Item = collectible.
+- Collection = personal shelf, set group or trade list.
+- Signal Clouds = trade intent, meetup preference, looking-for and condition.
+- Visitor Brief = a copyable message to start an offline swap conversation.
+- Contact actions = configured email and optional WhatsApp (parent-friendly).
 
 ### `furniture`
 

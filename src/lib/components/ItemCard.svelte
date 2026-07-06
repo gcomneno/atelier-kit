@@ -73,7 +73,10 @@
   }
 
   .image-wrap {
-    aspect-ratio: 4 / 3;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
     background: color-mix(in srgb, var(--site-base-color, #f8f0e4) 88%, white);
   }
 
@@ -81,14 +84,17 @@
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
   }
 
   .body {
     padding: 1.4rem;
+    min-width: 0;
   }
 
   .status {
+    max-width: 100%;
     width: fit-content;
     margin: 0 0 0.85rem;
     padding: 0.25rem 0.65rem;
@@ -97,7 +103,10 @@
     color: #6d5841;
     font-size: 0.75rem;
     letter-spacing: 0.08em;
+    line-height: 1.35;
     text-transform: uppercase;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   h2 {
@@ -108,12 +117,23 @@
   .subtitle {
     margin: 0.35rem 0 0;
     color: #725f4a;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
   }
 
   .description {
-    margin: 1rem 0;
+    margin: 0.75rem 0 0;
     color: #4f4236;
-    line-height: 1.6;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
   }
 
   dl {
@@ -124,8 +144,9 @@
 
   dl div {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 0.35rem 1rem;
     border-top: 1px solid #efe3d2;
     padding-top: 0.55rem;
   }
@@ -133,11 +154,16 @@
   dt {
     color: #7b6a58;
     font-size: 0.85rem;
+    flex: 1 1 6rem;
+    min-width: 0;
   }
 
   dd {
     margin: 0;
     color: #2f281f;
     text-align: right;
+    flex: 1 1 8rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 </style>

@@ -3,6 +3,7 @@
   import MetaInfo from '$lib/components/MetaInfo.svelte';
   import SignalCloud from '$lib/components/SignalCloud.svelte';
   import VisitorBrief from '$lib/components/VisitorBrief.svelte';
+  import { resolveItemCoverFallbackSrc, resolveItemCoverSrc } from '$lib/item-cover.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   /** @type {import('./$types').PageData} */
@@ -99,7 +100,22 @@
     <section class="hero" aria-labelledby="item-title">
       <div class="image-column">
         <div class="image-frame">
-          <img src={item.image_file} alt={item.image_alt || item.title} />
+          <img
+            src={resolveItemCoverSrc(item)}
+            alt={item.image_alt || item.title}
+            width="600"
+            height="900"
+            on:error={(event) => {
+              const img = event.currentTarget;
+
+              if (img.dataset.fallbackApplied === 'true') {
+                return;
+              }
+
+              img.dataset.fallbackApplied = 'true';
+              img.src = resolveItemCoverFallbackSrc(item);
+            }}
+          />
         </div>
       </div>
 

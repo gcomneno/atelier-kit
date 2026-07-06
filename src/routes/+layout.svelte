@@ -87,6 +87,7 @@
     flex-direction: column;
     min-height: 100vh;
     color: var(--site-text-color, #2f281f);
+    background-color: var(--site-base-color, #f8f0e4);
     background:
       radial-gradient(
         circle at top left,
@@ -97,6 +98,7 @@
   }
 
   .site-root.has-background-image {
+    background-color: var(--site-base-color, #f8f0e4);
     background:
       radial-gradient(
         circle at top left,
@@ -105,6 +107,35 @@
       ),
       var(--site-bg-url) center top / cover no-repeat,
       var(--site-base-color, #f8f0e4);
+  }
+
+  /* Chrome <111 (e.g. Windows 7) — no color-mix(): keep solid theme colors */
+  @supports not (color: color-mix(in srgb, red, blue)) {
+    .site-root,
+    .site-root.has-background-image {
+      background: var(--site-base-color, #f8f0e4);
+    }
+
+    .site-root.has-background-image {
+      background-color: var(--site-base-color, #f8f0e4);
+      background-image: var(--site-bg-url, none);
+      background-position: center top;
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+
+    :global(.catalog-sidebar--dark),
+    :global(.catalog-sidebar--dark .widget-title),
+    :global(.catalog-sidebar--dark .news-teaser),
+    :global(main header h1),
+    :global(main header p),
+    :global(main .eyebrow) {
+      color: var(--site-text-color, #2f281f);
+    }
+
+    :global(.catalog-sidebar--dark .widget) {
+      background-color: var(--site-card-color, var(--site-base-color, #f8f0e4));
+    }
   }
 
   .site-kit-credit-bar {

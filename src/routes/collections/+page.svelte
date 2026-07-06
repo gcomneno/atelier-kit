@@ -108,6 +108,7 @@
   header p {
     max-width: 42rem;
     margin: 0;
+    color: var(--site-text-color, #2f281f);
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 82%, transparent);
     font-size: clamp(1.1rem, 3vw, 1.5rem);
     line-height: 1.4;

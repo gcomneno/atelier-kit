@@ -7,6 +7,15 @@
   let { data, form } = $props();
 
   const aboutForm = $derived(form?.aboutForm ?? data.aboutForm);
+  let aboutEnabled = $state(false);
+  let showPortrait = $state(false);
+
+  $effect(() => {
+    aboutEnabled = aboutForm.enabled;
+    showPortrait = aboutForm.show_portrait;
+  });
+
+  const portraitFieldsEnabled = $derived(aboutEnabled && showPortrait);
 </script>
 
 <svelte:head>
@@ -20,25 +29,25 @@
 <section class="panel">
   <form method="POST" action="?/saveAbout" use:enhance class="studio-form">
     <label class="checkbox">
-      <input type="checkbox" name="enabled" checked={aboutForm.enabled} />
+      <input type="checkbox" name="enabled" bind:checked={aboutEnabled} />
       {t('studio.about.enabled')}
     </label>
 
     <label>
       {t('studio.about.titleField')}
-      <input name="title" value={aboutForm.title} />
+      <input name="title" disabled={!aboutEnabled} value={aboutForm.title} />
     </label>
 
     <label>
       {t('studio.about.introField')}
-      <textarea name="intro" rows="5">{aboutForm.intro}</textarea>
+      <textarea name="intro" rows="5" disabled={!aboutEnabled}>{aboutForm.intro}</textarea>
     </label>
 
-    <fieldset>
+    <fieldset disabled={!aboutEnabled}>
       <legend>{t('studio.about.portraitLegend')}</legend>
 
       <label class="checkbox">
-        <input type="checkbox" name="show_portrait" checked={aboutForm.show_portrait} />
+        <input type="checkbox" name="show_portrait" bind:checked={showPortrait} disabled={!aboutEnabled} />
         {t('studio.about.showPortrait')}
       </label>
 
@@ -54,18 +63,27 @@
       <label>
         {t('studio.about.portraitUpload')}
         <span class="hint">{t('studio.about.portraitUploadHint')}</span>
-        <input type="file" name="portrait_upload" accept="image/jpeg,image/png,image/webp" />
+        <input
+          type="file"
+          name="portrait_upload"
+          accept="image/jpeg,image/png,image/webp"
+          disabled={!portraitFieldsEnabled}
+        />
       </label>
 
       <input type="hidden" name="portrait_image_file" value={aboutForm.portrait_image_file} />
 
       <label>
         {t('studio.about.portraitAlt')}
-        <input name="portrait_image_alt" value={aboutForm.portrait_image_alt} />
+        <input
+          name="portrait_image_alt"
+          disabled={!portraitFieldsEnabled}
+          value={aboutForm.portrait_image_alt}
+        />
       </label>
     </fieldset>
 
-    <fieldset>
+    <fieldset disabled={!aboutEnabled}>
       <legend>{t('studio.about.sectionLegend')}</legend>
 
       <label>
@@ -142,6 +160,18 @@
     background: #fffdf9;
     color: inherit;
     font: inherit;
+  }
+
+  input:disabled:not([type='checkbox']),
+  textarea:disabled,
+  fieldset:disabled .checkbox input[type='checkbox'] {
+    background: #eef1f4;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+
+  fieldset:disabled label:not(.checkbox) {
+    opacity: 0.72;
   }
 
   textarea {

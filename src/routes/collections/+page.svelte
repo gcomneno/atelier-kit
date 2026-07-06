@@ -44,7 +44,8 @@
       collections={data.sidebar.collections}
       about={data.sidebar.about}
       newsPosts={data.sidebar.newsPosts}
-      widgets={data.layout.sidebar}
+      catalogItems={data.sidebar.catalogItems}
+      catalog={data.sidebar.catalog}
       site={data.site}
     />
   {/if}

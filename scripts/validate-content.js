@@ -5,6 +5,11 @@ import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
 import { isValidFooterHref } from '../src/lib/footer-links.js';
 import { isHomeShowMode, isLayoutPreset, MAX_LATEST_NEWS_COUNT } from '../src/lib/layout-presets.js';
+import {
+  isLayoutBlockId,
+  isLayoutPlacement,
+  LAYOUT_BLOCK_IDS
+} from '../src/lib/layout-blocks.js';
 import { isReadingFormat } from '../src/lib/reading-formats.js';
 import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
 
@@ -525,33 +530,6 @@ function validateFooter() {
   if ('show_social' in footer && footer.show_social !== undefined && typeof footer.show_social !== 'boolean') {
     failKey('footerShowSocialInvalid', { source });
   }
-
-  if (footer.header_nav !== undefined) {
-    if (!Array.isArray(footer.header_nav)) {
-      failKey('footerHeaderNavMustBeArray', { source });
-      return;
-    }
-
-    footer.header_nav.forEach((link, linkIndex) => {
-      const linkSource = `${source}:header_nav[${linkIndex}]`;
-
-      if (!link || typeof link !== 'object' || Array.isArray(link)) {
-        failKey('footerLinkMustBeObject', { source: linkSource });
-        return;
-      }
-
-      const label = requireString(link, 'label', linkSource);
-      const href = requireString(link, 'href', linkSource);
-
-      if (!isValidFooterHref(href)) {
-        failKey('footerLinkHrefInvalid', { source: linkSource });
-      }
-
-      if (label === '') {
-        failKey('footerLinkLabelRequired', { source: linkSource });
-      }
-    });
-  }
 }
 
 function validateLayout() {
@@ -571,6 +549,60 @@ function validateLayout() {
 
   if ('preset' in layout && layout.preset !== undefined && !isLayoutPreset(layout.preset)) {
     failKey('layoutPresetInvalid', { source });
+  }
+
+  const blocks = layout.blocks;
+
+  if (blocks !== undefined) {
+    if (!blocks || typeof blocks !== 'object' || Array.isArray(blocks)) {
+      failKey('layoutBlocksMustBeObject', { source });
+      return;
+    }
+
+    for (const [blockId, block] of Object.entries(blocks)) {
+      const blockSource = `${source}:blocks.${blockId}`;
+
+      if (!isLayoutBlockId(blockId)) {
+        if (blockId === 'banner') {
+          continue;
+        }
+
+        failKey('layoutBlockIdInvalid', { source: blockSource });
+        continue;
+      }
+
+      if (!block || typeof block !== 'object' || Array.isArray(block)) {
+        failKey('layoutBlockMustBeObject', { source: blockSource });
+        continue;
+      }
+
+      if ('enabled' in block && block.enabled !== undefined && typeof block.enabled !== 'boolean') {
+        failKey('layoutBlockEnabledInvalid', { source: blockSource });
+      }
+
+      if (
+        'placement' in block &&
+        block.placement !== undefined &&
+        !isLayoutPlacement(block.placement)
+      ) {
+        failKey('layoutBlockPlacementInvalid', { source: blockSource });
+      }
+
+      if (blockId === 'news' && 'count' in block && block.count !== undefined) {
+        const count = block.count;
+
+        if (
+          typeof count !== 'number' ||
+          !Number.isInteger(count) ||
+          count < 1 ||
+          count > MAX_LATEST_NEWS_COUNT
+        ) {
+          failKey('layoutLatestNewsCountInvalid', { source: blockSource, max: MAX_LATEST_NEWS_COUNT });
+        }
+      }
+    }
+
+    return;
   }
 
   const home = layout.home;

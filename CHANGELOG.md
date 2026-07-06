@@ -4,6 +4,22 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.19 - 2026-07-06
+
+### Added
+
+- **Studio site settings** split into focused pages under `/studio/site/*` (identity, layout, hero banner, appearance, contact, footer, social) with shared navigation.
+- **Layout placement `menu`**: home blocks (about, news, collections, catalog) can render in the header nav (top right).
+- **`hero_signature`** field separate from `hero_intro`; intro no longer italic by default.
+- **Site language** select (`it` / `en`) in Studio identity settings.
+- Hero banner: **Remove hero image** checkbox; alt text field removed (uses site title for `img` alt).
+
+### Changed
+
+- Operator docs and i18n: **Entità** terminology (replacing informal “pezzo” labels).
+- Layout blocks: **banner** removed from widget placement (banner lives under Studio → Hero only).
+- `resolveSiteAppearance` import fixed in `showcase.js`.
+
 ## v0.1.18 - 2026-07-05
 
 ### Fixed

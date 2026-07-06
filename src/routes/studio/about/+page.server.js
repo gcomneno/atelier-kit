@@ -31,23 +31,28 @@ export const actions = {
 
     try {
       const formData = await request.formData();
+      const current = loadAboutForm(locale);
+      const enabled = checkboxEnabled(formData.get('enabled'));
+      const showPortrait = enabled && checkboxEnabled(formData.get('show_portrait'));
       const upload = formData.get('portrait_upload');
       let portraitImageFile = String(formData.get('portrait_image_file') ?? '').trim();
 
-      if (upload instanceof File && upload.size > 0) {
+      if (showPortrait && upload instanceof File && upload.size > 0) {
         portraitImageFile = await saveAboutPortraitUpload(upload, locale);
       }
 
       writeAboutForm(
         {
-          enabled: checkboxEnabled(formData.get('enabled')),
-          title: formData.get('title'),
-          intro: formData.get('intro'),
-          section_heading: formData.get('section_heading'),
-          section_body: formData.get('section_body'),
-          show_portrait: checkboxEnabled(formData.get('show_portrait')),
-          portrait_image_file: portraitImageFile,
-          portrait_image_alt: formData.get('portrait_image_alt')
+          enabled,
+          title: enabled ? formData.get('title') : current.title,
+          intro: enabled ? formData.get('intro') : current.intro,
+          section_heading: enabled ? formData.get('section_heading') : current.section_heading,
+          section_body: enabled ? formData.get('section_body') : current.section_body,
+          show_portrait: enabled ? checkboxEnabled(formData.get('show_portrait')) : current.show_portrait,
+          portrait_image_file: showPortrait ? portraitImageFile : current.portrait_image_file,
+          portrait_image_alt: showPortrait
+            ? formData.get('portrait_image_alt')
+            : current.portrait_image_alt
         },
         locale
       );

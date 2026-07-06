@@ -6,17 +6,14 @@
   let { data } = $props();
   const t = useVisitorI18n();
 
-  const collectionsInSidebar = $derived(
-    data.sidebarActive && data.layout.sidebar.collections
-  );
+  const placements = $derived(data.placements);
+  const showBannerMain = $derived(Boolean(data.site.hero_banner));
   const showCollections = $derived(
-    data.collections.length > 0 &&
-      (data.layout.home.show === 'collections' || data.layout.home.show === 'both') &&
-      !collectionsInSidebar
+    placements.collections === 'main' && data.collections.length > 0
   );
-  const showCatalog = $derived(
-    data.layout.home.show === 'catalog' || data.layout.home.show === 'both'
-  );
+  const showCatalog = $derived(placements.catalog === 'main' && data.items.length > 0);
+  const showAboutMain = $derived(Boolean(data.main?.about));
+  const showNewsMain = $derived((data.main?.newsPosts?.length ?? 0) > 0);
 </script>
 
 <svelte:head>
@@ -34,24 +31,32 @@
 
         {#if data.site.hero_intro}
           <p class="hero-intro">{data.site.hero_intro}</p>
-        {:else if data.site.notice}
+        {/if}
+        {#if data.site.hero_signature}
+          <p class="hero-signature">{data.site.hero_signature}</p>
+        {/if}
+        {#if data.site.notice}
           <p class="notice">{data.site.notice}</p>
         {/if}
 
-        {#if data.site.hero_banner}
+        {#if showBannerMain && data.site.hero_banner}
           {@const banner = data.site.hero_banner}
           {#if banner.href}
             <a class="hero-banner" href={banner.href}>
               <img src={banner.image_file} alt={banner.image_alt} loading="lazy" width="960" height="360" />
-              {#if banner.caption || banner.link_label}
-                <span class="hero-banner-caption">
-                  {banner.link_label ?? banner.caption}
-                </span>
+              {#if banner.description}
+                <span class="hero-banner-description">{banner.description}</span>
+              {/if}
+              {#if banner.caption}
+                <span class="hero-banner-caption">{banner.caption}</span>
               {/if}
             </a>
           {:else}
             <figure class="hero-banner">
               <img src={banner.image_file} alt={banner.image_alt} loading="lazy" width="960" height="360" />
+              {#if banner.description}
+                <span class="hero-banner-description">{banner.description}</span>
+              {/if}
               {#if banner.caption}
                 <figcaption class="hero-banner-caption">{banner.caption}</figcaption>
               {/if}
@@ -65,11 +70,42 @@
           collections={data.sidebar.collections}
           about={data.sidebar.about}
           newsPosts={data.sidebar.newsPosts}
-          widgets={data.layout.sidebar}
+          catalogItems={data.sidebar.catalogItems}
+          catalog={data.sidebar.catalog}
           site={data.site}
         />
       {/if}
     </div>
+
+    {#if showAboutMain && data.main?.about}
+      {@const about = data.main.about}
+      <section class="home-about" aria-labelledby="home-about-title">
+        <h2 id="home-about-title">{about.title}</h2>
+        {#if about.intro}
+          <p>{about.intro}</p>
+        {:else if about.sections[0]?.body}
+          <p>{about.sections[0].body}</p>
+        {/if}
+        <p class="text-link"><a href="/about">{t('common.readMore')}</a></p>
+      </section>
+    {/if}
+
+    {#if showNewsMain && data.main?.newsPosts}
+      <section class="home-news" aria-labelledby="home-news-title">
+        <h2 id="home-news-title">{t('catalog.latestNews')}</h2>
+        <ul class="home-news-list">
+          {#each data.main.newsPosts as post (post.id)}
+            <li>
+              <a href={`/news/${post.id}`}>
+                <time datetime={post.date}>{post.date}</time>
+                <span>{post.title}</span>
+              </a>
+            </li>
+          {/each}
+        </ul>
+        <p class="text-link"><a href="/news">{t('common.allNews')}</a></p>
+      </section>
+    {/if}
 
     {#if showCollections}
       <section class="collections" aria-labelledby="collections-title">
@@ -93,7 +129,7 @@
     {/if}
 
     {#if showCatalog}
-      <section class="catalog" aria-labelledby="catalog-title">
+      <section id="catalog" class="catalog" aria-labelledby="catalog-title">
         <div class="section-heading">
           <p class="eyebrow">{t('home.catalogEyebrow')}</p>
           <h2 id="catalog-title">{data.items.length} {data.catalog.item_name_plural}</h2>
@@ -196,6 +232,7 @@
   }
 
   .hero-intro {
+    font-style: normal;
     width: fit-content;
     max-width: 46rem;
     margin: 1.25rem 0 0;
@@ -211,6 +248,17 @@
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.12);
     font-size: clamp(1.05rem, 2.5vw, 1.2rem);
     line-height: 1.65;
+    white-space: pre-line;
+  }
+
+  .hero-signature {
+    font-style: normal;
+    max-width: 46rem;
+    margin: 0.85rem 0 0 auto;
+    text-align: right;
+    color: color-mix(in srgb, var(--site-text-color, #5d4a36) 72%, transparent);
+    font-size: clamp(1rem, 2.2vw, 1.1rem);
+    line-height: 1.5;
     white-space: pre-line;
   }
 
@@ -231,10 +279,35 @@
     text-decoration: none;
   }
 
+  .hero-banner-description {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 1rem 1.35rem 2.75rem;
+    text-align: center;
+    font-size: clamp(1.35rem, 3.2vw, 1.95rem);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.03em;
+    text-wrap: balance;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 96%, transparent);
+    text-shadow: 0 2px 18px rgb(0 0 0 / 0.55);
+    pointer-events: none;
+  }
+
+  .hero-banner:not(:has(.hero-banner-caption)) .hero-banner-description {
+    padding-bottom: 1rem;
+  }
+
   .hero-banner::after {
     content: '';
     position: absolute;
     inset: 0;
+    z-index: 1;
     background: linear-gradient(
       180deg,
       rgb(0 0 0 / 0.04) 0%,
@@ -254,11 +327,13 @@
 
   .hero-banner-caption {
     position: absolute;
-    z-index: 1;
+    z-index: 2;
     left: 0;
     right: 0;
     bottom: 0;
+    margin: 0;
     padding: 0.85rem 1rem 0.9rem;
+    text-align: center;
     font-size: 0.82rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -272,8 +347,9 @@
   }
 
   .notice {
-    width: fit-content;
-    max-width: 46rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     margin: 1rem 0 0;
     padding: 1rem 1.2rem;
     border: 1px solid color-mix(in srgb, var(--site-accent-color, #dfc9aa) 55%, transparent);
@@ -356,6 +432,31 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  .home-about,
+  .home-news {
+    margin-top: 2rem;
+  }
+
+  .home-about h2,
+  .home-news h2 {
+    margin: 0 0 0.85rem;
+  }
+
+  .home-news-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .home-news-list a {
+    display: grid;
+    gap: 0.2rem;
+    text-decoration: none;
+    color: inherit;
   }
 
   .text-link {

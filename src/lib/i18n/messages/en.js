@@ -5,7 +5,18 @@ export default {
       eyebrow: 'Atelier-Kit studio',
       title: 'Local authoring',
       nav: {
+        dashboard: 'Overview',
+        siteGroup: 'Showcase site',
+        contentGroup: 'Content',
+        publishGroup: 'Publishing',
         site: 'Site',
+        identity: 'Identity',
+        appearance: 'Visitor appearance',
+        hero: 'Hero',
+        contact: 'Contact',
+        social: 'Social',
+        layout: 'Layout',
+        footer: 'Footer',
         about: 'About',
         catalog: 'Catalog',
         items: 'Items',
@@ -15,6 +26,45 @@ export default {
         readiness: 'Readiness',
         help: 'Help',
         preview: 'Preview'
+      }
+    },
+    dashboard: {
+      pageTitle: 'Studio · Overview',
+      intro:
+        'Welcome to Studio. Each card opens one focused page, so updates are cleaner and there is no more endless scrolling.',
+      cards: {
+        identity: {
+          title: 'Site identity',
+          description: 'Name, tagline, language, notice and Open Graph metadata.'
+        },
+        appearance: {
+          title: 'Visitor appearance',
+          description: 'Color presets and background image for the public site.'
+        },
+        hero: {
+          title: 'Hero banner',
+          description: 'Manage hero image, caption and optional call-to-action link.'
+        },
+        contact: {
+          title: 'Contact actions',
+          description: 'Configure Visitor Brief email and optional WhatsApp.'
+        },
+        social: {
+          title: 'Social links',
+          description: 'Header and footer social profile links.'
+        },
+        layout: {
+          title: 'Layout',
+          description: 'Homepage/catalog presets and sidebar widgets.'
+        },
+        footer: {
+          title: 'Footer',
+          description: 'Legal rows, link columns and social visibility.'
+        },
+        readiness: {
+          title: 'Publish readiness',
+          description: 'Check validation status and production deploy readiness.'
+        }
       }
     },
     accessGuide: {
@@ -56,12 +106,23 @@ export default {
       },
       identity: {
         title: 'Site identity',
-        intro: 'Title, tagline and visitor-facing notice text.',
+        intro: 'Title, tagline and home-page messages for visitors.',
         siteTitle: 'Site title',
         tagline: 'Tagline',
+        heroIntro: 'Home intro text',
+        heroIntroHint:
+          'One line break starts a new line; a blank line starts a new paragraph. Edit text only — theme styling and layout stay the same.',
+        heroSignature: 'Signature',
+        heroSignatureHint:
+          'Personal sign-off on the home page, shown below the intro and right-aligned. Leave empty to hide.',
         language: 'Language',
+        languages: {
+          it: 'Italian',
+          en: 'English'
+        },
         notice: 'Public notice',
-        noticeHint: 'Leave empty to hide the notice banner.',
+        noticeHint:
+          'Short message on the home page, in a highlighted box below the tagline. Shown even when a hero intro is active. Leave empty to hide.',
         footerNote: 'Footer note (optional)',
         footerNoteHint: 'Short client text on the home page when no multi-column footer is configured. The Atelier-Kit credit is added automatically and cannot be removed.',
         siteUrl: 'Canonical site URL (optional)',
@@ -80,10 +141,14 @@ export default {
           'You already have a background image under Appearance. Some custom home layouts use only that and ignore the hero banner.',
         upload: 'Upload banner image',
         uploadHint: 'JPEG, PNG or WebP. Landscape ratio works best (~3:1).',
-        alt: 'Alt text',
+        removeHeroImage: 'Remove hero image',
+        bannerDescription: 'Description',
+        bannerDescriptionHint:
+          'Text overlaid on the banner, centered and large. Leave empty to hide.',
         caption: 'Caption (optional)',
+        captionHint: 'Text along the bottom of the banner image, centered.',
         href: 'Link (optional, e.g. /news/preview)',
-        linkLabel: 'Link label (when a link is set)',
+        hrefHint: 'Internal path: makes the image clickable (e.g. /news, /collections).',
         save: 'Save hero banner'
       },
       contact: {
@@ -123,19 +188,28 @@ export default {
         save: 'Save footer'
       },
       layout: {
-        title: 'Catalog sidebar',
+        title: 'Layout',
         intro:
-          'Optional sidebar on the home page and collections index. Item, collection detail, news, about and legal pages stay single-column.',
+          'Choose single column or widget layout and where to show about, news, collections and catalog (main content, sidebar or top-right menu).',
         preset: 'Layout preset',
         presets: {
           'single-column': 'Single column (default)',
-          'catalog-sidebar': 'Catalog with sidebar'
+          'catalog-sidebar': 'Widget layout (main + sidebar)'
         },
-        widgetsLegend: 'Sidebar widgets',
-        collections: 'Collection links',
-        about: 'About snippet',
-        latestNews: 'Latest news',
-        latestNewsCount: 'Latest news count',
+        blocksLegend: 'Home elements',
+        blocksHint:
+          'With widget layout, place each element in the main content area or the sidebar.',
+        placement: 'Placement',
+        placementMain: 'Main content',
+        placementSidebar: 'Sidebar',
+        placementMenu: 'Menu',
+        blocks: {
+          about: 'About',
+          news: 'News',
+          collections: 'Collections',
+          catalog: 'Catalog'
+        },
+        latestNewsCount: 'News count',
         save: 'Save layout'
       },
       nextSteps: {
@@ -686,9 +760,13 @@ export default {
     footerLinkLabelRequired: '{source}: link label must not be empty when href is set.',
     footerFieldMustBeString: '{source}: footer.{field} must be a string when provided.',
     footerShowSocialInvalid: '{source}: footer.show_social must be true or false when provided.',
-    footerHeaderNavMustBeArray: '{source}: footer.header_nav must be an array when provided.',
     missingLayoutObject: '{source}: missing "layout" object.',
     layoutPresetInvalid: '{source}: layout.preset must be "single-column" or "catalog-sidebar".',
+    layoutBlocksMustBeObject: '{source}: layout.blocks must be an object when provided.',
+    layoutBlockMustBeObject: '{source}: layout block must be an object.',
+    layoutBlockIdInvalid: '{source}: invalid layout block id.',
+    layoutBlockEnabledInvalid: '{source}: enabled must be true or false when provided.',
+    layoutBlockPlacementInvalid: '{source}: placement must be "main", "sidebar" or "menu" when provided.',
     layoutHomeMustBeObject: '{source}: layout.home must be an object when provided.',
     layoutHomeShowInvalid:
       '{source}: layout.home.show must be "collections", "catalog", or "both" when provided.',
@@ -763,10 +841,10 @@ export default {
       home: 'Home',
       breadcrumb: 'Breadcrumb',
       socialLinks: 'Social links',
+      siteNav: 'Site menu',
       viewAllCollections: 'View all collections',
       readMore: 'Read more',
-      allNews: 'All news',
-      mainNav: 'Main navigation'
+      allNews: 'All news'
     },
     home: {
       collectionsEyebrow: 'Collections',
@@ -797,7 +875,7 @@ export default {
     },
     item: {
       visitorBriefEyebrow: 'Visitor Brief',
-      talkAboutTitle: 'Talk about this piece',
+      talkAboutTitle: 'Talk about this entity',
       talkAboutIntro:
         'Choose a few preferences below. Atelier-Kit will assemble a message you can copy or send by email or WhatsApp.',
       details: 'Details',

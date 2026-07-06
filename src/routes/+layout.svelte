@@ -1,11 +1,14 @@
 <script>
+  import { page } from '$app/state';
   import SiteFooter from '$lib/components/SiteFooter.svelte';
   import KitCredit from '$lib/components/KitCredit.svelte';
   import SiteHeader from '$lib/components/SiteHeader.svelte';
   import { setVisitorI18nContext } from '$lib/i18n/visitor-context.js';
   import { appearanceCssVariables } from '$lib/site-appearance.js';
+  import { STUDIO_HEAD_STYLE } from '$lib/studio-theme.js';
 
   let { children, data } = $props();
+  const isStudio = $derived(page.url.pathname.startsWith('/studio'));
 
   setVisitorI18nContext(() => data.locale);
 
@@ -21,7 +24,11 @@
 </script>
 
 <svelte:head>
-  {@html `<style id="site-appearance">${appearanceRootStyle}</style>`}
+  {#if isStudio}
+    {@html STUDIO_HEAD_STYLE}
+  {:else}
+    {@html `<style id="site-appearance">${appearanceRootStyle}</style>`}
+  {/if}
   {#if data.seo?.ogImage}
     <meta property="og:image" content={data.seo.ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
@@ -32,30 +39,35 @@
   {/if}
 </svelte:head>
 
-<div
-  class="site-root"
-  class:has-background-image={hasBackgroundImage}
-  style={`${appearanceStyle}${hasBackgroundImage ? `; --site-bg-url: url(${data.appearance.background_image})` : ''}`}
->
-  <SiteHeader
-    site={data.site}
-    socialLinks={data.socialLinks}
-    footer={data.footerActive ? data.footer : null}
-    overlay={hasBackgroundImage}
-  />
+{#if isStudio}
   {@render children()}
-  {#if data.footerActive && data.footer}
-    <SiteFooter
-      footer={data.footer}
-      socialLinks={data.footer.show_social ? data.socialLinks : []}
-      locale={data.locale}
+{:else}
+  <div
+    class="site-root"
+    class:has-background-image={hasBackgroundImage}
+    style={`${appearanceStyle}${hasBackgroundImage ? `; --site-bg-url: url(${data.appearance.background_image})` : ''}`}
+  >
+    <SiteHeader
+      site={data.site}
+      menuNav={data.menuNav}
+      socialLinks={data.socialLinks}
+      footer={data.footerActive ? data.footer : null}
+      overlay={hasBackgroundImage}
     />
-  {:else}
-    <footer class="site-kit-credit-bar">
-      <KitCredit locale={data.locale} />
-    </footer>
-  {/if}
-</div>
+    {@render children()}
+    {#if data.footerActive && data.footer}
+      <SiteFooter
+        footer={data.footer}
+        socialLinks={data.footer.show_social ? data.socialLinks : []}
+        locale={data.locale}
+      />
+    {:else}
+      <footer class="site-kit-credit-bar">
+        <KitCredit locale={data.locale} />
+      </footer>
+    {/if}
+  </div>
+{/if}
 
 <style>
   :global(*) {
@@ -80,6 +92,11 @@
 
   :global(img) {
     max-width: 100%;
+  }
+
+  :global(.hero-intro),
+  :global(.hero-intro-body) {
+    font-style: normal;
   }
 
   .site-root {

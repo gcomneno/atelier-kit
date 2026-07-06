@@ -1,7 +1,7 @@
 import {
   getAboutConfig,
   getCatalogConfig,
-  getCatalogSidebarPageData,
+  getHomeLayoutPageData,
   getCollections,
   getItems,
   getLayoutConfig,
@@ -10,7 +10,7 @@ import {
 
 export function load() {
   const layout = getLayoutConfig();
-  const sidebarPage = getCatalogSidebarPageData(layout);
+  const homeLayout = getHomeLayoutPageData(layout);
 
   return {
     site: getSiteConfig(),
@@ -18,6 +18,6 @@ export function load() {
     collections: getCollections(),
     items: getItems(),
     aboutAvailable: getAboutConfig() !== null,
-    ...sidebarPage
+    ...homeLayout
   };
 }

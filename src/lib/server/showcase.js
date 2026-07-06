@@ -3,15 +3,21 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { isValidFooterHref } from '$lib/footer-links.js';
 import {
-  DEFAULT_HOME_SHOW,
   DEFAULT_LATEST_NEWS_COUNT,
   DEFAULT_LAYOUT_PRESET,
-  isHomeShowMode,
   isLayoutPreset,
   MAX_LATEST_NEWS_COUNT
 } from '$lib/layout-presets.js';
+import {
+  LAYOUT_BLOCK_IDS,
+  effectiveBlockPlacement,
+  hasSidebarBlocks,
+  migrateLegacyLayoutBlocks,
+  normalizeLayoutBlocks
+} from '$lib/layout-blocks.js';
 import { isValidSocialUrl, normalizeSocialId } from '$lib/social-networks.js';
 import { resolveSiteAppearance } from '$lib/site-appearance.js';
+import { getVisitorTranslator } from '$lib/i18n/index.js';
 
 const configFiles = import.meta.glob('/config/*.yaml', {
   query: '?raw',
@@ -303,6 +309,7 @@ export function getSiteConfig() {
     language: optionalString(site, 'language', 'en'),
     notice: optionalString(site, 'notice'),
     hero_intro: optionalString(site, 'hero_intro'),
+    hero_signature: optionalString(site, 'hero_signature'),
     footer_note: optionalString(site, 'footer_note'),
     url: optionalString(site, 'url'),
     og_image: optionalString(site, 'og_image'),
@@ -331,9 +338,10 @@ function parseHeroBanner(site) {
 
   return {
     image_file: imageFile,
-    image_alt: optionalString(banner, 'image_alt') ?? optionalString(site, 'name') ?? 'Hero banner',
+    image_alt: optionalString(site, 'name') ?? 'Hero banner',
+    description: optionalString(banner, 'description'),
     caption: optionalString(banner, 'caption'),
-    ...(href ? { href, link_label: optionalString(banner, 'link_label') ?? optionalString(banner, 'caption') } : {})
+    ...(href ? { href } : {})
   };
 }
 
@@ -603,22 +611,8 @@ export function getFooterConfig() {
     });
   }
 
-  /** @type {FooterLink[]} */
-  const headerNav = [];
-
-  if (Array.isArray(footer.header_nav)) {
-    footer.header_nav.forEach((link, index) => {
-      const normalized = normalizeFooterLink(link, `config/footer.yaml:header_nav[${index}]`);
-
-      if (normalized) {
-        headerNav.push(normalized);
-      }
-    });
-  }
-
   return {
     columns,
-    header_nav: headerNav,
     copyright: optionalString(footer, 'copyright'),
     legal_line: optionalString(footer, 'legal_line'),
     show_social: footer.show_social === true
@@ -855,48 +849,19 @@ export function getNewsPost(id) {
 }
 
 /**
- * @typedef {{
- *   collections: boolean,
- *   about: boolean,
- *   latest_news: boolean,
- *   latest_news_count: number
- * }} SidebarWidgetConfig
- * @typedef {{
- *   show: import('$lib/layout-presets.js').HomeShowMode
- * }} HomeConfig
+ * @typedef {import('$lib/layout-blocks.js').LayoutBlockId} LayoutBlockId
+ * @typedef {import('$lib/layout-blocks.js').LayoutBlockConfig} LayoutBlockConfig
  * @typedef {{
  *   preset: import('$lib/layout-presets.js').LayoutPreset,
- *   home: HomeConfig,
- *   sidebar: SidebarWidgetConfig
+ *   blocks: Record<LayoutBlockId, LayoutBlockConfig>
  * }} LayoutConfig
  */
 
 /** @type {LayoutConfig} */
 const DEFAULT_LAYOUT_CONFIG = {
   preset: DEFAULT_LAYOUT_PRESET,
-  home: {
-    show: DEFAULT_HOME_SHOW
-  },
-  sidebar: {
-    collections: true,
-    about: true,
-    latest_news: true,
-    latest_news_count: DEFAULT_LATEST_NEWS_COUNT
-  }
+  blocks: normalizeLayoutBlocks()
 };
-
-/**
- * @param {unknown} value
- * @param {number} fallback
- * @returns {number}
- */
-function optionalPositiveInt(value, fallback) {
-  if (typeof value !== 'number' || !Number.isInteger(value) || value < 1) {
-    return fallback;
-  }
-
-  return Math.min(value, MAX_LATEST_NEWS_COUNT);
-}
 
 export function getLayoutConfig() {
   const raw = readYamlRaw('/config/layout.yaml');
@@ -920,31 +885,13 @@ export function getLayoutConfig() {
     );
   }
 
-  const home = isRecord(layout.home) ? layout.home : {};
-  const homeShowValue = optionalString(home, 'show', DEFAULT_HOME_SHOW);
-
-  if (!isHomeShowMode(homeShowValue)) {
-    throw new Error(
-      'config/layout.yaml: layout.home.show must be "collections", "catalog", or "both".'
-    );
-  }
-
-  const sidebar = isRecord(layout.sidebar) ? layout.sidebar : {};
+  const blocks = isRecord(layout.blocks)
+    ? normalizeLayoutBlocks(layout.blocks)
+    : migrateLegacyLayoutBlocks(layout);
 
   return {
     preset: presetValue,
-    home: {
-      show: homeShowValue
-    },
-    sidebar: {
-      collections: sidebar.collections !== false,
-      about: sidebar.about !== false,
-      latest_news: sidebar.latest_news !== false,
-      latest_news_count: optionalPositiveInt(
-        sidebar.latest_news_count,
-        DEFAULT_LATEST_NEWS_COUNT
-      )
-    }
+    blocks
   };
 }
 
@@ -952,35 +899,113 @@ export function getLayoutConfig() {
  * @param {LayoutConfig} layout
  */
 export function isCatalogSidebarActive(layout) {
-  return layout.preset === 'catalog-sidebar';
+  return layout.preset === 'catalog-sidebar' && hasSidebarBlocks(layout.preset, layout.blocks);
 }
 
 /**
- * Sidebar applies on home (`/`) and the collections index (`/collections`) only.
- * Item detail, collection detail, news, about and legal pages stay single-column.
- *
  * @param {LayoutConfig} layout
  */
-export function getCatalogSidebarPageData(layout) {
-  if (!isCatalogSidebarActive(layout)) {
+export function getHomeLayoutPageData(layout) {
+  /** @type {Record<LayoutBlockId, 'main' | 'sidebar' | null>} */
+  const placements = /** @type {Record<LayoutBlockId, 'main' | 'sidebar' | null>} */ (
+    Object.fromEntries(
+      LAYOUT_BLOCK_IDS.map((blockId) => [
+        blockId,
+        effectiveBlockPlacement(layout.preset, layout.blocks, blockId)
+      ])
+    )
+  );
+
+  const newsCount = layout.blocks.news.count ?? DEFAULT_LATEST_NEWS_COUNT;
+
+  const main = {
+    about: placements.about === 'main' ? getAboutConfig() : null,
+    newsPosts: placements.news === 'main' ? getNewsPosts().slice(0, newsCount) : []
+  };
+
+  const sidebarActive = isCatalogSidebarActive(layout);
+
+  if (!sidebarActive) {
     return {
-      sidebarActive: false,
       layout,
+      sidebarActive: false,
+      placements,
+      main,
       sidebar: null
     };
   }
 
-  const { sidebar } = layout;
-
   return {
-    sidebarActive: true,
     layout,
+    sidebarActive: true,
+    placements,
+    main,
     sidebar: {
-      collections: sidebar.collections ? getCollections() : [],
-      about: sidebar.about ? getAboutConfig() : null,
-      newsPosts: sidebar.latest_news
-        ? getNewsPosts().slice(0, sidebar.latest_news_count)
-        : []
+      collections: placements.collections === 'sidebar' ? getCollections() : [],
+      about: placements.about === 'sidebar' ? getAboutConfig() : null,
+      newsPosts:
+        placements.news === 'sidebar' ? getNewsPosts().slice(0, newsCount) : [],
+      catalogItems: placements.catalog === 'sidebar' ? getItems() : [],
+      catalog: placements.catalog === 'sidebar' ? getCatalogConfig() : null
     }
   };
+}
+
+/**
+ * Sidebar applies on home (`/`) and the collections index (`/collections`) only.
+ *
+ * @param {LayoutConfig} layout
+ */
+export function getCatalogSidebarPageData(layout) {
+  return getHomeLayoutPageData(layout);
+}
+
+/**
+ * @typedef {{ href: string, label: string }} LayoutMenuNavItem
+ * @param {LayoutConfig} layout
+ * @param {string} locale
+ * @returns {LayoutMenuNavItem[]}
+ */
+export function getLayoutMenuNav(layout, locale) {
+  const t = getVisitorTranslator(locale);
+  /** @type {LayoutMenuNavItem[]} */
+  const items = [];
+
+  for (const blockId of LAYOUT_BLOCK_IDS) {
+    if (effectiveBlockPlacement(layout.preset, layout.blocks, blockId) !== 'menu') {
+      continue;
+    }
+
+    if (blockId === 'about') {
+      const about = getAboutConfig();
+
+      if (about) {
+        items.push({ href: '/about', label: about.title });
+      }
+
+      continue;
+    }
+
+    if (blockId === 'news') {
+      if (getNewsPosts().length > 0) {
+        items.push({ href: '/news', label: t('visitor.news.title') });
+      }
+
+      continue;
+    }
+
+    if (blockId === 'collections') {
+      if (getCollections().length > 0) {
+        items.push({ href: '/collections', label: t('visitor.collections.pageTitle') });
+      }
+
+      continue;
+    }
+
+    if (blockId === 'catalog' && getItems().length > 0) {
+      items.push({ href: '/#catalog', label: getCatalogConfig().item_name_plural });
+    }
+  }
+
+  return items;
 }

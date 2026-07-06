@@ -6,7 +6,7 @@
   /** @typedef {{ title: string, links: FooterLink[] }} FooterColumn */
   /** @typedef {{ id: string, url: string }} SocialLink */
 
-  /** @type {{ name: string, socialLinks?: SocialLink[], footer?: { columns: FooterColumn[], header_nav: FooterLink[], show_social: boolean } | null }} */
+  /** @type {{ site: { name: string }, socialLinks?: SocialLink[], footer?: { columns: FooterColumn[], header_nav: FooterLink[], show_social: boolean } | null }} */
   let { site, socialLinks = [], footer = null } = $props();
 
   const t = useVisitorI18n();

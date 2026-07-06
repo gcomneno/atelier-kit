@@ -17,7 +17,7 @@
       width="400"
       height="600"
       onerror={(event) => {
-        const img = event.currentTarget;
+        const img = /** @type {HTMLImageElement} */ (event.currentTarget);
 
         if (img.dataset.fallbackApplied === 'true') {
           return;

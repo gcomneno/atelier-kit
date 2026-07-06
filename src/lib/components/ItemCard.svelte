@@ -1,4 +1,5 @@
 <script>
+  import { resolveItemCoverFallbackSrc, resolveItemCoverSrc } from '$lib/item-cover.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { item, catalog } = $props();
@@ -9,7 +10,23 @@
 
 <a class="card" href={`/items/${item.id}`}>
   <div class="image-wrap">
-    <img src={item.image_file} alt={item.title} loading="lazy" />
+    <img
+      src={resolveItemCoverSrc(item)}
+      alt={item.image_alt || item.title}
+      loading="lazy"
+      width="400"
+      height="600"
+      onerror={(event) => {
+        const img = event.currentTarget;
+
+        if (img.dataset.fallbackApplied === 'true') {
+          return;
+        }
+
+        img.dataset.fallbackApplied = 'true';
+        img.src = resolveItemCoverFallbackSrc(item);
+      }}
+    />
   </div>
 
   <div class="body">

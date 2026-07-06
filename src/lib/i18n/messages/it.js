@@ -64,6 +64,12 @@ export default {
         noticeHint: 'Lascia vuoto per nascondere il banner.',
         footerNote: 'Nota a piè di pagina (opzionale)',
         footerNoteHint: 'Testo breve del cliente in home quando non c\'è footer multi-colonna. Il credito Atelier-Kit viene aggiunto automaticamente e non è rimovibile.',
+        siteUrl: 'URL canonico del sito (opzionale)',
+        siteUrlHint:
+          'URL pubblico https usato per i link assoluti dell’immagine Open Graph. Lascia vuoto per usare l’host della richiesta corrente (ok su Vercel).',
+        ogImage: 'Immagine Open Graph (opzionale)',
+        ogImageHint:
+          'Percorso sotto /images/… o URL https completo per le anteprime social (Facebook, Instagram, WhatsApp). Dimensione consigliata: 1200×630.',
         save: 'Salva impostazioni sito'
       },
       heroBanner: {
@@ -652,6 +658,10 @@ export default {
     appearancePresetInvalid: '{source}: site.appearance.preset deve essere uno tra: warm, neutral, dark, custom.',
     appearanceColorInvalid: '{source}: site.appearance.{field} deve essere un colore hex come #f8f0e4.',
     appearanceBackgroundInvalid: '{source}: site.appearance.background_image deve essere un percorso sotto /images/site/.',
+    siteUrlInvalid: '{source}: site.url deve essere un URL http o https valido.',
+    ogImageInvalid: '{source}: site.og_image deve essere una stringa non vuota quando presente.',
+    ogImageUrlInvalid: '{source}: site.og_image deve essere un URL http o https valido.',
+    ogImagePathInvalid: '{source}: site.og_image deve essere un percorso sotto /images/ o un URL https completo.',
     missingCatalogObject: '{source}: manca l’oggetto "catalog".',
     routeSegmentUnsupported:
       '{source}: route_segment non è supportato in Atelier-Kit 1.0. I pezzi stanno sotto /items.',

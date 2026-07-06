@@ -117,6 +117,16 @@ function validateSite() {
     validateAppearance(site.appearance, source);
   }
 
+  if ('url' in site && site.url !== undefined && site.url !== '') {
+    if (typeof site.url !== 'string' || !isValidSocialUrl(site.url.trim())) {
+      failKey('siteUrlInvalid', { source });
+    }
+  }
+
+  if ('og_image' in site && site.og_image !== undefined) {
+    validateOgImage(site.og_image, source);
+  }
+
   if (site.hero_banner && typeof site.hero_banner === 'object' && !Array.isArray(site.hero_banner)) {
     const banner = site.hero_banner;
     const bannerSource = `${source}:hero_banner`;
@@ -185,6 +195,38 @@ function validateAppearance(appearance, source) {
     ) {
       failKey('appearanceBackgroundInvalid', { source });
     }
+  }
+}
+
+/**
+ * @param {unknown} ogImage
+ * @param {string} source
+ */
+function validateOgImage(ogImage, source) {
+  if (typeof ogImage !== 'string' || ogImage.trim() === '') {
+    failKey('ogImageInvalid', { source });
+    return;
+  }
+
+  const trimmed = ogImage.trim();
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    if (!isValidSocialUrl(trimmed)) {
+      failKey('ogImageUrlInvalid', { source });
+    }
+
+    return;
+  }
+
+  if (!trimmed.startsWith('/images/')) {
+    failKey('ogImagePathInvalid', { source });
+    return;
+  }
+
+  const staticImagePath = path.join(ROOT, 'static', trimmed.slice(1));
+
+  if (!existsSync(staticImagePath)) {
+    failKey('imageFileMissing', { source, imageFile: trimmed });
   }
 }
 

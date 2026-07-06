@@ -108,7 +108,9 @@ function loadSiteForm() {
     tagline: readString(site, 'tagline'),
     language: readString(site, 'language', 'en'),
     notice: readString(site, 'notice'),
-    footer_note: readString(site, 'footer_note')
+    footer_note: readString(site, 'footer_note'),
+    url: readString(site, 'url'),
+    og_image: readString(site, 'og_image')
   };
 }
 
@@ -305,13 +307,33 @@ export const actions = {
     const formData = await request.formData();
 
     try {
-      const site = {
-        name: requiredField(formData.get('name'), t('fields.siteTitle'), locale),
-        tagline: requiredField(formData.get('tagline'), t('fields.tagline'), locale),
-        language: optionalField(formData.get('language'), 'en'),
-        notice: optionalField(formData.get('notice')),
-        footer_note: optionalField(formData.get('footer_note'))
-      };
+      const data = readProjectYaml('config/site.yaml');
+
+      if (!isRecord(data.site)) {
+        throw new Error(t('errors.missingSite'));
+      }
+
+      const site = { ...data.site };
+      site.name = requiredField(formData.get('name'), t('fields.siteTitle'), locale);
+      site.tagline = requiredField(formData.get('tagline'), t('fields.tagline'), locale);
+      site.language = optionalField(formData.get('language'), 'en');
+      site.notice = optionalField(formData.get('notice'));
+      site.footer_note = optionalField(formData.get('footer_note'));
+
+      const siteUrl = optionalField(formData.get('url'));
+      const ogImage = optionalField(formData.get('og_image'));
+
+      if (siteUrl) {
+        site.url = siteUrl;
+      } else {
+        delete site.url;
+      }
+
+      if (ogImage) {
+        site.og_image = ogImage;
+      } else {
+        delete site.og_image;
+      }
 
       writeProjectYaml('config/site.yaml', { site });
       const validation = runStructuralValidation();
@@ -319,7 +341,7 @@ export const actions = {
       return {
         siteStatus: validation.ok ? 'success' : 'warning',
         siteMessage: saveMessage(validation, locale),
-        siteForm: site
+        siteForm: loadSiteForm()
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : t('server.saveSiteError');

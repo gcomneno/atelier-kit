@@ -830,6 +830,7 @@ export function getNewsPosts() {
 
       const post = parseYaml(source, raw);
       const imageFile = optionalString(post, 'image_file');
+      const readingFormat = optionalString(post, 'reading_format');
 
       return {
         id: requiredString(post, 'id', source),
@@ -837,6 +838,7 @@ export function getNewsPosts() {
         date: requiredString(post, 'date', source),
         excerpt: optionalString(post, 'excerpt'),
         body: requiredString(post, 'body', source),
+        ...(readingFormat ? { reading_format: readingFormat } : {}),
         ...(imageFile ? { image_file: imageFile, image_alt: optionalString(post, 'image_alt') } : {})
       };
     })

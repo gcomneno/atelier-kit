@@ -23,9 +23,26 @@
     for (const blockId of LAYOUT_BLOCK_IDS) {
       blockEnabled[blockId] = layoutForm.blocks[blockId].enabled;
     }
+
+    const usesSidebar = LAYOUT_BLOCK_IDS.some(
+      (id) => layoutForm.blocks[id].enabled && layoutForm.blocks[id].placement === 'sidebar'
+    );
+
+    if (usesSidebar && preset === 'single-column') {
+      preset = 'catalog-sidebar';
+    }
   });
 
-  const widgetMode = $derived(preset === 'catalog-sidebar');
+  /** @param {Event} event */
+  function onPlacementChange(event) {
+    if (!(event.currentTarget instanceof HTMLSelectElement)) {
+      return;
+    }
+
+    if (event.currentTarget.value === 'sidebar' && preset === 'single-column') {
+      preset = 'catalog-sidebar';
+    }
+  }
 </script>
 
 <svelte:head>
@@ -44,8 +61,8 @@
     <label>
       {t('studio.site.layout.preset')}
       <select name="preset" bind:value={preset}>
-        {#each data.layoutPresets as preset}
-          <option value={preset}>{t(`studio.site.layout.presets.${preset}`)}</option>
+        {#each data.layoutPresets as layoutPreset}
+          <option value={layoutPreset}>{t(`studio.site.layout.presets.${layoutPreset}`)}</option>
         {/each}
       </select>
     </label>
@@ -58,7 +75,7 @@
         {@const block = layoutForm.blocks[blockId]}
         <div class="block-row">
           <label class="checkbox">
-            <input type="checkbox" name="block_{blockId}_enabled" bind:checked={blockEnabled[blockId]} />
+            <input type="checkbox" name={`block_${blockId}_enabled`} bind:checked={blockEnabled[blockId]} />
             {t(`studio.site.layout.blocks.${blockId}`)}
           </label>
 
@@ -66,18 +83,17 @@
             <label>
               {t('studio.site.layout.placement')}
               <select
-                name="block_{blockId}_placement"
+                name={`block_${blockId}_placement`}
                 value={block.placement}
+                onchange={onPlacementChange}
               >
                 <option value="main">{t('studio.site.layout.placementMain')}</option>
-                {#if widgetMode}
-                  <option value="sidebar">{t('studio.site.layout.placementSidebar')}</option>
-                {/if}
+                <option value="sidebar">{t('studio.site.layout.placementSidebar')}</option>
                 <option value="menu">{t('studio.site.layout.placementMenu')}</option>
               </select>
             </label>
           {:else}
-            <input type="hidden" name="block_{blockId}_placement" value={block.placement} />
+            <input type="hidden" name={`block_${blockId}_placement`} value={block.placement} />
           {/if}
 
           {#if blockId === 'news'}

@@ -186,3 +186,22 @@ export function effectiveBlockPlacement(preset, blocks, blockId) {
 export function hasSidebarBlocks(preset, blocks) {
   return LAYOUT_BLOCK_IDS.some((id) => effectiveBlockPlacement(preset, blocks, id) === 'sidebar');
 }
+
+/**
+ * Sidebar placement requires the widget layout preset.
+ *
+ * @param {import('$lib/layout-presets.js').LayoutPreset} preset
+ * @param {Record<LayoutBlockId, LayoutBlockConfig>} blocks
+ * @returns {import('$lib/layout-presets.js').LayoutPreset}
+ */
+export function resolveLayoutPreset(preset, blocks) {
+  const usesSidebar = LAYOUT_BLOCK_IDS.some(
+    (id) => blocks[id].enabled && blocks[id].placement === 'sidebar'
+  );
+
+  if (usesSidebar && preset === 'single-column') {
+    return 'catalog-sidebar';
+  }
+
+  return preset;
+}

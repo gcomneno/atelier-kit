@@ -36,11 +36,7 @@
       return '';
     }
 
-    if (about.intro) {
-      return about.intro;
-    }
-
-    return about.sections[0]?.body ?? '';
+    return aboutTeaser(about);
   });
 
   const showAbout = $derived(Boolean(about));
@@ -73,6 +69,23 @@
 
     return firstLine?.trim() ?? '';
   }
+
+  /** @param {AboutConfig} aboutConfig */
+  function aboutTeaser(aboutConfig) {
+    const source = aboutConfig.intro?.trim() || aboutConfig.sections[0]?.body?.trim() || '';
+
+    if (!source) {
+      return '';
+    }
+
+    const firstParagraph =
+      source
+        .split(/\n\s*\n/)
+        .map((paragraph) => paragraph.trim())
+        .find(Boolean) ?? source;
+
+    return firstParagraph.replace(/\s*\n\s*/g, ' ').trim();
+  }
 </script>
 
 {#if hasWidgets}
@@ -85,9 +98,11 @@
       {#if blockId === 'about' && showAbout && about}
         <section class="widget">
           <h2 class="widget-title">{about.title}</h2>
-          {#if aboutSnippet}
-            <p class="about-snippet">{aboutSnippet}</p>
-          {/if}
+          <div class="widget-body">
+            {#if aboutSnippet}
+              <p class="about-snippet">{aboutSnippet}</p>
+            {/if}
+          </div>
           <p class="widget-footer">
             <a href="/about">{t('common.readMore')}</a>
           </p>
@@ -95,19 +110,21 @@
       {:else if blockId === 'news' && showNews}
         <section class="widget">
           <h2 class="widget-title">{t('catalog.latestNews')}</h2>
-          <ul class="news-list">
-            {#each newsPosts as post (post.id)}
-              <li>
-                <a href={`/news/${post.id}`} class="news-link">
-                  <time datetime={post.date}>{formatDate(post.date)}</time>
-                  <span class="news-title">{post.title}</span>
-                  {#if newsTeaser(post)}
-                    <span class="news-teaser">{newsTeaser(post)}</span>
-                  {/if}
-                </a>
-              </li>
-            {/each}
-          </ul>
+          <div class="widget-body">
+            <ul class="news-list">
+              {#each newsPosts as post (post.id)}
+                <li>
+                  <a href={`/news/${post.id}`} class="news-link">
+                    <time datetime={post.date}>{formatDate(post.date)}</time>
+                    <span class="news-title">{post.title}</span>
+                    {#if newsTeaser(post)}
+                      <span class="news-teaser">{newsTeaser(post)}</span>
+                    {/if}
+                  </a>
+                </li>
+              {/each}
+            </ul>
+          </div>
           <p class="widget-footer">
             <a href="/news">{t('common.allNews')}</a>
           </p>
@@ -115,38 +132,44 @@
       {:else if blockId === 'collections' && showCollections}
         <section class="widget">
           <h2 class="widget-title">{t('catalog.collections')}</h2>
-          {#if collections.length === 1}
-            {@const collection = collections[0]}
-            <a class="collection-featured" href={`/collections/${collection.id}`}>{collection.title}</a>
-            {#if collection.description}
-              <p class="collection-snippet">{collection.description}</p>
+          <div class="widget-body">
+            {#if collections.length === 1}
+              {@const collection = collections[0]}
+              <a class="collection-featured" href={`/collections/${collection.id}`}>{collection.title}</a>
+              {#if collection.description}
+                <p class="collection-snippet">{collection.description}</p>
+              {/if}
+            {:else}
+              <ul class="link-list">
+                {#each collections as collection (collection.id)}
+                  <li>
+                    <a href={`/collections/${collection.id}`}>{collection.title}</a>
+                  </li>
+                {/each}
+              </ul>
             {/if}
-            <p class="widget-footer">
+          </div>
+          <p class="widget-footer">
+            {#if collections.length === 1}
+              {@const collection = collections[0]}
               <a href={`/collections/${collection.id}`}>{t('common.readMore')}</a>
-            </p>
-          {:else}
-            <ul class="link-list">
-              {#each collections as collection (collection.id)}
-                <li>
-                  <a href={`/collections/${collection.id}`}>{collection.title}</a>
-                </li>
-              {/each}
-            </ul>
-            <p class="widget-footer">
+            {:else}
               <a href="/collections">{t('common.viewAllCollections')}</a>
-            </p>
-          {/if}
+            {/if}
+          </p>
         </section>
       {:else if blockId === 'catalog' && showCatalog && catalog}
         <section class="widget">
           <h2 class="widget-title">{catalog.item_name_plural}</h2>
-          <ul class="link-list">
-            {#each catalogItems as item (item.id)}
-              <li>
-                <a href={`/items/${item.id}`}>{item.title}</a>
-              </li>
-            {/each}
-          </ul>
+          <div class="widget-body">
+            <ul class="link-list">
+              {#each catalogItems as item (item.id)}
+                <li>
+                  <a href={`/items/${item.id}`}>{item.title}</a>
+                </li>
+              {/each}
+            </ul>
+          </div>
         </section>
       {/if}
     {/each}
@@ -161,11 +184,30 @@
   }
 
   .widget {
+    --sidebar-widget-height: 12.5rem;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: var(--sidebar-widget-height);
+    overflow: hidden;
     padding: 1.1rem 1.15rem;
     border: 1px solid #e4d8c7;
     border-radius: 1.25rem;
     background: rgb(255 250 242 / 0.88);
     box-shadow: 0 16px 50px rgb(36 27 18 / 0.06);
+  }
+
+  .widget:not(:has(.widget-footer)) {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .widget-body {
+    min-height: 0;
+    overflow-y: auto;
+    display: grid;
+    gap: 0.65rem;
+    align-content: start;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(125 104 79 / 0.35) transparent;
   }
 
   .widget-title {
@@ -196,7 +238,6 @@
 
   .collection-featured {
     display: block;
-    margin-bottom: 0.65rem;
     font-size: 0.95rem;
   }
 
@@ -218,8 +259,13 @@
   .about-snippet {
     margin: 0;
     color: #4f4236;
-    font-size: 0.95rem;
-    line-height: 1.55;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
   }
 
   .news-link {
@@ -249,7 +295,8 @@
   }
 
   .widget-footer {
-    margin: 0.85rem 0 0;
+    margin: 0.75rem 0 0;
+    padding-top: 0.1rem;
     font-size: 0.88rem;
     text-align: right;
   }

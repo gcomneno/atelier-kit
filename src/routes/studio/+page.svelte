@@ -2,6 +2,15 @@
   import { useI18n } from '$lib/i18n/context.js';
 
   const t = useI18n();
+
+  /** @typedef {'site' | 'content' | 'publish'} StudioZoneId */
+
+  /** @type {Array<{ id: StudioZoneId, href: string, tone: StudioZoneId }>} */
+  const zones = [
+    { id: 'site', href: '/studio/site/identity', tone: 'site' },
+    { id: 'content', href: '/studio/about', tone: 'content' },
+    { id: 'publish', href: '/studio/readiness', tone: 'publish' }
+  ];
 </script>
 
 <svelte:head>
@@ -10,71 +19,93 @@
 
 <p class="studio-intro">{t('studio.dashboard.intro')}</p>
 
-<section class="cards">
-  <a class="studio-panel card" href="/studio/site/identity">
-    <h2>{t('studio.dashboard.cards.identity.title')}</h2>
-    <p>{t('studio.dashboard.cards.identity.description')}</p>
-  </a>
-  <a class="studio-panel card" href="/studio/site/appearance">
-    <h2>{t('studio.dashboard.cards.appearance.title')}</h2>
-    <p>{t('studio.dashboard.cards.appearance.description')}</p>
-  </a>
-  <a class="studio-panel card" href="/studio/site/hero">
-    <h2>{t('studio.dashboard.cards.hero.title')}</h2>
-    <p>{t('studio.dashboard.cards.hero.description')}</p>
-  </a>
-  <a class="studio-panel card" href="/studio/site/layout">
-    <h2>{t('studio.dashboard.cards.layout.title')}</h2>
-    <p>{t('studio.dashboard.cards.layout.description')}</p>
-  </a>
-  <a class="studio-panel card" href="/studio/site/contact">
-    <h2>{t('studio.dashboard.cards.contact.title')}</h2>
-    <p>{t('studio.dashboard.cards.contact.description')}</p>
-  </a>
-  <a class="studio-panel card" href="/studio/site/social">
-    <h2>{t('studio.dashboard.cards.social.title')}</h2>
-    <p>{t('studio.dashboard.cards.social.description')}</p>
-  </a>
-  <a class="studio-panel card" href="/studio/site/footer">
-    <h2>{t('studio.dashboard.cards.footer.title')}</h2>
-    <p>{t('studio.dashboard.cards.footer.description')}</p>
-  </a>
-  <a class="studio-panel card" href="/studio/readiness">
-    <h2>{t('studio.dashboard.cards.readiness.title')}</h2>
-    <p>{t('studio.dashboard.cards.readiness.description')}</p>
-  </a>
+<section class="zones" aria-label={t('studio.dashboard.zonesLegend')}>
+  {#each zones as zone (zone.id)}
+    <a class="zone studio-panel tone-{zone.tone}" href={zone.href}>
+      <p class="zone-eyebrow">{t(`studio.dashboard.zones.${zone.id}.eyebrow`)}</p>
+      <h2>{t(`studio.dashboard.zones.${zone.id}.title`)}</h2>
+      <p class="zone-description">{t(`studio.dashboard.zones.${zone.id}.description`)}</p>
+    </a>
+  {/each}
 </section>
 
 <style>
-  .cards {
+  .zones {
     display: grid;
     gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
   }
 
-  .card {
-    display: grid;
-    gap: 0.45rem;
+  .zone {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    height: 100%;
+    min-height: 10rem;
     color: inherit;
     text-decoration: none;
     transition:
-      transform 100ms ease,
-      border-color 100ms ease;
+      transform 120ms ease,
+      box-shadow 120ms ease;
   }
 
-  .card:hover {
-    transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--studio-accent) 40%, var(--studio-border));
+  .zone:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgb(15 23 42 / 0.1);
   }
 
-  .card h2 {
+  .zone-eyebrow {
     margin: 0;
-    font-size: 1.04rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.82;
   }
 
-  .card p {
+  .zone h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1.2;
+  }
+
+  .zone-description {
     margin: 0;
     color: var(--studio-muted);
-    line-height: 1.45;
+    line-height: 1.5;
+  }
+
+  .tone-site {
+    border-color: #c5d8f8;
+    background: linear-gradient(160deg, #eef4ff 0%, #fff 58%);
+  }
+
+  .tone-site .zone-eyebrow {
+    color: #1f4f9c;
+  }
+
+  .tone-content {
+    border-color: #ecd9b8;
+    background: linear-gradient(160deg, #fdf6ec 0%, #fff 58%);
+  }
+
+  .tone-content .zone-eyebrow {
+    color: #8a5a12;
+  }
+
+  .tone-publish {
+    border-color: #b8dcc8;
+    background: linear-gradient(160deg, #ecf8f1 0%, #fff 58%);
+  }
+
+  .tone-publish .zone-eyebrow {
+    color: #1f6b42;
+  }
+
+  @media (max-width: 920px) {
+    .zones {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

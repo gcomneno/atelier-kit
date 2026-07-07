@@ -95,7 +95,7 @@
     box-shadow: var(--studio-shadow);
   }
 
-  :global(.studio-panel + .studio-panel) {
+  :global(.studio-content > .studio-panel + .studio-panel) {
     margin-top: 1rem;
   }
 

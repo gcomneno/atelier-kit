@@ -17,7 +17,8 @@ import {
   LAYOUT_BLOCK_IDS,
   isLayoutPlacement,
   migrateLegacyLayoutBlocks,
-  normalizeLayoutBlocks
+  normalizeLayoutBlocks,
+  resolveLayoutPreset
 } from '$lib/layout-blocks.js';
 import {
   checkboxEnabled,
@@ -191,6 +192,7 @@ export function loadLayoutForm() {
     return form;
   }
 
+  form.preset = resolveLayoutPreset(form.preset, form.blocks);
   return form;
 }
 
@@ -243,10 +245,35 @@ export function loadFooterForm() {
 }
 
 export function loadContactForm() {
-  const data = readProjectYaml('config/contact.yaml');
-  const contact = data.contact;
+  try {
+    const data = readProjectYaml('config/contact.yaml');
+    const contact = data.contact;
 
-  if (!isRecord(contact)) {
+    if (!isRecord(contact)) {
+      return {
+        email_enabled: true,
+        email_label: 'Email this brief',
+        email_address: '',
+        email_subject_prefix: 'Interest in',
+        whatsapp_enabled: false,
+        whatsapp_label: 'WhatsApp this brief',
+        whatsapp_phone: ''
+      };
+    }
+
+    const email = isRecord(contact.email) ? contact.email : {};
+    const whatsapp = isRecord(contact.whatsapp) ? contact.whatsapp : {};
+
+    return {
+      email_enabled: email.enabled === true,
+      email_label: readString(email, 'label', 'Email this brief'),
+      email_address: readString(email, 'address'),
+      email_subject_prefix: readString(email, 'subject_prefix', 'Interest in'),
+      whatsapp_enabled: whatsapp.enabled === true,
+      whatsapp_label: readString(whatsapp, 'label', 'WhatsApp this brief'),
+      whatsapp_phone: readString(whatsapp, 'phone')
+    };
+  } catch {
     return {
       email_enabled: true,
       email_label: 'Email this brief',
@@ -257,19 +284,6 @@ export function loadContactForm() {
       whatsapp_phone: ''
     };
   }
-
-  const email = isRecord(contact.email) ? contact.email : {};
-  const whatsapp = isRecord(contact.whatsapp) ? contact.whatsapp : {};
-
-  return {
-    email_enabled: email.enabled === true,
-    email_label: readString(email, 'label', 'Email this brief'),
-    email_address: readString(email, 'address'),
-    email_subject_prefix: readString(email, 'subject_prefix', 'Interest in'),
-    whatsapp_enabled: whatsapp.enabled === true,
-    whatsapp_label: readString(whatsapp, 'label', 'WhatsApp this brief'),
-    whatsapp_phone: readString(whatsapp, 'phone')
-  };
 }
 
 /** @param {{ ok: boolean, output: string }} validation @param {string} locale */
@@ -557,9 +571,9 @@ export async function saveLayoutAction({ request }) {
   const formData = await request.formData();
 
   try {
-    const preset = optionalField(formData.get('preset'), DEFAULT_LAYOUT_PRESET);
+    const presetField = optionalField(formData.get('preset'), DEFAULT_LAYOUT_PRESET);
 
-    if (!isLayoutPreset(preset)) {
+    if (!isLayoutPreset(presetField)) {
       throw new Error(t('errors.layoutPresetInvalid'));
     }
 
@@ -589,7 +603,7 @@ export async function saveLayoutAction({ request }) {
     blocks.news.count = newsCount;
 
     const layout = {
-      preset,
+      preset: resolveLayoutPreset(presetField, blocks),
       blocks
     };
 

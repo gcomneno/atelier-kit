@@ -6,9 +6,9 @@ export default {
       title: 'Modifica locale',
       nav: {
         dashboard: 'Panoramica',
-        siteGroup: 'Sito vetrina',
-        contentGroup: 'Contenuti',
-        publishGroup: 'Pubblicazione',
+        siteGroup: 'Vetrina e impostazioni',
+        contentGroup: 'Editoriale',
+        publishGroup: 'Metti online',
         site: 'Sito',
         identity: 'Identità',
         appearance: 'Aspetto',
@@ -31,39 +31,23 @@ export default {
     dashboard: {
       pageTitle: 'Studio · Panoramica',
       intro:
-        'Benvenuto in Studio. Ogni card apre una sezione dedicata: modifiche più pulite, meno scroll infinito, più controllo.',
-      cards: {
-        identity: {
-          title: 'Identità sito',
-          description: 'Nome, tagline, lingua, notice e metadati Open Graph.'
+        'Tre aree, come nel menu a sinistra: scegli dove lavorare. Ogni box apre la prima pagina del gruppo.',
+      zonesLegend: 'Aree Studio',
+      zones: {
+        site: {
+          eyebrow: 'Vetrina',
+          title: 'Vetrina e impostazioni',
+          description: 'Come appare il sito pubblico: identità, colori, layout e contatti.'
         },
-        appearance: {
-          title: 'Aspetto',
-          description: 'Preset colori e immagine di sfondo del sito pubblico.'
+        content: {
+          eyebrow: 'Editoriale',
+          title: 'Pagine e opere',
+          description: 'Testi, catalogo, entità, collezioni, news e segnali visitatore.'
         },
-        hero: {
-          title: 'Hero banner',
-          description: 'Gestisci banner principale con immagine, didascalia e link.'
-        },
-        contact: {
-          title: 'Contatti',
-          description: 'Configura email e WhatsApp per il Visitor Brief.'
-        },
-        social: {
-          title: 'Social',
-          description: 'Link social mostrati nell’header e nel footer.'
-        },
-        layout: {
-          title: 'Layout',
-          description: 'Preset home/catalogo e widget laterali.'
-        },
-        footer: {
-          title: 'Footer',
-          description: 'Righe legali, colonne link e visibilita social.'
-        },
-        readiness: {
-          title: 'Pubblicazione',
-          description: 'Controlla readiness, validation e deploy.'
+        publish: {
+          eyebrow: 'Online',
+          title: 'Metti online',
+          description: 'Controlli pre-lancio, guida operatore e anteprima del sito.'
         }
       }
     },
@@ -198,7 +182,7 @@ export default {
         },
         blocksLegend: 'Elementi in home',
         blocksHint:
-          'Con layout a widget puoi mettere ogni elemento nel contenuto principale o nella sidebar.',
+          'Ogni elemento può andare nel contenuto principale, nella sidebar o nel menù in alto a destra. La sidebar richiede il preset «Layout a widget».',
         placement: 'Posizione',
         placementMain: 'Contenuto principale',
         placementSidebar: 'Sidebar',

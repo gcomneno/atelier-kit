@@ -13,7 +13,8 @@ import {
   effectiveBlockPlacement,
   hasSidebarBlocks,
   migrateLegacyLayoutBlocks,
-  normalizeLayoutBlocks
+  normalizeLayoutBlocks,
+  resolveLayoutPreset
 } from '$lib/layout-blocks.js';
 import { isValidSocialUrl, normalizeSocialId } from '$lib/social-networks.js';
 import { resolveSiteAppearance } from '$lib/site-appearance.js';
@@ -858,9 +859,12 @@ export function getNewsPost(id) {
  */
 
 /** @type {LayoutConfig} */
+const defaultLayoutBlocks = normalizeLayoutBlocks();
+
+/** @type {LayoutConfig} */
 const DEFAULT_LAYOUT_CONFIG = {
-  preset: DEFAULT_LAYOUT_PRESET,
-  blocks: normalizeLayoutBlocks()
+  preset: resolveLayoutPreset(DEFAULT_LAYOUT_PRESET, defaultLayoutBlocks),
+  blocks: defaultLayoutBlocks
 };
 
 export function getLayoutConfig() {
@@ -890,7 +894,7 @@ export function getLayoutConfig() {
     : migrateLegacyLayoutBlocks(layout);
 
   return {
-    preset: presetValue,
+    preset: resolveLayoutPreset(presetValue, blocks),
     blocks
   };
 }

@@ -3,13 +3,14 @@
 
   const t = useI18n();
 
-  /** @typedef {'site' | 'content' | 'publish'} StudioZoneId */
+  /** @typedef {'site' | 'content' | 'publish' | 'system'} StudioZoneId */
 
   /** @type {Array<{ id: StudioZoneId, href: string, tone: StudioZoneId }>} */
   const zones = [
     { id: 'site', href: '/studio/site/identity', tone: 'site' },
     { id: 'content', href: '/studio/about', tone: 'content' },
-    { id: 'publish', href: '/studio/readiness', tone: 'publish' }
+    { id: 'publish', href: '/studio/readiness', tone: 'publish' },
+    { id: 'system', href: '/studio/system', tone: 'system' }
   ];
 </script>
 
@@ -33,7 +34,7 @@
   .zones {
     display: grid;
     gap: 1rem;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: stretch;
   }
 
@@ -101,6 +102,15 @@
 
   .tone-publish .zone-eyebrow {
     color: #1f6b42;
+  }
+
+  .tone-system {
+    border-color: #d4c5e8;
+    background: linear-gradient(160deg, #f3eef9 0%, #fff 58%);
+  }
+
+  .tone-system .zone-eyebrow {
+    color: #5c3d8f;
   }
 
   @media (max-width: 920px) {

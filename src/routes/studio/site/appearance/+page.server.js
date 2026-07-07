@@ -4,6 +4,7 @@ import { guardStudio } from '$lib/server/studio-guard.js';
 import {
   loadAppearanceForm,
   localizedAppearancePresets,
+  localizedFontPresets,
   saveAppearanceAction
 } from '$lib/server/studio-site-server.js';
 import { getOperatorLocale } from '$lib/i18n/server.js';
@@ -13,7 +14,8 @@ export function load() {
   const locale = getOperatorLocale();
   return {
     appearanceForm: loadAppearanceForm(),
-    appearancePresets: localizedAppearancePresets(locale)
+    appearancePresets: localizedAppearancePresets(locale),
+    fontPresets: localizedFontPresets(locale)
   };
 }
 

@@ -1,11 +1,16 @@
 about:
-  enabled: true
-  title: About the studio
-  intro: |
-    Atelier-Kit is a small configurable showcase for handmade work, artwork and creative projects.
-    Replace this page with your own studio story, process and background.
+  title: Lo studio
+  intro: >-
+    Atelier-Kit è una vetrina configurabile per lavori artigianali, opere e
+    progetti creativi.
+
+    Sostituisci questo testo con la storia del tuo studio, il processo creativo
+    e il background.
   sections:
-    - heading: How this showcase works
-      body: |
-        Items, collections and contact actions are edited through YAML files or the local studio.
-        Signal Clouds help visitors describe what they are looking for before sending a Visitor Brief.
+    - heading: Come funziona questa vetrina
+      body: >-
+        Entità, collezioni e contatti si modificano tramite file YAML o lo
+        Studio locale.
+
+        I Signal Clouds aiutano i visitatori a descrivere cosa cercano prima di
+        inviare un Visitor Brief.

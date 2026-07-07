@@ -19,6 +19,9 @@ export const DEFAULT_LATEST_NEWS_COUNT = 3;
 /** @type {number} */
 export const MAX_LATEST_NEWS_COUNT = 10;
 
+/** @type {number} */
+export const MAX_CATALOG_HOME_LIMIT = 3;
+
 /**
  * @param {unknown} value
  * @returns {value is LayoutPreset}

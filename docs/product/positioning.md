@@ -8,6 +8,7 @@ It is designed for people who need a simple online showcase, not a full e-commer
 
 ## What it is
 
+- a **micro-CMS** for creative showcases — a studied subset of CMS essentials, not a generic platform;
 - a configurable showcase template;
 - a catalog for handmade creations;
 - a small SvelteKit product;
@@ -18,7 +19,7 @@ It is designed for people who need a simple online showcase, not a full e-commer
 
 - Shopify;
 - Etsy;
-- WordPress;
+- a WordPress replacement or full CMS;
 - a marketplace;
 - a SaaS platform;
 - a CRM;
@@ -37,5 +38,6 @@ Atelier-Kit is currently strongest at **developer-assisted** setup and is moving
 
 See:
 
+- [`docs/product/micro-cms-positioning.md`](docs/product/micro-cms-positioning.md)
 - [`docs/product/product-levels.md`](docs/product/product-levels.md)
 - [`docs/product/no-code-roadmap.md`](docs/product/no-code-roadmap.md)

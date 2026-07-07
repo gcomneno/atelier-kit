@@ -1,6 +1,15 @@
 site:
-  name: "Atelier-Kit Demo"
-  tagline: "A configurable showcase for handmade creations"
-  language: "en"
-  notice: "Demo content. Replace these items with your own creations."
-  footer_note: ""
+  name: Atelier-Kit Demo
+  tagline: Lo Zoo delle Colline di Pistoia
+  language: it
+  footer_note: Testo breve in home quando non c'è footer multi-colonna
+  hero_intro: ""
+  hero_signature: ""
+  appearance:
+    preset: warm
+    base_color: "#f8f0e4"
+    accent_color: "#d6be9a"
+    text_color: "#2f281f"
+    heading_color: "#2f281f"
+    card_color: "#fefdfc"
+    font_preset: lora

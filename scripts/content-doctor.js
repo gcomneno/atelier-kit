@@ -231,28 +231,6 @@ function inspectSite() {
       technical: 'Site name still contains "demo".'
     });
   }
-
-  if (typeof site.notice === 'string' && site.notice.trim() !== '') {
-    if (textLooksStarter(site.notice)) {
-      addWarning({
-        source,
-        title: t('doctor.warnings.siteNoticeStarter.title'),
-        problem: t('doctor.warnings.siteNoticeStarter.problem'),
-        action: t('doctor.warnings.siteNoticeStarter.action'),
-        detail: site.notice,
-        technical: 'Site notice still looks like starter/demo text.'
-      });
-    } else {
-      addWarning({
-        source,
-        title: t('doctor.warnings.siteNoticeActive.title'),
-        problem: t('doctor.warnings.siteNoticeActive.problem'),
-        action: t('doctor.warnings.siteNoticeActive.action'),
-        detail: site.notice,
-        technical: 'Site notice is enabled. Check that it is intentional before publishing.'
-      });
-    }
-  }
 }
 
 function inspectContact() {

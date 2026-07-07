@@ -1,9 +1,11 @@
 // @ts-nocheck
 
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, isRedirect, redirect } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
 import {
   assertContentId,
+  collectionRecordExists,
+  deleteCollectionRecord,
   listItemSummaries,
   optionalField,
   readCollectionRecord,
@@ -40,12 +42,28 @@ export function load({ params }) {
 
   try {
     assertContentId(params.id, t('fields.collectionId'), locale);
+  } catch (loadError) {
+    if (isRedirect(loadError)) {
+      throw loadError;
+    }
 
+    error(404, t('server.collectionNotFound'));
+  }
+
+  if (!collectionRecordExists(params.id)) {
+    redirect(303, `/studio/collections?missing=${encodeURIComponent(params.id)}`);
+  }
+
+  try {
     return {
       collectionForm: loadCollectionForm(params.id),
       items: listItemSummaries()
     };
-  } catch {
+  } catch (loadError) {
+    if (isRedirect(loadError)) {
+      throw loadError;
+    }
+
     error(404, t('server.collectionNotFound'));
   }
 }
@@ -85,6 +103,45 @@ export const actions = {
       };
     } catch (saveError) {
       const message = saveError instanceof Error ? saveError.message : t('server.saveCollectionError');
+
+      try {
+        return fail(400, {
+          collectionStatus: 'error',
+          collectionMessage: message,
+          collectionForm: loadCollectionForm(params.id),
+          items: listItemSummaries()
+        });
+      } catch {
+        return fail(400, {
+          collectionStatus: 'error',
+          collectionMessage: message
+        });
+      }
+    }
+  },
+
+  deleteCollection: async ({ params }) => {
+    guardStudio();
+
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
+
+    try {
+      assertContentId(params.id, t('fields.collectionId'), locale);
+      const collection = readCollectionRecord(params.id);
+      const title = typeof collection.title === 'string' ? collection.title : params.id;
+
+      deleteCollectionRecord(params.id, locale);
+      runStructuralValidation();
+
+      redirect(303, `/studio/collections?deleted=${encodeURIComponent(title)}`);
+    } catch (deleteError) {
+      if (isRedirect(deleteError)) {
+        throw deleteError;
+      }
+
+      const message =
+        deleteError instanceof Error ? deleteError.message : t('server.deleteCollectionError');
 
       try {
         return fail(400, {

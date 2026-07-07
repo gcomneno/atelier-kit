@@ -5,7 +5,8 @@
  * @typedef {{
  *   enabled: boolean,
  *   placement: LayoutPlacement,
- *   count?: number
+ *   count?: number,
+ *   label?: string
  * }} LayoutBlockConfig
  */
 
@@ -57,7 +58,8 @@ function cloneBlock(block) {
   return {
     enabled: block.enabled,
     placement: block.placement,
-    ...(typeof block.count === 'number' ? { count: block.count } : {})
+    ...(typeof block.count === 'number' ? { count: block.count } : {}),
+    ...(typeof block.label === 'string' && block.label !== '' ? { label: block.label } : {})
   };
 }
 
@@ -96,6 +98,14 @@ export function normalizeLayoutBlocks(raw) {
 
     if (id === 'news' && 'count' in block) {
       blocks[id].count = normalizeNewsCount(block.count, blocks[id].count ?? 3);
+    }
+
+    if (typeof block.label === 'string') {
+      const label = block.label.trim();
+
+      if (label !== '') {
+        blocks[id].label = label;
+      }
     }
   }
 
@@ -188,20 +198,17 @@ export function hasSidebarBlocks(preset, blocks) {
 }
 
 /**
- * Sidebar placement requires the widget layout preset.
+ * Derive layout preset from block placement.
+ * Sidebar on any enabled block → widget layout; otherwise single column.
  *
- * @param {import('$lib/layout-presets.js').LayoutPreset} preset
+ * @param {import('$lib/layout-presets.js').LayoutPreset} _preset
  * @param {Record<LayoutBlockId, LayoutBlockConfig>} blocks
  * @returns {import('$lib/layout-presets.js').LayoutPreset}
  */
-export function resolveLayoutPreset(preset, blocks) {
+export function resolveLayoutPreset(_preset, blocks) {
   const usesSidebar = LAYOUT_BLOCK_IDS.some(
     (id) => blocks[id].enabled && blocks[id].placement === 'sidebar'
   );
 
-  if (usesSidebar && preset === 'single-column') {
-    return 'catalog-sidebar';
-  }
-
-  return preset;
+  return usesSidebar ? 'catalog-sidebar' : 'single-column';
 }

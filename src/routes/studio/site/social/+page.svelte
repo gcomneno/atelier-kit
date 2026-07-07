@@ -1,7 +1,10 @@
 <script>
   import { enhance } from '$app/forms';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
+  import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
+  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
-  import { studioFormEnhance } from '$lib/studio-form-enhance.js';
+  import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
   import { SOCIAL_NETWORK_IDS } from '$lib/social-networks.js';
 
   const t = useI18n();
@@ -9,6 +12,14 @@
   let { data, form } = $props();
 
   const socialForm = $derived(form?.socialForm ?? data.socialForm);
+  let isDirty = $state(false);
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
+  const dirtyControl = {};
+
+  $effect(() => {
+    socialForm;
+    dirtyControl.resetBaseline?.();
+  });
 </script>
 
 <svelte:head>
@@ -23,20 +34,25 @@
     <p>{t('studio.site.social.intro')}</p>
   </div>
 
-  <form method="POST" action="?/saveSocial" use:enhance={studioFormEnhance}>
+  <form
+    method="POST"
+    action="?/saveSocial"
+    use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
+    use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+  >
+    <StudioFormLegend />
+
     {#each SOCIAL_NETWORK_IDS as networkId}
       <label>
-        {t(`studio.site.social.${networkId}`)}
+        <StudioFieldLabel label={t(`studio.site.social.${networkId}`)} optional />
         <input name={`url_${networkId}`} type="url" value={socialForm[networkId]} />
       </label>
     {/each}
 
     <div class="actions">
-      <button type="submit">{t('studio.site.social.save')}</button>
+      <button type="submit" disabled={!isDirty}>{t('studio.site.social.save')}</button>
     </div>
 
-    {#if form?.socialMessage}
-      <p class={`status ${form.socialStatus || 'info'}`}>{form.socialMessage}</p>
-    {/if}
+    <StudioFormStatus message={form?.socialMessage} status={form?.socialStatus} />
   </form>
 </section>

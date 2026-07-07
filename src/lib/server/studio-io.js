@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parse, stringify } from 'yaml';
 import {
@@ -10,7 +10,14 @@ import {
   normalizeItemPreset,
   titleFromItemId
 } from '$lib/item-presets.js';
+import {
+  collectMetaSuggestions,
+  flattenMetaForEdit,
+  metaRowsToYaml,
+  parseMetaRowsFromForm
+} from '$lib/item-meta.js';
 import { translate } from '$lib/i18n/index.js';
+import { MAX_CATALOG_HOME_LIMIT } from '$lib/layout-presets.js';
 
 const ROOT = process.cwd();
 const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -129,14 +136,69 @@ export function listItemSummaries() {
     .map((file) => {
       const fallbackId = file.replace(/\.yaml$/, '');
       const item = readProjectYaml(`content/items/${file}`);
+      const sortOrder =
+        typeof item.sort_order === 'number' && Number.isInteger(item.sort_order) ? item.sort_order : null;
 
       return {
         id: typeof item.id === 'string' ? item.id : fallbackId,
         title: typeof item.title === 'string' ? item.title : fallbackId,
-        status: typeof item.status === 'string' ? item.status : ''
+        status: typeof item.status === 'string' ? item.status : '',
+        sort_order: sortOrder
       };
     })
-    .sort((left, right) => left.title.localeCompare(right.title));
+    .sort((left, right) => {
+      const leftOrder = left.sort_order ?? Number.POSITIVE_INFINITY;
+      const rightOrder = right.sort_order ?? Number.POSITIVE_INFINITY;
+
+      if (leftOrder !== rightOrder) {
+        return leftOrder - rightOrder;
+      }
+
+      return left.title.localeCompare(right.title);
+    });
+}
+
+/**
+ * @param {string[]} orderedIds
+ * @param {string} [locale]
+ */
+export function writeItemSortOrders(orderedIds, locale = 'en') {
+  const normalized = orderedIds.map((id) => String(id).trim()).filter(Boolean);
+
+  if (normalized.length === 0) {
+    throw new Error(translate('errors.itemOrderEmpty', locale));
+  }
+
+  const unique = new Set(normalized);
+
+  if (unique.size !== normalized.length) {
+    throw new Error(translate('errors.itemOrderDuplicate', locale));
+  }
+
+  const dir = path.join(ROOT, 'content/items');
+  const allIds = existsSync(dir)
+    ? readdirSync(dir)
+        .filter((file) => file.endsWith('.yaml'))
+        .map((file) => file.replace(/\.yaml$/, ''))
+    : [];
+
+  if (normalized.length !== allIds.length) {
+    throw new Error(translate('errors.itemOrderIncomplete', locale));
+  }
+
+  for (const id of normalized) {
+    if (!itemRecordExists(id)) {
+      throw new Error(translate('errors.itemNotFound', locale, { id }));
+    }
+  }
+
+  normalized.forEach((id, index) => {
+    const item = readItemRecord(id);
+    writeItemRecord(id, {
+      ...item,
+      sort_order: (index + 1) * 10
+    });
+  });
 }
 
 export function readItemRecord(id) {
@@ -191,6 +253,80 @@ export function writeItemRecord(id, item) {
   writeProjectYaml(recordPath('content/items', id), item);
 }
 
+/**
+ * @param {string} itemId
+ * @returns {Array<{ id: string, title: string }>}
+ */
+export function listCollectionsReferencingItem(itemId) {
+  const dir = path.join(ROOT, 'content/collections');
+
+  if (!existsSync(dir)) {
+    return [];
+  }
+
+  return readdirSync(dir)
+    .filter((file) => file.endsWith('.yaml'))
+    .flatMap((file) => {
+      const fallbackId = file.replace(/\.yaml$/, '');
+      const collection = readProjectYaml(`content/collections/${file}`);
+      const items = Array.isArray(collection.items) ? collection.items : [];
+
+      if (!items.includes(itemId)) {
+        return [];
+      }
+
+      return [
+        {
+          id: typeof collection.id === 'string' ? collection.id : fallbackId,
+          title: typeof collection.title === 'string' ? collection.title : fallbackId
+        }
+      ];
+    })
+    .sort((left, right) => left.title.localeCompare(right.title));
+}
+
+/**
+ * @param {string} id
+ */
+function deleteItemImageFiles(id) {
+  const imagesDir = path.join(ROOT, 'static/images/items');
+
+  for (const extension of IMAGE_EXTENSIONS) {
+    const normalized = extension === 'jpeg' ? 'jpg' : extension;
+    const absolutePath = path.join(imagesDir, `${id}.${normalized}`);
+
+    if (existsSync(absolutePath)) {
+      unlinkSync(absolutePath);
+    }
+  }
+}
+
+/**
+ * @param {string} id
+ * @param {string} [locale]
+ */
+export function deleteItemRecord(id, locale = 'en') {
+  assertContentId(id, translate('fields.itemId', locale), locale);
+
+  if (!itemRecordExists(id)) {
+    throw new Error(translate('errors.itemNotFound', locale));
+  }
+
+  const collections = listCollectionsReferencingItem(id);
+
+  if (collections.length > 0) {
+    throw new Error(
+      translate('errors.itemInCollections', locale, {
+        collections: collections.map((collection) => collection.title).join(', ')
+      })
+    );
+  }
+
+  const itemPath = path.join(ROOT, recordPath('content/items', id));
+  unlinkSync(itemPath);
+  deleteItemImageFiles(id);
+}
+
 export function listCollectionSummaries() {
   const dir = path.join(ROOT, 'content/collections');
 
@@ -203,14 +339,71 @@ export function listCollectionSummaries() {
     .map((file) => {
       const fallbackId = file.replace(/\.yaml$/, '');
       const collection = readProjectYaml(`content/collections/${file}`);
+      const sortOrder =
+        typeof collection.sort_order === 'number' && Number.isInteger(collection.sort_order)
+          ? collection.sort_order
+          : null;
 
       return {
         id: typeof collection.id === 'string' ? collection.id : fallbackId,
         title: typeof collection.title === 'string' ? collection.title : fallbackId,
-        itemCount: Array.isArray(collection.items) ? collection.items.length : 0
+        itemCount: Array.isArray(collection.items) ? collection.items.length : 0,
+        sort_order: sortOrder
       };
     })
-    .sort((left, right) => left.title.localeCompare(right.title));
+    .sort((left, right) => {
+      const leftOrder = left.sort_order ?? Number.POSITIVE_INFINITY;
+      const rightOrder = right.sort_order ?? Number.POSITIVE_INFINITY;
+
+      if (leftOrder !== rightOrder) {
+        return leftOrder - rightOrder;
+      }
+
+      return left.title.localeCompare(right.title);
+    });
+}
+
+/**
+ * @param {string[]} orderedIds
+ * @param {string} [locale]
+ */
+export function writeCollectionSortOrders(orderedIds, locale = 'en') {
+  const normalized = orderedIds.map((id) => String(id).trim()).filter(Boolean);
+
+  if (normalized.length === 0) {
+    throw new Error(translate('errors.collectionOrderEmpty', locale));
+  }
+
+  const unique = new Set(normalized);
+
+  if (unique.size !== normalized.length) {
+    throw new Error(translate('errors.collectionOrderDuplicate', locale));
+  }
+
+  const dir = path.join(ROOT, 'content/collections');
+  const allIds = existsSync(dir)
+    ? readdirSync(dir)
+        .filter((file) => file.endsWith('.yaml'))
+        .map((file) => file.replace(/\.yaml$/, ''))
+    : [];
+
+  if (normalized.length !== allIds.length) {
+    throw new Error(translate('errors.collectionOrderIncomplete', locale));
+  }
+
+  for (const id of normalized) {
+    if (!collectionRecordExists(id)) {
+      throw new Error(translate('errors.collectionNotFound', locale));
+    }
+  }
+
+  normalized.forEach((id, index) => {
+    const collection = readCollectionRecord(id);
+    writeCollectionRecord(id, {
+      ...collection,
+      sort_order: (index + 1) * 10
+    });
+  });
 }
 
 export function readCollectionRecord(id) {
@@ -275,37 +468,48 @@ export function writeCollectionRecord(id, collection) {
 }
 
 /**
- * @param {unknown[]} originalMeta
- * @param {FormData} formData
+ * @param {string} id
+ * @param {string} [locale]
  */
-export function applyMetaFromForm(originalMeta, formData) {
-  if (!Array.isArray(originalMeta)) {
-    return [];
+export function deleteCollectionRecord(id, locale = 'en') {
+  assertContentId(id, translate('fields.collectionId', locale), locale);
+
+  if (!collectionRecordExists(id)) {
+    throw new Error(translate('errors.collectionNotFound', locale));
   }
 
-  return originalMeta.map((entry, index) => {
-    const updated = { label: entry.label };
+  const collectionPath = path.join(ROOT, recordPath('content/collections', id));
+  unlinkSync(collectionPath);
+}
 
-    if (typeof entry.value === 'string') {
-      updated.value = optionalField(formData.get(`meta_${index}_value`), entry.value);
+/**
+ * @param {FormData} formData
+ * @param {string} [locale]
+ */
+export function parseItemMetaFromForm(formData, locale = 'en') {
+  const rows = parseMetaRowsFromForm(formData);
+
+  for (const row of rows) {
+    if (row.label.trim() === '') {
+      throw new Error(translate('errors.metaLabelRequired', locale));
     }
+  }
 
-    if (Array.isArray(entry.children)) {
-      updated.children = entry.children.map((child, childIndex) => ({
-        label: child.label,
-        ...(typeof child.value === 'string'
-          ? {
-              value: optionalField(
-                formData.get(`meta_${index}_child_${childIndex}_value`),
-                child.value
-              )
-            }
-          : {})
-      }));
-    }
+  return metaRowsToYaml(rows);
+}
 
-    return updated;
-  });
+export function listItemMetaSuggestions() {
+  const dir = path.join(ROOT, 'content/items');
+
+  if (!existsSync(dir)) {
+    return collectMetaSuggestions([]);
+  }
+
+  const items = readdirSync(dir)
+    .filter((file) => file.endsWith('.yaml'))
+    .map((file) => readProjectYaml(`content/items/${file}`));
+
+  return collectMetaSuggestions(items);
 }
 
 /** @returns {{ ok: boolean, output: string }} */
@@ -474,14 +678,106 @@ export function listNewsSummaries() {
     .map((file) => {
       const fallbackId = file.replace(/\.yaml$/, '');
       const post = readProjectYaml(`content/news/${file}`);
+      const sortOrder =
+        typeof post.sort_order === 'number' && Number.isInteger(post.sort_order)
+          ? post.sort_order
+          : null;
 
       return {
         id: typeof post.id === 'string' ? post.id : fallbackId,
         title: typeof post.title === 'string' ? post.title : fallbackId,
-        date: typeof post.date === 'string' ? post.date : ''
+        date: typeof post.date === 'string' ? post.date : '',
+        sort_order: sortOrder
       };
     })
-    .sort((left, right) => right.date.localeCompare(left.date));
+    .sort((left, right) => {
+      const leftOrder = left.sort_order ?? Number.POSITIVE_INFINITY;
+      const rightOrder = right.sort_order ?? Number.POSITIVE_INFINITY;
+
+      if (leftOrder !== rightOrder) {
+        return leftOrder - rightOrder;
+      }
+
+      const dateCompare = right.date.localeCompare(left.date);
+
+      if (dateCompare !== 0) {
+        return dateCompare;
+      }
+
+      return left.title.localeCompare(right.title);
+    });
+}
+
+/**
+ * @param {string[]} orderedIds
+ * @param {string} [locale]
+ */
+export function writeNewsSortOrders(orderedIds, locale = 'en') {
+  const normalized = orderedIds.map((id) => String(id).trim()).filter(Boolean);
+
+  if (normalized.length === 0) {
+    throw new Error(translate('errors.newsOrderEmpty', locale));
+  }
+
+  const unique = new Set(normalized);
+
+  if (unique.size !== normalized.length) {
+    throw new Error(translate('errors.newsOrderDuplicate', locale));
+  }
+
+  const dir = path.join(ROOT, 'content/news');
+  const allIds = existsSync(dir)
+    ? readdirSync(dir)
+        .filter((file) => file.endsWith('.yaml'))
+        .map((file) => file.replace(/\.yaml$/, ''))
+    : [];
+
+  if (normalized.length !== allIds.length) {
+    throw new Error(translate('errors.newsOrderIncomplete', locale));
+  }
+
+  for (const id of normalized) {
+    if (!newsRecordExists(id)) {
+      throw new Error(translate('errors.newsNotFound', locale, { id }));
+    }
+  }
+
+  normalized.forEach((id, index) => {
+    const post = readNewsRecord(id);
+    writeNewsRecord(id, {
+      ...post,
+      sort_order: (index + 1) * 10
+    });
+  });
+}
+
+function deleteNewsImageFiles(id) {
+  const imagesDir = path.join(ROOT, 'static/images/news');
+
+  for (const extension of IMAGE_EXTENSIONS) {
+    const normalized = extension === 'jpeg' ? 'jpg' : extension;
+    const absolutePath = path.join(imagesDir, `${id}.${normalized}`);
+
+    if (existsSync(absolutePath)) {
+      unlinkSync(absolutePath);
+    }
+  }
+}
+
+/**
+ * @param {string} id
+ * @param {string} [locale]
+ */
+export function deleteNewsRecord(id, locale = 'en') {
+  assertContentId(id, translate('fields.newsId', locale), locale);
+
+  if (!newsRecordExists(id)) {
+    throw new Error(translate('errors.newsNotFound', locale, { id }));
+  }
+
+  const postPath = path.join(ROOT, recordPath('content/news', id));
+  unlinkSync(postPath);
+  deleteNewsImageFiles(id);
 }
 
 export function readNewsRecord(id) {
@@ -582,17 +878,19 @@ export function loadCatalogForm(locale = 'en') {
     throw new Error(translate('errors.missingCatalog', locale));
   }
 
-  const fields = catalog.fields && typeof catalog.fields === 'object' ? catalog.fields : {};
-
   return {
     item_name_singular: typeof catalog.item_name_singular === 'string' ? catalog.item_name_singular : 'creation',
     item_name_plural: typeof catalog.item_name_plural === 'string' ? catalog.item_name_plural : 'creations',
-    show_price: fields.show_price === true,
-    show_availability: fields.show_availability !== false,
-    show_material: fields.show_material !== false,
-    show_dimensions: fields.show_dimensions !== false,
-    show_status: fields.show_status !== false,
-    show_meta: fields.show_meta !== false
+    eyebrow: typeof catalog.eyebrow === 'string' ? catalog.eyebrow : '',
+    intro: typeof catalog.intro === 'string' ? catalog.intro : '',
+    sort:
+      catalog.sort === 'title_asc' || catalog.sort === 'title_desc' ? catalog.sort : 'manual',
+    home_limit:
+      typeof catalog.home_limit === 'number' &&
+      Number.isInteger(catalog.home_limit) &&
+      catalog.home_limit > 0
+        ? Math.min(catalog.home_limit, MAX_CATALOG_HOME_LIMIT)
+        : 0
   };
 }
 
@@ -603,6 +901,13 @@ export function loadCatalogForm(locale = 'en') {
 export function writeCatalogForm(catalogForm, locale = 'en') {
   const singular = String(catalogForm.item_name_singular ?? '').trim();
   const plural = String(catalogForm.item_name_plural ?? '').trim();
+  const eyebrow = optionalField(String(catalogForm.eyebrow ?? ''));
+  const intro = optionalField(String(catalogForm.intro ?? ''));
+  const sortRaw = String(catalogForm.sort ?? 'manual').trim();
+  const sort = sortRaw === 'title_asc' || sortRaw === 'title_desc' ? sortRaw : 'manual';
+  const homeLimitInput = String(catalogForm.home_limit ?? '0').trim();
+  const homeLimitRaw = Number.parseInt(homeLimitInput, 10);
+  const homeLimit = Number.isInteger(homeLimitRaw) && homeLimitRaw > 0 ? homeLimitRaw : 0;
 
   if (singular === '') {
     throw new Error(translate('errors.required', locale, { label: translate('fields.itemNameSingular', locale) }));
@@ -612,20 +917,38 @@ export function writeCatalogForm(catalogForm, locale = 'en') {
     throw new Error(translate('errors.required', locale, { label: translate('fields.itemNamePlural', locale) }));
   }
 
-  writeProjectYaml('config/catalog.yaml', {
-    catalog: {
-      item_name_singular: singular,
-      item_name_plural: plural,
-      fields: {
-        show_price: catalogForm.show_price === true,
-        show_availability: catalogForm.show_availability !== false,
-        show_material: catalogForm.show_material !== false,
-        show_dimensions: catalogForm.show_dimensions !== false,
-        show_status: catalogForm.show_status !== false,
-        show_meta: catalogForm.show_meta !== false
-      }
-    }
-  });
+  if (homeLimitInput !== '' && (!Number.isInteger(homeLimitRaw) || homeLimitRaw < 0)) {
+    throw new Error(
+      translate('errors.catalogHomeLimitInvalid', locale, { max: MAX_CATALOG_HOME_LIMIT })
+    );
+  }
+
+  if (homeLimit > MAX_CATALOG_HOME_LIMIT) {
+    throw new Error(
+      translate('errors.catalogHomeLimitMax', locale, { max: MAX_CATALOG_HOME_LIMIT })
+    );
+  }
+
+  /** @type {Record<string, unknown>} */
+  const catalog = {
+    item_name_singular: singular,
+    item_name_plural: plural,
+    sort
+  };
+
+  if (eyebrow !== '') {
+    catalog.eyebrow = eyebrow;
+  }
+
+  if (intro !== '') {
+    catalog.intro = intro;
+  }
+
+  if (homeLimit > 0) {
+    catalog.home_limit = homeLimit;
+  }
+
+  writeProjectYaml('config/catalog.yaml', { catalog });
 }
 
 export function loadAboutForm(locale = 'en') {
@@ -633,7 +956,6 @@ export function loadAboutForm(locale = 'en') {
 
   if (!existsSync(aboutPath)) {
     return {
-      enabled: false,
       title: '',
       intro: '',
       section_heading: '',
@@ -659,7 +981,6 @@ export function loadAboutForm(locale = 'en') {
       : {};
 
   return {
-    enabled: about.enabled !== false,
     title: typeof about.title === 'string' ? about.title : '',
     intro: typeof about.intro === 'string' ? about.intro : '',
     section_heading: typeof firstSection.heading === 'string' ? firstSection.heading : '',
@@ -681,7 +1002,6 @@ export function writeAboutForm(aboutForm, locale = 'en') {
       ? existing.about
       : {};
 
-  const enabled = aboutForm.enabled === true;
   const title = optionalField(String(aboutForm.title ?? ''));
   const intro = optionalField(String(aboutForm.intro ?? ''));
   const sectionHeading = optionalField(String(aboutForm.section_heading ?? ''));
@@ -690,13 +1010,12 @@ export function writeAboutForm(aboutForm, locale = 'en') {
   const portraitImageFile = optionalField(String(aboutForm.portrait_image_file ?? ''));
   const portraitImageAlt = optionalField(String(aboutForm.portrait_image_alt ?? ''));
 
-  if (enabled && title === '') {
+  if (title === '') {
     throw new Error(translate('errors.aboutTitleRequired', locale));
   }
 
   /** @type {Record<string, unknown>} */
   const about = {
-    enabled,
     title,
     intro
   };

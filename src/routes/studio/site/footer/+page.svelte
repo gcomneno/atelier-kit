@@ -1,13 +1,24 @@
 <script>
   import { enhance } from '$app/forms';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
+  import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
+  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
-  import { studioFormEnhance } from '$lib/studio-form-enhance.js';
+  import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
   const t = useI18n();
 
   let { data, form } = $props();
 
   const footerForm = $derived(form?.footerForm ?? data.footerForm);
+  let isDirty = $state(false);
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
+  const dirtyControl = {};
+
+  $effect(() => {
+    footerForm;
+    dirtyControl.resetBaseline?.();
+  });
 </script>
 
 <svelte:head>
@@ -22,14 +33,21 @@
     <p>{t('studio.site.footer.intro')}</p>
   </div>
 
-  <form method="POST" action="?/saveFooter" use:enhance={studioFormEnhance}>
+  <form
+    method="POST"
+    action="?/saveFooter"
+    use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
+    use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+  >
+    <StudioFormLegend />
+
     <label>
-      {t('studio.site.footer.copyright')}
+      <StudioFieldLabel label={t('studio.site.footer.copyright')} optional />
       <input name="copyright" value={footerForm.copyright} />
     </label>
 
     <label>
-      {t('studio.site.footer.legalLine')}
+      <StudioFieldLabel label={t('studio.site.footer.legalLine')} optional />
       <input name="legal_line" value={footerForm.legal_line} />
     </label>
 
@@ -37,21 +55,28 @@
       <input type="checkbox" name="show_social" checked={footerForm.show_social} />
       {t('studio.site.footer.showSocial')}
     </label>
+    <p class="hint">{t('studio.site.footer.showSocialHint')}</p>
 
     {#each footerForm.columns as column, columnIndex}
       <fieldset>
         <legend>{t('studio.site.footer.columnLegend', { number: columnIndex + 1 })}</legend>
 
         <label>
-          {t('studio.site.footer.columnTitle')}
-          <span class="hint">{t('studio.site.footer.columnTitleHint')}</span>
+          <StudioFieldLabel
+            label={t('studio.site.footer.columnTitle')}
+            optional
+            hint={t('studio.site.footer.columnTitleHint')}
+          />
           <input name={`column_${columnIndex}_title`} value={column.title} />
         </label>
 
         {#each column.links as link, linkIndex}
           <div class="link-fields">
             <label>
-              {t('studio.site.footer.linkLabel', { number: linkIndex + 1 })}
+              <StudioFieldLabel
+                label={t('studio.site.footer.linkLabel', { number: linkIndex + 1 })}
+                optional
+              />
               <input
                 name={`column_${columnIndex}_link_${linkIndex}_label`}
                 value={link.label}
@@ -59,7 +84,7 @@
             </label>
 
             <label>
-              {t('studio.site.footer.linkHref')}
+              <StudioFieldLabel label={t('studio.site.footer.linkHref')} optional />
               <input
                 name={`column_${columnIndex}_link_${linkIndex}_href`}
                 value={link.href}
@@ -71,12 +96,10 @@
     {/each}
 
     <div class="actions">
-      <button type="submit">{t('studio.site.footer.save')}</button>
+      <button type="submit" disabled={!isDirty}>{t('studio.site.footer.save')}</button>
     </div>
 
-    {#if form?.footerMessage}
-      <p class={`status ${form.footerStatus || 'info'}`}>{form.footerMessage}</p>
-    {/if}
+    <StudioFormStatus message={form?.footerMessage} status={form?.footerStatus} />
   </form>
 </section>
 

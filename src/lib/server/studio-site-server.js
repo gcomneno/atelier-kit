@@ -2,8 +2,8 @@
 
 import { fail } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
-import { appearanceFromForm, resolveSiteAppearance } from '$lib/site-appearance.js';
-import { localizedAppearancePresets } from '$lib/i18n/index.js';
+import { appearanceFromForm, deriveCardColor, resolveSiteAppearance } from '$lib/site-appearance.js';
+import { localizedAppearancePresets, localizedFontPresets } from '$lib/i18n/index.js';
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 import {
@@ -35,7 +35,7 @@ import { isValidSocialUrl, normalizeSocialId, SOCIAL_NETWORK_IDS } from '$lib/so
 import { isValidFooterHref } from '$lib/footer-links.js';
 
 const MAX_FOOTER_COLUMNS = 4;
-const MAX_FOOTER_LINKS = 5;
+const MAX_FOOTER_LINKS = 4;
 
 function isRecord(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -63,15 +63,15 @@ export function loadAppearanceForm() {
  */
 function buildAppearanceYaml(appearance, backgroundImage = '') {
   /** @type {Record<string, string>} */
-  const record =
-    appearance.preset === 'custom'
-      ? {
-          preset: 'custom',
-          base_color: appearance.base_color,
-          accent_color: appearance.accent_color,
-          text_color: appearance.text_color
-        }
-      : { preset: appearance.preset };
+  const record = {
+    preset: appearance.preset,
+    base_color: appearance.base_color,
+    accent_color: appearance.accent_color,
+    text_color: appearance.text_color,
+    heading_color: appearance.heading_color,
+    card_color: appearance.card_color ?? deriveCardColor(appearance.base_color),
+    font_preset: appearance.font_preset
+  };
 
   if (backgroundImage) {
     record.background_image = backgroundImage;
@@ -116,10 +116,7 @@ export function loadSiteForm() {
     hero_intro: readString(site, 'hero_intro'),
     hero_signature: readString(site, 'hero_signature'),
     language: readString(site, 'language', 'en'),
-    notice: readString(site, 'notice'),
-    footer_note: readString(site, 'footer_note'),
-    url: readString(site, 'url'),
-    og_image: readString(site, 'og_image')
+    footer_note: readString(site, 'footer_note')
   };
 }
 
@@ -306,6 +303,7 @@ export function loadSiteStudioData() {
     footerLinkCount: MAX_FOOTER_LINKS,
     appearanceForm: loadAppearanceForm(),
     appearancePresets: localizedAppearancePresets(locale),
+    fontPresets: localizedFontPresets(locale),
     heroBannerForm: loadHeroBannerForm()
   };
 }
@@ -329,24 +327,7 @@ export async function saveSiteAction({ request }) {
     site.tagline = requiredField(formData.get('tagline'), t('fields.tagline'), locale);
     site.hero_intro = optionalField(formData.get('hero_intro'));
     site.hero_signature = optionalField(formData.get('hero_signature'));
-    site.language = resolveLocale(formData.get('language'));
-    site.notice = optionalField(formData.get('notice'));
     site.footer_note = optionalField(formData.get('footer_note'));
-
-    const siteUrl = optionalField(formData.get('url'));
-    const ogImage = optionalField(formData.get('og_image'));
-
-    if (siteUrl) {
-      site.url = siteUrl;
-    } else {
-      delete site.url;
-    }
-
-    if (ogImage) {
-      site.og_image = ogImage;
-    } else {
-      delete site.og_image;
-    }
 
     writeProjectYaml('config/site.yaml', { site });
     const validation = runStructuralValidation();
@@ -493,8 +474,14 @@ export async function saveFooterAction({ request }) {
   const formData = await request.formData();
 
   try {
-    const existingData = readProjectYaml('config/footer.yaml');
-    const existingFooter = isRecord(existingData.footer) ? existingData.footer : {};
+    let existingFooter = {};
+
+    try {
+      const existingData = readProjectYaml('config/footer.yaml');
+      existingFooter = isRecord(existingData.footer) ? existingData.footer : {};
+    } catch {
+      existingFooter = {};
+    }
 
     /** @type {{ title: string, links: { label: string, href: string }[] }[]} */
     const columns = [];
@@ -547,6 +534,16 @@ export async function saveFooterAction({ request }) {
 
     writeProjectYaml('config/footer.yaml', { footer });
     const validation = runStructuralValidation();
+    const socialUrls = loadSocialForm();
+    const hasSocialLinks = Object.values(socialUrls).some((url) => url !== '');
+
+    if (validation.ok && footer.show_social && !hasSocialLinks) {
+      return {
+        footerStatus: 'warning',
+        footerMessage: t('studio.site.footer.showSocialNoLinks'),
+        footerForm: loadFooterForm()
+      };
+    }
 
     return {
       footerStatus: validation.ok ? 'success' : 'warning',
@@ -571,12 +568,6 @@ export async function saveLayoutAction({ request }) {
   const formData = await request.formData();
 
   try {
-    const presetField = optionalField(formData.get('preset'), DEFAULT_LAYOUT_PRESET);
-
-    if (!isLayoutPreset(presetField)) {
-      throw new Error(t('errors.layoutPresetInvalid'));
-    }
-
     /** @type {Record<import('$lib/layout-blocks.js').LayoutBlockId, import('$lib/layout-blocks.js').LayoutBlockConfig>} */
     const blocks = normalizeLayoutBlocks();
 
@@ -584,6 +575,14 @@ export async function saveLayoutAction({ request }) {
       const placementValue = optionalField(formData.get(`block_${blockId}_placement`), 'main');
       blocks[blockId].enabled = checkboxEnabled(formData.get(`block_${blockId}_enabled`));
       blocks[blockId].placement = isLayoutPlacement(placementValue) ? placementValue : 'main';
+
+      const label = optionalField(formData.get(`block_${blockId}_label`));
+
+      if (label !== '') {
+        blocks[blockId].label = label;
+      } else {
+        delete blocks[blockId].label;
+      }
     }
 
     const newsCountRaw = optionalField(
@@ -603,7 +602,7 @@ export async function saveLayoutAction({ request }) {
     blocks.news.count = newsCount;
 
     const layout = {
-      preset: resolveLayoutPreset(presetField, blocks),
+      preset: resolveLayoutPreset(DEFAULT_LAYOUT_PRESET, blocks),
       blocks
     };
 
@@ -637,7 +636,10 @@ export async function saveAppearanceAction({ request }) {
       formData.get('preset'),
       formData.get('base_color'),
       formData.get('accent_color'),
-      formData.get('text_color')
+      formData.get('text_color'),
+      formData.get('heading_color'),
+      formData.get('card_color'),
+      formData.get('font_preset')
     );
     const data = readProjectYaml('config/site.yaml');
 
@@ -718,7 +720,7 @@ export async function saveHeroBannerAction({ request }) {
       throw new Error(t('errors.heroBannerImageRequired'));
     }
 
-    if (show && imageFile !== '') {
+    if (show) {
       site.hero_banner = {
         show: true,
         image_file: imageFile,
@@ -766,4 +768,4 @@ export const actions = {
   saveHeroBanner: saveHeroBannerAction
 };
 
-export { LAYOUT_PRESETS, MAX_FOOTER_COLUMNS, MAX_FOOTER_LINKS, localizedAppearancePresets };
+export { LAYOUT_PRESETS, MAX_FOOTER_COLUMNS, MAX_FOOTER_LINKS, localizedAppearancePresets, localizedFontPresets };

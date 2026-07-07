@@ -1,104 +1,222 @@
 <script>
+  import { enhance } from '$app/forms';
+  import { tick } from 'svelte';
+  import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
+  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
+  import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
+
+  /** @typedef {{ id: string, title: string, itemCount: number }} CollectionSummary */
 
   const t = useI18n();
 
-  let { data } = $props();
+  let { data, form } = $props();
+
+  const collections = $derived(
+    /** @type {CollectionSummary[]} */ (form?.collections ?? data.collections)
+  );
+  const collectionById = $derived(
+    Object.fromEntries(collections.map((/** @type {CollectionSummary} */ collection) => [collection.id, collection]))
+  );
+
+  /** @type {string[]} */
+  let orderedIds = $state([]);
+  let isDirty = $state(false);
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
+  const dirtyControl = {};
+
+  $effect(() => {
+    orderedIds = collections.map((/** @type {CollectionSummary} */ collection) => collection.id);
+    dirtyControl.resetBaseline?.();
+  });
+
+  /**
+   * @param {number} index
+   */
+  async function moveUp(index) {
+    if (index <= 0) {
+      return;
+    }
+
+    const next = [...orderedIds];
+    [next[index - 1], next[index]] = [next[index], next[index - 1]];
+    orderedIds = next;
+    await tick();
+    dirtyControl.checkDirty?.();
+  }
+
+  /**
+   * @param {number} index
+   */
+  async function moveDown(index) {
+    if (index >= orderedIds.length - 1) {
+      return;
+    }
+
+    const next = [...orderedIds];
+    [next[index + 1], next[index]] = [next[index], next[index + 1]];
+    orderedIds = next;
+    await tick();
+    dirtyControl.checkDirty?.();
+  }
 </script>
 
 <svelte:head>
   <title>{t('studio.collections.pageTitle')}</title>
 </svelte:head>
 
-<p class="intro">
+<p class="studio-intro">
   {t('studio.collections.intro')}
 </p>
 
-<section class="panel">
+{#if data.deletedCollectionTitle}
+  <StudioFormStatus
+    status="success"
+    message={t('studio.collections.deletedSuccess', { title: data.deletedCollectionTitle })}
+  />
+{:else if data.missingCollectionId}
+  <StudioFormStatus
+    status="warning"
+    message={t('studio.collections.missingCollection', { id: data.missingCollectionId })}
+  />
+{/if}
+
+<section class="studio-panel">
   <div class="panel-heading">
     <h2>{t('studio.collections.title')}</h2>
-    <p>{t('studio.collections.count', { count: data.collections.length })}</p>
+    <p>{t('studio.collections.count', { count: collections.length })}</p>
     <p class="create-link"><a href="/studio/collections/new">{t('studio.collections.createLink')}</a></p>
   </div>
 
-  {#if data.collections.length === 0}
-    <p class="empty">
-      {t('studio.collections.empty')}
-      <a href="/studio/collections/new">{t('studio.collections.createFirst')}</a>.
-    </p>
+  {#if collections.length === 0}
+    <p class="empty">{t('studio.collections.empty')}</p>
   {:else}
-    <ul class="record-list">
-      {#each data.collections as collection}
-        <li>
-          <a href={`/studio/collections/${collection.id}`}>
-            <strong>{collection.title}</strong>
-            <span>{collection.id}</span>
-            <span>{t('studio.collections.itemCount', { count: collection.itemCount })}</span>
-          </a>
-        </li>
-      {/each}
-    </ul>
+    <form
+      method="POST"
+      action="?/saveCollectionOrder"
+      use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
+      use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+      class="studio-form"
+    >
+      <StudioFormLegend />
+
+      <fieldset>
+        <legend>{t('studio.collections.orderLegend')}</legend>
+        <p class="hint">{t('studio.collections.orderHint')}</p>
+
+        <ol class="ordered-list">
+          {#each orderedIds as collectionId, index (collectionId)}
+            {@const collection = collectionById[collectionId]}
+            <li>
+              <input type="hidden" name="collection_ids" value={collectionId} />
+              <span class="order-label">{index + 1}.</span>
+              <a class="order-link" href={`/studio/collections/${collectionId}`}>
+                <strong>{collection?.title ?? collectionId}</strong>
+                <span>{collectionId}</span>
+                <span>{t('studio.collections.itemCount', { count: collection?.itemCount ?? 0 })}</span>
+              </a>
+              <div class="order-actions">
+                <button type="button" onclick={() => moveUp(index)} disabled={index === 0}>↑</button>
+                <button
+                  type="button"
+                  onclick={() => moveDown(index)}
+                  disabled={index === orderedIds.length - 1}>↓</button
+                >
+              </div>
+            </li>
+          {/each}
+        </ol>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" disabled={!isDirty}>{t('studio.collections.saveOrder')}</button>
+      </div>
+
+      <StudioFormStatus message={form?.collectionOrderMessage} status={form?.collectionOrderStatus} />
+    </form>
   {/if}
 </section>
 
 <style>
-  .intro {
-    margin: 0 0 1.5rem;
-    color: #5a4632;
-    line-height: 1.6;
+  .hint {
+    margin: 0 0 0.75rem;
+    color: var(--studio-muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
   }
 
-  .panel {
-    padding: 1.5rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
-    border-radius: 1rem;
-    background: rgb(255 250 242 / 0.82);
-  }
-
-  .panel-heading h2 {
-    margin: 0 0 0.35rem;
-    font-size: 1.2rem;
-  }
-
-  .panel-heading p {
-    margin: 0 0 1rem;
-    color: #7d684f;
-  }
-
-  .create-link {
-    margin: 0;
-  }
-
-  .create-link a {
-    color: #5a4632;
-    font-weight: 600;
-  }
-
-  .empty {
-    margin: 0;
-    color: #5a4632;
-  }
-
-  .record-list {
+  .ordered-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.75rem;
+    gap: 0.65rem;
   }
 
-  .record-list a {
+  .ordered-list li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.65rem;
+    align-items: center;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.75rem;
+    background: #fff;
+    border: 1px solid var(--studio-border);
+  }
+
+  .order-label {
+    color: var(--studio-muted);
+    font-weight: 700;
+  }
+
+  .order-link {
     display: grid;
     gap: 0.2rem;
-    padding: 0.9rem 1rem;
-    border-radius: 0.75rem;
-    background: #fffdf9;
-    border: 1px solid rgb(47 40 31 / 0.08);
+    min-width: 0;
+    color: inherit;
     text-decoration: none;
   }
 
-  .record-list span {
-    color: #7d684f;
-    font-size: 0.9rem;
+  .order-link:hover strong {
+    color: var(--studio-accent);
+  }
+
+  .order-link span {
+    color: var(--studio-muted);
+    font-size: 0.85rem;
+  }
+
+  .order-actions {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .order-actions button {
+    border: 1px solid var(--studio-border);
+    border-radius: 0.45rem;
+    padding: 0.25rem 0.55rem;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .order-actions button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .actions {
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .ordered-list li {
+      grid-template-columns: 1fr;
+    }
+
+    .order-actions {
+      justify-content: flex-start;
+    }
   }
 </style>

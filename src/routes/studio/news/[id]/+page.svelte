@@ -1,30 +1,56 @@
 <script>
   import { enhance } from '$app/forms';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
+  import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
+  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
+  import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
   const t = useI18n();
 
   let { data, form } = $props();
 
   const newsForm = $derived(form?.newsForm ?? data.newsForm);
+  let isDirty = $state(false);
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
+  const dirtyControl = {};
+
+  $effect(() => {
+    newsForm;
+    dirtyControl.resetBaseline?.();
+  });
+  function confirmDelete() {
+    return confirm(
+      t('studio.newsEdit.deleteConfirm', { title: newsForm.title, id: newsForm.id })
+    );
+  }
 </script>
 
 <svelte:head>
   <title>Studio · {newsForm.title}</title>
 </svelte:head>
 
-<p class="intro">
+<p class="studio-intro">
   {t('studio.newsEdit.intro')}
   <a href={`/news/${newsForm.id}`} target="_blank" rel="noreferrer">{t('studio.newsEdit.preview')}</a>
 </p>
 
-<section class="panel">
+<section class="studio-panel">
   <div class="panel-heading">
     <h2>{newsForm.title}</h2>
     <p>{t('studio.newsEdit.postId', { id: newsForm.id })}</p>
   </div>
 
-  <form method="POST" action="?/saveNews" enctype="multipart/form-data" use:enhance class="studio-form">
+  <form
+    method="POST"
+    action="?/saveNews"
+    enctype="multipart/form-data"
+    use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
+    use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+    class="studio-form"
+  >
+    <StudioFormLegend />
+
     {#if newsForm.image_file}
       <div class="image-preview">
         <img src={newsForm.image_file} alt={newsForm.image_alt || newsForm.title} />
@@ -32,87 +58,73 @@
     {/if}
 
     <label>
-      {t('studio.newsEdit.uploadPhoto')}
-      <span class="hint">{t('studio.newsEdit.uploadHint', { id: newsForm.id })}</span>
+      <StudioFieldLabel
+        label={t('studio.newsEdit.uploadPhoto')}
+        optional
+        hint={t('studio.newsEdit.uploadHint', { id: newsForm.id })}
+      />
       <input type="file" name="image_upload" accept="image/jpeg,image/png,image/webp" />
     </label>
 
     <label>
-      {t('studio.newsEdit.imagePath')}
+      <StudioFieldLabel label={t('studio.newsEdit.imagePath')} optional />
       <input name="image_file" value={newsForm.image_file} />
     </label>
 
     <label>
-      {t('studio.newsEdit.imageAlt')}
+      <StudioFieldLabel label={t('studio.newsEdit.imageAlt')} optional />
       <input name="image_alt" value={newsForm.image_alt} />
     </label>
 
     <label>
-      {t('studio.newsEdit.titleField')}
+      <StudioFieldLabel label={t('studio.newsEdit.titleField')} required />
       <input name="title" value={newsForm.title} required />
     </label>
 
     <label>
-      {t('studio.newsEdit.date')}
+      <StudioFieldLabel label={t('studio.newsEdit.date')} required />
       <input name="date" type="date" value={newsForm.date} required />
     </label>
 
     <label>
-      {t('studio.newsEdit.excerpt')}
-      <span class="hint">{t('studio.newsEdit.excerptHint')}</span>
+      <StudioFieldLabel label={t('studio.newsEdit.excerpt')} optional hint={t('studio.newsEdit.excerptHint')} />
       <textarea name="excerpt" rows="2">{newsForm.excerpt}</textarea>
     </label>
 
     <label>
-      {t('studio.newsEdit.body')}
+      <StudioFieldLabel label={t('studio.newsEdit.body')} required />
       <textarea name="body" rows="10" required>{newsForm.body}</textarea>
     </label>
 
     <div class="actions">
-      <button type="submit">{t('studio.newsEdit.save')}</button>
+      <button type="submit" disabled={!isDirty}>{t('studio.newsEdit.save')}</button>
       <a class="secondary-link" href="/studio/news">{t('studio.newsEdit.back')}</a>
     </div>
 
-    {#if form?.newsMessage}
-      <p class={`status ${form.newsStatus || 'info'}`}>{form.newsMessage}</p>
-    {/if}
+    <StudioFormStatus message={form?.newsMessage} status={form?.newsStatus} />
+  </form>
+
+  <form method="POST" action="?/deleteNews" class="danger-zone" use:enhance>
+    <button
+      type="submit"
+      class="remove-button"
+      onclick={(event) => {
+        if (!confirmDelete()) {
+          event.preventDefault();
+        }
+      }}
+    >
+      {t('studio.newsEdit.delete')}
+    </button>
   </form>
 </section>
 
 <style>
-  .intro {
-    margin: 0 0 1.5rem;
-    color: #5a4632;
-    line-height: 1.6;
-  }
-
-  .panel {
-    padding: 1.5rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
-    border-radius: 1rem;
-    background: rgb(255 250 242 / 0.82);
-  }
-
-  .panel-heading h2 {
-    margin: 0 0 0.35rem;
-    font-size: 1.2rem;
-  }
-
-  .panel-heading p {
-    margin: 0 0 1rem;
-    color: #7d684f;
-  }
-
-  .studio-form {
-    display: grid;
-    gap: 1rem;
-  }
-
   .image-preview {
     overflow: hidden;
     border-radius: 0.85rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
-    background: #fffdf9;
+    border: 1px solid var(--studio-border);
+    background: #fff;
   }
 
   .image-preview img {
@@ -122,72 +134,35 @@
     object-fit: cover;
   }
 
-  label {
-    display: grid;
-    gap: 0.4rem;
-    font-size: 0.95rem;
-  }
-
-  .hint {
-    color: #7d684f;
-    font-size: 0.85rem;
-  }
-
-  input,
-  textarea {
-    width: 100%;
-    padding: 0.7rem 0.8rem;
-    border: 1px solid rgb(47 40 31 / 0.18);
-    border-radius: 0.65rem;
-    background: #fffdf9;
-    color: inherit;
-    font: inherit;
-  }
-
-  textarea {
-    resize: vertical;
-  }
-
   .actions {
     display: flex;
     gap: 1rem;
     align-items: center;
   }
 
-  button {
-    border: 0;
+  .secondary-link {
+    color: var(--studio-accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .secondary-link:hover {
+    text-decoration: underline;
+  }
+
+  .danger-zone {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--studio-border);
+  }
+
+  .remove-button {
+    border: 1px solid rgb(132 46 46 / 0.35);
     border-radius: 999px;
-    padding: 0.75rem 1.2rem;
-    background: #2f281f;
-    color: #f8f0e4;
+    padding: 0.45rem 0.9rem;
+    background: rgb(132 46 46 / 0.08);
+    color: #6d2a2a;
     font: inherit;
     cursor: pointer;
-  }
-
-  .secondary-link {
-    color: #5a4632;
-  }
-
-  .status {
-    margin: 0;
-    padding: 0.85rem 1rem;
-    border-radius: 0.75rem;
-    white-space: pre-wrap;
-    line-height: 1.5;
-  }
-
-  .status.success {
-    background: rgb(56 102 65 / 0.12);
-    color: #2f4f35;
-  }
-
-  .status.warning {
-    background: rgb(158 106 33 / 0.14);
-    color: #6a4a1b;
-  }
-
-  .status.error {
-    background: rgb(132 46 46 / 0.12);
-    color: #6d2a2a;
   }
 </style>

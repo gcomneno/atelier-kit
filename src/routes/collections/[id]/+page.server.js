@@ -1,5 +1,11 @@
 import { error } from '@sveltejs/kit';
-import { getCatalogConfig, getCollectionById, getSiteConfig } from '$lib/server/showcase.js';
+import {
+  getCatalogConfig,
+  getCollectionById,
+  getHomeLayoutPageData,
+  getLayoutConfig,
+  getSiteConfig
+} from '$lib/server/showcase.js';
 
 /** @type {import('./$types').PageServerLoad} */
 export function load({ params }) {
@@ -9,9 +15,13 @@ export function load({ params }) {
     throw error(404, 'Collection not found');
   }
 
+  const layout = getLayoutConfig();
+  const homeLayout = getHomeLayoutPageData(layout);
+
   return {
     site: getSiteConfig(),
     catalog: getCatalogConfig(),
-    collection
+    collection,
+    ...homeLayout
   };
 }

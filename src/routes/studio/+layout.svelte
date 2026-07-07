@@ -47,7 +47,7 @@
 
   .eyebrow {
     margin: 0 0 0.4rem;
-    color: var(--studio-muted);
+    color: var(--studio-eyebrow, var(--studio-accent));
     font-size: 0.76rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -105,8 +105,72 @@
   }
 
   :global(.studio-panel .panel-heading p) {
-    margin: 0 0 1rem;
+    margin: 0 0 0.25rem;
     color: var(--studio-muted);
+  }
+
+  :global(.studio-panel .panel-heading h2) {
+    margin: 0 0 0.35rem;
+    font-size: 1.2rem;
+  }
+
+  :global(.studio-panel .create-link) {
+    margin: 0;
+  }
+
+  :global(.studio-panel .create-link a) {
+    color: var(--studio-accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  :global(.studio-panel .create-link a:hover) {
+    text-decoration: underline;
+  }
+
+  :global(.studio-panel .empty) {
+    margin: 0;
+    color: var(--studio-muted);
+  }
+
+  :global(.studio-panel .record-list) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  :global(.studio-panel .record-list a) {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.9rem 1rem;
+    border-radius: 0.75rem;
+    background: #fff;
+    border: 1px solid var(--studio-border);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  :global(.studio-panel .record-list a:hover) {
+    border-color: color-mix(in srgb, var(--studio-accent) 35%, var(--studio-border));
+  }
+
+  :global(.studio-panel .record-list span) {
+    color: var(--studio-muted);
+    font-size: 0.9rem;
+  }
+
+  :global(.studio-panel .badge) {
+    display: inline-block;
+    width: fit-content;
+    margin-top: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: rgb(45 108 223 / 0.1);
+    color: #143870;
+    font-size: 0.8rem;
+    font-weight: 600;
   }
 
   :global(.studio-panel form),
@@ -145,6 +209,51 @@
   :global(.studio-panel .hint) {
     color: var(--studio-muted);
     font-size: 0.85rem;
+  }
+
+  :global(.studio-panel .form-legend),
+  :global(.studio-form .form-legend),
+  :global(.panel .form-legend) {
+    margin: 0.15rem 0 0;
+    color: var(--studio-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    text-align: right;
+  }
+
+  :global(.form-legend .legend-required) {
+    color: #b42318;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  :global(.form-legend .legend-optional) {
+    color: var(--studio-muted);
+    font-weight: 500;
+  }
+
+  :global(.field-label-row) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  :global(.field-label) {
+    font-weight: 500;
+  }
+
+  :global(.field-badge.required) {
+    color: #b42318;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: help;
+  }
+
+  :global(.field-badge.optional) {
+    color: var(--studio-muted);
+    font-size: 0.85em;
+    font-weight: 400;
   }
 
   :global(.studio-panel input),
@@ -218,5 +327,10 @@
   :global(.studio-panel .status.error) {
     background: rgb(191 56 56 / 0.12);
     color: #7f2222;
+  }
+
+  :global(.studio-panel .status.info) {
+    background: rgb(45 108 223 / 0.1);
+    color: #143870;
   }
 </style>

@@ -1,6 +1,9 @@
 /** @typedef {'warm' | 'neutral' | 'dark' | 'custom'} AppearancePreset */
+/** @typedef {import('./site-typography.js').FontPreset} FontPreset */
 
-/** @typedef {{ preset: AppearancePreset, base_color: string, accent_color: string, text_color: string, background_image?: string }} SiteAppearance */
+/** @typedef {{ preset: AppearancePreset, base_color: string, accent_color: string, text_color: string, heading_color: string, card_color: string, font_preset: FontPreset, background_image?: string }} SiteAppearance */
+
+import { fontFamilyCss, resolveFontPreset } from './site-typography.js';
 
 export const APPEARANCE_PRESET_OPTIONS = [
   { id: 'warm', label: 'Warm atelier (default)' },
@@ -9,25 +12,31 @@ export const APPEARANCE_PRESET_OPTIONS = [
   { id: 'custom', label: 'Custom colors' }
 ];
 
-/** @type {Record<Exclude<AppearancePreset, 'custom'>, SiteAppearance>} */
+/** @type {Record<Exclude<AppearancePreset, 'custom'>, Omit<SiteAppearance, 'font_preset'>>} */
 export const APPEARANCE_PRESETS = {
   warm: {
     preset: 'warm',
     base_color: '#f8f0e4',
     accent_color: '#d6be9a',
-    text_color: '#2f281f'
+    text_color: '#2f281f',
+    heading_color: '#2f281f',
+    card_color: '#fefdfc'
   },
   neutral: {
     preset: 'neutral',
     base_color: '#f4f2ee',
     accent_color: '#c8c2b8',
-    text_color: '#1f1f1f'
+    text_color: '#1f1f1f',
+    heading_color: '#1f1f1f',
+    card_color: '#fefdfd'
   },
   dark: {
     preset: 'dark',
-    base_color: '#1c1916',
-    accent_color: '#5c4a3a',
-    text_color: '#f3ece2'
+    base_color: '#13110f',
+    accent_color: '#e4c4a0',
+    text_color: '#f8f4ec',
+    heading_color: '#f8f4ec',
+    card_color: '#42413f'
   }
 };
 
@@ -66,17 +75,30 @@ function normalizeHex(value, fallback) {
  */
 export function resolveSiteAppearance(appearance) {
   if (!appearance || typeof appearance !== 'object' || Array.isArray(appearance)) {
-    return { ...DEFAULT_APPEARANCE };
+    return resolveSiteAppearance({ preset: 'warm' });
   }
 
   const preset = isAppearancePreset(appearance.preset) ? appearance.preset : DEFAULT_APPEARANCE.preset;
   const presetDefaults = preset === 'custom' ? DEFAULT_APPEARANCE : APPEARANCE_PRESETS[preset];
+  const base_color = normalizeHex(appearance.base_color, presetDefaults.base_color);
+  const accent_color = normalizeHex(appearance.accent_color, presetDefaults.accent_color);
+  const text_color = normalizeHex(appearance.text_color, presetDefaults.text_color);
+  const heading_color = normalizeHex(
+    appearance.heading_color,
+    presetDefaults.heading_color ?? text_color
+  );
 
   return {
     preset,
-    base_color: normalizeHex(appearance.base_color, presetDefaults.base_color),
-    accent_color: normalizeHex(appearance.accent_color, presetDefaults.accent_color),
-    text_color: normalizeHex(appearance.text_color, presetDefaults.text_color),
+    base_color,
+    accent_color,
+    text_color,
+    heading_color,
+    card_color: normalizeHex(
+      appearance.card_color,
+      presetDefaults.card_color ?? deriveCardColor(base_color)
+    ),
+    font_preset: resolveFontPreset(appearance.font_preset),
     ...(typeof appearance.background_image === 'string' && appearance.background_image.trim() !== ''
       ? { background_image: appearance.background_image.trim() }
       : {})
@@ -108,6 +130,33 @@ function relativeLuminance(hex) {
 }
 
 /**
+ * @param {string} hexA
+ * @param {string} hexB
+ * @param {number} ratioOfB
+ */
+function mixHex(hexA, hexB, ratioOfB) {
+  const a = hexToRgb(hexA);
+  const b = hexToRgb(hexB);
+
+  if (!a || !b) {
+    return hexA;
+  }
+
+  const mix = (/** @type {number} */ channelA, /** @type {number} */ channelB) =>
+    Math.round(channelA + (channelB - channelA) * ratioOfB);
+
+  return rgbToHex(mix(a.r, b.r), mix(a.g, b.g), mix(a.b, b.b));
+}
+
+/**
+ * @param {string} baseColor
+ */
+export function deriveCardColor(baseColor) {
+  const darkBase = relativeLuminance(baseColor) < 0.2;
+  return darkBase ? mixWithWhite(baseColor, 0.2) : mixWithWhite(baseColor, 0.88);
+}
+
+/**
  * @param {SiteAppearance} appearance
  */
 export function appearanceCssVariables(appearance) {
@@ -118,15 +167,20 @@ export function appearanceCssVariables(appearance) {
     '--site-base-color': resolved.base_color,
     '--site-accent-color': resolved.accent_color,
     '--site-text-color': resolved.text_color,
+    '--site-heading-color': resolved.heading_color,
+    '--site-font-family': fontFamilyCss(resolved.font_preset),
     '--site-color-scheme': darkBase ? 'dark' : 'light',
+    '--site-muted-text-color': mixHex(
+      resolved.text_color,
+      resolved.base_color,
+      darkBase ? 0.28 : 0.42
+    ),
     '--site-surface-color': darkBase
-      ? mixWithWhite(resolved.base_color, 0.07)
+      ? mixWithWhite(resolved.base_color, 0.12)
       : mixWithWhite(resolved.base_color, 0.72),
-    '--site-card-color': darkBase
-      ? mixWithWhite(resolved.base_color, 0.13)
-      : mixWithWhite(resolved.base_color, 0.88),
+    '--site-card-color': resolved.card_color,
     '--site-border-color': darkBase
-      ? mixWithWhite(resolved.base_color, 0.22)
+      ? mixWithWhite(resolved.base_color, 0.34)
       : mixWithWhite(resolved.base_color, 0.55)
   };
 }
@@ -182,19 +236,31 @@ function rgbToHex(r, g, b) {
  * @param {FormDataEntryValue | null} baseColor
  * @param {FormDataEntryValue | null} accentColor
  * @param {FormDataEntryValue | null} textColor
+ * @param {FormDataEntryValue | null} headingColor
+ * @param {FormDataEntryValue | null} cardColor
+ * @param {FormDataEntryValue | null} fontPreset
  * @returns {SiteAppearance}
  */
-export function appearanceFromForm(preset, baseColor, accentColor, textColor) {
+export function appearanceFromForm(
+  preset,
+  baseColor,
+  accentColor,
+  textColor,
+  headingColor,
+  cardColor,
+  fontPreset
+) {
   const presetValue = typeof preset === 'string' && isAppearancePreset(preset) ? preset : 'warm';
-
-  if (presetValue !== 'custom') {
-    return { ...APPEARANCE_PRESETS[presetValue] };
-  }
+  const presetDefaults =
+    presetValue === 'custom' ? DEFAULT_APPEARANCE : APPEARANCE_PRESETS[presetValue];
 
   return resolveSiteAppearance({
-    preset: 'custom',
-    base_color: typeof baseColor === 'string' ? baseColor : DEFAULT_APPEARANCE.base_color,
-    accent_color: typeof accentColor === 'string' ? accentColor : DEFAULT_APPEARANCE.accent_color,
-    text_color: typeof textColor === 'string' ? textColor : DEFAULT_APPEARANCE.text_color
+    preset: presetValue,
+    base_color: typeof baseColor === 'string' ? baseColor : presetDefaults.base_color,
+    accent_color: typeof accentColor === 'string' ? accentColor : presetDefaults.accent_color,
+    text_color: typeof textColor === 'string' ? textColor : presetDefaults.text_color,
+    heading_color: typeof headingColor === 'string' ? headingColor : presetDefaults.heading_color,
+    card_color: typeof cardColor === 'string' ? cardColor : presetDefaults.card_color,
+    font_preset: typeof fontPreset === 'string' ? fontPreset : undefined
   });
 }

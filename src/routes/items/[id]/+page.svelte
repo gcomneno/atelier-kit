@@ -1,5 +1,5 @@
 <script>
-  import { onMount, tick } from 'svelte';
+  import { tick } from 'svelte';
   import MetaInfo from '$lib/components/MetaInfo.svelte';
   import PageSocialMeta from '$lib/components/PageSocialMeta.svelte';
   import SignalCloud from '$lib/components/SignalCloud.svelte';
@@ -23,6 +23,11 @@
   let descriptionCanToggle = false;
 
   $: item.id, resetDescription();
+  $: item.description, descriptionEl, queueDescriptionMeasure();
+
+  function queueDescriptionMeasure() {
+    tick().then(() => measureDescription());
+  }
 
   async function resetDescription() {
     descriptionExpanded = false;
@@ -50,7 +55,11 @@
     descriptionExpanded = !descriptionExpanded;
   }
 
-  onMount(() => {
+  /**
+   * @param {HTMLParagraphElement} node
+   */
+  function trackDescription(node) {
+    descriptionEl = node;
     measureDescription();
 
     const observer = new ResizeObserver(() => {
@@ -59,12 +68,21 @@
       }
     });
 
-    if (descriptionEl) {
-      observer.observe(descriptionEl);
-    }
+    observer.observe(node);
 
-    return () => observer.disconnect();
-  });
+    return {
+      update() {
+        measureDescription();
+      },
+      destroy() {
+        observer.disconnect();
+
+        if (descriptionEl === node) {
+          descriptionEl = undefined;
+        }
+      }
+    };
+  }
 </script>
 
 <svelte:head>
@@ -141,19 +159,21 @@
 
         <div class="description-block">
           <div class="description-shell" class:expanded={descriptionExpanded}>
-            <p class="description" bind:this={descriptionEl}>{item.description}</p>
-          </div>
+            <p class="description" use:trackDescription>{item.description}</p>
 
-          {#if descriptionCanToggle}
-            <button
-              type="button"
-              class="description-toggle"
-              aria-expanded={descriptionExpanded}
-              on:click={toggleDescription}
-            >
-              {descriptionExpanded ? t('item.synopsisShowLess') : t('item.synopsisReadMore')}
-            </button>
-          {/if}
+            {#if descriptionCanToggle}
+              <div class="description-actions">
+                <button
+                  type="button"
+                  class="description-toggle"
+                  aria-expanded={descriptionExpanded}
+                  on:click={toggleDescription}
+                >
+                  {descriptionExpanded ? t('item.synopsisShowLess') : t('item.synopsisReadMore')}
+                </button>
+              </div>
+            {/if}
+          </div>
         </div>
       </div>
 
@@ -258,12 +278,10 @@
   }
 
   .image-frame {
-    display: grid;
-    place-items: center;
+    display: block;
     width: min(100%, 16.5rem);
     aspect-ratio: 2 / 3;
     overflow: hidden;
-    padding: 0.75rem;
     border-radius: 1.35rem;
     border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent));
     background: var(--site-surface-color, rgb(255 255 255 / 0.72));
@@ -274,7 +292,7 @@
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
   }
 
@@ -303,23 +321,25 @@
   }
 
   .description-block {
-    display: grid;
-    gap: 0.65rem;
+    max-width: 38rem;
   }
 
   .description-shell {
     position: relative;
+    display: grid;
+    gap: 0.35rem;
   }
 
   .description-shell:not(.expanded) .description {
     max-height: 14rem;
     overflow: hidden;
+    padding-bottom: 0.15rem;
   }
 
   .description-shell:not(.expanded)::after {
     content: '';
     position: absolute;
-    inset: auto 0 0;
+    inset: auto 0 1.85rem;
     height: 3.5rem;
     pointer-events: none;
     background: linear-gradient(
@@ -334,11 +354,29 @@
   }
 
   .description {
+    margin: 0;
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 82%, transparent);
     font-size: 1.05rem;
     line-height: 1.7;
-    max-width: 38rem;
     white-space: pre-line;
+  }
+
+  .description-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .description-shell:not(.expanded) .description-actions {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    padding-left: 2.5rem;
+    background: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in srgb, var(--site-base-color, #0f0e0d) 88%, transparent) 42%
+    );
   }
 
   .description-toggle {

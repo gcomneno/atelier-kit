@@ -1,0 +1,23 @@
+id: koala-dormiglione
+title: Koala dormiglione
+subtitle: ""
+status: demo
+price_mode: hidden
+image_file: /images/items/placeholder.svg
+image_alt: ""
+description: "Produttività: 18 ore di sonno e 6 di eucalipto."
+notice: ""
+meta:
+  - label: Material
+    value: Replace with material
+  - label: Dimensions
+    value: Replace with dimensions
+  - label: Availability
+    value: Replace with availability
+  - label: Object details
+    children:
+      - label: Finish
+        value: Replace with finish
+      - label: Care
+        value: Replace with care instructions
+sort_order: 30

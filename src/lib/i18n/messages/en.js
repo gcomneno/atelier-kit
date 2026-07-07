@@ -25,13 +25,17 @@ export default {
         signals: 'Signals',
         readiness: 'Readiness',
         help: 'Help',
-        preview: 'Preview'
+        preview: 'Preview',
+        systemGroup: 'System',
+        system: 'Configure Studio',
+        language: 'Language',
+        shutdown: 'Stop studio'
       }
     },
     dashboard: {
       pageTitle: 'Studio · Overview',
       intro:
-        'Three areas, matching the left menu: pick where to work. Each box opens the first page in that group.',
+        'Four areas, matching the left menu: pick where to work. Each box opens the first page in that group.',
       zonesLegend: 'Studio areas',
       zones: {
         site: {
@@ -47,9 +51,48 @@ export default {
         publish: {
           eyebrow: 'Online',
           title: 'Go live',
-          description: 'Pre-launch checks, operator guide and site preview.'
+          description: 'Site preview and pre-launch checks.'
+        },
+        system: {
+          eyebrow: 'System',
+          title: 'Configure Studio',
+          description: 'Language, operator guide and closing Studio.'
         }
       }
+    },
+    system: {
+      pageTitle: 'Studio · System',
+      intro: 'Choose the interface language, or stop Studio when you are done editing.',
+      language: {
+        pageTitle: 'Studio · Language',
+        intro: 'Language applies to Studio labels and the visitor-facing site UI. Content you write in YAML is not translated automatically.',
+        title: 'Interface language',
+        description: 'Choose the language for menus, buttons and system messages.',
+        field: 'Language',
+        languages: {
+          it: 'Italian',
+          en: 'English'
+        },
+        save: 'Save language'
+      },
+      shutdown: {
+        pageTitle: 'Studio · Stop studio',
+        intro: 'Stop the local dev server when you are done editing. Your saved files stay on disk.',
+        title: 'Stop studio',
+        description: 'Closes the local authoring server started with npm run studio or studio:launch.',
+        hint: 'You can also press Ctrl+C in the terminal where the server is running.',
+        action: 'Stop studio server',
+        confirm: 'Stop the Studio server? Saved changes stay on disk, but you will need to restart Studio to keep editing.',
+        success: 'Stopping studio… You can close this tab.',
+        unavailable: 'Studio shutdown is only available in local authoring mode.'
+      }
+    },
+    forms: {
+      legend: '<span class="legend-required">*</span> Required field · <span class="legend-optional">(optional)</span> Optional field',
+      required: 'Required field',
+      optional: '(optional)',
+      requiredWhenEnabled: 'Required when enabled',
+      atLeastOne: 'Choose at least one'
     },
     accessGuide: {
       title: 'Recommended access',
@@ -66,7 +109,127 @@ export default {
         'Commit to Git (or copy the folder) before large edits. Photos live in static/images/items/.'
     },
     help: {
-      pageTitle: 'Studio · Help'
+      pageTitle: 'Studio · Help',
+      intro:
+        'Operator guide for Atelier-Kit Studio: where each setting lives, how saves work and what to check before going live.',
+      tocTitle: 'On this page',
+      toc: {
+        workflow: 'Workflow',
+        site: 'Showcase and site settings',
+        content: 'Editorial content',
+        itemPage: 'Item detail page',
+        publish: 'Preview and publishing',
+        upgrade: 'Client site upgrades',
+        limits: 'YAML-only options',
+        safety: 'Safety and access'
+      },
+      workflow: {
+        title: 'Recommended workflow',
+        intro: 'Typical path from editing to checking the public site.',
+        steps: {
+          1: 'Pick an area from the left menu (or Overview). Each page saves YAML files in the project.',
+          2: 'Fill in fields and press Save. Fields marked * are required; (optional) can stay empty.',
+          3: 'Open Preview in another tab and reload after important saves.',
+          4: 'For ordered lists (items, collections, news) use ↑↓ arrows and Save ordering.',
+          5: 'Before launch, open Readiness: Content Doctor, validation and publish prep.'
+        }
+      },
+      site: {
+        title: 'Showcase and site settings',
+        intro: 'Public site identity, appearance and structure. Changes show on home, catalog and sidebar.'
+      },
+      pages: {
+        identity: 'Site name, tagline, visitor language, URL and social preview image.',
+        appearance: 'Color presets, five editable colors, Google font and optional background.',
+        hero: 'Home banner: image, copy and visibility.',
+        layout: 'Layout preset, home/sidebar/menu blocks and widget order.',
+        contact: 'Email and WhatsApp for the visitor brief on item pages.',
+        social: 'Instagram, Facebook and X links in the footer.',
+        footer: 'Link columns, copyright and legal line.'
+      },
+      content: {
+        title: 'Editorial content',
+        intro: 'Copy and catalog: each entry maps to a file under content/ or config/.',
+        orderNote:
+          'Manual order in Items / Collections / News writes sort_order into YAML and applies on home, sidebar and public lists.'
+      },
+      contentPages: {
+        about: '/about page: title, intro, sections and optional portrait.',
+        catalog: 'Item singular/plural labels, catalog intro, sort mode and home card limit.',
+        items: 'Item list: edit records, reorder cards, create and delete.',
+        collections: 'Curated item groups, site order and item order on the collection page.',
+        news: '/news posts: create, edit, reorder and delete.',
+        signals: 'Global Signal Clouds: single-choice questions on item pages and in the visitor brief.'
+      },
+      itemPage: {
+        title: 'Item record — public detail page',
+        intro:
+          'The /items/{id} page combines item content and shared settings. Not everything is configured on the same Studio screen.',
+        inStudioTitle: 'On Studio → Items → {id}',
+        inStudio: {
+          1: 'Title, subtitle, status, description and notice.',
+          2: 'Image: upload JPG/PNG/WebP or path under static/images/items/.',
+          3: 'Item details: editable, reorderable rows; use Group › Label (or >) to render a highlighted group on the public site.',
+          4: 'Delete item removes the YAML file and any uploaded photo.'
+        },
+        elsewhereTitle: 'Elsewhere in Studio',
+        elsewhere: {
+          1: 'Signal Clouds → questions/answers below the item page (shared across all items).',
+          2: 'Site → Contact → email/WhatsApp and visitor brief button labels.',
+          3: 'Site → Appearance → page colors and font.',
+          4: 'Catalog + item order → previous/next navigation and card position.',
+          5: 'Collections → which groups include this item.'
+        },
+        previewNote: 'Use Preview item at the top of the Studio item page to open /items/{id} in a new tab.'
+      },
+      publish: {
+        title: 'Preview and publishing',
+        intro: 'Check the visitor site and readiness before going live.',
+        preview: 'local public site (reload after saves).',
+        readiness: 'Content Doctor, publish prep and Vercel deploy when the repo is ready.'
+      },
+      upgrade: {
+        title: 'Client site upgrades',
+        intro:
+          'A new kit release does not update live client sites automatically. Each client project must be synced and redeployed manually.',
+        steps: {
+          1: 'Ship the kit: merge to main, git tag vX.Y.Z and publish a GitHub release.',
+          2: 'In the client folder: npm run site:upgrade -- --from ../atelier-kit --dry-run to preview the plan.',
+          3: 'Apply with npm run site:upgrade -- --from ../atelier-kit (or add --yes).',
+          4: 'config/, content/ and static/images/items/ are never overwritten. List customized src/ paths in .atelier-kit-preserve.',
+          5: 'Then npm install (if dependencies changed), npm run check, npm run build and publish or push to Vercel.'
+        },
+        note: 'The applied version is recorded in .atelier-kit-upgrade.json. See docs/usage/client-scaffold.md for details.'
+      },
+      commands: {
+        title: 'Terminal commands',
+        intro: 'Useful outside Studio or in CI. Run from the project folder.',
+        validate: {
+          cmd: 'npm run content:validate',
+          desc: 'Checks YAML structure, ids, missing images and cross-references.'
+        },
+        doctor: {
+          cmd: 'npm run content:doctor -- --strict',
+          desc: 'Editorial reminders; with --strict fails when notes need fixing.'
+        },
+        publish: {
+          cmd: 'npm run publish -- --deploy',
+          desc: 'Validation, check, build and deploy to Vercel (when configured).'
+        },
+        upgrade: {
+          cmd: 'npm run site:upgrade -- --from ../atelier-kit',
+          desc: 'Sync src/ and scripts/ from a newer kit without touching config or content.'
+        }
+      },
+      limits: {
+        title: 'YAML-only options',
+        intro: 'Some advanced options do not have a Studio field yet.',
+        items: {
+          1: 'Item details beyond one grouping level (Group › Label): content/items/{id}.yaml.',
+          2: 'External preview link on an item (preview field with href and label).',
+          3: 'Full legal copy: config/legal.yaml.'
+        }
+      }
     },
     site: {
       pageTitle: 'Studio · Site settings',
@@ -74,12 +237,25 @@ export default {
         'Edit the public site identity, appearance and contact actions here. Changes are saved directly to the project files. After saving, refresh the preview tab if the homepage does not update immediately.',
       appearance: {
         title: 'Site appearance',
-        intro: 'Background colors and optional background image for the public showcase.',
+        intro: 'Colors, typography and optional background image for the public showcase.',
         preset: 'Color preset',
+        fontPreset: 'Site font',
+        fontPresetHint: 'Loaded from Google Fonts on the public site. “System” uses the device sans-serif with no external requests.',
+        fontPreviewTitle: 'Sample heading',
+        fontPreviewBody: 'Preview text for catalog cards and paragraphs.',
         baseColor: 'Base background',
+        baseColorHint: 'Page background, gradient glow and areas behind header and footer on the public site.',
         accentColor: 'Accent glow',
+        accentColorHint: 'Links, buttons, glows and decorative tints in header, cards and sidebar.',
         textColor: 'Text color',
-        preview: 'Preview',
+        textColorHint: 'Paragraphs, captions and body copy across the public site.',
+        headingColor: 'Heading color',
+        headingColorHint: 'Page titles, section headings, catalog cards and site name in the header.',
+        cardColor: 'Card color',
+        cardColorHint: 'Catalog cards, collections, and raised panels on the public site.',
+        preview: 'Background',
+        previewHeading: 'Heading',
+        previewCard: 'Card',
         backgroundImage: 'Background image (optional)',
         backgroundHint: 'JPG, PNG or WebP. Saved under static/images/site/background.*',
         backgroundVsBanner:
@@ -99,26 +275,12 @@ export default {
         heroSignature: 'Signature',
         heroSignatureHint:
           'Personal sign-off on the home page, shown below the intro and right-aligned. Leave empty to hide.',
-        language: 'Language',
-        languages: {
-          it: 'Italian',
-          en: 'English'
-        },
-        notice: 'Public notice',
-        noticeHint:
-          'Short message on the home page, in a highlighted box below the tagline. Shown even when a hero intro is active. Leave empty to hide.',
         footerNote: 'Footer note (optional)',
         footerNoteHint: 'Short client text on the home page when no multi-column footer is configured. The Atelier-Kit credit is added automatically and cannot be removed.',
-        siteUrl: 'Canonical site URL (optional)',
-        siteUrlHint:
-          'Public https URL used when building absolute Open Graph image links. Leave empty to use the current request host (fine on Vercel).',
-        ogImage: 'Open Graph image (optional)',
-        ogImageHint:
-          'Path under /images/… or full https URL for social previews (Facebook, Instagram, WhatsApp). Recommended size: 1200×630.',
-        save: 'Save site settings'
+        save: 'Save settings'
       },
       heroBanner: {
-        title: 'Hero banner (optional)',
+        title: 'Banner (optional)',
         intro: 'Visual band below the intro text on the kit default homepage. Turn it off to hide without losing the uploaded image.',
         show: 'Show hero banner on home',
         backgroundImageActive:
@@ -164,6 +326,9 @@ export default {
         copyright: 'Copyright line',
         legalLine: 'Legal line (e.g. P.IVA)',
         showSocial: 'Show social icons in footer',
+        showSocialHint: 'Icons appear only after you configure at least one URL under Studio → Social.',
+        showSocialNoLinks:
+          'Settings saved. “Show social icons” is on, but there are no Social URLs yet — icons stay hidden until you add at least one.',
         columnLegend: 'Column {number}',
         columnTitle: 'Column title',
         columnTitleHint: 'Leave empty to skip this column.',
@@ -174,25 +339,16 @@ export default {
       layout: {
         title: 'Layout',
         intro:
-          'Choose single column or widget layout and where to show about, news, collections and catalog (main content, sidebar or top-right menu).',
-        preset: 'Layout preset',
-        presets: {
-          'single-column': 'Single column (default)',
-          'catalog-sidebar': 'Widget layout (main + sidebar)'
-        },
+          'Choose where about, news, collections and catalog appear on the home page (main column, sidebar or top-right menu).',
         blocksLegend: 'Home elements',
         blocksHint:
-          'Each block can sit in the main content area, the sidebar, or the top-right menu. Sidebar placement requires the widget layout preset.',
+          'At least one active element in the sidebar enables a two-column home layout. All in main column or menu → single-column layout.',
         placement: 'Placement',
-        placementMain: 'Main content',
+        placementMain: 'Main column',
         placementSidebar: 'Sidebar',
         placementMenu: 'Menu',
-        blocks: {
-          about: 'About',
-          news: 'News',
-          collections: 'Collections',
-          catalog: 'Catalog'
-        },
+        blockName: 'Element name',
+        blockNameHint: 'Leave empty to use the default name.',
         latestNewsCount: 'News count',
         save: 'Save layout'
       },
@@ -248,13 +404,18 @@ export default {
     },
     collections: {
       pageTitle: 'Studio · Collections',
-      intro: 'Choose a collection to edit, or create a new curated group.',
+      intro: 'Choose a collection to edit, reorder how they appear on the site, or create a new one.',
       title: 'Collections',
       count: '{count} collection file(s) in content/collections/',
       createLink: '+ Create new collection',
       empty: 'No collections yet.',
-      createFirst: 'Create your first collection',
-      itemCount: '{count} item(s)'
+      itemCount: '{count} item(s)',
+      orderLegend: 'Site order',
+      orderHint:
+        'Arrows reorder collections on the home page, sidebar, and /collections. Save to write sort_order into the YAML files.',
+      saveOrder: 'Save ordering',
+      deletedSuccess: 'Collection “{title}” deleted.',
+      missingCollection: 'Collection “{id}” no longer exists. It may have been deleted.'
     },
     collectionsNew: {
       pageTitle: 'Studio · New collection',
@@ -276,7 +437,6 @@ export default {
     collectionsEdit: {
       intro:
         'Edit this collection’s public text, choose items and set their order on the public collection page.',
-      preview: 'Preview collection',
       collectionId: 'Collection id: {id}',
       titleField: 'Collection title',
       description: 'Collection description',
@@ -287,16 +447,24 @@ export default {
       add: 'Add',
       remove: 'Remove',
       save: 'Save collection',
-      back: 'Back to collections'
+      back: 'Back to collections',
+      delete: 'Delete collection',
+      deleteConfirm:
+        'Delete collection “{title}” ({id})? This removes the YAML file. You cannot undo this from Studio.'
     },
     items: {
       pageTitle: 'Studio · Items',
-      intro: 'Choose an item to edit, or create a new one for the catalog.',
+      intro: 'Choose an item to edit, reorder catalog cards, or create a new one.',
       title: 'Items',
       count: '{count} item file(s) in content/items/',
       createLink: '+ Create new item',
       empty: 'No items yet.',
-      createFirst: 'Create your first item'
+      orderLegend: 'Catalog order',
+      orderHint:
+        'Used on the public site when Catalog sort is set to Manual. Arrows reorder item cards; save to apply.',
+      saveOrder: 'Save ordering',
+      deletedSuccess: 'Item “{title}” deleted.',
+      missingItem: 'Item “{id}” no longer exists. It may have been deleted.'
     },
     itemsNew: {
       pageTitle: 'Studio · New item',
@@ -333,24 +501,39 @@ export default {
       notice: 'Item notice',
       noticeHint: 'Leave empty to hide the notice on the item page.',
       details: 'Item details',
+      detailsHint:
+        'Add, rename and reorder rows shown in the Details block on the public item page. Use «Group › Row» (or «Group > Row») for a highlighted heading with indented sub-rows. Dropdowns suggest names and values already used in the catalog.',
+      detailsEmpty: 'No detail rows yet. Add one with the button below.',
+      detailLabel: 'Row name',
+      detailValue: 'Value',
+      detailAdd: '+ Add row',
+      detailRemove: 'Remove',
       save: 'Save item',
-      back: 'Back to items'
+      back: 'Back to items',
+      delete: 'Delete item',
+      deleteConfirm:
+        'Delete item “{title}” ({id})? This removes the YAML file and any uploaded photo. You cannot undo this from Studio.'
     },
     news: {
       pageTitle: 'Studio · News',
-      intro: 'Choose a news post to edit, or create a new announcement.',
+      intro: 'Choose a post to edit, reorder how posts appear on the site, or create a new one.',
       title: 'News',
       count: '{count} post file(s) in content/news/',
       createLink: '+ Create new post',
       empty: 'No news posts yet.',
-      createFirst: 'Create your first post'
+      orderLegend: 'Site order',
+      orderHint:
+        'Arrows reorder posts on the home page, sidebar, and /news. Save to write sort_order into the YAML files. When manual order ties, the newest date wins.',
+      saveOrder: 'Save ordering',
+      deletedSuccess: 'Post “{title}” deleted.',
+      missingPost: 'Post “{id}” no longer exists. It may have been deleted.'
     },
     newsNew: {
       pageTitle: 'Studio · New post',
       intro:
         'Create a new post under content/news/. Use lowercase letters, numbers and hyphens for the post id, for example spring-announcement.',
       title: 'New post',
-      introPanel: 'Posts appear on /news, newest first.',
+      introPanel: 'Posts appear on /news. Use manual ordering on the news list page or rely on publication date.',
       id: 'Post id',
       idHint: 'Cannot be changed later. Becomes the file name and URL slug.',
       idPattern: 'Use lowercase letters, numbers and hyphens only.',
@@ -381,12 +564,14 @@ export default {
       excerptHint: 'Short teaser shown on the news list page. Leave empty to use the first line of the body.',
       body: 'Body',
       save: 'Save post',
-      back: 'Back to news'
+      back: 'Back to news',
+      delete: 'Delete post',
+      deleteConfirm:
+        'Delete post “{title}” ({id})? This removes the YAML file and any uploaded photo. You cannot undo this from Studio.'
     },
     about: {
       pageTitle: 'Studio · About',
-      intro: 'Edit the public about page at /about. Use it for studio story, process and background.',
-      enabled: 'Show about page on the public site',
+      intro: 'Edit the public about page at /about. Use it for studio story, process and background. Visibility on the home page is set under Site → Layout.',
       titleField: 'Page title',
       introField: 'Introduction',
       portraitLegend: 'Author portrait (optional)',
@@ -402,16 +587,21 @@ export default {
     catalog: {
       pageTitle: 'Studio · Catalog',
       intro:
-        'Choose how items are named on the public site and which detail fields appear on cards and item pages.',
+        'How the public catalog presents itself: entity names, copy, sort order and home preview. Individual item content is managed under Items.',
+      namesLegend: 'Entity names',
       singular: 'Item name (singular)',
       plural: 'Item name (plural)',
-      visibleFields: 'Visible fields',
-      showPrice: 'Show price mode',
-      showAvailability: 'Show availability',
-      showMaterial: 'Show material',
-      showDimensions: 'Show dimensions',
-      showStatus: 'Show status',
-      showMeta: 'Show item details block',
+      presentationLegend: 'Catalog page',
+      eyebrow: 'Label above the title',
+      introField: 'Intro text',
+      introHint: 'Shown in the home catalog section and on /catalog. Leave empty for the theme default (on /catalog only).',
+      listingLegend: 'Listing',
+      sort: 'Sort order',
+      sortManual: 'Manual (sort_order in item file, then title)',
+      sortTitleAsc: 'Title A → Z',
+      sortTitleDesc: 'Title Z → A',
+      homeLimit: 'Home limit',
+      homeLimitHint: 'How many cards to show on the home page when catalog is in the main column. 0 = all, max {max}.',
       save: 'Save catalog settings'
     },
     signals: {
@@ -442,6 +632,14 @@ export default {
       neutral: 'Neutral paper',
       dark: 'Dark studio',
       custom: 'Custom colors'
+    },
+    font: {
+      system: 'System (local sans-serif)',
+      inter: 'Inter (modern sans-serif)',
+      'source-serif': 'Source Serif 4 (editorial serif)',
+      fraunces: 'Fraunces (artisan serif)',
+      'dm-sans': 'DM Sans (clean sans-serif)',
+      lora: 'Lora (elegant serif)'
     },
     items: {
       default: 'General object',
@@ -483,6 +681,7 @@ export default {
     saveSuccess: 'Saved successfully. Structural validation passed. Refresh the preview tab to see changes.',
     saveValidationProblem: 'Saved, but validation reported a problem:\n{output}',
     saveSiteError: 'Could not save site settings.',
+    saveLanguageError: 'Could not save language.',
     saveContactError: 'Could not save contact settings.',
     saveSocialError: 'Could not save social links.',
     saveFooterError: 'Could not save footer.',
@@ -495,7 +694,13 @@ export default {
     removeCloudError: 'Could not remove signal.',
     cloudRemoved: 'Signal removed. Refresh the preview to confirm item pages.',
     saveItemError: 'Could not save item.',
+    saveItemOrderError: 'Could not save item order.',
+    deleteItemError: 'Could not delete item.',
     saveCollectionError: 'Could not save collection.',
+    saveCollectionOrderError: 'Could not save collection order.',
+    deleteCollectionError: 'Could not delete collection.',
+    saveNewsOrderError: 'Could not save news post order.',
+    deleteNewsError: 'Could not delete news post.',
     createItemError: 'Could not create item.',
     createCollectionError: 'Could not create collection.',
     createNewsError: 'Could not create news post.',
@@ -509,7 +714,21 @@ export default {
     idFormat: '{label} must use lowercase letters, numbers and hyphens only.',
     yamlObject: '{path} must contain a YAML object.',
     itemExists: 'An item with id "{id}" already exists.',
+    itemOrderEmpty: 'Item order cannot be empty.',
+    itemOrderDuplicate: 'Item order contains duplicate ids.',
+    itemOrderIncomplete: 'Item order must include every catalog item.',
+    itemInCollections:
+      'Cannot delete this item: it is used in collections {collections}. Remove it from those collections first.',
     collectionExists: 'A collection with id "{id}" already exists.',
+    collectionNotFound: 'Collection not found.',
+    collectionOrderEmpty: 'Collection order cannot be empty.',
+    collectionOrderDuplicate: 'Collection order contains duplicate ids.',
+    collectionOrderIncomplete: 'Collection order must include every collection.',
+    newsOrderEmpty: 'News post order cannot be empty.',
+    newsOrderDuplicate: 'News post order contains duplicate ids.',
+    newsOrderIncomplete: 'News post order must include every news post.',
+    newsNotFound: 'News post “{id}” not found.',
+    metaLabelRequired: 'Each detail row needs a name.',
     collectionNeedsItems: 'Choose at least one item for this collection.',
     newsExists: 'A news post with id "{id}" already exists.',
     newsDateInvalid: 'Publication date must use YYYY-MM-DD format.',
@@ -520,7 +739,9 @@ export default {
     missingAbout: 'config/about.yaml is missing an about object.',
     missingSignalClouds: 'config/signal-clouds.yaml is missing signal_clouds.',
     missingSite: 'config/site.yaml is missing a site object.',
-    aboutTitleRequired: 'About page title is required when the page is enabled.',
+    aboutTitleRequired: 'About page title is required.',
+    catalogHomeLimitInvalid: 'Home limit must be 0 (show all) or a whole number from 1 to {max}.',
+    catalogHomeLimitMax: 'Home limit cannot exceed {max}.',
     heroBannerImageRequired: 'Upload a banner image or turn off display.',
     contactEmailRequired: 'Contact email is required when email contact is enabled.',
     contactWhatsappRequired: 'WhatsApp phone number is required when WhatsApp contact is enabled.',
@@ -714,11 +935,19 @@ export default {
     appearancePresetInvalid: '{source}: site.appearance.preset must be one of: warm, neutral, dark, custom.',
     appearanceColorInvalid: '{source}: site.appearance.{field} must be a hex color like #f8f0e4.',
     appearanceBackgroundInvalid: '{source}: site.appearance.background_image must be a path under /images/site/.',
+    appearanceFontPresetInvalid:
+      '{source}: site.appearance.font_preset must be one of: system, inter, source-serif, fraunces, dm-sans, lora.',
     siteUrlInvalid: '{source}: site.url must be a valid http or https URL.',
     ogImageInvalid: '{source}: site.og_image must be a non-empty string when provided.',
     ogImageUrlInvalid: '{source}: site.og_image must be a valid http or https URL.',
     ogImagePathInvalid: '{source}: site.og_image must be a path under /images/ or a full https URL.',
     missingCatalogObject: '{source}: missing "catalog" object.',
+    catalogSortInvalid:
+      '{source}: catalog.sort must be one of: manual, title_asc, title_desc.',
+    catalogHomeLimitInvalid:
+      '{source}: catalog.home_limit must be an integer from 1 to {max} when provided (or omit the field to show all).',
+    catalogEyebrowInvalid: '{source}: catalog.eyebrow must be a string when provided.',
+    catalogIntroInvalid: '{source}: catalog.intro must be a string when provided.',
     routeSegmentUnsupported:
       '{source}: route_segment is intentionally not supported in Atelier-Kit 1.0. Items live under /items.',
     missingSignalCloudsArray: '{source}: missing "signal_clouds" array.',
@@ -751,6 +980,7 @@ export default {
     layoutBlockIdInvalid: '{source}: invalid layout block id.',
     layoutBlockEnabledInvalid: '{source}: enabled must be true or false when provided.',
     layoutBlockPlacementInvalid: '{source}: placement must be "main", "sidebar" or "menu" when provided.',
+    layoutBlockLabelInvalid: '{source}: label must be a string when provided.',
     layoutHomeMustBeObject: '{source}: layout.home must be an object when provided.',
     layoutHomeShowInvalid:
       '{source}: layout.home.show must be "collections", "catalog", or "both" when provided.',
@@ -773,6 +1003,7 @@ export default {
     newsIdInvalid: '{source}: id must use lowercase letters, numbers and single hyphens only.',
     newsIdFilenameMismatch: '{source}: id must match filename "{expectedId}".',
     newsDateInvalid: '{source}: date must use YYYY-MM-DD format.',
+    newsSortOrderInvalid: '{source}: sort_order must be a whole number when present.',
     newsReadingFormatInvalid:
       '{source}: reading_format must be one of: book (got "{value}").'
   },
@@ -827,6 +1058,7 @@ export default {
       socialLinks: 'Social links',
       siteNav: 'Site menu',
       viewAllCollections: 'View all collections',
+      viewAllItems: 'View all {itemPlural}',
       readMore: 'Read more',
       allNews: 'All news'
     },
@@ -834,7 +1066,11 @@ export default {
       collectionsEyebrow: 'Collections',
       collectionsTitle: 'Collections',
       catalogEyebrow: 'Catalog',
-      aboutStudio: 'About the studio'
+    },
+    about: {
+      pageTitle: 'About',
+      metaDescription: 'Story and background from {siteName}.',
+      eyebrow: 'About'
     },
     collections: {
       pageTitle: 'Collections',
@@ -850,6 +1086,19 @@ export default {
       collections: 'Collections',
       latestNews: 'Latest news',
       sidebarAriaLabel: 'Catalog sidebar'
+    },
+    catalogListing: {
+      metaDescription: 'All {itemPlural} from {siteName}.',
+      intro: 'Browse every {itemPlural} in the showcase.',
+      empty: 'No catalog items yet.'
+    },
+    layout: {
+      blocks: {
+        about: 'About',
+        news: 'News',
+        collections: 'Collections',
+        catalog: 'Catalogue'
+      }
     },
     news: {
       pageTitle: 'News',
@@ -900,8 +1149,13 @@ export default {
       chooseOption: 'Choose {label}'
     },
     error: {
-      notFoundTitle: 'Item not found',
-      notFoundBody: 'The requested catalog item does not exist.',
+      itemNotFoundTitle: 'Item not found',
+      itemNotFoundBody:
+        'The requested catalog item does not exist. It may have been removed or the link is no longer valid.',
+      itemNotFoundId: 'Requested: {id}',
+      pageNotFoundTitle: 'Page not found',
+      pageNotFoundBody: 'The page you are looking for does not exist or is no longer available.',
+      backToHome: 'Back to home',
       genericTitle: 'Something went wrong',
       unexpectedError: 'Unexpected error.'
     },

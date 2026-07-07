@@ -14,15 +14,33 @@
 <!-- Sidebar layout applies on `/collections` index only; see getCatalogSidebarPageData() in showcase.js -->
 <div class="page-shell" class:with-sidebar={data.sidebarActive}>
   <main>
-    <nav aria-label={t('common.breadcrumb')}>
-      <a href="/">{t('common.home')}</a>
-    </nav>
+    <div class="page-intro">
+      <div class="page-intro-main">
+        <nav aria-label={t('common.breadcrumb')}>
+          <a href="/">{t('common.home')}</a>
+        </nav>
 
-    <header>
-      <p class="eyebrow">{t('collections.eyebrow')}</p>
-      <h1>{t('collections.title')}</h1>
-      <p>{t('collections.intro', { itemPlural: data.catalog.item_name_plural })}</p>
-    </header>
+        <header>
+          <p class="eyebrow">{t('collections.eyebrow')}</p>
+          <h1>{t('collections.title')}</h1>
+          <p>{t('collections.intro', { itemPlural: data.catalog.item_name_plural })}</p>
+        </header>
+      </div>
+
+      {#if data.sidebarActive && data.sidebar}
+        <aside class="page-sidebar">
+          <CatalogSidebar
+            collections={data.sidebar.collections}
+            about={data.sidebar.about}
+            newsPosts={data.sidebar.newsPosts}
+            catalogItems={data.sidebar.catalogItems}
+            catalog={data.sidebar.catalog}
+            site={data.site}
+            blockLabels={data.blockLabels}
+          />
+        </aside>
+      {/if}
+    </div>
 
     {#if data.collections.length > 0}
       <div class="grid">
@@ -38,17 +56,6 @@
       <p>{t('collections.empty')}</p>
     {/if}
   </main>
-
-  {#if data.sidebarActive && data.sidebar}
-    <CatalogSidebar
-      collections={data.sidebar.collections}
-      about={data.sidebar.about}
-      newsPosts={data.sidebar.newsPosts}
-      catalogItems={data.sidebar.catalogItems}
-      catalog={data.sidebar.catalog}
-      site={data.site}
-    />
-  {/if}
 </div>
 
 <style>
@@ -58,20 +65,28 @@
     padding: 0.75rem 0 4rem;
   }
 
-  .page-shell.with-sidebar {
+  .page-shell.with-sidebar .page-intro {
     display: grid;
     gap: 2rem;
-    grid-template-columns: minmax(0, 1fr);
     align-items: start;
+    margin-bottom: 2rem;
   }
 
   @media (min-width: 960px) {
-    .page-shell.with-sidebar {
+    .page-shell.with-sidebar .page-intro {
       grid-template-columns: minmax(0, 1fr) 280px;
     }
   }
 
   main {
+    min-width: 0;
+  }
+
+  .page-intro-main {
+    min-width: 0;
+  }
+
+  .page-sidebar {
     min-width: 0;
   }
 
@@ -86,7 +101,7 @@
   header {
     display: grid;
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
   }
 
   .eyebrow {
@@ -103,7 +118,7 @@
     font-size: clamp(3rem, 12vw, 7rem);
     line-height: 0.9;
     letter-spacing: -0.07em;
-    color: var(--site-text-color, #2f281f);
+    color: var(--site-heading-color, var(--site-text-color, #2f281f));
   }
 
   header p {
@@ -117,7 +132,8 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 22rem));
+    justify-content: center;
     gap: 1.2rem;
   }
 
@@ -125,37 +141,42 @@
     display: grid;
     gap: 0.75rem;
     padding: 1.4rem;
-    color: inherit;
+    color: var(--site-text-color, #2f281f);
     text-decoration: none;
-    background: #fffaf2;
-    border: 1px solid #e4d8c7;
+    background: var(--site-card-color, #fffaf2);
+    border: 1px solid var(--site-border-color, #e4d8c7);
     border-radius: 28px;
-    box-shadow: 0 20px 70px rgb(36 27 18 / 0.08);
+    box-shadow: 0 20px 70px rgb(0 0 0 / 0.08);
     transition:
       transform 160ms ease,
       box-shadow 160ms ease,
       border-color 160ms ease;
+    overflow: hidden;
   }
 
   .collection-card:hover {
     transform: translateY(-3px);
-    border-color: #c9ad89;
-    box-shadow: 0 24px 90px rgb(36 27 18 / 0.14);
+    border-color: color-mix(in srgb, var(--site-accent-color, #c9ad89) 70%, var(--site-border-color, #e4d8c7));
+    box-shadow: 0 24px 90px rgb(0 0 0 / 0.14);
   }
 
   .collection-card h2 {
-    margin: 0;
+    margin: -1.4rem -1.4rem 0;
+    padding: 0.82rem 1.4rem;
+    border-radius: 28px 28px 0 0;
+    background: color-mix(in srgb, var(--site-accent-color, #d6be9a) 14%, var(--site-card-color, #fffaf2));
+    color: var(--site-heading-color, var(--site-text-color, #2f281f));
     font-size: clamp(1.35rem, 4vw, 1.75rem);
   }
 
   .collection-card p {
     margin: 0;
-    color: #4f4236;
+    color: var(--site-muted-text-color, #7b6a58);
     line-height: 1.6;
   }
 
   .collection-card span {
-    color: #7b6a58;
+    color: var(--site-muted-text-color, #7b6a58);
     font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.08em;

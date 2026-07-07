@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest an improvement aligned with Atelier-Kit scope
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Atelier-Kit is a **micro-CMS for creative showcases** — not a generic WordPress replacement.
+        See [`docs/product/micro-cms-positioning.md`](https://github.com/gcomneno/atelier-kit/blob/main/docs/product/micro-cms-positioning.md) for scope.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What creative showcase need does this address?
+      placeholder: As a jeweller maintaining my catalog, I need…
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should Atelier-Kit do? Keep it concrete.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      description: Confirm this fits the micro-CMS direction.
+      options:
+        - label: This does not require ecommerce, comments, visitor accounts or a plugin ecosystem
+          required: true
+        - label: I checked open issues and did not find a duplicate
+          required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: YAML workflow, fork, operator handoff, or another tool?
+    validations:
+      required: false

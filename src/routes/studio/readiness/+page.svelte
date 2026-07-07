@@ -27,11 +27,11 @@
   <title>{t('studio.readiness.pageTitle')}</title>
 </svelte:head>
 
-<p class="intro">
+<p class="studio-intro">
   {t('studio.readiness.intro')}
 </p>
 
-<section class="panel">
+<section class="studio-panel">
   <div class="panel-heading">
     <h2>{t('studio.readiness.doctorTitle')}</h2>
     <p class={data.report.ok ? 'ok' : 'review'}>
@@ -42,7 +42,7 @@
   <pre class="report">{data.report.output}</pre>
 </section>
 
-<section class="panel">
+<section class="studio-panel">
   <div class="panel-heading">
     <h2>{t('studio.readiness.publishTitle')}</h2>
     <p>{t('studio.readiness.publishIntro')}</p>
@@ -72,7 +72,7 @@
   {/if}
 </section>
 
-<section class="panel">
+<section class="studio-panel">
   <div class="panel-heading">
     <h2>{t('studio.readiness.liveTitle')}</h2>
     <p>{t('studio.readiness.liveIntro')}</p>
@@ -132,20 +132,6 @@
 </section>
 
 <style>
-  .intro {
-    margin: 0 0 1.5rem;
-    color: #5a4632;
-    line-height: 1.6;
-  }
-
-  .panel {
-    margin-bottom: 1.5rem;
-    padding: 1.5rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
-    border-radius: 1rem;
-    background: rgb(255 250 242 / 0.82);
-  }
-
   .panel-heading h2 {
     margin: 0 0 0.35rem;
     font-size: 1.2rem;
@@ -153,7 +139,7 @@
 
   .panel-heading p {
     margin: 0 0 1rem;
-    color: #7d684f;
+    color: var(--studio-muted);
   }
 
   .pending h3 {
@@ -164,7 +150,7 @@
   .pending p,
   .pending ul {
     margin: 0 0 0.75rem;
-    color: #5a4632;
+    color: var(--studio-text);
   }
 
   .pending ul {

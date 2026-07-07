@@ -4,6 +4,29 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+### Added
+
+- **Studio Help** (`/studio/help`): workflow, site/content map, item detail guide, publish commands, **client site upgrade** steps and YAML-only limits.
+- **Item meta editor** in Studio: editable/reorderable detail rows, datalist suggestions, hierarchy via `Gruppo › Voce` (or `>`) with grouped public rendering.
+- **News** Studio parity with items/collections: manual order, delete and `sort_order`.
+- **Public catalog page** (`/catalog`) with sidebar integration.
+- **Site typography** presets (Google Fonts) in Studio appearance settings.
+- **Studio system** page for operator locale and related local settings.
+- Shared **form status / dirty-state** helpers across Studio save flows.
+
+### Changed
+
+- Italian Studio labels: **Novità**, **Nuvole di Segnali**, **Salva Nuvole**, **Entità** terminology throughout.
+- **Visitor Brief** and **Signal Cloud** colors follow site theme tokens; brief layout background swap.
+- **MetaInfo** renders group headers with indented children (no separator line under the group title).
+- Item detail page: image fill, localized «Leggi tutto» toggle, description layout polish.
+- Collections edit intro: removed redundant «Anteprima collezione» link.
+- Flat item meta labels with `›`/`>` are normalized to nested groups on read (`normalizeMetaHierarchy`).
+
+### Fixed
+
+- Card color hint and visitor-facing i18n gaps (including prepared-message heading in IT).
+
 ## v0.1.19 - 2026-07-06
 
 ### Added

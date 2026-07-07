@@ -74,7 +74,7 @@
     font-size: 0.82rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--site-text-color, #2f281f) 58%, transparent);
+    color: color-mix(in srgb, var(--site-heading-color, var(--site-text-color, #2f281f)) 58%, transparent);
   }
 
   .meta-list {
@@ -99,14 +99,26 @@
   }
 
   .meta-group {
-    padding-top: calc(0.5rem + var(--depth) * 0.25rem);
+    padding-top: calc(0.65rem + var(--depth) * 0.25rem);
     padding-left: calc(var(--depth) * 0.85rem);
+    border-top: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 10%, transparent);
+  }
+
+  .meta-group:first-of-type {
+    border-top: 0;
+    padding-top: calc(var(--depth) * 0.25rem);
+  }
+
+  .meta-group + .meta-row {
+    border-top: 0;
+    padding-top: 0.35rem;
   }
 
   .meta-group h3 {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 700;
+    color: var(--site-heading-color, var(--site-text-color, #2f281f));
   }
 
   dt {

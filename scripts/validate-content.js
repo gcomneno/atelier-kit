@@ -4,7 +4,7 @@ import { parse } from 'yaml';
 import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
 import { isValidFooterHref } from '../src/lib/footer-links.js';
-import { isHomeShowMode, isLayoutPreset, MAX_LATEST_NEWS_COUNT } from '../src/lib/layout-presets.js';
+import { isHomeShowMode, isLayoutPreset, MAX_CATALOG_HOME_LIMIT, MAX_LATEST_NEWS_COUNT } from '../src/lib/layout-presets.js';
 import {
   isLayoutBlockId,
   isLayoutPlacement,
@@ -12,6 +12,7 @@ import {
 } from '../src/lib/layout-blocks.js';
 import { isReadingFormat } from '../src/lib/reading-formats.js';
 import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
+import { isFontPreset } from '../src/lib/site-typography.js';
 
 const ROOT = process.cwd();
 const t = createTranslator(loadOperatorLocale());
@@ -183,7 +184,7 @@ function validateAppearance(appearance, source) {
     }
   }
 
-  for (const field of ['base_color', 'accent_color', 'text_color']) {
+  for (const field of ['base_color', 'accent_color', 'text_color', 'heading_color', 'card_color']) {
     if (!(field in appearance) || appearance[field] === undefined) {
       continue;
     }
@@ -199,6 +200,12 @@ function validateAppearance(appearance, source) {
       !appearance.background_image.startsWith('/images/site/')
     ) {
       failKey('appearanceBackgroundInvalid', { source });
+    }
+  }
+
+  if ('font_preset' in appearance && appearance.font_preset !== undefined) {
+    if (typeof appearance.font_preset !== 'string' || !isFontPreset(appearance.font_preset)) {
+      failKey('appearanceFontPresetInvalid', { source });
     }
   }
 }
@@ -247,6 +254,28 @@ function validateCatalog() {
 
   requireString(catalog, 'item_name_singular', source);
   requireString(catalog, 'item_name_plural', source);
+
+  if ('sort' in catalog) {
+    const sort = catalog.sort;
+    if (sort !== 'manual' && sort !== 'title_asc' && sort !== 'title_desc') {
+      failKey('catalogSortInvalid', { source });
+    }
+  }
+
+  if ('home_limit' in catalog) {
+    const homeLimit = catalog.home_limit;
+    if (typeof homeLimit !== 'number' || !Number.isInteger(homeLimit) || homeLimit < 1 || homeLimit > MAX_CATALOG_HOME_LIMIT) {
+      failKey('catalogHomeLimitInvalid', { source, max: MAX_CATALOG_HOME_LIMIT });
+    }
+  }
+
+  if ('eyebrow' in catalog && catalog.eyebrow !== undefined && typeof catalog.eyebrow !== 'string') {
+    failKey('catalogEyebrowInvalid', { source });
+  }
+
+  if ('intro' in catalog && catalog.intro !== undefined && typeof catalog.intro !== 'string') {
+    failKey('catalogIntroInvalid', { source });
+  }
 
   if ('route_segment' in catalog) {
     failKey('routeSegmentUnsupported', { source });
@@ -312,10 +341,6 @@ function validateAbout() {
 
   if (!about || typeof about !== 'object' || Array.isArray(about)) {
     failKey('missingAboutObject', { source });
-    return;
-  }
-
-  if (about.enabled === false) {
     return;
   }
 
@@ -600,6 +625,10 @@ function validateLayout() {
           failKey('layoutLatestNewsCountInvalid', { source: blockSource, max: MAX_LATEST_NEWS_COUNT });
         }
       }
+
+      if ('label' in block && block.label !== undefined && typeof block.label !== 'string') {
+        failKey('layoutBlockLabelInvalid', { source: blockSource });
+      }
     }
 
     return;
@@ -826,6 +855,13 @@ function validateNews() {
     }
 
     requireString(post, 'body', source);
+
+    if (
+      post.sort_order !== undefined &&
+      (typeof post.sort_order !== 'number' || !Number.isInteger(post.sort_order))
+    ) {
+      failKey('newsSortOrderInvalid', { source });
+    }
 
     if (post.reading_format !== undefined && !isReadingFormat(post.reading_format)) {
       const value =

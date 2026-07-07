@@ -6,7 +6,8 @@ import {
   DEFAULT_LATEST_NEWS_COUNT,
   DEFAULT_LAYOUT_PRESET,
   isLayoutPreset,
-  MAX_LATEST_NEWS_COUNT
+  MAX_LATEST_NEWS_COUNT,
+  MAX_CATALOG_HOME_LIMIT
 } from '$lib/layout-presets.js';
 import {
   LAYOUT_BLOCK_IDS,
@@ -18,7 +19,9 @@ import {
 } from '$lib/layout-blocks.js';
 import { isValidSocialUrl, normalizeSocialId } from '$lib/social-networks.js';
 import { resolveSiteAppearance } from '$lib/site-appearance.js';
-import { getVisitorTranslator } from '$lib/i18n/index.js';
+import { resolveLocale } from '$lib/i18n/resolve-locale.js';
+import { getDefaultLayoutBlockLabel } from '$lib/layout-block-labels.js';
+import { normalizeMetaHierarchy } from '$lib/item-meta.js';
 
 const configFiles = import.meta.glob('/config/*.yaml', {
   query: '?raw',
@@ -243,7 +246,9 @@ function normalizeMetaEntries(entries, source) {
     throw new Error(`${source}: "meta" must be an array when provided.`);
   }
 
-  return entries.map((entry, index) => normalizeMetaEntry(entry, `${source}:meta[${index}]`));
+  const hierarchy = normalizeMetaHierarchy(entries);
+
+  return hierarchy.map((entry, index) => normalizeMetaEntry(entry, `${source}:meta[${index}]`));
 }
 
 /**
@@ -308,7 +313,6 @@ export function getSiteConfig() {
     name: requiredString(site, 'name', 'config/site.yaml'),
     tagline: requiredString(site, 'tagline', 'config/site.yaml'),
     language: optionalString(site, 'language', 'en'),
-    notice: optionalString(site, 'notice'),
     hero_intro: optionalString(site, 'hero_intro'),
     hero_signature: optionalString(site, 'hero_signature'),
     footer_note: optionalString(site, 'footer_note'),
@@ -354,20 +358,47 @@ export function getCatalogConfig() {
     throw new Error('config/catalog.yaml: missing "catalog" object.');
   }
 
-  const fields = isRecord(catalog.fields) ? catalog.fields : {};
+  const sort = optionalString(catalog, 'sort');
+  const homeLimitRaw = catalog.home_limit;
 
   return {
     item_name_singular: requiredString(catalog, 'item_name_singular', 'config/catalog.yaml'),
     item_name_plural: requiredString(catalog, 'item_name_plural', 'config/catalog.yaml'),
-    fields: {
-      show_price: fields.show_price === true,
-      show_availability: fields.show_availability !== false,
-      show_material: fields.show_material !== false,
-      show_dimensions: fields.show_dimensions !== false,
-      show_status: fields.show_status !== false,
-      show_meta: fields.show_meta !== false
-    }
+    eyebrow: optionalString(catalog, 'eyebrow'),
+    intro: optionalString(catalog, 'intro'),
+    sort: sort === 'title_asc' || sort === 'title_desc' ? sort : 'manual',
+    home_limit:
+      typeof homeLimitRaw === 'number' && Number.isInteger(homeLimitRaw) && homeLimitRaw > 0
+        ? Math.min(homeLimitRaw, MAX_CATALOG_HOME_LIMIT)
+        : 0
   };
+}
+
+/**
+ * @param {any[]} items
+ * @param {'manual' | 'title_asc' | 'title_desc'} sortMode
+ */
+function sortCatalogItems(items, sortMode) {
+  const sorted = [...items];
+
+  if (sortMode === 'title_asc') {
+    return sorted.sort((left, right) => left.title.localeCompare(right.title));
+  }
+
+  if (sortMode === 'title_desc') {
+    return sorted.sort((left, right) => right.title.localeCompare(left.title));
+  }
+
+  return sorted.sort((left, right) => {
+    const leftOrder = left.sort_order ?? Number.POSITIVE_INFINITY;
+    const rightOrder = right.sort_order ?? Number.POSITIVE_INFINITY;
+
+    if (leftOrder !== rightOrder) {
+      return leftOrder - rightOrder;
+    }
+
+    return left.title.localeCompare(right.title);
+  });
 }
 
 export function getSignalClouds() {
@@ -421,7 +452,7 @@ export function getAboutConfig() {
   const data = parseYaml('/config/about.yaml', raw);
   const about = data.about;
 
-  if (!isRecord(about) || about.enabled === false) {
+  if (!isRecord(about)) {
     return null;
   }
 
@@ -701,7 +732,10 @@ export function getSocialConfig() {
 }
 
 export function getItems() {
-  return readContentYamlEntries(itemFiles, 'content/items')
+  const sortMode = getCatalogConfig().sort;
+
+  return sortCatalogItems(
+    readContentYamlEntries(itemFiles, 'content/items')
     .map(([source, raw]) => {
       if (typeof raw !== 'string') {
         throw new Error(`${source}: expected raw YAML content.`);
@@ -727,17 +761,9 @@ export function getItems() {
         availability: optionalString(item, 'availability') || findMetaValue(meta, 'Availability'),
         meta
       };
-    })
-    .sort((left, right) => {
-      const leftOrder = left.sort_order ?? Number.POSITIVE_INFINITY;
-      const rightOrder = right.sort_order ?? Number.POSITIVE_INFINITY;
-
-      if (leftOrder !== rightOrder) {
-        return leftOrder - rightOrder;
-      }
-
-      return left.title.localeCompare(right.title);
-    });
+    }),
+    sortMode
+  );
 }
 
 /**
@@ -796,6 +822,7 @@ export function getCollections() {
         id: requiredString(collection, 'id', source),
         title: requiredString(collection, 'title', source),
         description: requiredString(collection, 'description', source),
+        sort_order: optionalSortOrder(collection, 'sort_order'),
         item_ids: itemIds,
         items: itemIds.map((itemId) => {
           const item = itemById.get(itemId);
@@ -808,7 +835,16 @@ export function getCollections() {
         })
       };
     })
-    .sort((left, right) => left.title.localeCompare(right.title));
+    .sort((left, right) => {
+      const leftOrder = left.sort_order ?? Number.POSITIVE_INFINITY;
+      const rightOrder = right.sort_order ?? Number.POSITIVE_INFINITY;
+
+      if (leftOrder !== rightOrder) {
+        return leftOrder - rightOrder;
+      }
+
+      return left.title.localeCompare(right.title);
+    });
 }
 
 /**
@@ -828,6 +864,10 @@ export function getNewsPosts() {
       const post = parseYaml(source, raw);
       const imageFile = optionalString(post, 'image_file');
       const readingFormat = optionalString(post, 'reading_format');
+      const sortOrder =
+        typeof post.sort_order === 'number' && Number.isInteger(post.sort_order)
+          ? post.sort_order
+          : null;
 
       return {
         id: requiredString(post, 'id', source),
@@ -835,11 +875,27 @@ export function getNewsPosts() {
         date: requiredString(post, 'date', source),
         excerpt: optionalString(post, 'excerpt'),
         body: requiredString(post, 'body', source),
+        sort_order: sortOrder,
         ...(readingFormat ? { reading_format: readingFormat } : {}),
         ...(imageFile ? { image_file: imageFile, image_alt: optionalString(post, 'image_alt') } : {})
       };
     })
-    .sort((left, right) => right.date.localeCompare(left.date));
+    .sort((left, right) => {
+      const leftOrder = left.sort_order ?? Number.POSITIVE_INFINITY;
+      const rightOrder = right.sort_order ?? Number.POSITIVE_INFINITY;
+
+      if (leftOrder !== rightOrder) {
+        return leftOrder - rightOrder;
+      }
+
+      const dateCompare = right.date.localeCompare(left.date);
+
+      if (dateCompare !== 0) {
+        return dateCompare;
+      }
+
+      return left.title.localeCompare(right.title);
+    });
 }
 
 /**
@@ -858,7 +914,7 @@ export function getNewsPost(id) {
  * }} LayoutConfig
  */
 
-/** @type {LayoutConfig} */
+/** @type {Record<LayoutBlockId, LayoutBlockConfig>} */
 const defaultLayoutBlocks = normalizeLayoutBlocks();
 
 /** @type {LayoutConfig} */
@@ -907,9 +963,47 @@ export function isCatalogSidebarActive(layout) {
 }
 
 /**
+ * @typedef {{ surface?: 'menu' | 'main' | 'sidebar' }} LayoutBlockLabelOptions
+ * @param {LayoutBlockId} blockId
+ * @param {LayoutBlockConfig} block
+ * @param {string} locale
+ * @param {LayoutBlockLabelOptions} [_options]
+ */
+export function resolveLayoutBlockLabel(blockId, block, locale, _options = {}) {
+  const custom = typeof block.label === 'string' ? block.label.trim() : '';
+
+  if (custom) {
+    return custom;
+  }
+
+  return getDefaultLayoutBlockLabel(blockId, locale);
+}
+
+/**
+ * @param {LayoutConfig} layout
+ * @param {string} locale
+ */
+export function getLayoutBlockLabels(layout, locale) {
+  /** @type {Record<LayoutBlockId, string>} */
+  const labels = /** @type {Record<LayoutBlockId, string>} */ ({});
+
+  for (const blockId of LAYOUT_BLOCK_IDS) {
+    const placement = effectiveBlockPlacement(layout.preset, layout.blocks, blockId);
+    const surface =
+      placement === 'menu' ? 'menu' : placement === 'main' ? 'main' : 'sidebar';
+
+    labels[blockId] = resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale, { surface });
+  }
+
+  return labels;
+}
+
+/**
  * @param {LayoutConfig} layout
  */
 export function getHomeLayoutPageData(layout) {
+  const locale = resolveLocale(getSiteConfig().language);
+  const blockLabels = getLayoutBlockLabels(layout, locale);
   /** @type {Record<LayoutBlockId, 'main' | 'sidebar' | null>} */
   const placements = /** @type {Record<LayoutBlockId, 'main' | 'sidebar' | null>} */ (
     Object.fromEntries(
@@ -934,6 +1028,7 @@ export function getHomeLayoutPageData(layout) {
       layout,
       sidebarActive: false,
       placements,
+      blockLabels,
       main,
       sidebar: null
     };
@@ -943,6 +1038,7 @@ export function getHomeLayoutPageData(layout) {
     layout,
     sidebarActive: true,
     placements,
+    blockLabels,
     main,
     sidebar: {
       collections: placements.collections === 'sidebar' ? getCollections() : [],
@@ -956,7 +1052,7 @@ export function getHomeLayoutPageData(layout) {
 }
 
 /**
- * Sidebar applies on home (`/`) and the collections index (`/collections`) only.
+ * Sidebar applies on home (`/`), catalog (`/catalog`), collections index and detail.
  *
  * @param {LayoutConfig} layout
  */
@@ -971,7 +1067,6 @@ export function getCatalogSidebarPageData(layout) {
  * @returns {LayoutMenuNavItem[]}
  */
 export function getLayoutMenuNav(layout, locale) {
-  const t = getVisitorTranslator(locale);
   /** @type {LayoutMenuNavItem[]} */
   const items = [];
 
@@ -984,7 +1079,10 @@ export function getLayoutMenuNav(layout, locale) {
       const about = getAboutConfig();
 
       if (about) {
-        items.push({ href: '/about', label: about.title });
+        items.push({
+          href: '/about',
+          label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale, { surface: 'menu' })
+        });
       }
 
       continue;
@@ -992,7 +1090,10 @@ export function getLayoutMenuNav(layout, locale) {
 
     if (blockId === 'news') {
       if (getNewsPosts().length > 0) {
-        items.push({ href: '/news', label: t('visitor.news.title') });
+        items.push({
+          href: '/news',
+          label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale, { surface: 'menu' })
+        });
       }
 
       continue;
@@ -1000,14 +1101,20 @@ export function getLayoutMenuNav(layout, locale) {
 
     if (blockId === 'collections') {
       if (getCollections().length > 0) {
-        items.push({ href: '/collections', label: t('visitor.collections.pageTitle') });
+        items.push({
+          href: '/collections',
+          label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale, { surface: 'menu' })
+        });
       }
 
       continue;
     }
 
     if (blockId === 'catalog' && getItems().length > 0) {
-      items.push({ href: '/#catalog', label: getCatalogConfig().item_name_plural });
+      items.push({
+        href: '/catalog',
+        label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale, { surface: 'menu' })
+      });
     }
   }
 

@@ -25,15 +25,6 @@
     }
   });
 
-  $effect(() => {
-    if (removeHeroImage) {
-      showBanner = false;
-
-      if (bannerUploadInput) {
-        bannerUploadInput.value = '';
-      }
-    }
-  });
 </script>
 
 <svelte:head>

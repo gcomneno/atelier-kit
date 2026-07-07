@@ -6,9 +6,9 @@ export default {
       title: 'Local authoring',
       nav: {
         dashboard: 'Overview',
-        siteGroup: 'Showcase site',
-        contentGroup: 'Content',
-        publishGroup: 'Publishing',
+        siteGroup: 'Showcase settings',
+        contentGroup: 'Editorial',
+        publishGroup: 'Go live',
         site: 'Site',
         identity: 'Identity',
         appearance: 'Visitor appearance',
@@ -31,39 +31,23 @@ export default {
     dashboard: {
       pageTitle: 'Studio · Overview',
       intro:
-        'Welcome to Studio. Each card opens one focused page, so updates are cleaner and there is no more endless scrolling.',
-      cards: {
-        identity: {
-          title: 'Site identity',
-          description: 'Name, tagline, language, notice and Open Graph metadata.'
+        'Three areas, matching the left menu: pick where to work. Each box opens the first page in that group.',
+      zonesLegend: 'Studio areas',
+      zones: {
+        site: {
+          eyebrow: 'Showcase',
+          title: 'Showcase settings',
+          description: 'How the public site looks: identity, colors, layout and contact points.'
         },
-        appearance: {
-          title: 'Visitor appearance',
-          description: 'Color presets and background image for the public site.'
+        content: {
+          eyebrow: 'Editorial',
+          title: 'Pages and works',
+          description: 'Copy, catalog, items, collections, news and visitor signals.'
         },
-        hero: {
-          title: 'Hero banner',
-          description: 'Manage hero image, caption and optional call-to-action link.'
-        },
-        contact: {
-          title: 'Contact actions',
-          description: 'Configure Visitor Brief email and optional WhatsApp.'
-        },
-        social: {
-          title: 'Social links',
-          description: 'Header and footer social profile links.'
-        },
-        layout: {
-          title: 'Layout',
-          description: 'Homepage/catalog presets and sidebar widgets.'
-        },
-        footer: {
-          title: 'Footer',
-          description: 'Legal rows, link columns and social visibility.'
-        },
-        readiness: {
-          title: 'Publish readiness',
-          description: 'Check validation status and production deploy readiness.'
+        publish: {
+          eyebrow: 'Online',
+          title: 'Go live',
+          description: 'Pre-launch checks, operator guide and site preview.'
         }
       }
     },
@@ -198,7 +182,7 @@ export default {
         },
         blocksLegend: 'Home elements',
         blocksHint:
-          'With widget layout, place each element in the main content area or the sidebar.',
+          'Each block can sit in the main content area, the sidebar, or the top-right menu. Sidebar placement requires the widget layout preset.',
         placement: 'Placement',
         placementMain: 'Main content',
         placementSidebar: 'Sidebar',

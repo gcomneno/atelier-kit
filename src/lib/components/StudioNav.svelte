@@ -39,17 +39,24 @@
         <li><a class:active={isActive('/studio/catalog')} href="/studio/catalog">{t('studio.layout.nav.catalog')}</a></li>
         <li><a class:active={pathname.startsWith('/studio/items')} href="/studio/items">{t('studio.layout.nav.items')}</a></li>
         <li><a class:active={pathname.startsWith('/studio/collections')} href="/studio/collections">{t('studio.layout.nav.collections')}</a></li>
-        <li><a class:active={pathname.startsWith('/studio/news')} href="/studio/news">{t('studio.layout.nav.news')}</a></li>
         <li><a class:active={isActive('/studio/signal-clouds')} href="/studio/signal-clouds">{t('studio.layout.nav.signals')}</a></li>
+        <li><a class:active={pathname.startsWith('/studio/news')} href="/studio/news">{t('studio.layout.nav.news')}</a></li>
       </ul>
     </li>
 
     <li class="group">
       <p class="group-title">{t('studio.layout.nav.publishGroup')}</p>
-      <ul class="sub-list" class:active-group={isActiveGroup(['/studio/readiness', '/studio/help'])}>
-        <li><a class:active={isActive('/studio/readiness')} href="/studio/readiness">{t('studio.layout.nav.readiness')}</a></li>
-        <li><a class:active={isActive('/studio/help')} href="/studio/help">{t('studio.layout.nav.help')}</a></li>
+      <ul class="sub-list" class:active-group={isActiveGroup(['/studio/readiness'])}>
         <li><a href="/" target="_blank" rel="noreferrer">{t('studio.layout.nav.preview')}</a></li>
+        <li><a class:active={isActive('/studio/readiness')} href="/studio/readiness">{t('studio.layout.nav.readiness')}</a></li>
+      </ul>
+    </li>
+
+    <li class="group">
+      <p class="group-title">{t('studio.layout.nav.systemGroup')}</p>
+      <ul class="sub-list" class:active-group={isActiveGroup(['/studio/system', '/studio/help'])}>
+        <li><a class:active={isActive('/studio/system')} href="/studio/system">{t('studio.layout.nav.system')}</a></li>
+        <li><a class:active={isActive('/studio/help')} href="/studio/help">{t('studio.layout.nav.help')}</a></li>
       </ul>
     </li>
   </ul>

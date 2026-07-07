@@ -1,11 +1,10 @@
 contact:
   email:
-    enabled: true
-    label: "Email this brief"
-    address: "hello@example.com"
-    subject_prefix: "Interest in"
-
-  whatsapp:
     enabled: false
-    label: "WhatsApp this brief"
-    phone: ""
+    label: ""
+    address: hello@example.com
+    subject_prefix: ""
+  whatsapp:
+    enabled: true
+    label: WhatsAppami!
+    phone: "1234567"

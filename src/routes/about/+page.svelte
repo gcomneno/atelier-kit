@@ -10,7 +10,10 @@
 
 <svelte:head>
   <title>{data.about.title} · {data.site.name}</title>
-  <meta name="description" content={data.about.intro || data.about.title} />
+  <meta
+    name="description"
+    content={data.about.intro || t('about.metaDescription', { siteName: data.site.name })}
+  />
 </svelte:head>
 
 <main class="about-page">
@@ -30,20 +33,28 @@
         </figure>
       {/if}
 
-      <p class="eyebrow">{data.site.name}</p>
-      <h1>{data.about.title}</h1>
+      <div class="page-heading">
+        <p class="eyebrow">{t('about.eyebrow')}</p>
+        <h1>{data.about.title}</h1>
+      </div>
 
-      {#each introParagraphs as paragraph}
-        <p class="intro">{paragraph}</p>
-      {/each}
+      {#if introParagraphs.length > 0}
+        <div class="intro-block">
+          {#each introParagraphs as paragraph}
+            <p>{paragraph}</p>
+          {/each}
+        </div>
+      {/if}
     </header>
 
     {#each data.about.sections as section}
-      <section>
+      <section class="about-section">
         <h2>{section.heading}</h2>
-        {#each splitParagraphs(section.body) as paragraph}
-          <p>{paragraph}</p>
-        {/each}
+        <div class="section-body">
+          {#each splitParagraphs(section.body) as paragraph}
+            <p>{paragraph}</p>
+          {/each}
+        </div>
       </section>
     {/each}
   </article>
@@ -51,9 +62,9 @@
 
 <style>
   .about-page {
-    width: min(1120px, calc(100% - 2rem));
+    width: min(760px, calc(100% - 2rem));
     margin: 0 auto;
-    padding: 2rem 0 4rem;
+    padding: 1.25rem 0 4rem;
   }
 
   .back-link {
@@ -61,6 +72,7 @@
     margin-bottom: 1.25rem;
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 72%, transparent);
     text-decoration: none;
+    font-weight: 600;
   }
 
   .back-link:hover {
@@ -69,15 +81,16 @@
 
   article {
     display: grid;
-    gap: 1.5rem;
+    gap: 1.25rem;
   }
 
   header {
     display: flow-root;
   }
 
-  header.has-portrait {
-    min-height: 10.5rem;
+  .page-heading {
+    display: grid;
+    gap: 0.45rem;
   }
 
   .about-portrait {
@@ -87,11 +100,9 @@
     aspect-ratio: 1;
     overflow: hidden;
     border-radius: 1rem;
-    border: 1px solid color-mix(in srgb, var(--site-border-color, rgb(232 224 212 / 0.18)) 88%, transparent);
-    background: color-mix(in srgb, var(--site-card-color, #1a1816) 82%, transparent);
-    box-shadow:
-      0 18px 50px rgb(0 0 0 / 0.28),
-      inset 0 0 0 1px color-mix(in srgb, var(--site-text-color, #e8e0d4) 6%, transparent);
+    border: 1px solid var(--site-border-color, #e4d8c7);
+    background: color-mix(in srgb, var(--site-card-color, #fffaf2) 88%, transparent);
+    box-shadow: 0 18px 50px rgb(0 0 0 / 0.12);
   }
 
   .about-portrait img {
@@ -104,57 +115,67 @@
 
   .eyebrow {
     margin: 0;
-    color: color-mix(in srgb, var(--site-text-color, #2f281f) 68%, transparent);
+    color: color-mix(in srgb, var(--site-accent-color, #7d684f) 72%, var(--site-text-color, #2f281f));
     font-size: 0.8rem;
-    letter-spacing: 0.08em;
+    font-weight: 800;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
   }
 
   h1 {
     margin: 0;
+    max-width: 16ch;
     font-size: clamp(2.4rem, 8vw, 4rem);
     line-height: 0.95;
     letter-spacing: -0.05em;
   }
 
-  .intro,
-  section p {
+  .intro-block,
+  .section-body {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .intro-block {
+    margin-top: 1rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid color-mix(in srgb, var(--site-accent-color, #dfc9aa) 55%, transparent);
+    border-radius: 1.25rem;
+    background: color-mix(
+      in srgb,
+      var(--site-card-color, #fffaf2) 82%,
+      var(--site-accent-color, #dfc9aa) 18%
+    );
+    box-shadow: 0 12px 40px rgb(0 0 0 / 0.1);
+  }
+
+  .intro-block p,
+  .section-body p {
     margin: 0;
-    width: 100%;
-    max-width: none;
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 92%, transparent);
     font-size: 1.05rem;
     line-height: 1.7;
     text-align: left;
-    text-wrap: wrap;
-    hyphens: manual;
+    text-wrap: pretty;
   }
 
-  .intro {
-    margin-top: 0.75rem;
-  }
-
-  .intro ~ .intro {
-    margin-top: 0.65rem;
-  }
-
-  section {
+  .about-section {
     display: grid;
-    gap: 0.65rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 16%, transparent);
+    gap: 0.85rem;
+    padding: 1.25rem 1.3rem;
+    border: 1px solid var(--site-border-color, #e4d8c7);
+    border-radius: 1.25rem;
+    background: color-mix(in srgb, var(--site-card-color, #fffaf2) 92%, transparent);
+    box-shadow: 0 16px 50px rgb(0 0 0 / 0.08);
   }
 
   h2 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
   }
 
   @media (max-width: 719px) {
-    header.has-portrait {
-      min-height: 0;
-    }
-
     .about-portrait {
       float: none;
       width: min(100%, 11rem);
@@ -167,9 +188,8 @@
       text-align: left;
     }
 
-    header.has-portrait .eyebrow,
-    header.has-portrait h1,
-    header.has-portrait .intro {
+    header.has-portrait .page-heading,
+    header.has-portrait .intro-block {
       width: 100%;
     }
   }

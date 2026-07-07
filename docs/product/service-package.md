@@ -6,9 +6,11 @@ It supports ADR 0003 and epic [#43](https://github.com/gcomneno/atelier-kit/issu
 
 ## Positioning
 
-> A small online showcase for unique creative work — not a shop, not a CMS, not a comment system.
+> A small online showcase for unique creative work — a bounded micro-CMS, not a shop, not a generic CMS, not a comment system.
 
 The service sells **clarity and handoff**, not hosting lock-in.
+
+For the micro-CMS contract and WordPress comparison, see [`micro-cms-positioning.md`](micro-cms-positioning.md).
 
 ## Standard package — “Vetrina pronta”
 
@@ -99,6 +101,7 @@ The package succeeds when:
 
 ## Related docs
 
+- [`micro-cms-positioning.md`](micro-cms-positioning.md)
 - [`operator-handoff-playbook.md`](operator-handoff-playbook.md)
 - [`product-levels.md`](product-levels.md)
 - [`positioning.md`](positioning.md)

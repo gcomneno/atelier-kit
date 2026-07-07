@@ -1,11 +1,14 @@
 // @ts-nocheck
 
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, isRedirect, redirect } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
 import {
-  applyMetaFromForm,
   assertContentId,
+  deleteItemRecord,
+  itemRecordExists,
+  listItemMetaSuggestions,
   optionalField,
+  parseItemMetaFromForm,
   readItemRecord,
   requiredField,
   runStructuralValidation,
@@ -13,6 +16,7 @@ import {
   validationMessage,
   writeItemRecord
 } from '$lib/server/studio-io.js';
+import { flattenMetaForEdit } from '$lib/item-meta.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 
 function readString(record, key, fallback = '') {
@@ -22,6 +26,7 @@ function readString(record, key, fallback = '') {
 
 function loadItemForm(id) {
   const item = readItemRecord(id);
+  const meta = Array.isArray(item.meta) ? item.meta : [];
 
   return {
     id: readString(item, 'id', id),
@@ -33,7 +38,7 @@ function loadItemForm(id) {
     image_alt: readString(item, 'image_alt'),
     description: readString(item, 'description'),
     notice: readString(item, 'notice'),
-    meta: Array.isArray(item.meta) ? item.meta : []
+    metaRows: flattenMetaForEdit(meta)
   };
 }
 
@@ -44,10 +49,28 @@ export function load({ params }) {
 
   try {
     assertContentId(params.id, t('fields.itemId'), locale);
+  } catch (loadError) {
+    if (isRedirect(loadError)) {
+      throw loadError;
+    }
+
+    error(404, t('server.itemNotFound'));
+  }
+
+  if (!itemRecordExists(params.id)) {
+    redirect(303, `/studio/items?missing=${encodeURIComponent(params.id)}`);
+  }
+
+  try {
     return {
-      itemForm: loadItemForm(params.id)
+      itemForm: loadItemForm(params.id),
+      metaSuggestions: listItemMetaSuggestions()
     };
-  } catch {
+  } catch (loadError) {
+    if (isRedirect(loadError)) {
+      throw loadError;
+    }
+
     error(404, t('server.itemNotFound'));
   }
 }
@@ -81,7 +104,7 @@ export const actions = {
         image_alt: optionalField(formData.get('image_alt')),
         description: requiredField(formData.get('description'), t('fields.description'), locale),
         notice: optionalField(formData.get('notice')),
-        meta: applyMetaFromForm(original.meta, formData)
+        meta: parseItemMetaFromForm(formData, locale)
       };
 
       writeItemRecord(params.id, item);
@@ -90,10 +113,49 @@ export const actions = {
       return {
         itemStatus: validation.ok ? 'success' : 'warning',
         itemMessage: validationMessage(validation, locale),
-        itemForm: loadItemForm(params.id)
+        itemForm: loadItemForm(params.id),
+        metaSuggestions: listItemMetaSuggestions()
       };
     } catch (saveError) {
       const message = saveError instanceof Error ? saveError.message : t('server.saveItemError');
+
+      try {
+        return fail(400, {
+          itemStatus: 'error',
+          itemMessage: message,
+          itemForm: loadItemForm(params.id),
+          metaSuggestions: listItemMetaSuggestions()
+        });
+      } catch {
+        return fail(400, {
+          itemStatus: 'error',
+          itemMessage: message
+        });
+      }
+    }
+  },
+
+  deleteItem: async ({ params }) => {
+    guardStudio();
+
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
+
+    try {
+      assertContentId(params.id, t('fields.itemId'), locale);
+      const item = readItemRecord(params.id);
+      const title = typeof item.title === 'string' ? item.title : params.id;
+
+      deleteItemRecord(params.id, locale);
+      runStructuralValidation();
+
+      redirect(303, `/studio/items?deleted=${encodeURIComponent(title)}`);
+    } catch (deleteError) {
+      if (isRedirect(deleteError)) {
+        throw deleteError;
+      }
+
+      const message = deleteError instanceof Error ? deleteError.message : t('server.deleteItemError');
 
       try {
         return fail(400, {

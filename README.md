@@ -267,6 +267,8 @@ People who can configure it themselves can use it freely.
 
 People who want help configuring, customizing or deploying it may support the author or request paid setup/customization work.
 
+To report bugs, suggest scoped features or improve docs, see [`CONTRIBUTING.md`](CONTRIBUTING.md). Please use the GitHub issue templates — blank issues are disabled.
+
 ## Status
 
 Atelier-Kit is in early development.

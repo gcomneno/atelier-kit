@@ -1,5 +1,8 @@
 <script>
   import { enhance } from '$app/forms';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
+  import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
+  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
 
   const t = useI18n();
@@ -21,20 +24,21 @@
   <title>{t('studio.itemsNew.pageTitle')}</title>
 </svelte:head>
 
-<p class="intro">
+<p class="studio-intro">
   {t('studio.itemsNew.intro')}
 </p>
 
-<section class="panel">
+<section class="studio-panel">
   <div class="panel-heading">
     <h2>{t('studio.itemsNew.title')}</h2>
     <p>{t('studio.itemsNew.introPanel')}</p>
   </div>
 
   <form method="POST" action="?/createItem" enctype="multipart/form-data" use:enhance class="studio-form">
+    <StudioFormLegend />
+
     <label>
-      {t('studio.itemsNew.id')}
-      <span class="hint">{t('studio.itemsNew.idHint')}</span>
+      <StudioFieldLabel label={t('studio.itemsNew.id')} required hint={t('studio.itemsNew.idHint')} />
       <input
         name="id"
         value={itemForm.id}
@@ -45,12 +49,12 @@
     </label>
 
     <label>
-      {t('studio.itemsNew.titleField')}
+      <StudioFieldLabel label={t('studio.itemsNew.titleField')} required />
       <input name="title" value={itemForm.title} required />
     </label>
 
     <label>
-      {t('studio.itemsNew.preset')}
+      <StudioFieldLabel label={t('studio.itemsNew.preset')} required />
       <select name="preset" value={itemForm.preset}>
         {#each presets as preset}
           <option value={preset.id}>{preset.label}</option>
@@ -59,13 +63,16 @@
     </label>
 
     <label>
-      {t('studio.itemsNew.description')}
+      <StudioFieldLabel label={t('studio.itemsNew.description')} optional />
       <textarea name="description" rows="4">{itemForm.description}</textarea>
     </label>
 
     <label>
-      {t('studio.itemsNew.photo')}
-      <span class="hint">{t('studio.itemsNew.photoHint', { id: itemForm.id || 'item-id' })}</span>
+      <StudioFieldLabel
+        label={t('studio.itemsNew.photo')}
+        optional
+        hint={t('studio.itemsNew.photoHint', { id: itemForm.id || 'item-id' })}
+      />
       <input type="file" name="image_upload" accept="image/jpeg,image/png,image/webp" />
     </label>
 
@@ -74,108 +81,24 @@
       <a class="secondary-link" href="/studio/items">{t('studio.itemsNew.cancel')}</a>
     </div>
 
-    {#if form?.createMessage}
-      <p class={`status ${form.createStatus || 'info'}`}>{form.createMessage}</p>
-    {/if}
+    <StudioFormStatus message={form?.createMessage} status={form?.createStatus} />
   </form>
 </section>
 
 <style>
-  .intro {
-    margin: 0 0 1.5rem;
-    color: #5a4632;
-    line-height: 1.6;
-  }
-
-  .panel {
-    padding: 1.5rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
-    border-radius: 1rem;
-    background: rgb(255 250 242 / 0.82);
-  }
-
-  .panel-heading h2 {
-    margin: 0 0 0.35rem;
-    font-size: 1.2rem;
-  }
-
-  .panel-heading p {
-    margin: 0 0 1rem;
-    color: #7d684f;
-  }
-
-  .studio-form {
-    display: grid;
-    gap: 1rem;
-  }
-
-  label {
-    display: grid;
-    gap: 0.4rem;
-    font-size: 0.95rem;
-  }
-
-  .hint {
-    color: #7d684f;
-    font-size: 0.85rem;
-  }
-
-  input,
-  textarea,
-  select {
-    width: 100%;
-    padding: 0.7rem 0.8rem;
-    border: 1px solid rgb(47 40 31 / 0.18);
-    border-radius: 0.65rem;
-    background: #fffdf9;
-    color: inherit;
-    font: inherit;
-  }
-
-  textarea {
-    resize: vertical;
-  }
-
   .actions {
     display: flex;
     gap: 1rem;
     align-items: center;
   }
 
-  button {
-    border: 0;
-    border-radius: 999px;
-    padding: 0.75rem 1.2rem;
-    background: #2f281f;
-    color: #f8f0e4;
-    font: inherit;
-    cursor: pointer;
-  }
-
   .secondary-link {
-    color: #5a4632;
+    color: var(--studio-accent);
+    font-weight: 600;
+    text-decoration: none;
   }
 
-  .status {
-    margin: 0;
-    padding: 0.85rem 1rem;
-    border-radius: 0.75rem;
-    white-space: pre-wrap;
-    line-height: 1.5;
-  }
-
-  .status.success {
-    background: rgb(56 102 65 / 0.12);
-    color: #2f4f35;
-  }
-
-  .status.warning {
-    background: rgb(158 106 33 / 0.14);
-    color: #6a4a1b;
-  }
-
-  .status.error {
-    background: rgb(132 46 46 / 0.12);
-    color: #6d2a2a;
+  .secondary-link:hover {
+    text-decoration: underline;
   }
 </style>

@@ -47,7 +47,6 @@ Options:
   --language <code>         Site language (default: en)
   --email <address>         Contact email
   --whatsapp-phone <phone>  Enable WhatsApp contact with this phone number
-  --notice <text>           Public site notice (empty hides it)
   --first-item-title <text> Starter item title
   --collection-title <text> Starter collection title
 
@@ -81,7 +80,6 @@ function parseArgs(argv) {
     '--language',
     '--email',
     '--whatsapp-phone',
-    '--notice',
     '--first-item-title',
     '--collection-title'
   ]);
@@ -97,7 +95,6 @@ function parseArgs(argv) {
     language: 'en',
     email: '',
     whatsappPhone: '',
-    notice: '',
     firstItemTitle: '',
     collectionTitle: ''
   };
@@ -142,7 +139,6 @@ function parseArgs(argv) {
       '--language',
       '--email',
       '--whatsapp-phone',
-      '--notice',
       '--first-item-title',
       '--collection-title'
     ]) {
@@ -281,7 +277,6 @@ function patchSiteIdentity(root, answers) {
   data.site.name = answers.siteTitle;
   data.site.tagline = answers.tagline;
   data.site.language = answers.language;
-  data.site.notice = answers.notice;
   writeYamlFile(root, 'config/site.yaml', data);
 }
 
@@ -406,7 +401,6 @@ function buildAnswersFromOptions(options) {
     email: options.email,
     whatsappEnabled: options.whatsappPhone.trim() !== '',
     whatsappPhone: options.whatsappPhone.trim(),
-    notice: options.notice,
     firstItemTitle: options.inPlace ? '' : options.firstItemTitle,
     collectionTitle: options.inPlace ? '' : options.collectionTitle
   };
@@ -436,7 +430,6 @@ async function collectAnswersInteractively(rl, options) {
   answers.whatsappPhone = answers.whatsappEnabled
     ? await askRequired(rl, t('wizard.whatsappPhone'))
     : '';
-  answers.notice = (await askOptional(rl, t('wizard.notice'), '')).trim();
   answers.firstItemTitle = options.inPlace ? '' : await askOptional(rl, t('wizard.firstItemOptional'));
   answers.collectionTitle = options.inPlace ? '' : await askOptional(rl, t('wizard.collectionOptional'));
 

@@ -1,18 +1,24 @@
 <script>
   import { enhance } from '$app/forms';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
+  import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
+  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
-  import { resolveLocale, SUPPORTED_LOCALES } from '$lib/i18n/resolve-locale.js';
-  import { studioFormEnhance } from '$lib/studio-form-enhance.js';
+  import { studioFormDirty } from '$lib/studio-form-dirty.js';
+  import { studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
   const t = useI18n();
 
   let { data, form } = $props();
 
   const siteForm = $derived(form?.siteForm ?? data.siteForm);
-  let language = $state('en');
+  let isDirty = $state(false);
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
+  const dirtyControl = {};
 
   $effect(() => {
-    language = resolveLocale(siteForm.language);
+    siteForm;
+    dirtyControl.resetBaseline?.();
   });
 </script>
 
@@ -28,68 +34,55 @@
     <p>{t('studio.site.identity.intro')}</p>
   </div>
 
-  <form method="POST" action="?/saveSite" use:enhance={studioFormEnhance}>
+  <form
+    method="POST"
+    action="?/saveSite"
+    use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
+    use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+  >
+    <StudioFormLegend />
+
     <label>
-      {t('studio.site.identity.siteTitle')}
+      <StudioFieldLabel label={t('studio.site.identity.siteTitle')} required />
       <input name="name" value={siteForm.name} required />
     </label>
 
     <label>
-      {t('studio.site.identity.tagline')}
+      <StudioFieldLabel label={t('studio.site.identity.tagline')} required />
       <input name="tagline" value={siteForm.tagline} required />
     </label>
 
     <label>
-      {t('studio.site.identity.heroIntro')}
-      <span class="hint">{t('studio.site.identity.heroIntroHint')}</span>
+      <StudioFieldLabel
+        label={t('studio.site.identity.heroIntro')}
+        optional
+        hint={t('studio.site.identity.heroIntroHint')}
+      />
       <textarea name="hero_intro" rows="12">{siteForm.hero_intro}</textarea>
     </label>
 
     <label>
-      {t('studio.site.identity.heroSignature')}
-      <span class="hint">{t('studio.site.identity.heroSignatureHint')}</span>
+      <StudioFieldLabel
+        label={t('studio.site.identity.heroSignature')}
+        optional
+        hint={t('studio.site.identity.heroSignatureHint')}
+      />
       <textarea name="hero_signature" rows="3">{siteForm.hero_signature}</textarea>
     </label>
 
     <label>
-      {t('studio.site.identity.language')}
-      <select name="language" bind:value={language}>
-        {#each SUPPORTED_LOCALES as code}
-          <option value={code}>{t(`studio.site.identity.languages.${code}`)}</option>
-        {/each}
-      </select>
-    </label>
-
-    <label>
-      {t('studio.site.identity.notice')}
-      <span class="hint">{t('studio.site.identity.noticeHint')}</span>
-      <textarea name="notice" rows="3">{siteForm.notice}</textarea>
-    </label>
-
-    <label>
-      {t('studio.site.identity.footerNote')}
-      <span class="hint">{t('studio.site.identity.footerNoteHint')}</span>
+      <StudioFieldLabel
+        label={t('studio.site.identity.footerNote')}
+        optional
+        hint={t('studio.site.identity.footerNoteHint')}
+      />
       <input name="footer_note" value={siteForm.footer_note} />
     </label>
 
-    <label>
-      {t('studio.site.identity.siteUrl')}
-      <span class="hint">{t('studio.site.identity.siteUrlHint')}</span>
-      <input name="url" type="url" value={siteForm.url} placeholder="https://example.com" />
-    </label>
-
-    <label>
-      {t('studio.site.identity.ogImage')}
-      <span class="hint">{t('studio.site.identity.ogImageHint')}</span>
-      <input name="og_image" value={siteForm.og_image} placeholder="/images/site/og.jpg" />
-    </label>
-
     <div class="actions">
-      <button type="submit">{t('studio.site.identity.save')}</button>
+      <button type="submit" disabled={!isDirty}>{t('studio.site.identity.save')}</button>
     </div>
 
-    {#if form?.siteMessage}
-      <p class={`status ${form.siteStatus || 'info'}`}>{form.siteMessage}</p>
-    {/if}
+    <StudioFormStatus message={form?.siteMessage} status={form?.siteStatus} />
   </form>
 </section>

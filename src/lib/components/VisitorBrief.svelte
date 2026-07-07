@@ -108,6 +108,21 @@
   }
 
   /**
+   * @param {string | undefined} value
+   * @param {string} templateDefault
+   * @param {string} i18nKey
+   */
+  function localizedContactLabel(value, templateDefault, i18nKey) {
+    const label = typeof value === 'string' ? value.trim() : '';
+
+    if (label === '' || label === templateDefault) {
+      return t(i18nKey);
+    }
+
+    return label;
+  }
+
+  /**
    * @param {EmailContact | undefined} email
    * @param {BriefItem} item
    * @param {string} briefText
@@ -118,7 +133,11 @@
       return '';
     }
 
-    const subjectPrefix = email.subject_prefix || t('visitorBrief.emailSubjectPrefix');
+    const rawPrefix = typeof email.subject_prefix === 'string' ? email.subject_prefix.trim() : '';
+    const subjectPrefix =
+      rawPrefix === '' || rawPrefix === 'Interest in'
+        ? t('visitorBrief.emailSubjectPrefix')
+        : rawPrefix;
     const subject = `${subjectPrefix} "${item.title}"`;
 
     return `mailto:${encodeURIComponent(email.address)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(briefText)}`;
@@ -178,12 +197,18 @@
     <button type="button" on:click={copyBrief}>{t('visitorBrief.copyButton')}</button>
 
     {#if emailHref}
-      <a class="action-link" href={emailHref}>{contact.email?.label || t('visitorBrief.emailDefault')}</a>
+      <a class="action-link" href={emailHref}>
+        {localizedContactLabel(contact.email?.label, 'Email this brief', 'visitorBrief.emailDefault')}
+      </a>
     {/if}
 
     {#if whatsappHref}
       <a class="action-link" href={whatsappHref} target="_blank" rel="noreferrer">
-        {contact.whatsapp?.label || t('visitorBrief.whatsappDefault')}
+        {localizedContactLabel(
+          contact.whatsapp?.label,
+          'WhatsApp this brief',
+          'visitorBrief.whatsappDefault'
+        )}
       </a>
     {/if}
   </div>
@@ -201,7 +226,7 @@
     border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 18%, transparent));
     border-radius: 1rem;
     padding: 1.1rem;
-    background: var(--site-card-color, rgb(255 250 242 / 0.88));
+    background: var(--site-surface-color, rgb(255 255 255 / 0.72));
     box-shadow: 0 16px 40px color-mix(in srgb, var(--site-base-color, #0f0e0d) 35%, black);
   }
 
@@ -242,7 +267,7 @@
     border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent));
     border-radius: 0.75rem;
     padding: 0.85rem;
-    background: var(--site-surface-color, rgb(255 255 255 / 0.72));
+    background: var(--site-card-color, rgb(255 250 242 / 0.88));
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 82%, transparent);
     font: inherit;
     line-height: 1.5;
@@ -286,7 +311,7 @@
   }
 
   .action-link {
-    background: var(--site-surface-color, rgb(255 255 255 / 0.72));
+    background: var(--site-card-color, rgb(255 250 242 / 0.88));
     color: inherit;
   }
 

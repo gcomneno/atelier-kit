@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/gcomneno/atelier-kit/tree/main/docs
+  - name: Contributing guide
+    url: https://github.com/gcomneno/atelier-kit/blob/main/CONTRIBUTING.md

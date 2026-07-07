@@ -1,7 +1,10 @@
 <script>
   import { enhance } from '$app/forms';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
+  import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
+  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
-  import { studioFormEnhance } from '$lib/studio-form-enhance.js';
+  import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
   const t = useI18n();
 
@@ -10,10 +13,14 @@
   const contactForm = $derived(form?.contactForm ?? data.contactForm);
   let emailEnabled = $state(false);
   let whatsappEnabled = $state(false);
+  let isDirty = $state(false);
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
+  const dirtyControl = {};
 
   $effect(() => {
     emailEnabled = contactForm.email_enabled;
     whatsappEnabled = contactForm.whatsapp_enabled;
+    dirtyControl.resetBaseline?.();
   });
 </script>
 
@@ -29,7 +36,14 @@
     <p>{t('studio.site.contact.intro')}</p>
   </div>
 
-  <form method="POST" action="?/saveContact" use:enhance={studioFormEnhance}>
+  <form
+    method="POST"
+    action="?/saveContact"
+    use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
+    use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+  >
+    <StudioFormLegend />
+
     <fieldset>
       <legend>{t('studio.site.contact.emailLegend')}</legend>
 
@@ -39,22 +53,27 @@
       </label>
 
       <label>
-        {t('studio.site.contact.emailAddress')}
+        <StudioFieldLabel
+          label={t('studio.site.contact.emailAddress')}
+          required={emailEnabled}
+          hint={emailEnabled ? t('studio.forms.requiredWhenEnabled') : ''}
+        />
         <input
           name="email_address"
           type="email"
           disabled={!emailEnabled}
           value={contactForm.email_address}
+          required={emailEnabled}
         />
       </label>
 
       <label>
-        {t('studio.site.contact.emailLabel')}
+        <StudioFieldLabel label={t('studio.site.contact.emailLabel')} optional />
         <input name="email_label" disabled={!emailEnabled} value={contactForm.email_label} />
       </label>
 
       <label>
-        {t('studio.site.contact.emailSubjectPrefix')}
+        <StudioFieldLabel label={t('studio.site.contact.emailSubjectPrefix')} optional />
         <input
           name="email_subject_prefix"
           disabled={!emailEnabled}
@@ -72,22 +91,29 @@
       </label>
 
       <label>
-        {t('studio.site.contact.whatsappPhone')}
-        <input name="whatsapp_phone" disabled={!whatsappEnabled} value={contactForm.whatsapp_phone} />
+        <StudioFieldLabel
+          label={t('studio.site.contact.whatsappPhone')}
+          required={whatsappEnabled}
+          hint={whatsappEnabled ? t('studio.forms.requiredWhenEnabled') : ''}
+        />
+        <input
+          name="whatsapp_phone"
+          disabled={!whatsappEnabled}
+          value={contactForm.whatsapp_phone}
+          required={whatsappEnabled}
+        />
       </label>
 
       <label>
-        {t('studio.site.contact.whatsappLabel')}
+        <StudioFieldLabel label={t('studio.site.contact.whatsappLabel')} optional />
         <input name="whatsapp_label" disabled={!whatsappEnabled} value={contactForm.whatsapp_label} />
       </label>
     </fieldset>
 
     <div class="actions">
-      <button type="submit">{t('studio.site.contact.save')}</button>
+      <button type="submit" disabled={!isDirty}>{t('studio.site.contact.save')}</button>
     </div>
 
-    {#if form?.contactMessage}
-      <p class={`status ${form.contactStatus || 'info'}`}>{form.contactMessage}</p>
-    {/if}
+    <StudioFormStatus message={form?.contactMessage} status={form?.contactStatus} />
   </form>
 </section>

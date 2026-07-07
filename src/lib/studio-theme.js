@@ -5,6 +5,7 @@ export const STUDIO_HEAD_STYLE = `<style id="studio-admin-theme">
     --studio-text: #1f2937;
     --studio-muted: #5b6472;
     --studio-accent: #2d6cdf;
+    --studio-eyebrow: #4a90dc;
     --studio-border: #d6dde8;
     --studio-shadow: 0 10px 30px rgb(15 23 42 / 0.06);
   }

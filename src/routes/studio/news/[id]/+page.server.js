@@ -1,9 +1,11 @@
 // @ts-nocheck
 
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, isRedirect, redirect } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
 import {
   assertContentId,
+  deleteNewsRecord,
+  newsRecordExists,
   optionalField,
   readNewsRecord,
   requiredField,
@@ -40,10 +42,27 @@ export function load({ params }) {
 
   try {
     assertContentId(params.id, t('fields.newsId'), locale);
+  } catch (loadError) {
+    if (isRedirect(loadError)) {
+      throw loadError;
+    }
+
+    error(404, t('server.newsNotFound'));
+  }
+
+  if (!newsRecordExists(params.id)) {
+    redirect(303, `/studio/news?missing=${encodeURIComponent(params.id)}`);
+  }
+
+  try {
     return {
       newsForm: loadNewsForm(params.id)
     };
-  } catch {
+  } catch (loadError) {
+    if (isRedirect(loadError)) {
+      throw loadError;
+    }
+
     error(404, t('server.newsNotFound'));
   }
 }
@@ -83,6 +102,10 @@ export const actions = {
         body: requiredField(formData.get('body'), t('fields.newsBody'), locale)
       };
 
+      if (typeof original.sort_order === 'number' && Number.isInteger(original.sort_order)) {
+        post.sort_order = original.sort_order;
+      }
+
       const excerpt = optionalField(formData.get('excerpt'));
       const imageAlt = optionalField(formData.get('image_alt'));
 
@@ -108,6 +131,43 @@ export const actions = {
       };
     } catch (saveError) {
       const message = saveError instanceof Error ? saveError.message : t('server.saveNewsError');
+
+      try {
+        return fail(400, {
+          newsStatus: 'error',
+          newsMessage: message,
+          newsForm: loadNewsForm(params.id)
+        });
+      } catch {
+        return fail(400, {
+          newsStatus: 'error',
+          newsMessage: message
+        });
+      }
+    }
+  },
+
+  deleteNews: async ({ params }) => {
+    guardStudio();
+
+    const locale = getOperatorLocale();
+    const t = getOperatorTranslator();
+
+    try {
+      assertContentId(params.id, t('fields.newsId'), locale);
+      const post = readNewsRecord(params.id);
+      const title = typeof post.title === 'string' ? post.title : params.id;
+
+      deleteNewsRecord(params.id, locale);
+      runStructuralValidation();
+
+      redirect(303, `/studio/news?deleted=${encodeURIComponent(title)}`);
+    } catch (deleteError) {
+      if (isRedirect(deleteError)) {
+        throw deleteError;
+      }
+
+      const message = deleteError instanceof Error ? deleteError.message : t('server.deleteNewsError');
 
       try {
         return fail(400, {

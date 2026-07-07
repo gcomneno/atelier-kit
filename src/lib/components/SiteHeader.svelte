@@ -75,8 +75,8 @@
 
 <style>
   .site-header {
-    border-bottom: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 14%, transparent);
-    color: color-mix(in srgb, var(--site-text-color, #2f281f) 72%, transparent);
+    border-bottom: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 14%, transparent));
+    color: var(--site-muted-text-color, color-mix(in srgb, var(--site-text-color, #2f281f) 72%, transparent));
     background: color-mix(in srgb, var(--site-base-color, #f8f0e4) 88%, white);
   }
 
@@ -94,7 +94,7 @@
   }
 
   .site-header.overlay .site-name {
-    color: var(--site-text-color, #e8e0d4);
+    color: var(--site-heading-color, var(--site-text-color, #e8e0d4));
     text-shadow: 0 1px 16px rgb(0 0 0 / 0.65);
   }
 
@@ -121,7 +121,7 @@
     line-height: 1.25;
     text-decoration: none;
     text-transform: none;
-    color: var(--site-text-color, #2f281f);
+    color: var(--site-heading-color, var(--site-text-color, #2f281f));
   }
 
   .header-actions {
@@ -147,6 +147,11 @@
     letter-spacing: 0.04em;
     text-decoration: none;
     white-space: nowrap;
+    color: var(--site-text-color, #2f281f);
+  }
+
+  .site-header.overlay .site-nav-link {
+    color: var(--site-text-color, #e8e0d4);
   }
 
   .site-nav-link:hover {

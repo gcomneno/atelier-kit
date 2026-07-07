@@ -256,15 +256,7 @@ site:
 catalog:
   item_name_singular: "project"
   item_name_plural: "projects"
-
-  fields:
-    show_price: false
-    show_availability: true
-    show_material: false
-    show_dimensions: false
-    show_status: true
-    show_meta: true
-`);
+  sort: manual`);
 
   writeFile(targetRoot, 'config/signal-clouds.yaml', `
 signal_clouds:
@@ -388,15 +380,7 @@ site:
 catalog:
   item_name_singular: "work"
   item_name_plural: "works"
-
-  fields:
-    show_price: false
-    show_availability: true
-    show_material: true
-    show_dimensions: true
-    show_status: true
-    show_meta: true
-`);
+  sort: manual`);
 
   writeFile(targetRoot, 'config/signal-clouds.yaml', `
 signal_clouds:
@@ -510,15 +494,7 @@ site:
 catalog:
   item_name_singular: "piece"
   item_name_plural: "pieces"
-
-  fields:
-    show_price: false
-    show_availability: true
-    show_material: true
-    show_dimensions: true
-    show_status: true
-    show_meta: true
-`);
+  sort: manual`);
 
   writeFile(targetRoot, 'config/signal-clouds.yaml', `
 signal_clouds:
@@ -650,15 +626,7 @@ site:
 catalog:
   item_name_singular: "piece"
   item_name_plural: "pieces"
-
-  fields:
-    show_price: false
-    show_availability: true
-    show_material: true
-    show_dimensions: false
-    show_status: true
-    show_meta: true
-`);
+  sort: manual`);
 
   writeFile(targetRoot, 'config/signal-clouds.yaml', `
 signal_clouds:
@@ -785,15 +753,7 @@ site:
 catalog:
   item_name_singular: "collectible"
   item_name_plural: "collectibles"
-
-  fields:
-    show_price: false
-    show_availability: true
-    show_material: false
-    show_dimensions: false
-    show_status: true
-    show_meta: true
-`);
+  sort: manual`);
 
   writeFile(targetRoot, 'config/signal-clouds.yaml', `
 signal_clouds:
@@ -906,15 +866,7 @@ site:
 catalog:
   item_name_singular: "piece"
   item_name_plural: "pieces"
-
-  fields:
-    show_price: false
-    show_availability: true
-    show_material: true
-    show_dimensions: true
-    show_status: true
-    show_meta: true
-`);
+  sort: manual`);
 
   writeFile(targetRoot, 'config/signal-clouds.yaml', `
 signal_clouds:

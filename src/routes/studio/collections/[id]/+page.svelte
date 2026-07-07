@@ -1,6 +1,11 @@
 <script>
   import { enhance } from '$app/forms';
+  import { tick } from 'svelte';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
+  import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
+  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
+  import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
   /** @typedef {{ id: string, title: string }} ItemSummary */
 
@@ -14,9 +19,13 @@
 
   /** @type {string[]} */
   let orderedIds = $state([]);
+  let isDirty = $state(false);
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
+  const dirtyControl = {};
 
   $effect(() => {
     orderedIds = [...collectionForm.item_ids];
+    dirtyControl.resetBaseline?.();
   });
 
   const availableItems = $derived(items.filter((/** @type {ItemSummary} */ item) => !orderedIds.includes(item.id)));
@@ -24,7 +33,7 @@
   /**
    * @param {number} index
    */
-  function moveUp(index) {
+  async function moveUp(index) {
     if (index <= 0) {
       return;
     }
@@ -32,12 +41,14 @@
     const next = [...orderedIds];
     [next[index - 1], next[index]] = [next[index], next[index - 1]];
     orderedIds = next;
+    await tick();
+    dirtyControl.checkDirty?.();
   }
 
   /**
    * @param {number} index
    */
-  function moveDown(index) {
+  async function moveDown(index) {
     if (index >= orderedIds.length - 1) {
       return;
     }
@@ -45,22 +56,37 @@
     const next = [...orderedIds];
     [next[index + 1], next[index]] = [next[index], next[index + 1]];
     orderedIds = next;
+    await tick();
+    dirtyControl.checkDirty?.();
   }
 
   /**
    * @param {string} id
    */
-  function removeItem(id) {
+  async function removeItem(id) {
     orderedIds = orderedIds.filter((itemId) => itemId !== id);
+    await tick();
+    dirtyControl.checkDirty?.();
   }
 
   /**
    * @param {string} id
    */
-  function addItem(id) {
+  async function addItem(id) {
     if (!orderedIds.includes(id)) {
       orderedIds = [...orderedIds, id];
+      await tick();
+      dirtyControl.checkDirty?.();
     }
+  }
+
+  function confirmDelete() {
+    return confirm(
+      t('studio.collectionsEdit.deleteConfirm', {
+        title: collectionForm.title,
+        id: collectionForm.id
+      })
+    );
   }
 </script>
 
@@ -68,31 +94,41 @@
   <title>Studio · {collectionForm.title}</title>
 </svelte:head>
 
-<p class="intro">
+<p class="studio-intro">
   {t('studio.collectionsEdit.intro')}
-  <a href={`/collections/${collectionForm.id}`} target="_blank" rel="noreferrer">{t('studio.collectionsEdit.preview')}</a>
 </p>
 
-<section class="panel">
+<section class="studio-panel">
   <div class="panel-heading">
     <h2>{collectionForm.title}</h2>
     <p>{t('studio.collectionsEdit.collectionId', { id: collectionForm.id })}</p>
   </div>
 
-  <form method="POST" action="?/saveCollection" use:enhance class="studio-form">
+  <form
+    method="POST"
+    action="?/saveCollection"
+    use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
+    use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+    class="studio-form"
+  >
+    <StudioFormLegend />
+
     <label>
-      {t('studio.collectionsEdit.titleField')}
+      <StudioFieldLabel label={t('studio.collectionsEdit.titleField')} required />
       <input name="title" value={collectionForm.title} required />
     </label>
 
     <label>
-      {t('studio.collectionsEdit.description')}
+      <StudioFieldLabel label={t('studio.collectionsEdit.description')} required />
       <textarea name="description" rows="4" required>{collectionForm.description}</textarea>
     </label>
 
     <fieldset>
-      <legend>{t('studio.collectionsEdit.itemOrder')}</legend>
-      <p class="hint">{t('studio.collectionsEdit.orderHint')}</p>
+      <legend>
+        {t('studio.collectionsEdit.itemOrder')}
+        <abbr class="field-badge required" title={t('studio.forms.atLeastOne')}>*</abbr>
+      </legend>
+      <p class="hint">{t('studio.collectionsEdit.orderHint')} {t('studio.forms.atLeastOne')}</p>
 
       {#if orderedIds.length === 0}
         <p class="hint">{t('studio.collectionsEdit.noItemsSelected')}</p>
@@ -134,68 +170,31 @@
     {/if}
 
     <div class="actions">
-      <button type="submit">{t('studio.collectionsEdit.save')}</button>
+      <button type="submit" disabled={!isDirty}>{t('studio.collectionsEdit.save')}</button>
       <a class="secondary-link" href="/studio/collections">{t('studio.collectionsEdit.back')}</a>
     </div>
 
-    {#if form?.collectionMessage}
-      <p class={`status ${form.collectionStatus || 'info'}`}>{form.collectionMessage}</p>
-    {/if}
+    <StudioFormStatus message={form?.collectionMessage} status={form?.collectionStatus} />
+  </form>
+
+  <form method="POST" action="?/deleteCollection" class="danger-zone" use:enhance>
+    <button
+      type="submit"
+      class="remove-button"
+      onclick={(event) => {
+        if (!confirmDelete()) {
+          event.preventDefault();
+        }
+      }}
+    >
+      {t('studio.collectionsEdit.delete')}
+    </button>
   </form>
 </section>
 
 <style>
-  .intro {
-    margin: 0 0 1.5rem;
-    color: #5a4632;
-    line-height: 1.6;
-  }
-
-  .panel {
-    padding: 1.5rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
-    border-radius: 1rem;
-    background: rgb(255 250 242 / 0.82);
-  }
-
-  .panel-heading h2 {
-    margin: 0 0 0.35rem;
-    font-size: 1.2rem;
-  }
-
-  .panel-heading p {
-    margin: 0 0 1rem;
-    color: #7d684f;
-  }
-
-  .studio-form {
-    display: grid;
-    gap: 1rem;
-  }
-
-  fieldset {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    display: grid;
-    gap: 1rem;
-  }
-
-  legend {
-    margin-bottom: 0.25rem;
-    font-weight: 600;
-  }
-
-  label {
-    display: grid;
-    gap: 0.4rem;
-    font-size: 0.95rem;
-  }
-
   .hint {
     margin: 0;
-    color: #7d684f;
-    font-size: 0.85rem;
   }
 
   .ordered-list {
@@ -213,17 +212,17 @@
     align-items: center;
     padding: 0.75rem 0.9rem;
     border-radius: 0.75rem;
-    background: #fffdf9;
-    border: 1px solid rgb(47 40 31 / 0.08);
+    background: #fff;
+    border: 1px solid var(--studio-border);
   }
 
   .order-label {
-    color: #7d684f;
+    color: var(--studio-muted);
     font-weight: 700;
   }
 
   .order-id {
-    color: #7d684f;
+    color: var(--studio-muted);
     font-size: 0.85rem;
   }
 
@@ -247,24 +246,31 @@
     gap: 1rem;
     padding: 0.65rem 0.9rem;
     border-radius: 0.75rem;
-    background: #fffdf9;
-    border: 1px solid rgb(47 40 31 / 0.08);
+    background: #fff;
+    border: 1px solid var(--studio-border);
   }
 
   .available-list button {
-    border: 1px solid rgb(47 40 31 / 0.18);
+    border: 1px solid var(--studio-border);
     border-radius: 999px;
     padding: 0.35rem 0.75rem;
-    background: #fffdf9;
+    background: #fff;
+    color: var(--studio-text);
     font: inherit;
+    font-weight: 600;
     cursor: pointer;
   }
 
+  .available-list button:hover {
+    border-color: color-mix(in srgb, var(--studio-accent) 35%, var(--studio-border));
+    color: var(--studio-accent);
+  }
+
   .order-actions button {
-    border: 1px solid rgb(47 40 31 / 0.18);
+    border: 1px solid var(--studio-border);
     border-radius: 0.45rem;
     padding: 0.25rem 0.55rem;
-    background: #fffdf9;
+    background: #fff;
     color: inherit;
     font: inherit;
     cursor: pointer;
@@ -279,62 +285,36 @@
     cursor: not-allowed;
   }
 
-  input,
-  textarea {
-    width: 100%;
-    padding: 0.7rem 0.8rem;
-    border: 1px solid rgb(47 40 31 / 0.18);
-    border-radius: 0.65rem;
-    background: #fffdf9;
-    color: inherit;
-    font: inherit;
-  }
-
-  textarea {
-    resize: vertical;
-  }
-
   .actions {
     display: flex;
     gap: 1rem;
     align-items: center;
   }
 
-  button[type='submit'] {
-    border: 0;
+  .secondary-link {
+    color: var(--studio-accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .secondary-link:hover {
+    text-decoration: underline;
+  }
+
+  .danger-zone {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--studio-border);
+  }
+
+  .remove-button {
+    border: 1px solid rgb(132 46 46 / 0.35);
     border-radius: 999px;
-    padding: 0.75rem 1.2rem;
-    background: #2f281f;
-    color: #f8f0e4;
+    padding: 0.45rem 0.9rem;
+    background: rgb(132 46 46 / 0.08);
+    color: #6d2a2a;
     font: inherit;
     cursor: pointer;
-  }
-
-  .secondary-link {
-    color: #5a4632;
-  }
-
-  .status {
-    margin: 0;
-    padding: 0.85rem 1rem;
-    border-radius: 0.75rem;
-    white-space: pre-wrap;
-    line-height: 1.5;
-  }
-
-  .status.success {
-    background: rgb(56 102 65 / 0.12);
-    color: #2f4f35;
-  }
-
-  .status.warning {
-    background: rgb(158 106 33 / 0.14);
-    color: #6a4a1b;
-  }
-
-  .status.error {
-    background: rgb(132 46 46 / 0.12);
-    color: #6d2a2a;
   }
 
   @media (max-width: 640px) {

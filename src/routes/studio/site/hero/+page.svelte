@@ -1,8 +1,11 @@
 <script>
   // @ts-nocheck
   import { enhance } from '$app/forms';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
+  import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
+  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
-  import { studioFormEnhance } from '$lib/studio-form-enhance.js';
+  import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
   const t = useI18n();
 
@@ -13,6 +16,8 @@
   const heroBannerForm = $derived(form?.heroBannerForm ?? data.heroBannerForm);
   let showBanner = $state(false);
   let removeHeroImage = $state(false);
+  let isDirty = $state(false);
+  const dirtyControl = {};
   /** @type {HTMLInputElement | null} */
   let bannerUploadInput = $state(null);
 
@@ -23,8 +28,13 @@
     if (bannerUploadInput) {
       bannerUploadInput.value = '';
     }
+
+    dirtyControl.resetBaseline?.();
   });
 
+  const hasStoredImage = $derived(Boolean(heroBannerForm.image_file) && !removeHeroImage);
+  const bannerFieldsEnabled = $derived(showBanner);
+  const uploadRequired = $derived(showBanner && !hasStoredImage);
 </script>
 
 <svelte:head>
@@ -46,37 +56,36 @@
     method="POST"
     action="?/saveHeroBanner"
     enctype="multipart/form-data"
-    use:enhance={studioFormEnhance}
+    use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
+    use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
     class="studio-form"
   >
+    <StudioFormLegend />
+
     <label class="checkbox">
       <input type="checkbox" name="show_banner" bind:checked={showBanner} />
       {t('studio.site.heroBanner.show')}
     </label>
 
-    <label>
-      {t('studio.site.heroBanner.bannerDescription')}
-      <span class="hint">{t('studio.site.heroBanner.bannerDescriptionHint')}</span>
-      <textarea name="banner_description" rows="3" disabled={!showBanner}
-        >{heroBannerForm.description}</textarea
-      >
-    </label>
-
-    {#if heroBannerForm.image_file && !removeHeroImage}
+    {#if hasStoredImage}
       <div class="banner-preview">
         <img src={heroBannerForm.image_file} alt={siteForm.name} />
       </div>
     {/if}
 
     <label>
-      {t('studio.site.heroBanner.upload')}
-      <span class="hint">{t('studio.site.heroBanner.uploadHint')}</span>
+      <StudioFieldLabel
+        label={t('studio.site.heroBanner.upload')}
+        required={bannerFieldsEnabled}
+        hint={t('studio.site.heroBanner.uploadHint')}
+      />
       <input
         bind:this={bannerUploadInput}
         type="file"
         name="banner_upload"
         accept="image/jpeg,image/png,image/webp"
-        disabled={!showBanner || removeHeroImage}
+        disabled={!bannerFieldsEnabled}
+        required={uploadRequired}
       />
     </label>
 
@@ -93,25 +102,40 @@
       value={removeHeroImage ? '' : heroBannerForm.image_file}
     />
 
-    <label>
-      {t('studio.site.heroBanner.caption')}
-      <span class="hint">{t('studio.site.heroBanner.captionHint')}</span>
-      <input name="banner_caption" disabled={!showBanner} value={heroBannerForm.caption} />
-    </label>
+    <fieldset disabled={!bannerFieldsEnabled}>
+      <label>
+        <StudioFieldLabel
+          label={t('studio.site.heroBanner.bannerDescription')}
+          optional
+          hint={t('studio.site.heroBanner.bannerDescriptionHint')}
+        />
+        <textarea name="banner_description" rows="3">{heroBannerForm.description}</textarea>
+      </label>
 
-    <label>
-      {t('studio.site.heroBanner.href')}
-      <span class="hint">{t('studio.site.heroBanner.hrefHint')}</span>
-      <input name="banner_href" disabled={!showBanner} value={heroBannerForm.href} />
-    </label>
+      <label>
+        <StudioFieldLabel
+          label={t('studio.site.heroBanner.caption')}
+          optional
+          hint={t('studio.site.heroBanner.captionHint')}
+        />
+        <input name="banner_caption" value={heroBannerForm.caption} />
+      </label>
+
+      <label>
+        <StudioFieldLabel
+          label={t('studio.site.heroBanner.href')}
+          optional
+          hint={t('studio.site.heroBanner.hrefHint')}
+        />
+        <input name="banner_href" value={heroBannerForm.href} />
+      </label>
+    </fieldset>
 
     <div class="actions">
-      <button type="submit">{t('studio.site.heroBanner.save')}</button>
+      <button type="submit" disabled={!isDirty}>{t('studio.site.heroBanner.save')}</button>
     </div>
 
-    {#if form?.heroBannerMessage}
-      <p class={`status ${form.heroBannerStatus || 'info'}`}>{form.heroBannerMessage}</p>
-    {/if}
+    <StudioFormStatus message={form?.heroBannerMessage} status={form?.heroBannerStatus} />
   </form>
 </section>
 

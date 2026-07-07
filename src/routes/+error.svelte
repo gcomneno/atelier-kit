@@ -4,20 +4,34 @@
 
   const t = useVisitorI18n();
   let isNotFound = $derived(page.status === 404);
+  let missingItemId = $derived.by(() => {
+    const match = page.url.pathname.match(/^\/items\/([^/]+)\/?$/);
+
+    return match?.[1] ? decodeURIComponent(match[1]) : '';
+  });
+  let isItemNotFound = $derived(isNotFound && missingItemId !== '');
+  let backHref = $derived(isItemNotFound ? '/catalog' : '/');
+  let backLabel = $derived(
+    isItemNotFound ? t('common.backToCatalog') : t('error.backToHome')
+  );
 </script>
 
 <main class="error-page">
   <p class="eyebrow">{page.status}</p>
 
-  {#if isNotFound}
-    <h1>{t('error.notFoundTitle')}</h1>
-    <p>{t('error.notFoundBody')}</p>
+  {#if isItemNotFound}
+    <h1>{t('error.itemNotFoundTitle')}</h1>
+    <p>{t('error.itemNotFoundBody')}</p>
+    <p class="requested-id">{t('error.itemNotFoundId', { id: missingItemId })}</p>
+  {:else if isNotFound}
+    <h1>{t('error.pageNotFoundTitle')}</h1>
+    <p>{t('error.pageNotFoundBody')}</p>
   {:else}
     <h1>{t('error.genericTitle')}</h1>
     <p>{page.error?.message ?? t('error.unexpectedError')}</p>
   {/if}
 
-  <a href="/">{t('common.backToCatalog')}</a>
+  <a href={backHref}>{backLabel}</a>
 </main>
 
 <style>
@@ -58,6 +72,13 @@
 
   p {
     color: #5d4a36;
+  }
+
+  .requested-id {
+    margin-top: 0.75rem;
+    color: #7d684f;
+    font-size: 0.95rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
 
   a {

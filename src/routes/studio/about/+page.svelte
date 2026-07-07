@@ -1,53 +1,60 @@
 <script>
   import { enhance } from '$app/forms';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
+  import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
+  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
+  import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
   const t = useI18n();
 
   let { data, form } = $props();
 
   const aboutForm = $derived(form?.aboutForm ?? data.aboutForm);
-  let aboutEnabled = $state(false);
   let showPortrait = $state(false);
+  let isDirty = $state(false);
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
+  const dirtyControl = {};
 
   $effect(() => {
-    aboutEnabled = aboutForm.enabled;
     showPortrait = aboutForm.show_portrait;
+    dirtyControl.resetBaseline?.();
   });
-
-  const portraitFieldsEnabled = $derived(aboutEnabled && showPortrait);
 </script>
 
 <svelte:head>
   <title>{t('studio.about.pageTitle')}</title>
 </svelte:head>
 
-<p class="intro">
+<p class="studio-intro">
   {t('studio.about.intro')}
 </p>
 
-<section class="panel">
-  <form method="POST" action="?/saveAbout" use:enhance class="studio-form">
-    <label class="checkbox">
-      <input type="checkbox" name="enabled" bind:checked={aboutEnabled} />
-      {t('studio.about.enabled')}
+<section class="studio-panel">
+  <form
+    method="POST"
+    action="?/saveAbout"
+    use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
+    use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+    class="studio-form"
+  >
+    <StudioFormLegend />
+
+    <label>
+      <StudioFieldLabel label={t('studio.about.titleField')} required />
+      <input name="title" value={aboutForm.title} required />
     </label>
 
     <label>
-      {t('studio.about.titleField')}
-      <input name="title" disabled={!aboutEnabled} value={aboutForm.title} />
+      <StudioFieldLabel label={t('studio.about.introField')} optional />
+      <textarea name="intro" rows="5">{aboutForm.intro}</textarea>
     </label>
 
-    <label>
-      {t('studio.about.introField')}
-      <textarea name="intro" rows="5" disabled={!aboutEnabled}>{aboutForm.intro}</textarea>
-    </label>
-
-    <fieldset disabled={!aboutEnabled}>
+    <fieldset>
       <legend>{t('studio.about.portraitLegend')}</legend>
 
       <label class="checkbox">
-        <input type="checkbox" name="show_portrait" bind:checked={showPortrait} disabled={!aboutEnabled} />
+        <input type="checkbox" name="show_portrait" bind:checked={showPortrait} />
         {t('studio.about.showPortrait')}
       </label>
 
@@ -61,130 +68,57 @@
       {/if}
 
       <label>
-        {t('studio.about.portraitUpload')}
-        <span class="hint">{t('studio.about.portraitUploadHint')}</span>
+        <StudioFieldLabel
+          label={t('studio.about.portraitUpload')}
+          optional
+          hint={t('studio.about.portraitUploadHint')}
+        />
         <input
           type="file"
           name="portrait_upload"
           accept="image/jpeg,image/png,image/webp"
-          disabled={!portraitFieldsEnabled}
+          disabled={!showPortrait}
         />
       </label>
 
       <input type="hidden" name="portrait_image_file" value={aboutForm.portrait_image_file} />
 
       <label>
-        {t('studio.about.portraitAlt')}
-        <input
-          name="portrait_image_alt"
-          disabled={!portraitFieldsEnabled}
-          value={aboutForm.portrait_image_alt}
-        />
+        <StudioFieldLabel label={t('studio.about.portraitAlt')} optional />
+        <input name="portrait_image_alt" disabled={!showPortrait} value={aboutForm.portrait_image_alt} />
       </label>
     </fieldset>
 
-    <fieldset disabled={!aboutEnabled}>
+    <fieldset>
       <legend>{t('studio.about.sectionLegend')}</legend>
 
       <label>
-        {t('studio.about.sectionHeading')}
+        <StudioFieldLabel label={t('studio.about.sectionHeading')} optional />
         <input name="section_heading" value={aboutForm.section_heading} />
       </label>
 
       <label>
-        {t('studio.about.sectionBody')}
+        <StudioFieldLabel label={t('studio.about.sectionBody')} optional />
         <textarea name="section_body" rows="5">{aboutForm.section_body}</textarea>
       </label>
     </fieldset>
 
     <div class="actions">
-      <button type="submit">{t('studio.about.save')}</button>
+      <button type="submit" disabled={!isDirty}>{t('studio.about.save')}</button>
     </div>
 
-    {#if form?.aboutMessage}
-      <p class={`status ${form.aboutStatus || 'info'}`}>{form.aboutMessage}</p>
-    {/if}
+    <StudioFormStatus message={form?.aboutMessage} status={form?.aboutStatus} />
   </form>
 </section>
 
 <style>
-  .intro {
-    margin: 0 0 1.5rem;
-    color: #5a4632;
-    line-height: 1.6;
-  }
-
-  .panel {
-    padding: 1.5rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
-    border-radius: 1rem;
-    background: rgb(255 250 242 / 0.82);
-  }
-
-  .studio-form {
-    display: grid;
-    gap: 1rem;
-  }
-
-  fieldset {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    display: grid;
-    gap: 1rem;
-  }
-
-  legend {
-    margin-bottom: 0.25rem;
-    font-weight: 600;
-  }
-
-  label {
-    display: grid;
-    gap: 0.4rem;
-    font-size: 0.95rem;
-  }
-
-  .checkbox {
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    gap: 0.65rem;
-  }
-
-  input,
-  textarea {
-    width: 100%;
-    padding: 0.7rem 0.8rem;
-    border: 1px solid rgb(47 40 31 / 0.18);
-    border-radius: 0.65rem;
-    background: #fffdf9;
-    color: inherit;
-    font: inherit;
-  }
-
-  input:disabled:not([type='checkbox']),
-  textarea:disabled,
-  fieldset:disabled .checkbox input[type='checkbox'] {
-    background: #eef1f4;
-    color: #6b7280;
-    cursor: not-allowed;
-  }
-
-  fieldset:disabled label:not(.checkbox) {
-    opacity: 0.72;
-  }
-
-  textarea {
-    resize: vertical;
-  }
-
   .preview {
     width: min(100%, 10rem);
     aspect-ratio: 1;
     overflow: hidden;
     border-radius: 0.75rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
-    background: #fffdf9;
+    border: 1px solid var(--studio-border);
+    background: #fff;
   }
 
   .preview img {
@@ -193,44 +127,5 @@
     height: 100%;
     object-fit: cover;
     object-position: center top;
-  }
-
-  .hint {
-    color: #7b6a58;
-    font-size: 0.85rem;
-    line-height: 1.45;
-  }
-
-  button {
-    border: 0;
-    border-radius: 999px;
-    padding: 0.75rem 1.2rem;
-    background: #2f281f;
-    color: #f8f0e4;
-    font: inherit;
-    cursor: pointer;
-  }
-
-  .status {
-    margin: 0;
-    padding: 0.85rem 1rem;
-    border-radius: 0.75rem;
-    white-space: pre-wrap;
-    line-height: 1.5;
-  }
-
-  .status.success {
-    background: rgb(56 102 65 / 0.12);
-    color: #2f4f35;
-  }
-
-  .status.warning {
-    background: rgb(158 106 33 / 0.14);
-    color: #6a4a1b;
-  }
-
-  .status.error {
-    background: rgb(132 46 46 / 0.12);
-    color: #6d2a2a;
   }
 </style>

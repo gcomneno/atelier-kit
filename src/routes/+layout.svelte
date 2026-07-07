@@ -5,6 +5,7 @@
   import SiteHeader from '$lib/components/SiteHeader.svelte';
   import { setVisitorI18nContext } from '$lib/i18n/visitor-context.js';
   import { appearanceCssVariables } from '$lib/site-appearance.js';
+  import { fontStylesheetHref } from '$lib/site-typography.js';
   import { STUDIO_HEAD_STYLE } from '$lib/studio-theme.js';
 
   let { children, data } = $props();
@@ -18,8 +19,11 @@
       .join('; ')
   );
   const hasBackgroundImage = $derived(Boolean(data.appearance?.background_image));
+  const publicFontHref = $derived(
+    isStudio ? null : fontStylesheetHref(data.appearance?.font_preset ?? 'inter')
+  );
   const appearanceRootStyle = $derived(
-    `:root, body { ${appearanceStyle}; color-scheme: var(--site-color-scheme, light); background-color: var(--site-base-color, #f8f0e4); color: var(--site-text-color, #2f281f); }`
+    `:root, body { ${appearanceStyle}; color-scheme: var(--site-color-scheme, light); background-color: var(--site-base-color, #f8f0e4); color: var(--site-text-color, #2f281f); font-family: var(--site-font-family, ui-sans-serif, system-ui, sans-serif); }`
   );
 </script>
 
@@ -28,6 +32,11 @@
     {@html STUDIO_HEAD_STYLE}
   {:else}
     {@html `<style id="site-appearance">${appearanceRootStyle}</style>`}
+    {#if publicFontHref}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+      <link rel="stylesheet" href={publicFontHref} />
+    {/if}
   {/if}
   {#if data.seo?.ogImage}
     <meta property="og:image" content={data.seo.ogImage} />
@@ -81,9 +90,15 @@
   :global(body) {
     margin: 0;
     min-height: 100vh;
-    font-family:
-      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-      sans-serif;
+    font-family: var(
+      --site-font-family,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif
+    );
   }
 
   :global(a) {
@@ -108,10 +123,16 @@
     background:
       radial-gradient(
         circle at top left,
-        color-mix(in srgb, var(--site-accent-color, #d6be9a) 35%, transparent),
+        color-mix(in srgb, var(--site-accent-color, #d6be9a) 42%, transparent),
         transparent 32rem
       ),
       var(--site-base-color, #f8f0e4);
+  }
+
+  .site-root :global(h1),
+  .site-root :global(h2),
+  .site-root :global(h3) {
+    color: var(--site-heading-color, var(--site-text-color, #2f281f));
   }
 
   .site-root.has-background-image {
@@ -144,7 +165,10 @@
     :global(.catalog-sidebar--dark),
     :global(.catalog-sidebar--dark .widget-title),
     :global(.catalog-sidebar--dark .news-teaser),
-    :global(main header h1),
+    :global(main header h1) {
+      color: var(--site-heading-color, var(--site-text-color, #2f281f));
+    }
+
     :global(main header p),
     :global(main .eyebrow) {
       color: var(--site-text-color, #2f281f);

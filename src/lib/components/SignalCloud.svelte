@@ -86,11 +86,11 @@
 
 <style>
   .signal-cloud {
-    border: 1px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 55%, black);
+    border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent));
     border-radius: 1rem;
     padding: 1rem;
-    background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 62%, black);
-    color: #fff;
+    background: var(--site-surface-color, rgb(255 255 255 / 0.72));
+    color: var(--site-text-color, #2f281f);
     min-width: 0;
   }
 
@@ -105,11 +105,12 @@
     font-size: clamp(1.25rem, 2.8vw, 1.5rem);
     font-weight: 700;
     line-height: 1.25;
+    color: var(--site-heading-color, var(--site-text-color, #2f281f));
   }
 
   .cloud-hint {
     margin: 0;
-    color: color-mix(in srgb, white 72%, var(--site-accent-color, #8c3a44));
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 62%, transparent);
     font-size: clamp(1rem, 2.2vw, 1.12rem);
     line-height: 1.45;
   }
@@ -125,11 +126,11 @@
     align-items: center;
     gap: 0.45rem;
     max-width: 100%;
-    border: 1px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 78%, black);
+    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 16%, transparent);
     border-radius: 999px;
     padding: 0.55rem 0.85rem;
-    background: var(--site-accent-color, #8c3a44);
-    color: #fff;
+    background: var(--site-card-color, rgb(255 250 242 / 0.88));
+    color: var(--site-text-color, #2f281f);
     cursor: pointer;
     font: inherit;
     line-height: 1.35;
@@ -143,19 +144,19 @@
   }
 
   button:hover {
-    border-color: color-mix(in srgb, white 28%, var(--site-accent-color, #8c3a44));
-    background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 82%, white);
+    border-color: var(--site-accent-color, #8c3a44);
+    background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 16%, var(--site-card-color, #fefdfc));
   }
 
   button:focus-visible {
-    outline: 3px solid color-mix(in srgb, white 45%, transparent);
+    outline: 3px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 45%, transparent);
     outline-offset: 3px;
   }
 
   button.selected {
-    border-color: #fff;
-    background: color-mix(in srgb, var(--site-text-color, #e8e0d4) 94%, white);
-    color: var(--site-base-color, #0f0e0d);
+    border-color: var(--site-accent-color, #8c3a44);
+    background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 34%, var(--site-card-color, #fefdfc));
+    color: var(--site-text-color, #2f281f);
     font-weight: 700;
   }
 
@@ -166,15 +167,15 @@
     width: 1.15rem;
     height: 1.15rem;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 72%, black);
-    color: #fff;
+    background: var(--site-accent-color, #8c3a44);
+    color: var(--site-base-color, #f8f0e4);
     font-size: 0.8rem;
     line-height: 1;
   }
 
   .selection-status {
     margin: 0.85rem 0 0;
-    color: color-mix(in srgb, white 72%, var(--site-accent-color, #8c3a44));
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 62%, transparent);
     font-size: 0.9rem;
   }
 </style>

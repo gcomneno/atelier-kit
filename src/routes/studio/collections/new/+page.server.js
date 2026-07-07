@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, isRedirect, redirect } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
 import {
   createCollectionRecord,
@@ -58,7 +58,7 @@ export const actions = {
 
       redirect(303, `/studio/collections/${id}`);
     } catch (error) {
-      if (error instanceof Response) {
+      if (isRedirect(error)) {
         throw error;
       }
 

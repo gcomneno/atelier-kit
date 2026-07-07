@@ -1,155 +1,157 @@
 <script>
   import { enhance } from '$app/forms';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
+  import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
+  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
+  import StudioItemMetaFields from '$lib/components/StudioItemMetaFields.svelte';
   import { useI18n } from '$lib/i18n/context.js';
+  import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
+
+  /** @typedef {{ label: string, value: string }} MetaEditRow */
 
   const t = useI18n();
 
   let { data, form } = $props();
 
   const itemForm = $derived(form?.itemForm ?? data.itemForm);
+  const metaSuggestions = $derived(form?.metaSuggestions ?? data.metaSuggestions);
+
+  /** @type {MetaEditRow[]} */
+  let metaRows = $state([]);
+  let isDirty = $state(false);
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
+  const dirtyControl = {};
+
+  $effect(() => {
+    metaRows = itemForm.metaRows.map((/** @type {MetaEditRow} */ row) => ({ ...row }));
+    dirtyControl.resetBaseline?.();
+  });
+
+  function confirmDelete() {
+    return confirm(
+      t('studio.itemsEdit.deleteConfirm', { title: itemForm.title, id: itemForm.id })
+    );
+  }
 </script>
 
 <svelte:head>
   <title>Studio · {itemForm.title}</title>
 </svelte:head>
 
-<p class="intro">
+<p class="studio-intro">
   {t('studio.itemsEdit.intro')}
   <a href={`/items/${itemForm.id}`} target="_blank" rel="noreferrer">{t('studio.itemsEdit.preview')}</a>
 </p>
 
-<section class="panel">
+<section class="studio-panel">
   <div class="panel-heading">
     <h2>{itemForm.title}</h2>
     <p>{t('studio.itemsEdit.itemId', { id: itemForm.id })}</p>
   </div>
 
-  <form method="POST" action="?/saveItem" enctype="multipart/form-data" use:enhance class="studio-form">
+  <form
+    method="POST"
+    action="?/saveItem"
+    enctype="multipart/form-data"
+    use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
+    use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+    class="studio-form"
+  >
+    <StudioFormLegend />
+
     <div class="image-preview">
       <img src={itemForm.image_file} alt={itemForm.image_alt || itemForm.title} />
     </div>
 
     <label>
-      {t('studio.itemsEdit.uploadPhoto')}
-      <span class="hint">{t('studio.itemsEdit.uploadHint', { id: itemForm.id })}</span>
+      <StudioFieldLabel
+        label={t('studio.itemsEdit.uploadPhoto')}
+        optional
+        hint={t('studio.itemsEdit.uploadHint', { id: itemForm.id })}
+      />
       <input type="file" name="image_upload" accept="image/jpeg,image/png,image/webp" />
     </label>
 
     <label>
-      {t('studio.itemsEdit.imagePath')}
+      <StudioFieldLabel label={t('studio.itemsEdit.imagePath')} required />
       <input name="image_file" value={itemForm.image_file} required />
     </label>
 
     <label>
-      {t('studio.itemsEdit.imageAlt')}
+      <StudioFieldLabel label={t('studio.itemsEdit.imageAlt')} optional />
       <input name="image_alt" value={itemForm.image_alt} />
     </label>
 
     <label>
-      {t('studio.itemsEdit.titleField')}
+      <StudioFieldLabel label={t('studio.itemsEdit.titleField')} required />
       <input name="title" value={itemForm.title} required />
     </label>
 
     <label>
-      {t('studio.itemsEdit.subtitle')}
+      <StudioFieldLabel label={t('studio.itemsEdit.subtitle')} optional />
       <input name="subtitle" value={itemForm.subtitle} />
     </label>
 
     <label>
-      {t('studio.itemsEdit.status')}
+      <StudioFieldLabel label={t('studio.itemsEdit.status')} optional />
       <input name="status" value={itemForm.status} />
     </label>
 
     <label>
-      {t('studio.itemsEdit.priceMode')}
+      <StudioFieldLabel label={t('studio.itemsEdit.priceMode')} optional />
       <input name="price_mode" value={itemForm.price_mode} />
     </label>
 
     <label>
-      {t('studio.itemsEdit.description')}
+      <StudioFieldLabel label={t('studio.itemsEdit.description')} required />
       <textarea name="description" rows="5" required>{itemForm.description}</textarea>
     </label>
 
     <label>
-      {t('studio.itemsEdit.notice')}
-      <span class="hint">{t('studio.itemsEdit.noticeHint')}</span>
+      <StudioFieldLabel
+        label={t('studio.itemsEdit.notice')}
+        optional
+        hint={t('studio.itemsEdit.noticeHint')}
+      />
       <textarea name="notice" rows="2">{itemForm.notice}</textarea>
     </label>
 
-    {#if itemForm.meta.length > 0}
-      <fieldset>
-        <legend>{t('studio.itemsEdit.details')}</legend>
-
-        {#each itemForm.meta as entry, index}
-          {#if typeof entry.value === 'string'}
-            <label>
-              {entry.label}
-              <input name={`meta_${index}_value`} value={entry.value} />
-            </label>
-          {/if}
-
-          {#if Array.isArray(entry.children)}
-            {#each entry.children as child, childIndex}
-              {#if typeof child.value === 'string'}
-                <label>
-                  {entry.label} › {child.label}
-                  <input
-                    name={`meta_${index}_child_${childIndex}_value`}
-                    value={child.value}
-                  />
-                </label>
-              {/if}
-            {/each}
-          {/if}
-        {/each}
-      </fieldset>
-    {/if}
+    <StudioItemMetaFields
+      bind:rows={metaRows}
+      labels={metaSuggestions.labels}
+      values={metaSuggestions.values}
+      {dirtyControl}
+    />
 
     <div class="actions">
-      <button type="submit">{t('studio.itemsEdit.save')}</button>
+      <button type="submit" disabled={!isDirty}>{t('studio.itemsEdit.save')}</button>
       <a class="secondary-link" href="/studio/items">{t('studio.itemsEdit.back')}</a>
     </div>
 
-    {#if form?.itemMessage}
-      <p class={`status ${form.itemStatus || 'info'}`}>{form.itemMessage}</p>
-    {/if}
+    <StudioFormStatus message={form?.itemMessage} status={form?.itemStatus} />
+  </form>
+
+  <form method="POST" action="?/deleteItem" class="danger-zone" use:enhance>
+    <button
+      type="submit"
+      class="remove-button"
+      onclick={(event) => {
+        if (!confirmDelete()) {
+          event.preventDefault();
+        }
+      }}
+    >
+      {t('studio.itemsEdit.delete')}
+    </button>
   </form>
 </section>
 
 <style>
-  .intro {
-    margin: 0 0 1.5rem;
-    color: #5a4632;
-    line-height: 1.6;
-  }
-
-  .panel {
-    padding: 1.5rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
-    border-radius: 1rem;
-    background: rgb(255 250 242 / 0.82);
-  }
-
-  .panel-heading h2 {
-    margin: 0 0 0.35rem;
-    font-size: 1.2rem;
-  }
-
-  .panel-heading p {
-    margin: 0 0 1rem;
-    color: #7d684f;
-  }
-
-  .studio-form {
-    display: grid;
-    gap: 1rem;
-  }
-
   .image-preview {
     overflow: hidden;
     border-radius: 0.85rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
-    background: #fffdf9;
+    border: 1px solid var(--studio-border);
+    background: #fff;
   }
 
   .image-preview img {
@@ -159,85 +161,35 @@
     object-fit: cover;
   }
 
-  fieldset {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    display: grid;
-    gap: 1rem;
-  }
-
-  legend {
-    margin-bottom: 0.25rem;
-    font-weight: 600;
-  }
-
-  label {
-    display: grid;
-    gap: 0.4rem;
-    font-size: 0.95rem;
-  }
-
-  .hint {
-    color: #7d684f;
-    font-size: 0.85rem;
-  }
-
-  input,
-  textarea {
-    width: 100%;
-    padding: 0.7rem 0.8rem;
-    border: 1px solid rgb(47 40 31 / 0.18);
-    border-radius: 0.65rem;
-    background: #fffdf9;
-    color: inherit;
-    font: inherit;
-  }
-
-  textarea {
-    resize: vertical;
-  }
-
   .actions {
     display: flex;
     gap: 1rem;
     align-items: center;
   }
 
-  button {
-    border: 0;
+  .secondary-link {
+    color: var(--studio-accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .secondary-link:hover {
+    text-decoration: underline;
+  }
+
+  .danger-zone {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--studio-border);
+  }
+
+  .remove-button {
+    border: 1px solid rgb(132 46 46 / 0.35);
     border-radius: 999px;
-    padding: 0.75rem 1.2rem;
-    background: #2f281f;
-    color: #f8f0e4;
+    padding: 0.45rem 0.9rem;
+    background: rgb(132 46 46 / 0.08);
+    color: #6d2a2a;
     font: inherit;
     cursor: pointer;
-  }
-
-  .secondary-link {
-    color: #5a4632;
-  }
-
-  .status {
-    margin: 0;
-    padding: 0.85rem 1rem;
-    border-radius: 0.75rem;
-    white-space: pre-wrap;
-    line-height: 1.5;
-  }
-
-  .status.success {
-    background: rgb(56 102 65 / 0.12);
-    color: #2f4f35;
-  }
-
-  .status.warning {
-    background: rgb(158 106 33 / 0.14);
-    color: #6a4a1b;
-  }
-
-  .status.error {
-    background: rgb(132 46 46 / 0.12);
-    color: #6d2a2a;
   }
 </style>

@@ -1,5 +1,4 @@
 import {
-  getAboutConfig,
   getCatalogConfig,
   getHomeLayoutPageData,
   getCollections,
@@ -17,7 +16,6 @@ export function load() {
     catalog: getCatalogConfig(),
     collections: getCollections(),
     items: getItems(),
-    aboutAvailable: getAboutConfig() !== null,
     ...homeLayout
   };
 }

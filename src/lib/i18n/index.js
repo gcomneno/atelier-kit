@@ -1,6 +1,7 @@
 import en from './messages/en.js';
 import it from './messages/it.js';
 import { resolveLocale } from './resolve-locale.js';
+import { FONT_PRESET_IDS } from '../site-typography.js';
 
 /** @typedef {import('./resolve-locale.js').SupportedLocale} SupportedLocale */
 
@@ -67,6 +68,14 @@ export function appearancePresetLabel(locale, id) {
  * @param {SupportedLocale | string} locale
  * @param {string} id
  */
+export function fontPresetLabel(locale, id) {
+  return translate(`presets.font.${id}`, locale);
+}
+
+/**
+ * @param {SupportedLocale | string} locale
+ * @param {string} id
+ */
 export function itemPresetLabel(locale, id) {
   return translate(`presets.items.${id}`, locale);
 }
@@ -81,6 +90,16 @@ export function localizedAppearancePresets(locale) {
     { id: 'dark', label: appearancePresetLabel(locale, 'dark') },
     { id: 'custom', label: appearancePresetLabel(locale, 'custom') }
   ];
+}
+
+/**
+ * @param {SupportedLocale | string} locale
+ */
+export function localizedFontPresets(locale) {
+  return FONT_PRESET_IDS.map((id) => ({
+    id,
+    label: fontPresetLabel(locale, id)
+  }));
 }
 
 /**

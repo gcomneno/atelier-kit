@@ -3,7 +3,6 @@
 import { fail } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
 import {
-  checkboxEnabled,
   loadCatalogForm,
   runStructuralValidation,
   validationMessage,
@@ -35,12 +34,10 @@ export const actions = {
         {
           item_name_singular: formData.get('item_name_singular'),
           item_name_plural: formData.get('item_name_plural'),
-          show_price: checkboxEnabled(formData.get('show_price')),
-          show_availability: checkboxEnabled(formData.get('show_availability')),
-          show_material: checkboxEnabled(formData.get('show_material')),
-          show_dimensions: checkboxEnabled(formData.get('show_dimensions')),
-          show_status: checkboxEnabled(formData.get('show_status')),
-          show_meta: checkboxEnabled(formData.get('show_meta'))
+          eyebrow: formData.get('eyebrow'),
+          intro: formData.get('intro'),
+          sort: formData.get('sort'),
+          home_limit: formData.get('home_limit')
         },
         locale
       );

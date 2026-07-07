@@ -16,6 +16,7 @@
    *   catalogItems?: CatalogItem[],
    *   catalog?: CatalogConfig | null,
    *   site?: { language: string },
+   *   blockLabels?: Partial<Record<'about' | 'news' | 'collections' | 'catalog', string>>,
    *   variant?: 'light' | 'dark'
    * }}
    */
@@ -26,6 +27,7 @@
     catalogItems = [],
     catalog = null,
     site = { language: 'en' },
+    blockLabels = {},
     variant = 'light'
   } = $props();
 
@@ -97,7 +99,7 @@
     {#each LAYOUT_BLOCK_IDS as blockId (blockId)}
       {#if blockId === 'about' && showAbout && about}
         <section class="widget">
-          <h2 class="widget-title">{about.title}</h2>
+          <h2 class="widget-title">{blockLabels.about ?? about.title}</h2>
           <div class="widget-body">
             {#if aboutSnippet}
               <p class="about-snippet">{aboutSnippet}</p>
@@ -109,7 +111,7 @@
         </section>
       {:else if blockId === 'news' && showNews}
         <section class="widget">
-          <h2 class="widget-title">{t('catalog.latestNews')}</h2>
+          <h2 class="widget-title">{blockLabels.news ?? t('catalog.latestNews')}</h2>
           <div class="widget-body">
             <ul class="news-list">
               {#each newsPosts as post (post.id)}
@@ -131,7 +133,7 @@
         </section>
       {:else if blockId === 'collections' && showCollections}
         <section class="widget">
-          <h2 class="widget-title">{t('catalog.collections')}</h2>
+          <h2 class="widget-title">{blockLabels.collections ?? t('catalog.collections')}</h2>
           <div class="widget-body">
             {#if collections.length === 1}
               {@const collection = collections[0]}
@@ -160,7 +162,7 @@
         </section>
       {:else if blockId === 'catalog' && showCatalog && catalog}
         <section class="widget">
-          <h2 class="widget-title">{catalog.item_name_plural}</h2>
+          <h2 class="widget-title">{blockLabels.catalog ?? catalog.item_name_plural}</h2>
           <div class="widget-body">
             <ul class="link-list">
               {#each catalogItems as item (item.id)}
@@ -178,45 +180,73 @@
 
 <style>
   .catalog-sidebar {
+    --sidebar-title-size: 1.125rem;
+    --sidebar-title-weight: 700;
+    --sidebar-title-tracking: 0.03em;
+    --sidebar-title-color: var(--site-heading-color, var(--site-text-color, #2f281f));
+    --sidebar-link-size: 0.8125rem;
+    --sidebar-link-weight: 600;
+    --sidebar-link-color: var(--site-text-color, #2f281f);
+    --sidebar-body-size: 0.8125rem;
+    --sidebar-body-weight: 400;
+    --sidebar-body-color: var(--site-muted-text-color, #7b6a58);
+    --sidebar-meta-size: 0.6875rem;
+    --sidebar-meta-color: color-mix(
+      in srgb,
+      var(--site-accent-color, #d6be9a) 28%,
+      var(--site-muted-text-color, #7d684f)
+    );
+    --sidebar-footer-size: 0.8125rem;
+
     display: grid;
-    gap: 1.25rem;
+    gap: 1.5rem;
     align-content: start;
   }
 
   .widget {
-    --sidebar-widget-height: 12.5rem;
+    --sidebar-widget-height: 13rem;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     height: var(--sidebar-widget-height);
     overflow: hidden;
-    padding: 1.1rem 1.15rem;
-    border: 1px solid #e4d8c7;
-    border-radius: 1.25rem;
-    background: rgb(255 250 242 / 0.88);
-    box-shadow: 0 16px 50px rgb(36 27 18 / 0.06);
+    border: 1px solid var(--site-border-color, #e4d8c7);
+    border-radius: 1.1rem;
+    background: var(--site-card-color, #fffaf2);
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--site-text-color, #2f281f) 6%, transparent) inset,
+      0 18px 44px rgb(0 0 0 / 0.1);
   }
 
   .widget:not(:has(.widget-footer)) {
     grid-template-rows: auto minmax(0, 1fr);
   }
 
+  .widget-title {
+    margin: 0;
+    padding: 0.82rem 1rem 0.72rem;
+    border-bottom: 1px solid var(--site-border-color, #e4d8c7);
+    background: color-mix(in srgb, var(--site-accent-color, #d6be9a) 14%, var(--site-card-color, #fffaf2));
+    color: var(--sidebar-title-color);
+    font-size: var(--sidebar-title-size);
+    font-weight: var(--sidebar-title-weight);
+    letter-spacing: var(--sidebar-title-tracking);
+    line-height: 1.25;
+    text-transform: none;
+  }
+
   .widget-body {
     min-height: 0;
     overflow-y: auto;
     display: grid;
-    gap: 0.65rem;
+    gap: 0.45rem;
     align-content: start;
+    padding: 0.65rem 0.85rem 0.3rem;
+    color: var(--sidebar-body-color);
+    font-size: var(--sidebar-body-size);
+    font-weight: var(--sidebar-body-weight);
+    line-height: 1.5;
     scrollbar-width: thin;
-    scrollbar-color: rgb(125 104 79 / 0.35) transparent;
-  }
-
-  .widget-title {
-    margin: 0 0 0.75rem;
-    font-size: 0.85rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #7d684f;
+    scrollbar-color: color-mix(in srgb, var(--site-text-color, #2f281f) 24%, transparent) transparent;
   }
 
   .link-list,
@@ -225,42 +255,85 @@
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.55rem;
+    gap: 0.2rem;
   }
 
   .link-list a,
-  .collection-featured,
-  .widget-footer a {
-    color: #5f4529;
-    font-weight: 700;
+  .collection-featured {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.45rem;
+    padding: 0.42rem 0.55rem;
+    border-radius: 0.55rem;
+    color: var(--sidebar-link-color);
+    font-size: var(--sidebar-link-size);
+    font-weight: var(--sidebar-link-weight);
+    line-height: 1.35;
     text-decoration: none;
+    transition:
+      background-color 140ms ease,
+      color 140ms ease;
+  }
+
+  .link-list a::after {
+    content: '→';
+    flex-shrink: 0;
+    color: var(--site-accent-color, #8c3a44);
+    font-size: 0.75rem;
+    opacity: 0.45;
+    transition: opacity 140ms ease;
+  }
+
+  .link-list a:hover,
+  .collection-featured:hover {
+    background: color-mix(in srgb, var(--site-accent-color, #d6be9a) 12%, var(--site-card-color, #fffaf2));
+    text-decoration: none;
+  }
+
+  .link-list a:hover::after {
+    opacity: 1;
   }
 
   .collection-featured {
     display: block;
-    font-size: 0.95rem;
+    font-size: calc(var(--sidebar-link-size) + 0.0625rem);
+    font-weight: 700;
+    color: color-mix(
+      in srgb,
+      var(--sidebar-link-color) 82%,
+      var(--site-accent-color, #d6be9a)
+    );
   }
 
   .collection-snippet {
     margin: 0;
-    color: #4f4236;
-    font-size: 0.88rem;
+    padding: 0 0.55rem;
+    color: var(--sidebar-body-color);
+    font-size: calc(var(--sidebar-body-size) - 0.03125rem);
+    font-weight: var(--sidebar-body-weight);
     line-height: 1.55;
     white-space: pre-line;
   }
 
-  .link-list a:hover,
-  .collection-featured:hover,
-  .widget-footer a:hover,
-  .news-link:hover .news-title {
+  .widget-footer a {
+    color: var(--site-accent-color, #8c3a44);
+    font-size: var(--sidebar-footer-size);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .widget-footer a:hover {
     text-decoration: underline;
   }
 
   .about-snippet {
     margin: 0;
-    color: #4f4236;
-    font-size: 0.88rem;
-    line-height: 1.45;
+    padding: 0 0.2rem;
+    color: var(--sidebar-body-color);
+    font-size: var(--sidebar-body-size);
+    font-weight: var(--sidebar-body-weight);
+    line-height: 1.55;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
@@ -270,67 +343,70 @@
 
   .news-link {
     display: grid;
-    gap: 0.2rem;
+    gap: 0.18rem;
+    padding: 0.45rem 0.55rem;
+    border-radius: 0.55rem;
     color: inherit;
+    text-decoration: none;
+    transition: background-color 140ms ease;
+  }
+
+  .news-link:hover {
+    background: color-mix(in srgb, var(--site-accent-color, #d6be9a) 12%, var(--site-card-color, #fffaf2));
     text-decoration: none;
   }
 
   time {
-    color: #7d684f;
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
+    color: var(--sidebar-meta-color);
+    font-size: var(--sidebar-meta-size);
+    font-weight: 600;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
   }
 
   .news-title {
-    color: #5f4529;
-    font-weight: 700;
+    color: var(--sidebar-link-color);
+    font-size: var(--sidebar-link-size);
+    font-weight: var(--sidebar-link-weight);
     line-height: 1.35;
   }
 
   .news-teaser {
-    color: #4f4236;
-    font-size: 0.88rem;
+    color: var(--sidebar-body-color);
+    font-size: calc(var(--sidebar-body-size) - 0.03125rem);
+    font-weight: var(--sidebar-body-weight);
     line-height: 1.45;
   }
 
   .widget-footer {
-    margin: 0.75rem 0 0;
-    padding-top: 0.1rem;
-    font-size: 0.88rem;
+    margin: 0;
+    padding: 0.55rem 1rem 0.72rem;
+    border-top: 1px solid var(--site-border-color, #e4d8c7);
     text-align: right;
   }
 
+  .catalog-sidebar--dark {
+    --sidebar-title-color: var(--site-heading-color, var(--site-text-color, #f8f4ec));
+    --sidebar-meta-color: color-mix(
+      in srgb,
+      var(--site-accent-color, #e4c4a0) 34%,
+      var(--site-muted-text-color, #c8bfb0)
+    );
+  }
+
   .catalog-sidebar--dark .widget {
-    border: 1px solid var(--site-border-color, rgb(232 224 212 / 0.14));
-    border-radius: 1rem;
-    background: color-mix(in srgb, var(--site-card-color, #1a1816) 82%, transparent);
-    box-shadow: 0 16px 48px rgb(0 0 0 / 0.32);
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--site-text-color, #f8f4ec) 8%, transparent) inset,
+      0 18px 44px rgb(0 0 0 / 0.28);
   }
 
   .catalog-sidebar--dark .widget-title {
-    color: color-mix(in srgb, var(--site-accent-color, #8c3a44) 78%, var(--site-text-color, #e8e0d4));
+    background: color-mix(in srgb, var(--site-accent-color, #e4c4a0) 18%, var(--site-card-color, #2f2e2c));
   }
 
-  .catalog-sidebar--dark .link-list a,
-  .catalog-sidebar--dark .collection-featured,
-  .catalog-sidebar--dark .widget-footer a {
-    color: var(--site-accent-color, #8c3a44);
-  }
-
-  .catalog-sidebar--dark .collection-snippet,
-  .catalog-sidebar--dark .about-snippet,
-  .catalog-sidebar--dark .news-teaser {
-    color: var(--site-text-color, #e8e0d4);
-    color: color-mix(in srgb, var(--site-text-color, #e8e0d4) 72%, transparent);
-  }
-
-  .catalog-sidebar--dark time {
-    color: var(--site-text-color, #e8e0d4);
-    color: color-mix(in srgb, var(--site-text-color, #e8e0d4) 52%, transparent);
-  }
-
-  .catalog-sidebar--dark .news-title {
-    color: var(--site-text-color, #e8e0d4);
+  .catalog-sidebar--dark .link-list a:hover,
+  .catalog-sidebar--dark .collection-featured:hover,
+  .catalog-sidebar--dark .news-link:hover {
+    background: color-mix(in srgb, var(--site-accent-color, #e4c4a0) 14%, var(--site-card-color, #2f2e2c));
   }
 </style>

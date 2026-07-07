@@ -1,0 +1,18 @@
+layout:
+  preset: catalog-sidebar
+  blocks:
+    about:
+      enabled: true
+      placement: menu
+      label: Chi sono
+    news:
+      enabled: true
+      placement: menu
+      count: 1
+      label: News
+    collections:
+      enabled: true
+      placement: sidebar
+    catalog:
+      enabled: true
+      placement: menu

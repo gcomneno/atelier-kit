@@ -46,10 +46,10 @@ Fields:
 - `language` sets `<html lang="…">`, the studio / CLI operator UI locale, **and** visitor-facing UI labels (`en`, `it`, `it-IT`, etc.). YAML content (item titles, about text, news bodies) is not auto-translated.
 - `notice` can be used for demo warnings or short publishing notes.
 - `footer_note` is optional client text on the home page when no multi-column footer is configured (`config/footer.yaml`). The **Atelier-Kit credit** (`Built with Atelier-Kit` / `Realizzato con Atelier-Kit`) is added automatically by the framework in the site footer and is not editable in YAML.
-- `url` is an optional canonical public site URL (`https://…`). Used when building absolute Open Graph image links, the XML sitemap (`/sitemap.xml`), and the `Sitemap:` line in `/robots.txt`. Leave empty to use the current request host.
+- `url` is an optional canonical public site URL (`https://…`). Used when building absolute Open Graph image links, the XML sitemap (`/sitemap.xml`), the news RSS feed (`/news/rss.xml`), and the `Sitemap:` line in `/robots.txt`. Leave empty to use the current request host.
 - `og_image` is an optional social preview image for Facebook, Instagram and similar link unfurlers. Use a path under `/images/…` (for example `/images/site/og.jpg`) or a full `https://` URL. Recommended size: 1200×630.
 
-## Discovery (sitemap)
+## Discovery (sitemap and RSS)
 
 Atelier-Kit generates a sitemap automatically at:
 
@@ -69,6 +69,14 @@ It lists public visitor routes built from your YAML content:
 Set `site.url` in `config/site.yaml` to your production domain so search engines receive absolute URLs (for example `https://example.com/items/bracelet-a`). If `url` is empty, the sitemap uses the current request host (fine for previews; set `url` before go-live).
 
 `/robots.txt` includes a `Sitemap:` reference when the site is served. No manual sitemap file is required.
+
+When you publish news posts under `content/news/`, Atelier-Kit also serves an RSS 2.0 feed at:
+
+```text
+/news/rss.xml
+```
+
+Each entry includes title, date, excerpt (or first body line), link and optional image. The news index page (`/news`) links the feed with `<link rel="alternate" type="application/rss+xml">`. Set `site.url` so feed links use your production domain.
 
 ## Catalog configuration
 

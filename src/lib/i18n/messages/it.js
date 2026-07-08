@@ -297,7 +297,7 @@ export default {
         heroSignature: 'Firma',
         heroSignatureHint:
           'Saluto o chiusura personale in home, mostrata sotto il testo introduttivo e allineata a destra. Lascia vuoto per nascondere.',
-        footerNote: 'Nota a piè di pagina (opzionale)',
+        footerNote: 'Nota a piè di pagina',
         footerNoteHint: 'Testo breve in home quando non c\'è footer multi-colonna. Il credit Atelier-Kit viene aggiunto automaticamente e non è rimovibile.',
         save: 'Salva impostazioni'
       },

@@ -4,6 +4,12 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.28 - 2026-07-08
+
+### Changed
+
+- Footer kit credit shows the latest CHANGELOG release version at build time ([#112](https://github.com/gcomneno/atelier-kit/pull/112)).
+
 ## v0.1.27 - 2026-07-08
 
 ### Fixed

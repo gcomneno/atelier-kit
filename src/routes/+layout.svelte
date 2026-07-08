@@ -62,6 +62,7 @@
       socialLinks={data.socialLinks}
       footer={data.footerActive ? data.footer : null}
       overlay={hasBackgroundImage}
+      searchIndex={data.searchIndex}
     />
     {@render children()}
     {#if data.footerActive && data.footer}

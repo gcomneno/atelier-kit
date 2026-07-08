@@ -109,11 +109,16 @@ Confirm item vocabulary (`piece` / `pieces`, `work` / `works`, etc.) and visible
 - **Create:** `/studio/collections/new`
 - **Edit:** title, description, included items
 
-### 2.7 Signal Clouds (`/studio/signal-clouds`)
+### 2.7 News (`/studio/news`)
+
+- **Create:** `/studio/news/new` — title, date, excerpt, body
+- **Edit:** update posts for writing-oriented showcases
+
+### 2.8 Signal Clouds (`/studio/signal-clouds`)
 
 Localize questions and answer labels for the client’s contact flow.
 
-### 2.8 Publish readiness (`/studio/readiness`)
+### 2.9 Publish readiness (`/studio/readiness`)
 
 Run Content Doctor from the UI. Resolve warnings before deploy.
 
@@ -152,7 +157,7 @@ See [`deploy-vercel.md`](../usage/deploy-vercel.md).
 - [ ] About page reads correctly
 - [ ] Signal Clouds + Visitor Brief produce a copyable message
 - [ ] Contact email/WhatsApp links use real client details
-- [ ] `/studio` returns 404 on production (expected)
+- [ ] `/studio` returns 404 on production (expected — see [ADR 0007](../architecture/adr-0007-production-safe-studio-desktop.md))
 
 ---
 
@@ -207,6 +212,7 @@ Use this agenda with the client.
 | About page | `/studio/about` |
 | Add or edit items | `/studio/items` + photo upload |
 | Collections | `/studio/collections` |
+| News posts | `/studio/news` |
 | Visitor questions | `/studio/signal-clouds` |
 | Check before publish | `/studio/readiness` |
 
@@ -226,7 +232,7 @@ Tell the client:
 4. Edit in the browser; save writes to project files.
 5. When ready to go online, use **Metti online** on `/studio/readiness` inside the studio (or run `npm run publish -- --deploy`).
 
-Studio is **local only** — never exposed on the live site.
+Studio is **local only** — never exposed on the live site. Security model: [ADR 0007](../architecture/adr-0007-production-safe-studio-desktop.md).
 
 ### 5.5 Atelier Desktop handoff
 
@@ -279,6 +285,7 @@ Send this to the client after the call.
 - About page text
 - Items (title, description, photo upload)
 - Collections (which items belong together)
+- News posts (title, date, excerpt, body)
 - Visitor Brief questions
 
 ## Before going live after changes
@@ -335,6 +342,7 @@ Use Luna Argento to demo studio flows during handoff calls.
 
 - [`service-package.md`](service-package.md) — pricing and scope
 - [`studio.md`](../usage/studio.md) — studio routes and access rules
+- [`adr-0007-production-safe-studio-desktop.md`](../architecture/adr-0007-production-safe-studio-desktop.md) — authoring security model
 - [`client-intake.md`](../client-intake.md) — intake worksheet
 - [`deploy-vercel.md`](../usage/deploy-vercel.md) — Vercel setup
 - [`content-doctor.md`](../usage/content-doctor.md) — publish readiness

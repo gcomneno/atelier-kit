@@ -7,7 +7,7 @@ This file tracks the committed micro-CMS roadmap from [`micro-cms-positioning.md
 | Item | Issue |
 |---|---|
 | **Epic — Tier 1** | [#72](https://github.com/gcomneno/atelier-kit/issues/72) |
-| 1. Production-safe Studio | [#67](https://github.com/gcomneno/atelier-kit/issues/67) |
+| 1. Production-safe Studio | [#67](https://github.com/gcomneno/atelier-kit/issues/67) — **Path B:** [ADR 0007](../architecture/adr-0007-production-safe-studio-desktop.md) |
 | 2. Terminal-free publish | [#68](https://github.com/gcomneno/atelier-kit/issues/68) |
 | 3. XML sitemap | [#69](https://github.com/gcomneno/atelier-kit/issues/69) |
 | 4. Client-side search | [#70](https://github.com/gcomneno/atelier-kit/issues/70) |

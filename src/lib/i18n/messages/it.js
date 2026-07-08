@@ -107,7 +107,9 @@ export default {
       publishWhenReady:
         'Esegui npm run publish -- --deploy dalla cartella del progetto per inviare le modifiche a Vercel.',
       keepBackups:
-        'Fai commit su Git (o copia la cartella) prima di modifiche grandi. Le foto sono in static/images/items/.'
+        'Fai commit su Git (o copia la cartella) prima di modifiche grandi. Le foto sono in static/images/items/.',
+      desktopClient:
+        'Per clienti non tecnici, consegna Atelier Desktop (vedi desktop/README.md). Avvia lo studio in localhost senza terminale.'
     },
     help: {
       pageTitle: 'Studio · Aiuto',
@@ -629,7 +631,8 @@ export default {
       productionReadonly: 'Produzione in sola lettura.',
       previewFirst: 'Anteprima prima.',
       publishWhenReady: 'Pubblica quando pronto.',
-      keepBackups: 'Conserva backup.'
+      keepBackups: 'Conserva backup.',
+      desktopClient: 'Atelier Desktop (clienti).'
     }
   },
   presets: {

@@ -1,4 +1,5 @@
 <script>
+  import { untrack } from 'svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { EDITORIAL_MARK_TAGS, parseEditorialMarkup } from '$lib/editorial-markup.js';
   import EditorialText from '$lib/components/EditorialText.svelte';
@@ -16,12 +17,12 @@
 
   const t = useI18n();
 
-  let draft = $state(value);
+  let draft = $state(untrack(() => value));
   /** @type {HTMLTextAreaElement | HTMLInputElement | null} */
   let field = $state(null);
 
-  let wrapDraft = $state(display?.wrap ?? 'none');
-  let quoteColorDraft = $state(display?.quote_color ?? 'text');
+  let wrapDraft = $state(untrack(() => display?.wrap ?? 'none'));
+  let quoteColorDraft = $state(untrack(() => display?.quote_color ?? 'text'));
 
   $effect(() => {
     draft = value;

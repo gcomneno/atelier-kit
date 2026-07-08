@@ -84,6 +84,10 @@ When you have items or news posts, the visitor header shows a search field. It f
 
 Keyboard navigation: arrow keys move between results, Enter opens the highlighted match, Escape closes the panel. Labels follow the site language (`site.language`).
 
+### Publishing from the studio
+
+Open **`/studio/readiness`** and click **Put site online**. Content Doctor runs first; the studio then validates, builds, and updates the live site without terminal commands. Git and deploy run in the background when the operator configured them at handoff.
+
 ## Catalog configuration
 
 Edit:

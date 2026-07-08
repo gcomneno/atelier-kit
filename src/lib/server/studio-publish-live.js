@@ -5,6 +5,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { createTranslator } from '$lib/i18n/index.js';
 import { runPublishPrepReport } from '$lib/server/studio-io.js';
+import { getSiteConfig } from '$lib/server/showcase.js';
 
 const ROOT = process.cwd();
 const TRACKED_PREFIXES = ['config/', 'content/', 'static/images/'];
@@ -194,9 +195,16 @@ export function runPublishLive(locale) {
 
   log.push(deployOutput);
 
+  const site = getSiteConfig();
+  const deployedUrl =
+    deployOutput.match(/https:\/\/[^\s]+/)?.[0] || (site.url?.trim() || '');
+
   return {
     ok: true,
-    message: t('studio.readiness.liveOk'),
-    output: log.join('\n\n')
+    message: deployedUrl
+      ? t('studio.readiness.liveOkUrl', { url: deployedUrl })
+      : t('studio.readiness.liveOk'),
+    output: log.join('\n\n'),
+    deployedUrl
   };
 }

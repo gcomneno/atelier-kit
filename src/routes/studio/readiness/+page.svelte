@@ -79,8 +79,6 @@
       method="POST"
       action="?/publishLive"
       use:enhance={() => {
-        liveRunning = true;
-
         return async ({ update }) => {
           liveRunning = false;
           await update();
@@ -88,9 +86,17 @@
       }}
       class="action-form"
       onsubmit={(event) => {
+        if (liveRunning || prepRunning) {
+          event.preventDefault();
+          return;
+        }
+
         if (!confirmLive()) {
           event.preventDefault();
+          return;
         }
+
+        liveRunning = true;
       }}
     >
       <button type="submit" class="primary" disabled={liveRunning || prepRunning}>
@@ -127,14 +133,20 @@
     method="POST"
     action="?/runPublishPrep"
     use:enhance={() => {
-      prepRunning = true;
-
       return async ({ update }) => {
         prepRunning = false;
         await update();
       };
     }}
     class="action-form"
+    onsubmit={(event) => {
+      if (prepRunning || liveRunning) {
+        event.preventDefault();
+        return;
+      }
+
+      prepRunning = true;
+    }}
   >
     <button type="submit" class="secondary" disabled={prepRunning || liveRunning}>
       {prepRunning ? t('studio.readiness.publishRunning') : t('studio.readiness.publishRun')}

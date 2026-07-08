@@ -136,6 +136,7 @@ export default {
       toc: {
         workflow: 'Workflow',
         site: 'Showcase and site settings',
+        atelierMark: 'Atelier Mark',
         content: 'Editorial content',
         itemPage: 'Item detail page',
         publish: 'Preview and publishing',
@@ -159,13 +160,44 @@ export default {
         intro: 'Public site identity, appearance and structure. Changes show on home, catalog and sidebar.'
       },
       pages: {
-        identity: 'Site name, tagline, visitor language, URL and social preview image.',
+        identity:
+          'Site name, tagline (with optional Atelier Mark emphasis), intro title, home intro, visitor language, URL and social preview image.',
         appearance: 'Color presets, five editable colors, Google font and optional background.',
         hero: 'Home banner: image, copy and visibility.',
         layout: 'Layout preset, home/sidebar/menu blocks and widget order.',
         contact: 'Email and WhatsApp for the visitor brief on item pages.',
         social: 'Instagram, Facebook and X links in the footer.',
         footer: 'Link columns, copyright and legal line.'
+      },
+      atelierMark: {
+        title: 'Atelier Mark — inline text emphasis',
+        intro:
+          'Atelier Mark lets you color words in short site texts using theme tokens — no HTML or custom CSS. Plain text without { stays unchanged.',
+        whereTitle: 'Where it works',
+        where: {
+          1: 'Studio → Site → Identity → Tagline (optional epigraph guillemets « »).',
+          2: 'Studio → Site → Identity → Intro title (home hero heading).',
+          3: 'Studio → Site → Identity → Home intro text (per paragraph).'
+        },
+        syntaxTitle: 'Syntax',
+        syntax: {
+          1: '{accent}…{/accent} — accent color',
+          2: '{intro}…{/intro} — intro title color',
+          3: '{heading}…{/heading} — heading color',
+          4: '{muted}…{/muted} — muted text',
+          5: 'Literal braces: {{ and }}. Tags cannot nest in v1. Unknown or unclosed tags block Save.'
+        },
+        studioTitle: 'In Studio',
+        studio: {
+          1: 'Open Site → Identity and use the toolbar above tagline, intro title or home intro.',
+          2: 'Select text and click Accent, Intro, Heading or Muted to wrap the selection.',
+          3: 'Check the live preview under the field with your current appearance preset.',
+          4: 'For tagline only: choose Epigraph quotes to render « » with a separate quote color.'
+        },
+        epigraphNote:
+          'Tagline epigraph: Theme default keeps legacy CSS guillemets; Epigraph quotes uses component-managed « » with quote color Text, Accent, Heading or Intro.',
+        validationNote:
+          'Invalid markup blocks Save. Run npm run content:doctor before publish. Full reference: docs/usage/editorial-markup.md in the kit repo.'
       },
       content: {
         title: 'Editorial content',

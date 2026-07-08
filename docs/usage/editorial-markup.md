@@ -43,6 +43,8 @@ Visitor: dark `« »`, accent-colored body, no duplicate guillemets.
 
 Use the toolbar buttons above tagline / intro fields to wrap the selection. Preview shows the result with your current appearance preset.
 
+Open **Studio → Help** (`/studio/help`) for a short operator summary in the studio UI.
+
 **Guillemets** (tagline only):
 
 - *Theme default* — legacy CSS guillemets on `.hero-epigraph`

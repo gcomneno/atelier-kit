@@ -262,7 +262,7 @@ export default {
         preview: 'Background',
         previewHeading: 'Heading',
         previewCard: 'Card',
-        backgroundImage: 'Background image (optional)',
+        backgroundImage: 'Background image',
         backgroundHint: 'JPG, PNG or WebP. Saved under static/images/site/background.*',
         backgroundVsBanner:
           'Use this for a full-page background or a top strip below the header. Custom home layouts may rely on this asset instead of the hero banner.',
@@ -288,6 +288,7 @@ export default {
         currentHeaderLogo: 'Current: {path}',
         removeHeaderLogo: 'Remove header logo',
         tagline: 'Tagline',
+        taglineHint: 'Short line under the intro title on the home page. Leave empty to hide.',
         heroIntro: 'Home intro text',
         heroIntroHint:
           'One line break starts a new line; a blank line starts a new paragraph. Edit text only — theme styling and layout stay the same.',

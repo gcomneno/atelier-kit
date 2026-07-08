@@ -91,8 +91,12 @@
     {/if}
 
     <label>
-      <StudioFieldLabel label={t('studio.site.identity.tagline')} required />
-      <input name="tagline" value={siteForm.tagline} required />
+      <StudioFieldLabel
+        label={t('studio.site.identity.tagline')}
+        optional
+        hint={t('studio.site.identity.taglineHint')}
+      />
+      <input name="tagline" value={siteForm.tagline} />
     </label>
 
     <label>

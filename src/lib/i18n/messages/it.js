@@ -137,6 +137,7 @@ export default {
       toc: {
         workflow: 'Flusso di lavoro',
         site: 'Vetrina e impostazioni sito',
+        atelierMark: 'Atelier Mark',
         content: 'Contenuti editoriali',
         itemPage: 'Scheda entità (pagina dettaglio)',
         publish: 'Anteprima e pubblicazione',
@@ -160,13 +161,44 @@ export default {
         intro: 'Identità, aspetto e struttura del sito pubblico. Le modifiche si vedono su home, catalogo e sidebar.'
       },
       pages: {
-        identity: 'Nome sito, tagline, lingua visitatori, URL e immagine social.',
+        identity:
+          'Nome sito, tagline (con enfasi Atelier Mark opzionale), titolo intro, testo home intro, lingua visitatori, URL e immagine social.',
         appearance: 'Preset colori, cinque colori editabili, font Google e sfondo opzionale.',
         hero: 'Banner in home: immagine, testo e visibilità.',
         layout: 'Preset layout, blocchi home/sidebar/menu e ordine widget.',
         contact: 'Email e WhatsApp per la scheda visitatore sulle pagine entità.',
         social: 'Link Instagram, Facebook, X nel footer.',
         footer: 'Colonne link, copyright e riga legale.'
+      },
+      atelierMark: {
+        title: 'Atelier Mark — enfasi inline nei testi',
+        intro:
+          'Atelier Mark colora parole in testi brevi del sito usando i token del tema — senza HTML né CSS personalizzato. Testo senza { resta invariato.',
+        whereTitle: 'Dove funziona',
+        where: {
+          1: 'Studio → Sito → Identità → Tagline (virgolette epigrafe « » opzionali).',
+          2: 'Studio → Sito → Identità → Titolo intro (heading hero in home).',
+          3: 'Studio → Sito → Identità → Testo home intro (per paragrafo).'
+        },
+        syntaxTitle: 'Sintassi',
+        syntax: {
+          1: '{accent}…{/accent} — colore accento',
+          2: '{intro}…{/intro} — colore titolo intro',
+          3: '{heading}…{/heading} — colore titoli',
+          4: '{muted}…{/muted} — testo tenue',
+          5: 'Parentesi graffe letterali: {{ e }}. I tag non si annidano in v1. Tag sconosciuti o non chiusi bloccano Salva.'
+        },
+        studioTitle: 'In Studio',
+        studio: {
+          1: 'Apri Sito → Identità e usa la barra strumenti sopra tagline, titolo intro o testo home intro.',
+          2: 'Seleziona il testo e clicca Accento, Intro, Titolo o Tenue per avvolgere la selezione.',
+          3: 'Controlla l’anteprima live sotto il campo con il preset aspetto corrente.',
+          4: 'Solo per la tagline: scegli Epigrafe « » per virgolette gestite dal componente con colore virgolette separato.'
+        },
+        epigraphNote:
+          'Epigrafe tagline: Predefinito tema mantiene le virgolette CSS legacy; Epigrafe « » usa virgolette dal componente con colore Testo, Accento, Titolo o Intro.',
+        validationNote:
+          'Markup non valido blocca Salva. Esegui npm run content:doctor prima del publish. Riferimento completo: docs/usage/editorial-markup.md nel repo del Kit.'
       },
       content: {
         title: 'Contenuti editoriali',

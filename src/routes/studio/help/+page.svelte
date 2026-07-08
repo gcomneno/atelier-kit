@@ -8,6 +8,7 @@
   const toc = [
     { id: 'workflow', labelKey: 'studio.help.toc.workflow' },
     { id: 'site', labelKey: 'studio.help.toc.site' },
+    { id: 'atelier-mark', labelKey: 'studio.help.toc.atelierMark' },
     { id: 'content', labelKey: 'studio.help.toc.content' },
     { id: 'item-page', labelKey: 'studio.help.toc.itemPage' },
     { id: 'publish', labelKey: 'studio.help.toc.publish' },
@@ -38,6 +39,9 @@
   ];
 
   const workflowSteps = [1, 2, 3, 4, 5];
+  const atelierMarkWhere = [1, 2, 3];
+  const atelierMarkSyntax = [1, 2, 3, 4, 5];
+  const atelierMarkStudio = [1, 2, 3, 4];
   const itemInStudio = [1, 2, 3, 4];
   const itemElsewhere = [1, 2, 3, 4, 5];
   const yamlOnly = [1, 2, 3];
@@ -85,6 +89,37 @@
       </li>
     {/each}
   </ul>
+</section>
+
+<section id="atelier-mark" class="studio-panel help-section">
+  <div class="panel-heading">
+    <h2>{t('studio.help.atelierMark.title')}</h2>
+    <p>{t('studio.help.atelierMark.intro')}</p>
+  </div>
+
+  <h3>{t('studio.help.atelierMark.whereTitle')}</h3>
+  <ul class="help-bullets">
+    {#each atelierMarkWhere as index}
+      <li>{t(`studio.help.atelierMark.where.${index}`)}</li>
+    {/each}
+  </ul>
+
+  <h3>{t('studio.help.atelierMark.syntaxTitle')}</h3>
+  <ul class="help-bullets">
+    {#each atelierMarkSyntax as index}
+      <li>{t(`studio.help.atelierMark.syntax.${index}`)}</li>
+    {/each}
+  </ul>
+
+  <h3>{t('studio.help.atelierMark.studioTitle')}</h3>
+  <ol class="help-steps">
+    {#each atelierMarkStudio as step}
+      <li>{t(`studio.help.atelierMark.studio.${step}`)}</li>
+    {/each}
+  </ol>
+
+  <p class="help-note">{t('studio.help.atelierMark.epigraphNote')}</p>
+  <p class="help-note">{t('studio.help.atelierMark.validationNote')}</p>
 </section>
 
 <section id="content" class="studio-panel help-section">

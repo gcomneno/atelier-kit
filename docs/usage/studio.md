@@ -127,6 +127,28 @@ Presets: `warm` (default), `neutral`, `dark`, or `custom` with explicit hex colo
 
 Optional **background image** upload (JPG/PNG/WebP) saved to `static/images/site/background.*`.
 
+## Atelier Mark
+
+**Atelier Mark** is inline text emphasis for short site identity fields. Operators wrap words with theme-color tokens instead of HTML or custom CSS.
+
+**Studio:** open **Site → Identity**. Use the toolbar above **Tagline**, **Intro title** and **Home intro** to wrap a selection. A live preview shows the result with the current appearance preset. Tagline can use **Epigraph quotes** (`« »`) with a separate quote color.
+
+**YAML fields:** `tagline`, `intro_title`, `hero_intro` in `config/site.yaml`. Optional `tagline_display` controls epigraph guillemets.
+
+| Token | Visitor color |
+|-------|----------------|
+| `{accent}…{/accent}` | Accent |
+| `{intro}…{/intro}` | Intro title |
+| `{heading}…{/heading}` | Heading |
+| `{muted}…{/muted}` | Muted text |
+
+- Literal braces: `{{` and `}}`
+- No nesting in v1
+- Invalid markup blocks Studio **Save**
+- `npm run content:doctor` warns before publish
+
+Full operator guide: [`editorial-markup.md`](editorial-markup.md). In Studio, open **Help** (`/studio/help`) for a short summary.
+
 ## Operator language
 
 Studio labels, save messages, Content Doctor output and `npm run publish` banners follow `site.language` in `config/site.yaml`. Supported operator locales: **English** (`en`) and **Italian** (`it`). See [ADR 0005](../architecture/adr-0005-operator-ui-i18n.md).
@@ -183,3 +205,4 @@ See [`deploy-vercel.md`](deploy-vercel.md) and [`../product/service-package.md`]
 - [`../product/product-levels.md`](../product/product-levels.md)
 - [`../product/no-code-roadmap.md`](../product/no-code-roadmap.md)
 - [`content-doctor.md`](content-doctor.md)
+- [`editorial-markup.md`](editorial-markup.md)

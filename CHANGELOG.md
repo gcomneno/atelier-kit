@@ -4,6 +4,16 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.2.0 - 2026-07-08
+
+### Added
+
+- **Atelier Mark** ([#103](https://github.com/gcomneno/atelier-kit/issues/103)): safe inline emphasis in site identity fields using theme tokens (`{accent}`, `{intro}`, `{heading}`, `{muted}`). Studio toolbar with live preview on tagline, intro title and home intro. Optional `tagline_display` epigraph wrap with separate quote color. See [`docs/usage/editorial-markup.md`](docs/usage/editorial-markup.md).
+
+### Changed
+
+- Home page renders tagline, intro title and hero intro through `EditorialText`; meta description strips markup tags.
+
 ## v0.1.29 - 2026-07-08
 
 ### Changed

@@ -94,6 +94,24 @@ export default {
       requiredWhenEnabled: 'Required when enabled',
       atLeastOne: 'Choose at least one'
     },
+    editorial: {
+      toolbar: 'Text emphasis',
+      preview: 'Preview',
+      tags: {
+        accent: 'Accent',
+        intro: 'Intro',
+        heading: 'Heading',
+        muted: 'Muted'
+      },
+      taglineWrap: 'Guillemets',
+      taglineWrapNone: 'Theme default',
+      taglineWrapEpigraph: 'Epigraph quotes',
+      quoteColor: 'Quote color',
+      quoteColorText: 'Text',
+      quoteColorAccent: 'Accent',
+      quoteColorHeading: 'Heading',
+      quoteColorIntro: 'Intro title'
+    },
     accessGuide: {
       title: 'Recommended access',
       intro: 'How to use the studio safely and publish changes online.',
@@ -846,6 +864,12 @@ export default {
         title: 'Site title',
         problem: 'The public site title still contains the word "demo".',
         action: 'Open config/site.yaml and set the real name visitors should see.'
+      },
+      editorialMarkup: {
+        title: 'Editorial markup',
+        problem: 'A site text field contains invalid Atelier Mark tags: {detail}',
+        action:
+          'Open Studio → Site identity and fix the highlighted tags, or remove the { and } markers.'
       },
       siteNoticeStarter: {
         title: 'Site notice banner',

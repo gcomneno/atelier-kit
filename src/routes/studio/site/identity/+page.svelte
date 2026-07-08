@@ -1,5 +1,6 @@
 <script>
   import { enhance } from '$app/forms';
+  import EditorialField from '$lib/components/EditorialField.svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
@@ -60,7 +61,7 @@
         optional
         hint={t('studio.site.identity.introTitleHint')}
       />
-      <input name="intro_title" value={siteForm.intro_title} />
+      <EditorialField name="intro_title" value={siteForm.intro_title} />
     </label>
 
     <label>
@@ -96,7 +97,12 @@
         optional
         hint={t('studio.site.identity.taglineHint')}
       />
-      <input name="tagline" value={siteForm.tagline} />
+      <EditorialField
+        name="tagline"
+        value={siteForm.tagline}
+        display={siteForm.tagline_display}
+        showEpigraphControls
+      />
     </label>
 
     <label>
@@ -105,7 +111,7 @@
         optional
         hint={t('studio.site.identity.heroIntroHint')}
       />
-      <textarea name="hero_intro" rows="12">{siteForm.hero_intro}</textarea>
+      <EditorialField name="hero_intro" value={siteForm.hero_intro} multiline rows={12} />
     </label>
 
     <label>

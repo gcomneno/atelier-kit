@@ -1,5 +1,6 @@
 <script>
   import { enhance } from '$app/forms';
+  import { untrack } from 'svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
@@ -15,16 +16,17 @@
   const appearanceForm = $derived(form?.appearanceForm ?? data.appearanceForm);
   const appearancePresets = $derived(data.appearancePresets);
   const fontPresets = $derived(data.fontPresets);
-  let presetDraft = $state(data.appearanceForm.preset);
-  let fontPresetDraft = $state(data.appearanceForm.font_preset);
-  let baseColor = $state(data.appearanceForm.base_color);
-  let accentColor = $state(data.appearanceForm.accent_color);
-  let textColor = $state(data.appearanceForm.text_color);
-  let headingColor = $state(data.appearanceForm.heading_color);
-  let headerTitleColor = $state(data.appearanceForm.header_title_color);
-  let introTitleColor = $state(data.appearanceForm.intro_title_color);
-  let cardColor = $state(data.appearanceForm.card_color);
-  let backgroundFitDraft = $state(data.appearanceForm.background_fit ?? 'top');
+  const initialAppearance = untrack(() => data.appearanceForm);
+  let presetDraft = $state(initialAppearance.preset);
+  let fontPresetDraft = $state(initialAppearance.font_preset);
+  let baseColor = $state(initialAppearance.base_color);
+  let accentColor = $state(initialAppearance.accent_color);
+  let textColor = $state(initialAppearance.text_color);
+  let headingColor = $state(initialAppearance.heading_color);
+  let headerTitleColor = $state(initialAppearance.header_title_color);
+  let introTitleColor = $state(initialAppearance.intro_title_color);
+  let cardColor = $state(initialAppearance.card_color);
+  let backgroundFitDraft = $state(initialAppearance.background_fit ?? 'top');
   let removeBackground = $state(false);
   let hasNewBackground = $state(false);
   /** @type {HTMLInputElement | null} */

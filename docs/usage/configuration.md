@@ -78,6 +78,14 @@ When you publish news posts under `content/news/`, Atelier-Kit also serves an RS
 
 Each entry includes title, date, excerpt (or first body line), link and optional image. The news index page (`/news`) links the feed with `<link rel="alternate" type="application/rss+xml">`. Set `site.url` so feed links use your production domain.
 
+### Structured data (JSON-LD)
+
+News detail pages (`/news/<slug>`) include a `BlogPosting` schema block: headline, publication date, description (excerpt or first body line), optional image, and publisher (`Organization` from `site.name`).
+
+The about page (`/about`) includes an `AboutPage` schema block when `config/about.yaml` is present. The `mainEntity` is a `Person` when a portrait is configured, otherwise an `Organization` from `site.name`.
+
+Data is built from the same YAML loaders as the visible page — no duplicate content source. Set `site.url` so absolute URLs in structured data match your production domain. You can verify output with [Google Rich Results Test](https://search.google.com/test/rich-results).
+
 ### On-site search
 
 When you have items or news posts, the visitor header shows a search field. It filters **client-side** on item and news titles (and optional subtitles or excerpts). No backend or database is required; the index is built at build time from your YAML files.

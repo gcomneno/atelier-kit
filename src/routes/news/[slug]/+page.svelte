@@ -1,5 +1,6 @@
 <script>
   import BookReading from '$lib/components/BookReading.svelte';
+  import JsonLd from '$lib/components/JsonLd.svelte';
   import PageSocialMeta from '$lib/components/PageSocialMeta.svelte';
   import { isBookReadingFormat } from '$lib/book-content.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
@@ -44,6 +45,8 @@
   description={data.seo?.ogDescription}
   image={data.seo?.ogImage}
 />
+
+<JsonLd data={data.jsonLd} />
 
 {#if isBookLayout}
   <BookReading

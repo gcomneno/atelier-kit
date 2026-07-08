@@ -1,4 +1,5 @@
 import { error } from '@sveltejs/kit';
+import { buildBlogPostingJsonLd } from '$lib/server/json-ld.js';
 import { resolveAbsoluteImageUrl } from '$lib/site-meta.js';
 import { getNewsPost, getSiteConfig } from '$lib/server/showcase.js';
 
@@ -20,6 +21,7 @@ export function load({ params, url }) {
       ogTitle: `${post.title} · ${site.name}`,
       ogDescription: description,
       ogImage: resolveAbsoluteImageUrl(site.og_image, url.origin, site.url)
-    }
+    },
+    jsonLd: buildBlogPostingJsonLd(post, site, url.origin)
   };
 }

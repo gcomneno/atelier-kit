@@ -1,4 +1,5 @@
 <script>
+  import JsonLd from '$lib/components/JsonLd.svelte';
   import { splitParagraphs } from '$lib/text-blocks.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
@@ -15,6 +16,8 @@
     content={data.about.intro || t('about.metaDescription', { siteName: data.site.name })}
   />
 </svelte:head>
+
+<JsonLd data={data.jsonLd} />
 
 <main class="about-page">
   <a class="back-link" href="/">{t('common.backToShowcase')}</a>

@@ -120,12 +120,11 @@ Localize questions and answer labels for the client’s contact flow.
 
 ### 2.9 Publish readiness (`/studio/readiness`)
 
-Run Content Doctor from the UI. Resolve warnings before deploy.
+- Review **Content Doctor** notes
+- Click **Put site online** / **Metti online** — one guided action (checks, build, deploy); no terminal for the client
+- Optional **Test build** without updating the live site
 
-```bash
-npm run content:doctor
-npm run content:doctor -- --strict   # must pass before public launch
-```
+Operator setup (Git remote, Vercel link) happens once during handoff — see Phase 3–4 below.
 
 ---
 

@@ -105,7 +105,7 @@ export default {
       previewFirst:
         'Apri Anteprima in un’altra scheda per controllare le pagine pubbliche dopo ogni salvataggio.',
       publishWhenReady:
-        'Esegui npm run publish -- --deploy dalla cartella del progetto per inviare le modifiche a Vercel.',
+        'Apri Stato pubblicazione nello studio e clicca Metti online quando i contenuti sono pronti.',
       keepBackups:
         'Fai commit su Git (o copia la cartella) prima di modifiche grandi. Le foto sono in static/images/items/.',
       desktopClient:
@@ -359,53 +359,65 @@ export default {
       },
       nextSteps: {
         title: 'Prima di pubblicare',
-        intro: 'Controlla lo stato di pubblicazione nello studio o esegui lo script publish dalla cartella del progetto.',
+        intro: 'Controlla lo stato di pubblicazione nello studio e metti online con un pulsante.',
         link: 'Apri stato pubblicazione'
       }
     },
     readiness: {
       pageTitle: 'Studio · Stato pubblicazione',
       intro:
-        'Content Doctor controlla testi segnaposto, immagini mancanti e altre note pre-lancio in linguaggio semplice. Esegui publish quando sei pronto a compilare e distribuire.',
+        'Leggi le note del Content Doctor, poi metti il sito online con un pulsante. I controlli partono in automatico e i messaggi restano in linguaggio semplice — niente comandi da terminale.',
       doctorTitle: 'Content Doctor',
       doctorOk: 'Niente di evidente da rivedere.',
       doctorReview: 'Rivedi le note qui sotto prima di pubblicare.',
-      publishTitle: 'Comandi publish',
-      publishIntro: 'Dalla cartella del progetto:',
-      publishRun: 'Esegui preparazione publish',
-      publishRunning: 'Preparazione publish in corso…',
-      publishOk: 'Preparazione publish completata.',
-      publishFailed: 'Preparazione publish non riuscita. Controlla l’output qui sotto.',
+      publishTitle: 'Solo test build (opzionale)',
+      publishIntro:
+        'Esegue validazione e build di produzione senza aggiornare il sito live. Utile per verificare errori prima di mettere online.',
+      publishRun: 'Test build',
+      publishRunning: 'Test build in corso…',
+      publishOk: 'Test build riuscito. Puoi mettere online quando sei pronto.',
+      publishFailed:
+        'Test build non riuscito. Leggi i dettagli qui sotto e correggi prima di pubblicare.',
       liveTitle: 'Metti online',
       liveIntro:
-        'Salva su Git le modifiche dello studio (config, contenuti e immagini caricate), esegue push e deploy in produzione su Vercel. Richiede remote Git e Vercel CLI collegato al progetto.',
-      livePendingTitle: 'Modifiche locali in sospeso',
+        'Controlla i contenuti, salva le modifiche e aggiorna il sito live. Resti nello studio — Git e deploy girano in background.',
+      liveBlocked: 'La pubblicazione non è ancora configurata su questo computer.',
+      livePendingSummary: '{count} aggiornamento/i pronti da pubblicare.',
+      livePendingDetails: 'Mostra file modificati',
       livePendingEmpty:
-        'Nessuna modifica non committata in config/, content/ o static/images/. Puoi comunque ridistribuire l’ultimo commit.',
-      liveCommitsAhead: '{count} commit locale/i non ancora pushati.',
+        'Nessuna modifica locale nuova. Puoi comunque aggiornare il sito live dall’ultima versione salvata.',
+      liveCommitsAhead: '{count} aggiornamento/i salvati in attesa di andare online.',
       liveRun: 'Metti online',
-      liveRunning: 'Pubblicazione live in corso…',
+      liveRunning: 'Aggiornamento sito live…',
       liveOk: 'Sito live aggiornato.',
-      liveFailed: 'Impossibile pubblicare live.',
-      liveFailedPrep: 'Preparazione publish non riuscita. Nessun commit o deploy eseguito.',
-      liveFailedCommit: 'Commit Git non riuscito. Verifica nome/email Git e riprova.',
-      liveFailedPush: 'Push Git non riuscito. Risolvi conflitti o autenticazione e riprova.',
-      liveFailedDeploy: 'Deploy Vercel non riuscito. Il push Git può essere andato a buon fine — controlla la dashboard Vercel.',
-      liveConfirm:
-        'Mettere online adesso? Verranno eseguiti publish prep, commit dei file studio, push su origin e deploy in produzione.',
+      liveOkUrl: 'Sito live aggiornato: {url}',
+      liveFailed: 'Impossibile aggiornare il sito live.',
+      liveFailedPrep:
+        'Controlli contenuto o build non riusciti. Nulla è stato inviato online. Leggi i dettagli e correggi prima di riprovare.',
+      liveFailedCommit:
+        'Impossibile salvare le modifiche in locale. Chiedi all’operatore di verificare Git su questo computer.',
+      liveFailedPush:
+        'Impossibile inviare le modifiche al repository online. Chiedi all’operatore di verificare l’accesso Git.',
+      liveFailedDeploy:
+        'Il sito live potrebbe non essersi aggiornato. Le modifiche potrebbero essere salvate — chiedi all’operatore di controllare l’hosting.',
+      liveConfirm: 'Mettere online {count} aggiornamento/i adesso? Verranno controllati i contenuti e aggiornato il sito live.',
+      liveConfirmRedeploy: 'Aggiornare il sito live dall’ultima versione salvata?',
       liveCommitMessage: 'Aggiornamento da studio',
-      livePhasePrep: '→ Preparazione publish (validate, doctor, check, build)',
-      livePrepOk: 'Preparazione publish OK.',
-      livePhaseCommit: '→ Commit Git',
-      liveCommitOk: 'Commit creato.',
-      liveSkipCommit: '→ Nessun file nuovo da committare (push dei commit locali esistenti).',
-      liveNoCommitNeeded: '→ Nessun commit Git necessario.',
-      livePhasePush: '→ Push Git',
-      livePushOk: 'Push OK.',
-      livePhaseDeploy: '→ Deploy produzione Vercel',
+      livePhasePrep: '→ Controllo contenuti e build del sito',
+      livePrepOk: 'Controlli e build OK.',
+      livePhaseCommit: '→ Salvataggio modifiche',
+      liveCommitOk: 'Modifiche salvate.',
+      liveSkipCommit: '→ Nessun file nuovo da salvare (invio aggiornamenti esistenti).',
+      liveNoCommitNeeded: '→ Nessun nuovo salvataggio necessario.',
+      livePhasePush: '→ Invio aggiornamenti online',
+      livePushOk: 'Aggiornamenti inviati.',
+      livePhaseDeploy: '→ Aggiornamento sito live',
+      outputDetails: 'Dettagli tecnici',
       liveIssues: {
-        noRepo: 'Questa cartella non è un repository Git. Inizializza Git o clona il progetto sito.',
-        noRemote: 'Manca il remote Git "origin". Aggiungi il repository GitHub prima di mettere online.'
+        noRepo:
+          'Questa cartella non è ancora collegata al backup online. L’operatore lo configura durante la consegna.',
+        noRemote:
+          'La pubblicazione online non è ancora collegata. Contatta l’operatore — collega GitHub e hosting in fase di setup.'
       }
     },
     collections: {

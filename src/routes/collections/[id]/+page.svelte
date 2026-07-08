@@ -1,14 +1,17 @@
 <script>
   import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
   import ItemCard from '$lib/components/ItemCard.svelte';
+  import { formatPageTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
+
+  const pageTitle = $derived(formatPageTitle(data.collection.title, data.site));
 </script>
 
 <svelte:head>
-  <title>{data.collection.title} · {data.site.name}</title>
+  <title>{pageTitle}</title>
   <meta name="description" content={data.collection.description} />
 </svelte:head>
 

@@ -1,14 +1,23 @@
 <script>
   import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
+  import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
+
+  const siteLabel = $derived(resolveDocumentTitle(data.site));
+  const pageTitle = $derived(formatPageTitle(t('collections.pageTitle'), data.site));
+  const metaDescription = $derived(
+    siteLabel
+      ? t('collections.metaDescription', { siteName: siteLabel })
+      : t('collections.intro', { itemPlural: data.catalog.item_name_plural })
+  );
 </script>
 
 <svelte:head>
-  <title>{t('collections.pageTitle')} · {data.site.name}</title>
-  <meta name="description" content={t('collections.metaDescription', { siteName: data.site.name })} />
+  <title>{pageTitle}</title>
+  <meta name="description" content={metaDescription} />
 </svelte:head>
 
 <!-- Sidebar layout applies on `/collections` index only; see getCatalogSidebarPageData() in showcase.js -->

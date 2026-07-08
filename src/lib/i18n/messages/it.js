@@ -22,7 +22,7 @@ export default {
         items: 'Entità',
         news: 'Novità',
         collections: 'Collezioni',
-        signals: 'Nuvole di Segnali',
+        signals: 'Signal Cloud',
         readiness: 'Pubblicazione',
         help: 'Aiuto',
         preview: 'Anteprima',
@@ -46,7 +46,7 @@ export default {
         content: {
           eyebrow: 'Editoriale',
           title: 'Pagine e opere',
-          description: 'Testi, catalogo, entità, collezioni, news e segnali visitatore.'
+          description: 'Testi, catalogo, entità, collezioni, news e Signal Cloud visitatore.'
         },
         publish: {
           eyebrow: 'Online',
@@ -643,13 +643,13 @@ export default {
       save: 'Salva impostazioni catalogo'
     },
     signals: {
-      pageTitle: 'Studio · Signal Clouds',
+      pageTitle: 'Studio · Signal Cloud',
       intro:
         'Modifica domande per i visitatori ed etichette risposta. Gli id domanda e risposta restano fissi così le pagine entità esistenti restano stabili.',
       question: 'Domanda',
       hint: 'Suggerimento',
       answer: 'Risposta · {id}',
-      save: 'Salva Nuvole',
+      save: 'Salva Signal Cloud',
       enabled: 'Mostra sulle pagine entità',
       remove: 'Rimuovi signal',
       removeConfirm:
@@ -730,7 +730,7 @@ export default {
     saveHeroBannerError: 'Impossibile salvare l’hero banner.',
     saveAboutError: 'Impossibile salvare la pagina Chi siamo.',
     saveCatalogError: 'Impossibile salvare le impostazioni catalogo.',
-    saveCloudsError: 'Impossibile salvare Signal Clouds.',
+    saveCloudsError: 'Impossibile salvare Signal Cloud.',
     removeCloudError: 'Impossibile rimuovere il signal.',
     cloudRemoved: 'Signal rimosso. Aggiorna l’anteprima per verificare le pagine entità.',
     saveItemError: 'Impossibile salvare l\'entità.',

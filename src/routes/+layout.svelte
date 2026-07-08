@@ -206,18 +206,21 @@
   }
 
   .site-root :global(.page-shell:not(.with-sidebar) .hero-head .tagline),
-  .site-root :global(.page-shell:not(.with-sidebar) .hero-head .hero-intro),
-  .site-root :global(.page-shell:not(.with-sidebar) .hero-head .hero-signature) {
+  .site-root :global(.page-shell:not(.with-sidebar) .hero-head .hero-intro-card) {
     text-align: center;
     margin-inline: auto;
   }
 
-  .site-root :global(.page-shell:not(.with-sidebar) .hero-head .hero-intro) {
+  .site-root :global(.page-shell:not(.with-sidebar) .hero-head .hero-intro-card) {
     width: min(100%, 46rem);
   }
 
+  .site-root :global(.page-shell:not(.with-sidebar) .hero-head .hero-intro) {
+    text-align: center;
+  }
+
   .site-root :global(.page-shell:not(.with-sidebar) .hero-head .hero-signature) {
-    max-width: 46rem;
+    text-align: right;
   }
 
   /* Chrome <111 (e.g. Windows 7) — no color-mix(): keep solid theme colors */

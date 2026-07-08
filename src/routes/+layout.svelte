@@ -52,21 +52,22 @@
 {#if isStudio}
   {@render children()}
 {:else}
-  <div
-    class="site-root"
-    class:has-background-image={hasBackgroundImage}
-    data-bg-fit={hasBackgroundImage ? backgroundFit : undefined}
-    style={`${appearanceStyle}${hasBackgroundImage ? `; --site-bg-url: url(${data.appearance.background_image})` : ''}`}
-  >
+  <div class="site-root" style={appearanceStyle}>
     <SiteHeader
       site={data.site}
       menuNav={data.menuNav}
       socialLinks={data.socialLinks}
       footer={data.footerActive ? data.footer : null}
-      overlay={hasBackgroundImage}
       searchIndex={data.searchIndex}
     />
-    {@render children()}
+    <div
+      class="site-content"
+      class:has-background-image={hasBackgroundImage}
+      data-bg-fit={hasBackgroundImage ? backgroundFit : undefined}
+      style={hasBackgroundImage ? `--site-bg-url: url(${data.appearance.background_image})` : undefined}
+    >
+      {@render children()}
+    </div>
     {#if data.footerActive && data.footer}
       <SiteFooter
         footer={data.footer}
@@ -123,6 +124,20 @@
     min-height: 100vh;
     color: var(--site-text-color, #2f281f);
     background-color: var(--site-base-color, #f8f0e4);
+  }
+
+  .site-root :global(h1),
+  .site-root :global(h2),
+  .site-root :global(h3) {
+    color: var(--site-heading-color, var(--site-text-color, #2f281f));
+  }
+
+  .site-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    background-color: var(--site-base-color, #f8f0e4);
     background:
       radial-gradient(
         circle at top left,
@@ -132,13 +147,7 @@
       var(--site-base-color, #f8f0e4);
   }
 
-  .site-root :global(h1),
-  .site-root :global(h2),
-  .site-root :global(h3) {
-    color: var(--site-heading-color, var(--site-text-color, #2f281f));
-  }
-
-  .site-root.has-background-image {
+  .site-content.has-background-image {
     background-color: var(--site-base-color, #f8f0e4);
     background:
       radial-gradient(
@@ -150,7 +159,7 @@
       var(--site-base-color, #f8f0e4);
   }
 
-  .site-root.has-background-image[data-bg-fit='center'] {
+  .site-content.has-background-image[data-bg-fit='center'] {
     background:
       radial-gradient(
         circle at top left,
@@ -161,7 +170,7 @@
       var(--site-base-color, #f8f0e4);
   }
 
-  .site-root.has-background-image[data-bg-fit='contain'] {
+  .site-content.has-background-image[data-bg-fit='contain'] {
     background:
       radial-gradient(
         circle at top left,
@@ -214,11 +223,12 @@
   /* Chrome <111 (e.g. Windows 7) — no color-mix(): keep solid theme colors */
   @supports not (color: color-mix(in srgb, red, blue)) {
     .site-root,
-    .site-root.has-background-image {
+    .site-content,
+    .site-content.has-background-image {
       background: var(--site-base-color, #f8f0e4);
     }
 
-    .site-root.has-background-image {
+    .site-content.has-background-image {
       background-color: var(--site-base-color, #f8f0e4);
       background-image: var(--site-bg-url, none);
       background-position: center top;
@@ -226,12 +236,12 @@
       background-repeat: no-repeat;
     }
 
-    .site-root.has-background-image[data-bg-fit='center'] {
+    .site-content.has-background-image[data-bg-fit='center'] {
       background-position: center center;
       background-size: cover;
     }
 
-    .site-root.has-background-image[data-bg-fit='contain'] {
+    .site-content.has-background-image[data-bg-fit='contain'] {
       background-position: center center;
       background-size: contain;
     }
@@ -253,14 +263,14 @@
     }
   }
 
-  .site-root > :global(main) {
+  .site-content > :global(main) {
     display: flex;
     flex: 1;
     flex-direction: column;
     min-width: 0;
   }
 
-  .site-root > :global(main .page-shell) {
+  .site-content > :global(main .page-shell) {
     display: flex;
     flex: 1;
     flex-direction: column;

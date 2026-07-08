@@ -4,6 +4,12 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.25 - 2026-07-08
+
+### Changed
+
+- **Background image scope** ([#95](https://github.com/gcomneno/atelier-kit/issues/95)): the decorative background now lives in the content area below the header instead of full-bleed on `.site-root`. The header sits on a solid `base_color` (no forced overlay), keeping logo and navigation legible. Works with the existing `background_fit` modes (`top` / `center` / `contain`).
+
 ## v0.1.24 - 2026-07-08
 
 ### Fixed

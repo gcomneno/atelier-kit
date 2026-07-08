@@ -27,6 +27,7 @@ import {
   requiredField,
   runStructuralValidation,
   saveSiteBackgroundUpload,
+  saveHeaderLogoUpload,
   saveHeroBannerUpload,
   validationMessage,
   writeProjectYaml
@@ -70,7 +71,10 @@ function buildAppearanceYaml(appearance, backgroundImage = '') {
     text_color: appearance.text_color,
     heading_color: appearance.heading_color,
     card_color: appearance.card_color ?? deriveCardColor(appearance.base_color),
-    font_preset: appearance.font_preset
+    font_preset: appearance.font_preset,
+    header_title_color: appearance.header_title_color,
+    intro_title_color: appearance.intro_title_color,
+    background_fit: appearance.background_fit
   };
 
   if (backgroundImage) {
@@ -112,6 +116,10 @@ export function loadSiteForm() {
 
   return {
     name: readString(site, 'name'),
+    header_title: readString(site, 'header_title'),
+    intro_title: readString(site, 'intro_title'),
+    header_logo: readString(site, 'header_logo'),
+    header_logo_alt: readString(site, 'header_logo_alt'),
     tagline: readString(site, 'tagline'),
     hero_intro: readString(site, 'hero_intro'),
     hero_signature: readString(site, 'hero_signature'),
@@ -323,11 +331,35 @@ export async function saveSiteAction({ request }) {
     }
 
     const site = { ...data.site };
-    site.name = requiredField(formData.get('name'), t('fields.siteTitle'), locale);
+    const headerTitle = optionalField(formData.get('header_title'));
+    const introTitle = optionalField(formData.get('intro_title'));
+    site.header_title = headerTitle;
+    site.intro_title = introTitle;
+    site.name = introTitle || headerTitle || readString(site, 'name');
     site.tagline = requiredField(formData.get('tagline'), t('fields.tagline'), locale);
     site.hero_intro = optionalField(formData.get('hero_intro'));
     site.hero_signature = optionalField(formData.get('hero_signature'));
     site.footer_note = optionalField(formData.get('footer_note'));
+
+    let headerLogo = String(formData.get('header_logo') ?? readString(site, 'header_logo')).trim();
+
+    if (checkboxEnabled(formData.get('remove_header_logo'))) {
+      headerLogo = '';
+    } else {
+      const logoUpload = formData.get('header_logo_upload');
+
+      if (logoUpload instanceof File && logoUpload.size > 0) {
+        headerLogo = await saveHeaderLogoUpload(logoUpload, locale);
+      }
+    }
+
+    if (headerLogo) {
+      site.header_logo = headerLogo;
+      site.header_logo_alt = optionalField(formData.get('header_logo_alt'));
+    } else {
+      delete site.header_logo;
+      delete site.header_logo_alt;
+    }
 
     writeProjectYaml('config/site.yaml', { site });
     const validation = runStructuralValidation();
@@ -639,7 +671,10 @@ export async function saveAppearanceAction({ request }) {
       formData.get('text_color'),
       formData.get('heading_color'),
       formData.get('card_color'),
-      formData.get('font_preset')
+      formData.get('header_title_color'),
+      formData.get('intro_title_color'),
+      formData.get('font_preset'),
+      formData.get('background_fit')
     );
     const data = readProjectYaml('config/site.yaml');
 

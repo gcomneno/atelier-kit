@@ -15,13 +15,16 @@
   const appearanceForm = $derived(form?.appearanceForm ?? data.appearanceForm);
   const appearancePresets = $derived(data.appearancePresets);
   const fontPresets = $derived(data.fontPresets);
-  let presetDraft = $state('warm');
-  let fontPresetDraft = $state('inter');
-  let baseColor = $state('#000000');
-  let accentColor = $state('#000000');
-  let textColor = $state('#000000');
-  let headingColor = $state('#000000');
-  let cardColor = $state('#000000');
+  let presetDraft = $state(data.appearanceForm.preset);
+  let fontPresetDraft = $state(data.appearanceForm.font_preset);
+  let baseColor = $state(data.appearanceForm.base_color);
+  let accentColor = $state(data.appearanceForm.accent_color);
+  let textColor = $state(data.appearanceForm.text_color);
+  let headingColor = $state(data.appearanceForm.heading_color);
+  let headerTitleColor = $state(data.appearanceForm.header_title_color);
+  let introTitleColor = $state(data.appearanceForm.intro_title_color);
+  let cardColor = $state(data.appearanceForm.card_color);
+  let backgroundFitDraft = $state(data.appearanceForm.background_fit ?? 'top');
   let removeBackground = $state(false);
   let hasNewBackground = $state(false);
   /** @type {HTMLInputElement | null} */
@@ -35,7 +38,10 @@
     accentColor = next.accent_color;
     textColor = next.text_color;
     headingColor = next.heading_color;
+    headerTitleColor = next.header_title_color;
+    introTitleColor = next.intro_title_color;
     cardColor = next.card_color;
+    backgroundFitDraft = next.background_fit ?? 'top';
     removeBackground = false;
     hasNewBackground = false;
 
@@ -65,10 +71,13 @@
       removeBackground ||
       presetDraft !== appearanceForm.preset ||
       fontPresetDraft !== appearanceForm.font_preset ||
+      backgroundFitDraft !== (appearanceForm.background_fit ?? 'top') ||
       baseColor !== appearanceForm.base_color ||
       accentColor !== appearanceForm.accent_color ||
       textColor !== appearanceForm.text_color ||
       headingColor !== appearanceForm.heading_color ||
+      headerTitleColor !== appearanceForm.header_title_color ||
+      introTitleColor !== appearanceForm.intro_title_color ||
       cardColor !== appearanceForm.card_color
   );
 
@@ -82,6 +91,8 @@
       accentColor = preset.accent_color;
       textColor = preset.text_color;
       headingColor = preset.heading_color;
+      headerTitleColor = preset.header_title_color;
+      introTitleColor = preset.intro_title_color;
       cardColor = preset.card_color;
     }
   }
@@ -188,6 +199,24 @@
 
       <label>
         <StudioFieldLabel
+          label={t('studio.site.appearance.headerTitleColor')}
+          required
+          hint={t('studio.site.appearance.headerTitleColorHint')}
+        />
+        <input name="header_title_color" type="color" bind:value={headerTitleColor} />
+      </label>
+
+      <label>
+        <StudioFieldLabel
+          label={t('studio.site.appearance.introTitleColor')}
+          required
+          hint={t('studio.site.appearance.introTitleColorHint')}
+        />
+        <input name="intro_title_color" type="color" bind:value={introTitleColor} />
+      </label>
+
+      <label>
+        <StudioFieldLabel
           label={t('studio.site.appearance.cardColor')}
           required
           hint={t('studio.site.appearance.cardColorHint')}
@@ -225,6 +254,19 @@
         disabled={removeBackground}
         onchange={onBackgroundSelected}
       />
+    </label>
+
+    <label>
+      <StudioFieldLabel
+        label={t('studio.site.appearance.backgroundFit')}
+        optional
+        hint={t('studio.site.appearance.backgroundFitHint')}
+      />
+      <select name="background_fit" bind:value={backgroundFitDraft}>
+        <option value="top">{t('studio.site.appearance.backgroundFitTop')}</option>
+        <option value="center">{t('studio.site.appearance.backgroundFitCenter')}</option>
+        <option value="contain">{t('studio.site.appearance.backgroundFitContain')}</option>
+      </select>
     </label>
 
     {#if appearanceForm.background_image}

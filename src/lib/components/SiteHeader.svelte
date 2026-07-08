@@ -6,7 +6,7 @@
   /** @typedef {{ href: string, label: string }} MenuNavItem */
   /** @typedef {import('$lib/search-index.js').SearchEntry} SearchEntry */
 
-  /** @type {{ site: { name: string }, menuNav?: MenuNavItem[], socialLinks?: SocialLink[], footer?: { show_social: boolean } | null, overlay?: boolean, searchIndex?: SearchEntry[] }} */
+  /** @type {{ site: { name: string, header_title?: string, header_logo?: string, header_logo_alt?: string }, menuNav?: MenuNavItem[], socialLinks?: SocialLink[], footer?: { show_social: boolean } | null, overlay?: boolean, searchIndex?: SearchEntry[] }} */
   let {
     site,
     menuNav = [],
@@ -17,6 +17,10 @@
   } = $props();
 
   const t = useVisitorI18n();
+
+  const headerTitle = $derived(site.header_title?.trim() || site.name);
+  const headerLogo = $derived(site.header_logo?.trim() || '');
+  const headerLogoAlt = $derived(site.header_logo_alt?.trim() || headerTitle);
 
   /** @param {string} id */
   function ariaLabel(id) {
@@ -32,20 +36,27 @@
 
 <header class="site-header" class:overlay>
   <div class="header-inner">
-    <a class="site-name" href="/">{site.name}</a>
+    <a class="site-brand" href="/">
+      {#if headerLogo}
+        <img class="site-logo" src={headerLogo} alt={headerLogoAlt} />
+      {/if}
+      {#if headerTitle}
+        <span class="site-name">{headerTitle}</span>
+      {/if}
+    </a>
 
     {#if searchIndex.length > 0 || menuNav.length > 0 || (footer?.show_social && socialLinks.length > 0)}
       <div class="header-actions">
-        {#if searchIndex.length > 0}
-          <SiteSearch entries={searchIndex} {overlay} />
-        {/if}
-
         {#if menuNav.length > 0}
           <nav class="site-nav" aria-label={t('common.siteNav')}>
             {#each menuNav as item (item.href)}
               <a class="site-nav-link" href={item.href}>{item.label}</a>
             {/each}
           </nav>
+        {/if}
+
+        {#if searchIndex.length > 0}
+          <SiteSearch entries={searchIndex} {overlay} />
         {/if}
 
         {#if footer?.show_social && socialLinks.length > 0}
@@ -107,7 +118,7 @@
   }
 
   .site-header.overlay .site-name {
-    color: var(--site-heading-color, var(--site-text-color, #e8e0d4));
+    color: var(--site-header-title-color, var(--site-heading-color, var(--site-text-color, #e8e0d4)));
     text-shadow: 0 1px 16px rgb(0 0 0 / 0.65);
   }
 
@@ -126,15 +137,30 @@
     padding: 1rem 0;
   }
 
-  .site-name {
+  .site-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
     flex-shrink: 0;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .site-logo {
+    display: block;
+    width: auto;
+    max-width: min(12rem, 42vw);
+    max-height: 2.5rem;
+    object-fit: contain;
+  }
+
+  .site-name {
     font-size: clamp(0.95rem, 2.5vw, 1.1rem);
     font-weight: 600;
     letter-spacing: 0.03em;
     line-height: 1.25;
-    text-decoration: none;
     text-transform: none;
-    color: var(--site-heading-color, var(--site-text-color, #2f281f));
+    color: var(--site-header-title-color, var(--site-heading-color, var(--site-text-color, #2f281f)));
   }
 
   .header-actions {

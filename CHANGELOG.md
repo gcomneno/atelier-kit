@@ -4,6 +4,19 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.23 - 2026-07-08
+
+### Added
+
+- **Site branding**: separate header title, intro title and optional header logo (Studio → Identity).
+- **Appearance**: header/intro title colors (distinct per preset), background layout (`top` / `center` / `contain`).
+
+### Fixed
+
+- Studio font preset combobox now reflects the saved value on first load.
+- Header search field order: menu → search → social icons.
+- Home hero block centers horizontally and vertically when the catalog sidebar is off.
+
 ## v0.1.22 - 2026-07-08
 
 ### Added

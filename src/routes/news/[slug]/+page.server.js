@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { buildBlogPostingJsonLd } from '$lib/server/json-ld.js';
 import { resolveAbsoluteImageUrl } from '$lib/site-meta.js';
+import { formatPageTitle } from '$lib/site-branding.js';
 import { getNewsPost, getSiteConfig } from '$lib/server/showcase.js';
 
 /** @type {import('./$types').PageServerLoad} */
@@ -18,7 +19,7 @@ export function load({ params, url }) {
     site,
     post,
     seo: {
-      ogTitle: `${post.title} · ${site.name}`,
+      ogTitle: formatPageTitle(post.title, site),
       ogDescription: description,
       ogImage: resolveAbsoluteImageUrl(site.og_image, url.origin, site.url)
     },

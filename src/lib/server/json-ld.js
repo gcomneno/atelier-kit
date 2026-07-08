@@ -1,4 +1,5 @@
 import { resolveAbsoluteImageUrl, resolveAbsoluteUrl } from '$lib/site-meta.js';
+import { resolveDocumentTitle } from '$lib/site-branding.js';
 
 /**
  * @param {{ excerpt?: string, body: string }} post
@@ -36,6 +37,7 @@ export function buildBlogPostingJsonLd(post, site, origin) {
   const description = postDescription(post);
   const imageFile = post.image_file || site.og_image;
   const image = imageFile ? resolveAbsoluteImageUrl(imageFile, origin, site.url) : '';
+  const publisherName = resolveDocumentTitle(site);
 
   return {
     '@context': 'https://schema.org',
@@ -45,10 +47,14 @@ export function buildBlogPostingJsonLd(post, site, origin) {
     description,
     url: pageUrl,
     mainEntityOfPage: pageUrl,
-    publisher: {
-      '@type': 'Organization',
-      name: site.name
-    },
+    ...(publisherName
+      ? {
+          publisher: {
+            '@type': 'Organization',
+            name: publisherName
+          }
+        }
+      : {}),
     ...(image ? { image } : {})
   };
 }
@@ -61,6 +67,7 @@ export function buildBlogPostingJsonLd(post, site, origin) {
 export function buildAboutPageJsonLd(about, site, origin) {
   const pageUrl = resolveAbsoluteUrl('/about', origin, site.url);
   const description = about.intro || about.title;
+  const siteLabel = resolveDocumentTitle(site);
 
   /** @type {Record<string, unknown>} */
   const mainEntity = about.portrait
@@ -76,7 +83,7 @@ export function buildAboutPageJsonLd(about, site, origin) {
       }
     : {
         '@type': 'Organization',
-        name: site.name,
+        ...(siteLabel ? { name: siteLabel } : {}),
         description
       };
 

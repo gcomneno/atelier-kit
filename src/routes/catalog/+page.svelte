@@ -1,27 +1,32 @@
 <script>
   import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
   import ItemCard from '$lib/components/ItemCard.svelte';
+  import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
 
+  const siteLabel = $derived(resolveDocumentTitle(data.site));
+  const pageTitle = $derived(formatPageTitle(data.blockLabels.catalog, data.site));
   const catalogEyebrow = $derived(data.catalog.eyebrow || t('home.catalogEyebrow'));
   const catalogIntro = $derived(
     data.catalog.intro.trim() ||
       t('catalogListing.intro', { itemPlural: data.catalog.item_name_plural })
   );
+  const metaDescription = $derived(
+    siteLabel
+      ? t('catalogListing.metaDescription', {
+          itemPlural: data.catalog.item_name_plural,
+          siteName: siteLabel
+        })
+      : catalogIntro
+  );
 </script>
 
 <svelte:head>
-  <title>{data.blockLabels.catalog} · {data.site.name}</title>
-  <meta
-    name="description"
-    content={t('catalogListing.metaDescription', {
-      itemPlural: data.catalog.item_name_plural,
-      siteName: data.site.name
-    })}
-  />
+  <title>{pageTitle}</title>
+  <meta name="description" content={metaDescription} />
 </svelte:head>
 
 <div class="page-shell" class:with-sidebar={data.sidebarActive}>

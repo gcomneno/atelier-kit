@@ -4,6 +4,17 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.29 - 2026-07-08
+
+### Changed
+
+- **Italian Signal Cloud copy** ([#86](https://github.com/gcomneno/atelier-kit/issues/86)): Studio nav, save button and error strings now keep the product term **Signal Cloud** instead of mixed translations like «Nuvole di Segnali» / «Salva Nuvole».
+- Site `name` and `tagline` documented as optional in `docs/usage/configuration.md` ([#88](https://github.com/gcomneno/atelier-kit/issues/88)).
+
+### Fixed
+
+- **Optional site title and tagline** ([#88](https://github.com/gcomneno/atelier-kit/issues/88)): visitor pages no longer render empty headings or `·` title suffixes when branding fields are blank; RSS, Open Graph and JSON-LD use the same `resolveDocumentTitle` / `formatPageTitle` fallbacks as the home page.
+
 ## v0.1.28 - 2026-07-08
 
 ### Changed

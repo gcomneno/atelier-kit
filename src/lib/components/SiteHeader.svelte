@@ -1,6 +1,7 @@
 <script>
   import SiteSearch from '$lib/components/SiteSearch.svelte';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+  import { resolveHeaderTitle } from '$lib/site-branding.js';
 
   /** @typedef {{ id: string, url: string }} SocialLink */
   /** @typedef {{ href: string, label: string }} MenuNavItem */
@@ -18,7 +19,7 @@
 
   const t = useVisitorI18n();
 
-  const headerTitle = $derived(site.header_title?.trim() || site.name);
+  const headerTitle = $derived(resolveHeaderTitle(site));
   const headerLogo = $derived(site.header_logo?.trim() || '');
   const headerLogoAlt = $derived(site.header_logo_alt?.trim() || headerTitle);
 

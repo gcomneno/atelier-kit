@@ -22,6 +22,7 @@ import { resolveSiteAppearance } from '$lib/site-appearance.js';
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
 import { getDefaultLayoutBlockLabel } from '$lib/layout-block-labels.js';
 import { normalizeMetaHierarchy } from '$lib/item-meta.js';
+import { getItemCoverImage, normalizeItemImages } from '$lib/item-images.js';
 import { parseTaglineDisplay } from '$lib/editorial-markup.js';
 
 const configFiles = import.meta.glob('/config/*.yaml', {
@@ -761,6 +762,8 @@ export function getItems() {
 
       const item = parseYaml(source, raw);
       const meta = normalizeMetaEntries(item.meta, source);
+      const images = normalizeItemImages(item);
+      const coverImage = getItemCoverImage({ ...item, images });
 
       return {
         id: requiredString(item, 'id', source),
@@ -768,8 +771,9 @@ export function getItems() {
         subtitle: optionalString(item, 'subtitle'),
         status: optionalString(item, 'status'),
         price_mode: optionalString(item, 'price_mode'),
-        image_file: requiredString(item, 'image_file', source),
-        image_alt: optionalString(item, 'image_alt'),
+        image_file: coverImage.file,
+        image_alt: coverImage.alt,
+        images,
         description: requiredString(item, 'description', source),
         notice: optionalString(item, 'notice'),
         preview: normalizeItemPreview(item.preview),

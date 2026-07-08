@@ -206,3 +206,9 @@ See [`deploy-vercel.md`](deploy-vercel.md) and [`../product/service-package.md`]
 - [`../product/no-code-roadmap.md`](../product/no-code-roadmap.md)
 - [`content-doctor.md`](content-doctor.md)
 - [`editorial-markup.md`](editorial-markup.md)
+
+## Item galleries
+
+The item editor currently manages the legacy cover image fields: `image_file`, `image_alt`, and the single item upload control.
+
+Multi-image item galleries are supported in YAML through `images`, but Studio upload, reorder, and remove controls are not implemented yet. Edit galleries manually in `content/items/*.yaml` and run `npm run content:validate`.

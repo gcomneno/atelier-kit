@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { resolveAbsoluteImageUrl } from '$lib/site-meta.js';
+import { resolveItemCoverSrc } from '$lib/item-cover.js';
 import {
   getCatalogConfig,
   getContactConfig,
@@ -28,7 +29,7 @@ export function load({ params, url }) {
     seo: {
       ogTitle: item.title,
       ogDescription: item.description,
-      ogImage: resolveAbsoluteImageUrl(item.image_file, url.origin, site.url)
+      ogImage: resolveAbsoluteImageUrl(resolveItemCoverSrc(item), url.origin, site.url)
     }
   };
 }

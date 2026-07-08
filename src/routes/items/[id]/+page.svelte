@@ -5,7 +5,8 @@
   import PageSocialMeta from '$lib/components/PageSocialMeta.svelte';
   import SignalCloud from '$lib/components/SignalCloud.svelte';
   import VisitorBrief from '$lib/components/VisitorBrief.svelte';
-  import { resolveItemCoverFallbackSrc, resolveItemCoverSrc } from '$lib/item-cover.js';
+  import { getItemCoverImage, getItemCoverIndex, normalizeItemImages } from '$lib/item-images.js';
+  import { resolveItemCoverFallbackSrc } from '$lib/item-cover.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   /** @type {import('./$types').PageData} */
@@ -17,12 +18,16 @@
   $: signalClouds = data.signalClouds;
   $: nextItem = data.neighbors?.next ?? null;
   $: previousItem = data.neighbors?.previous ?? null;
+  $: itemImages = normalizeItemImages(item);
+  $: coverImage = getItemCoverImage(item);
+  $: coverIndex = getItemCoverIndex(itemImages);
 
   let descriptionExpanded = false;
   /** @type {HTMLParagraphElement | undefined} */
   let descriptionEl;
   let descriptionCanToggle = false;
   let lightboxOpen = false;
+  let lightboxIndex = 0;
 
   $: item.id, resetDescription();
   $: item.description, descriptionEl, queueDescriptionMeasure();
@@ -55,6 +60,11 @@
 
   async function toggleDescription() {
     descriptionExpanded = !descriptionExpanded;
+  }
+
+  function openImageLightbox(index = coverIndex) {
+    lightboxIndex = index;
+    lightboxOpen = true;
   }
 
   /**
@@ -130,11 +140,11 @@
           type="button"
           class="image-frame image-trigger"
           aria-label={t('imageLightbox.enlarge', { title: item.title })}
-          on:click={() => (lightboxOpen = true)}
+          on:click={() => openImageLightbox(coverIndex)}
         >
           <img
-            src={resolveItemCoverSrc(item)}
-            alt={item.image_alt || item.title}
+            src={coverImage.file}
+            alt={coverImage.alt || item.title}
             width="600"
             height="900"
             on:error={(event) => {
@@ -151,9 +161,27 @@
         </button>
         <ImageLightbox
           bind:open={lightboxOpen}
-          src={resolveItemCoverSrc(item)}
-          alt={item.image_alt || item.title}
+          bind:index={lightboxIndex}
+          images={itemImages}
+          src={coverImage.file}
+          alt={coverImage.alt || item.title}
         />
+
+        {#if itemImages.length > 1}
+          <div class="image-gallery" aria-label="Item image gallery">
+            {#each itemImages as image, imageIndex}
+              <button
+                type="button"
+                class="image-thumb"
+                class:active={imageIndex === lightboxIndex}
+                aria-label={`View image ${imageIndex + 1}`}
+                on:click={() => openImageLightbox(imageIndex)}
+              >
+                <img src={image.file} alt={image.alt || item.title} loading="lazy" />
+              </button>
+            {/each}
+          </div>
+        {/if}
       </div>
 
       <div class="content-column">
@@ -285,7 +313,9 @@
 
   .image-column {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
     min-width: 0;
   }
 
@@ -310,6 +340,37 @@
   .image-trigger:focus-visible {
     outline: 3px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 45%, transparent);
     outline-offset: 4px;
+  }
+
+  .image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.55rem;
+    width: min(100%, 22rem);
+  }
+
+  .image-thumb {
+    width: 4rem;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 18%, transparent);
+    border-radius: 0.7rem;
+    padding: 0;
+    background: var(--site-surface-color, rgb(255 255 255 / 0.72));
+    cursor: zoom-in;
+    opacity: 0.74;
+  }
+
+  .image-thumb.active,
+  .image-thumb:hover {
+    opacity: 1;
+    border-color: var(--site-accent-color, #8c3a44);
+  }
+
+  .image-thumb:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 45%, transparent);
+    outline-offset: 3px;
   }
 
   img {

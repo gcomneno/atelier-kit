@@ -106,6 +106,81 @@ function validateMetaEntries(entries, source, pathLabel = 'meta') {
   });
 }
 
+function validateStaticImageFile(imageFile, source) {
+  if (!imageFile.startsWith('/')) {
+    failKey('imageFileMustStartWithSlash', { source });
+    return;
+  }
+
+  const staticImagePath = path.join(ROOT, 'static', imageFile.slice(1));
+
+  if (!existsSync(staticImagePath)) {
+    failKey('imageFileMissing', { source, imageFile });
+  }
+}
+
+function validateItemImages(item, source) {
+  const legacyImageFile = typeof item.image_file === 'string' ? item.image_file.trim() : '';
+
+  if (item.images === undefined) {
+    const imageFile = requireString(item, 'image_file', source);
+    validateStaticImageFile(imageFile, source);
+    return;
+  }
+
+  if (!Array.isArray(item.images)) {
+    fail(`${source}: images must be an array when provided.`);
+
+    if (legacyImageFile) {
+      validateStaticImageFile(legacyImageFile, source);
+    }
+
+    return;
+  }
+
+  if (item.images.length === 0) {
+    fail(`${source}: images must contain at least one image when provided.`);
+
+    if (legacyImageFile) {
+      validateStaticImageFile(legacyImageFile, source);
+    }
+
+    return;
+  }
+
+  const imageFiles = [];
+
+  item.images.forEach((entry, index) => {
+    const entrySource = `${source}:images[${index}]`;
+
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      fail(`${entrySource} must be an object.`);
+      return;
+    }
+
+    const imageFile = requireString(entry, 'file', entrySource);
+
+    if (imageFile) {
+      imageFiles.push(imageFile);
+      validateStaticImageFile(imageFile, `${entrySource}.file`);
+    }
+
+    if ('alt' in entry && entry.alt !== undefined && typeof entry.alt !== 'string') {
+      fail(`${entrySource}.alt must be a string when provided.`);
+    }
+
+    if ('role' in entry && entry.role !== undefined && typeof entry.role !== 'string') {
+      fail(`${entrySource}.role must be a string when provided.`);
+    }
+  });
+
+  assertUnique(imageFiles, `image file in ${source}`);
+
+  if (legacyImageFile) {
+    validateStaticImageFile(legacyImageFile, source);
+  }
+}
+
 function validateSite() {
   const source = 'config/site.yaml';
   const data = readYaml(source);
@@ -756,18 +831,7 @@ function validateItems() {
     requireString(item, 'description', source);
     validateMetaEntries(item.meta, source);
 
-    const imageFile = requireString(item, 'image_file', source);
-
-    if (!imageFile.startsWith('/')) {
-      failKey('imageFileMustStartWithSlash', { source });
-      continue;
-    }
-
-    const staticImagePath = path.join(ROOT, 'static', imageFile.slice(1));
-
-    if (!existsSync(staticImagePath)) {
-      failKey('imageFileMissing', { source, imageFile });
-    }
+    validateItemImages(item, source);
   }
 
   assertUnique(ids, 'item id');

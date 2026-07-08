@@ -4,6 +4,9 @@
   export let open = false;
   export let src = '';
   export let alt = '';
+  /** @type {Array<{ file: string, alt?: string, role?: string }>} */
+  export let images = [];
+  export let index = 0;
 
   const t = useVisitorI18n();
 
@@ -13,6 +16,18 @@
   /** @type {HTMLDialogElement | undefined} */
   let dialog;
 
+  /** @type {Array<{ file: string, alt?: string, role?: string }>} */
+  let galleryImages = [];
+
+  let currentIndex = 0;
+
+  /** @type {{ file: string, alt?: string, role?: string }} */
+  let activeImage = { file: '', alt: '' };
+
+  $: galleryImages = normalizeGalleryImages(images, src, alt);
+  $: currentIndex = clampIndex(index, galleryImages.length);
+  $: activeImage = galleryImages[currentIndex] ?? { file: src, alt };
+
   $: if (typeof document !== 'undefined') {
     if (open && dialog && !dialog.open) {
       fit = 'contain';
@@ -20,6 +35,63 @@
     } else if (!open && dialog?.open) {
       dialog.close();
     }
+  }
+
+  /**
+   * @param {unknown[]} imageList
+   * @param {string} fallbackSrc
+   * @param {string} fallbackAlt
+   * @returns {Array<{ file: string, alt?: string, role?: string }>}
+   */
+  function normalizeGalleryImages(imageList, fallbackSrc, fallbackAlt) {
+    if (Array.isArray(imageList) && imageList.length > 0) {
+      /** @type {Array<{ file: string, alt?: string, role?: string }>} */
+      const normalized = [];
+
+      for (const image of imageList) {
+        if (!image || typeof image !== 'object' || Array.isArray(image)) {
+          continue;
+        }
+
+        const record = /** @type {{ file?: unknown, alt?: unknown, role?: unknown }} */ (image);
+        const file = typeof record.file === 'string' ? record.file.trim() : '';
+
+        if (!file) {
+          continue;
+        }
+
+        const imageAlt = typeof record.alt === 'string' ? record.alt : '';
+        const role = typeof record.role === 'string' ? record.role.trim() : '';
+
+        normalized.push({
+          file,
+          alt: imageAlt,
+          ...(role ? { role } : {})
+        });
+      }
+
+      if (normalized.length > 0) {
+        return normalized;
+      }
+    }
+
+    return fallbackSrc ? [{ file: fallbackSrc, alt: fallbackAlt }] : [];
+  }
+
+  /**
+   * @param {number} value
+   * @param {number} length
+   */
+  function clampIndex(value, length) {
+    if (length <= 0) {
+      return 0;
+    }
+
+    if (!Number.isInteger(value)) {
+      return 0;
+    }
+
+    return Math.min(Math.max(value, 0), length - 1);
   }
 
   /** @param {'cover' | 'contain' | 'natural'} next */
@@ -41,6 +113,35 @@
       handleClose();
     }
   }
+
+  function showPrevious() {
+    if (galleryImages.length <= 1) {
+      return;
+    }
+
+    index = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+  }
+
+  function showNext() {
+    if (galleryImages.length <= 1) {
+      return;
+    }
+
+    index = (currentIndex + 1) % galleryImages.length;
+  }
+
+  /** @param {KeyboardEvent} event */
+  function handleKeydown(event) {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      showPrevious();
+    }
+
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      showNext();
+    }
+  }
 </script>
 
 <dialog
@@ -49,6 +150,7 @@
   aria-label={t('imageLightbox.dialogLabel')}
   on:close={handleDialogClose}
   on:click={handleBackdropClick}
+  on:keydown={handleKeydown}
 >
   <div class="lightbox-panel">
     <div class="lightbox-toolbar">
@@ -82,13 +184,21 @@
         </button>
       </div>
 
+      {#if galleryImages.length > 1}
+        <div class="gallery-nav" role="group" aria-label="Image navigation">
+          <button type="button" class="nav-button" on:click={showPrevious}>Previous</button>
+          <span class="image-count">{currentIndex + 1} / {galleryImages.length}</span>
+          <button type="button" class="nav-button" on:click={showNext}>Next</button>
+        </div>
+      {/if}
+
       <button type="button" class="close-button" on:click={handleClose}>
         {t('imageLightbox.close')}
       </button>
     </div>
 
     <div class="lightbox-stage" data-fit={fit}>
-      <img class="lightbox-image" {src} {alt} />
+      <img class="lightbox-image" src={activeImage.file} alt={activeImage.alt || alt} />
     </div>
   </div>
 </dialog>
@@ -127,8 +237,10 @@
     flex-wrap: wrap;
   }
 
-  .fit-group {
+  .fit-group,
+  .gallery-nav {
     display: inline-flex;
+    align-items: center;
     gap: 0.35rem;
     padding: 0.25rem;
     border-radius: 999px;
@@ -136,6 +248,7 @@
   }
 
   .fit-button,
+  .nav-button,
   .close-button {
     border: 0;
     border-radius: 999px;
@@ -153,9 +266,17 @@
   }
 
   .fit-button:focus-visible,
+  .nav-button:focus-visible,
   .close-button:focus-visible {
     outline: 3px solid rgb(255 255 255 / 0.45);
     outline-offset: 2px;
+  }
+
+  .image-count {
+    min-width: 3.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.82;
   }
 
   .close-button {

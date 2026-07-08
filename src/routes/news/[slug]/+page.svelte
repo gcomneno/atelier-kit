@@ -1,5 +1,6 @@
 <script>
   import BookReading from '$lib/components/BookReading.svelte';
+  import ImageLightbox from '$lib/components/ImageLightbox.svelte';
   import JsonLd from '$lib/components/JsonLd.svelte';
   import PageSocialMeta from '$lib/components/PageSocialMeta.svelte';
   import { isBookReadingFormat } from '$lib/book-content.js';
@@ -7,6 +8,8 @@
 
   let { data } = $props();
   const t = useVisitorI18n();
+
+  let lightboxOpen = $state(false);
 
   const isBookLayout = $derived(
     isBookReadingFormat(data.post.reading_format, data.post.id)
@@ -67,8 +70,20 @@
 
       {#if data.post.image_file}
         <figure class="hero-image">
-          <img src={data.post.image_file} alt={data.post.image_alt || data.post.title} />
+          <button
+            type="button"
+            class="hero-image-trigger"
+            aria-label={t('imageLightbox.enlarge', { title: data.post.title })}
+            onclick={() => (lightboxOpen = true)}
+          >
+            <img src={data.post.image_file} alt={data.post.image_alt || data.post.title} />
+          </button>
         </figure>
+        <ImageLightbox
+          bind:open={lightboxOpen}
+          src={data.post.image_file}
+          alt={data.post.image_alt || data.post.title}
+        />
       {/if}
 
       <div class="body">
@@ -132,6 +147,22 @@
     overflow: hidden;
     border-radius: 1rem;
     border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 16%, transparent);
+  }
+
+  .hero-image-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+    font: inherit;
+    color: inherit;
+  }
+
+  .hero-image-trigger:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 45%, transparent);
+    outline-offset: 4px;
   }
 
   .hero-image img {

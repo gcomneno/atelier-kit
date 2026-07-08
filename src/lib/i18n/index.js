@@ -88,6 +88,7 @@ export function localizedAppearancePresets(locale) {
     { id: 'warm', label: appearancePresetLabel(locale, 'warm') },
     { id: 'neutral', label: appearancePresetLabel(locale, 'neutral') },
     { id: 'dark', label: appearancePresetLabel(locale, 'dark') },
+    { id: 'noir', label: appearancePresetLabel(locale, 'noir') },
     { id: 'custom', label: appearancePresetLabel(locale, 'custom') }
   ];
 }

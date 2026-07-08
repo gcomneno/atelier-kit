@@ -17,6 +17,7 @@
   const languageForm = $derived(form?.languageForm ?? data.languageForm);
   let language = $state('en');
   let isDirty = $state(false);
+  let shutdownPending = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};
 
@@ -77,19 +78,28 @@
       <p>{t('studio.system.shutdown.description')}</p>
     </div>
 
-    <form method="POST" action="?/shutdown" use:enhance={studioFormEnhance}>
+    <form
+      method="POST"
+      action="?/shutdown"
+      use:enhance={studioFormEnhance}
+      onsubmit={(event) => {
+        if (shutdownPending) {
+          event.preventDefault();
+          return;
+        }
+
+        if (!confirmShutdown()) {
+          event.preventDefault();
+          return;
+        }
+
+        shutdownPending = true;
+      }}
+    >
       <p class="hint">{t('studio.system.shutdown.hint')}</p>
 
       <div class="actions">
-        <button
-          type="submit"
-          class="danger"
-          onclick={(event) => {
-            if (!confirmShutdown()) {
-              event.preventDefault();
-            }
-          }}
-        >
+        <button type="submit" class="danger" disabled={shutdownPending}>
           {t('studio.system.shutdown.action')}
         </button>
       </div>
@@ -123,5 +133,10 @@
 
   .shutdown-panel :global(button.danger:hover) {
     background: #912018;
+  }
+
+  .shutdown-panel :global(button.danger:disabled) {
+    opacity: 0.65;
+    cursor: wait;
   }
 </style>

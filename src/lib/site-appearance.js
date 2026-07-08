@@ -1,4 +1,4 @@
-/** @typedef {'warm' | 'neutral' | 'dark' | 'custom'} AppearancePreset */
+/** @typedef {'warm' | 'neutral' | 'dark' | 'noir' | 'custom'} AppearancePreset */
 /** @typedef {import('./site-typography.js').FontPreset} FontPreset */
 
 /** @typedef {{ preset: AppearancePreset, base_color: string, accent_color: string, text_color: string, heading_color: string, card_color: string, font_preset: FontPreset, background_image?: string }} SiteAppearance */
@@ -9,6 +9,7 @@ export const APPEARANCE_PRESET_OPTIONS = [
   { id: 'warm', label: 'Warm atelier (default)' },
   { id: 'neutral', label: 'Neutral paper' },
   { id: 'dark', label: 'Dark studio' },
+  { id: 'noir', label: 'Noir' },
   { id: 'custom', label: 'Custom colors' }
 ];
 
@@ -37,6 +38,14 @@ export const APPEARANCE_PRESETS = {
     text_color: '#f8f4ec',
     heading_color: '#f8f4ec',
     card_color: '#42413f'
+  },
+  noir: {
+    preset: 'noir',
+    base_color: '#0f0e0d',
+    accent_color: '#8c3a44',
+    text_color: '#e8e0d4',
+    heading_color: '#f5efe6',
+    card_color: '#1c1a18'
   }
 };
 
@@ -48,7 +57,13 @@ const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
  * @returns {value is AppearancePreset}
  */
 export function isAppearancePreset(value) {
-  return value === 'warm' || value === 'neutral' || value === 'dark' || value === 'custom';
+  return (
+    value === 'warm' ||
+    value === 'neutral' ||
+    value === 'dark' ||
+    value === 'noir' ||
+    value === 'custom'
+  );
 }
 
 /**

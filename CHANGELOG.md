@@ -4,6 +4,21 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.21 - 2026-07-08
+
+### Added
+
+- **Noir** appearance preset (dark palette from the Nero Quotidiano client showcase).
+
+### Fixed
+
+- Studio **Put site online** and **Test build** buttons no longer accept double-clicks before the running state locks.
+- Studio **Stop** button on the system page disables immediately after confirmation.
+
+### Changed
+
+- README: Studio local authoring section and quick-start pointer.
+
 ## v0.1.20 - 2026-07-08
 
 ### Added

@@ -272,6 +272,7 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 
 - `docs/usage/configuration.md` explains the YAML configuration files.
 - `docs/usage/customization.md` explains the first customization workflow.
+- `docs/usage/editorial-markup.md` explains Atelier Mark inline text emphasis.
 - `docs/usage/deploy-vercel.md` explains Vercel deployment.
 - `docs/usage/contact-flow.md` explains the no-textarea contact flow.
 - `docs/usage/content-doctor.md` explains pre-publish checks.

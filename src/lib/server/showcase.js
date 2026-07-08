@@ -22,6 +22,7 @@ import { resolveSiteAppearance } from '$lib/site-appearance.js';
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
 import { getDefaultLayoutBlockLabel } from '$lib/layout-block-labels.js';
 import { normalizeMetaHierarchy } from '$lib/item-meta.js';
+import { parseTaglineDisplay } from '$lib/editorial-markup.js';
 
 const configFiles = import.meta.glob('/config/*.yaml', {
   query: '?raw',
@@ -325,7 +326,8 @@ export function getSiteConfig() {
     url: optionalString(site, 'url'),
     og_image: optionalString(site, 'og_image'),
     appearance: resolveSiteAppearance(isRecord(site.appearance) ? site.appearance : undefined),
-    hero_banner: parseHeroBanner(site)
+    hero_banner: parseHeroBanner(site),
+    tagline_display: parseTaglineDisplay(site.tagline_display)
   };
 }
 

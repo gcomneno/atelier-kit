@@ -350,6 +350,16 @@ function parseHeroBanner(site) {
   };
 }
 
+/**
+ * @returns {{
+ *   item_name_singular: string,
+ *   item_name_plural: string,
+ *   eyebrow: string,
+ *   intro: string,
+ *   sort: 'manual' | 'title_asc' | 'title_desc',
+ *   home_limit: number
+ * }}
+ */
 export function getCatalogConfig() {
   const data = readYaml('/config/catalog.yaml');
   const catalog = data.catalog;

@@ -1,0 +1,27 @@
+id: "example-item"
+title: "Example Creation"
+subtitle: "A neutral starter item"
+status: "demo"
+price_mode: "hidden"
+image_file: "/images/items/placeholder.svg"
+image_alt: "Neutral placeholder image for an example item"
+description: "This is a neutral demo item. Replace it with a real object, artwork, handmade product or creative piece."
+notice: "Demo item. Replace before publishing."
+
+meta:
+  - label: "Material"
+    value: "Replace with material"
+
+  - label: "Dimensions"
+    value: "Replace with dimensions"
+
+  - label: "Availability"
+    value: "Replace with availability"
+
+  - label: "Object details"
+    children:
+      - label: "Finish"
+        value: "Replace with finish"
+
+      - label: "Care"
+        value: "Replace with care instructions"

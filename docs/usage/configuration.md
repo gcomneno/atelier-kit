@@ -46,8 +46,29 @@ Fields:
 - `language` sets `<html lang="…">`, the studio / CLI operator UI locale, **and** visitor-facing UI labels (`en`, `it`, `it-IT`, etc.). YAML content (item titles, about text, news bodies) is not auto-translated.
 - `notice` can be used for demo warnings or short publishing notes.
 - `footer_note` is optional client text on the home page when no multi-column footer is configured (`config/footer.yaml`). The **Atelier-Kit credit** (`Built with Atelier-Kit` / `Realizzato con Atelier-Kit`) is added automatically by the framework in the site footer and is not editable in YAML.
-- `url` is an optional canonical public site URL (`https://…`). Used when building absolute Open Graph image links. Leave empty to use the current request host.
+- `url` is an optional canonical public site URL (`https://…`). Used when building absolute Open Graph image links, the XML sitemap (`/sitemap.xml`), and the `Sitemap:` line in `/robots.txt`. Leave empty to use the current request host.
 - `og_image` is an optional social preview image for Facebook, Instagram and similar link unfurlers. Use a path under `/images/…` (for example `/images/site/og.jpg`) or a full `https://` URL. Recommended size: 1200×630.
+
+## Discovery (sitemap)
+
+Atelier-Kit generates a sitemap automatically at:
+
+```text
+/sitemap.xml
+```
+
+It lists public visitor routes built from your YAML content:
+
+- home `/`
+- all items `/items/<id>`
+- collections index and detail pages (when you have collections)
+- news index and posts (when you have news)
+- about (when `config/about.yaml` exists)
+- legal pages from `config/legal.yaml`
+
+Set `site.url` in `config/site.yaml` to your production domain so search engines receive absolute URLs (for example `https://example.com/items/bracelet-a`). If `url` is empty, the sitemap uses the current request host (fine for previews; set `url` before go-live).
+
+`/robots.txt` includes a `Sitemap:` reference when the site is served. No manual sitemap file is required.
 
 ## Catalog configuration
 

@@ -76,11 +76,11 @@ A credible micro-CMS inspired by WordPress should cover eight pillars. Each pill
 | Full CMS expectation | Micro-CMS minimum | Atelier-Kit today |
 |---|---|---|
 | Draft / published states | Yes | Item `status` |
-| One-step publish | Yes | `npm run publish` — validate, doctor, build, git push, Vercel |
+| One-step publish | Yes | **`/studio/readiness` → Put site online** — validate, doctor, build, deploy in one action; Git/npm hidden from client |
 | Scheduled publish | Optional | Not implemented |
-| Publish readiness feedback | Useful | Studio readiness + Content Doctor |
+| Publish readiness feedback | Useful | Content Doctor + plain-language publish results in studio |
 
-**Status:** works with operator support; not yet client-grade without technical help.
+**Status:** **client-grade via Studio / Atelier Desktop** when Git and Vercel are configured at handoff ([#68](https://github.com/gcomneno/atelier-kit/issues/68)).
 
 ### 5. Site structure
 
@@ -134,7 +134,7 @@ A credible micro-CMS inspired by WordPress should cover eight pillars. Each pill
 | 1. Content model | Complete | — |
 | 2. Authoring | Mostly complete (Desktop) | — |
 | 3. Media | Complete | Low |
-| 4. Publishing | Partial | High |
+| 4. Publishing | Mostly complete | High |
 | 5. Site structure | Complete | Low |
 | 6. Discovery | Incomplete | High |
 | 7. SEO base | Mostly complete | Medium |
@@ -176,7 +176,7 @@ If Atelier-Kit is presented as a micro-CMS, buyers will expect **CMS behavior**,
 | Expectation | Current state | Impact on claim |
 |---|---|---|
 | “I manage content in a browser” | Studio is local/dev-first | High |
-| “I publish without knowing Git” | Publish flow uses CLI/Git/Vercel | High |
+| “I publish without knowing Git” | **Put site online** in `/studio/readiness` (Git in background) | Low — after handoff |
 | “Search engines can index everything” | No sitemap | Medium–high |
 | “I can search the catalog” | No on-site search | Medium |
 | “My blog has a feed” | No RSS | Medium (writing template) |
@@ -211,7 +211,7 @@ These five deliverables close the micro-CMS contract. Track as a single epic wit
 | # | Deliverable | Pillar | Notes |
 |---|---|---|---|
 | 1 | **Production-safe Studio** — browser-accessible authoring outside dev-only | Authoring | **Atelier Desktop** (Path B, ADR 0007). Hosted auth (Path A) deferred |
-| 2 | **Terminal-free publish** | Publishing | Builds on [#52](https://github.com/gcomneno/atelier-kit/issues/52) where applicable |
+| 2 | **Terminal-free publish** | Publishing | **`/studio/readiness` → Put site online** ([#68](https://github.com/gcomneno/atelier-kit/issues/68)) |
 | 3 | **XML sitemap** | Discovery | All public routes (items, collections, news, about, legal) |
 | 4 | **Client-side search** | Discovery | Item and news titles; aligns with ADR 0006 phase 2 |
 | 5 | **RSS feed for news** | Discovery | Important for writing-oriented showcases |

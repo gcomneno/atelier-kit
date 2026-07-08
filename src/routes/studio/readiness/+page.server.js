@@ -6,6 +6,7 @@ import {
   getPublishLivePreview,
   runPublishLive
 } from '$lib/server/studio-publish-live.js';
+import { getSiteConfig } from '$lib/server/showcase.js';
 import { loadOperatorLocale } from '$lib/i18n/load-operator-locale.js';
 import { createTranslator } from '$lib/i18n/index.js';
 
@@ -14,10 +15,12 @@ export function load() {
 
   const report = runContentDoctorReport();
   const livePreview = getPublishLivePreview();
+  const site = getSiteConfig();
 
   return {
     report,
-    livePreview
+    livePreview,
+    siteUrl: site.url?.trim() || ''
   };
 }
 

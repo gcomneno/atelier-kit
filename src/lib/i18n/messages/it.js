@@ -1114,6 +1114,14 @@ export default {
       title: 'Notizie',
       empty: 'Nessun articolo per ora.'
     },
+    search: {
+      label: 'Cerca',
+      placeholder: 'Cerca entità e notizie…',
+      resultsLabel: 'Risultati di ricerca',
+      noResults: 'Nessun risultato per "{query}".',
+      resultTypeItem: 'Entità',
+      resultTypeNews: 'Notizia'
+    },
     item: {
       visitorBriefEyebrow: 'Scheda visitatore',
       talkAboutTitle: 'Parla di questa entità',

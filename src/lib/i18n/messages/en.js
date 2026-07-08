@@ -1106,6 +1106,14 @@ export default {
       title: 'News',
       empty: 'No news posts yet.'
     },
+    search: {
+      label: 'Search',
+      placeholder: 'Search items and news…',
+      resultsLabel: 'Search results',
+      noResults: 'No matches for "{query}".',
+      resultTypeItem: 'Item',
+      resultTypeNews: 'News'
+    },
     item: {
       visitorBriefEyebrow: 'Visitor Brief',
       talkAboutTitle: 'Talk about this entity',

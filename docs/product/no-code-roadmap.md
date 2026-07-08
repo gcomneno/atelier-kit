@@ -4,7 +4,7 @@ This document defines Atelier-Kit’s staged path toward real no-code authoring.
 
 It supports epic [#35](https://github.com/gcomneno/atelier-kit/issues/35).
 
-**Epic status (2026-07-05):** [#43 client handoff](https://github.com/gcomneno/atelier-kit/issues/43) closed — studio create flows, `site:upgrade`, operator playbook, publish-ready scaffold copy. Prior [#35](https://github.com/gcomneno/atelier-kit/issues/35) closed 2026-07-04. Full terminal-free use remains future research.
+**Epic status (2026-07-08):** Micro-CMS Tier 1 ([#72](https://github.com/gcomneno/atelier-kit/issues/72)) closed — Atelier Desktop authoring (ADR 0007), **Put site online** publish, sitemap, RSS, client-side search. See [`micro-cms-positioning.md`](micro-cms-positioning.md). Prior [#43](https://github.com/gcomneno/atelier-kit/issues/43) client handoff closed 2026-07-05.
 
 ## Goal
 
@@ -125,7 +125,7 @@ Deliverables:
 - [x] operator handoff playbook
 - [x] `site:upgrade` for client kit sync
 
-**Status:** client handoff epic [#43](https://github.com/gcomneno/atelier-kit/issues/43) closed in v0.1.9. Phase 5 studio/tooling shipped in v0.1.10 ([#54](https://github.com/gcomneno/atelier-kit/issues/54)–[#56](https://github.com/gcomneno/atelier-kit/issues/56)); Tauri spike documented ([#53](https://github.com/gcomneno/atelier-kit/issues/53)). Full terminal-free packaging remains — see epic [#52](https://github.com/gcomneno/atelier-kit/issues/52).
+**Status:** client handoff epic [#43](https://github.com/gcomneno/atelier-kit/issues/43) closed in v0.1.9. Phase 5 studio/tooling shipped in v0.1.10 ([#54](https://github.com/gcomneno/atelier-kit/issues/54)–[#56](https://github.com/gcomneno/atelier-kit/issues/56)); Tauri MVP ([#60](https://github.com/gcomneno/atelier-kit/issues/60)). **Terminal-free publish** and **Desktop-first authoring** shipped in v0.1.20 (micro-CMS epic [#72](https://github.com/gcomneno/atelier-kit/issues/72), ADR 0007).
 
 ## Architecture options
 
@@ -180,6 +180,7 @@ Even if a no-code authoring layer is added, the generated site should remain sma
 
 ## Related docs
 
+- [`micro-cms-positioning.md`](micro-cms-positioning.md)
 - [`product-levels.md`](product-levels.md)
 - [`positioning.md`](positioning.md)
 - [`../usage/client-scaffold.md`](../usage/client-scaffold.md)

@@ -64,7 +64,7 @@ npm run site:wizard
 npm run site:wizard -- --template jewelry
 ```
 
-**Current status:** in progress — wizard available; studio covers most file-based editing; publish script available.
+**Current status:** in progress — wizard available; studio covers most file-based editing; **Put site online** publish from `/studio/readiness`.
 
 The wizard is the first Level 2 deliverable. It does not remove the need for `npm install`, preview or deploy, but it removes manual YAML editing for the first site setup.
 
@@ -89,7 +89,7 @@ The wizard is the first Level 2 deliverable. It does not remove the need for `np
 - plain-language validation and publish readiness;
 - optional packaging that hides the terminal for common workflows.
 
-**Current status:** studio prototype available for most content; photo upload and publish readiness included. Full terminal-free use remains future work.
+**Current status:** **available** via **Atelier Desktop** and Studio — visual editing, photo upload, plain-language validation, and **Put site online** without terminal commands for the client. Operator configures Git and Vercel once at handoff (see [ADR 0007](../architecture/adr-0007-production-safe-studio-desktop.md)).
 
 Level 3 is a product direction actively being built. See [`no-code-roadmap.md`](no-code-roadmap.md) and [`service-package.md`](service-package.md).
 

@@ -85,7 +85,7 @@ Unless explicitly contracted:
 - ecommerce;
 - booking systems;
 - newsletter;
-- blog;
+- blog or multi-author newsroom workflows;
 - multi-language CMS workflows;
 - custom design outside Atelier-Kit templates;
 - ongoing hosting administration beyond first deploy.

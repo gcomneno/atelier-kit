@@ -97,12 +97,12 @@ A credible micro-CMS inspired by WordPress should cover eight pillars. Each pill
 
 | Full CMS expectation | Micro-CMS minimum | Atelier-Kit today |
 |---|---|---|
-| XML sitemap | Yes | **Not implemented** |
-| RSS for editorial content | Yes when blog/news exists | **Not implemented** |
-| On-site search | Yes for larger catalogs | **Not implemented** (planned — see ADR 0006, roadmap phase 2) |
-| `robots.txt` | Useful | Not customized |
+| XML sitemap | Yes | **`/sitemap.xml`** — all public routes ([#69](https://github.com/gcomneno/atelier-kit/issues/69)) |
+| RSS for editorial content | Yes when blog/news exists | **`/news/rss.xml`** ([#71](https://github.com/gcomneno/atelier-kit/issues/71)) |
+| On-site search | Yes for larger catalogs | **Client-side search** on item and news titles ([#70](https://github.com/gcomneno/atelier-kit/issues/70)) |
+| `robots.txt` | Useful | **`/robots.txt`** with `Sitemap:` when served |
 
-**Status:** **weakest pillar** for the micro-CMS claim. WordPress ships sitemap and feeds in core; visitors and search engines expect them.
+**Status:** complete for the micro-CMS contract.
 
 ### 7. Identity and SEO
 
@@ -111,10 +111,10 @@ A credible micro-CMS inspired by WordPress should cover eight pillars. Each pill
 | Per-page title and description | Yes | Implemented |
 | Open Graph and social preview | Yes | Implemented |
 | Document language | Yes | `<html lang>` from `site.language` |
-| Structured data (JSON-LD) | Useful | Not implemented |
+| Structured data (JSON-LD) | Useful | **`BlogPosting`** (news), **`Person`/`Organization`** (about) ([#73](https://github.com/gcomneno/atelier-kit/issues/73)) |
 | Multi-locale sites | Not required for micro | UI labels en/it; content is manual; hreflang out of scope |
 
-**Status:** good base; structured data is a small additive win.
+**Status:** complete for the micro-CMS contract.
 
 ### 8. Portability
 
@@ -129,18 +129,18 @@ A credible micro-CMS inspired by WordPress should cover eight pillars. Each pill
 
 ## Scorecard
 
-| Pillar | Status | Priority to close gaps |
+| Pillar | Status | Notes |
 |---|---|---|
 | 1. Content model | Complete | — |
-| 2. Authoring | Mostly complete (Desktop) | — |
-| 3. Media | Complete | Low |
-| 4. Publishing | Mostly complete | High |
-| 5. Site structure | Complete | Low |
-| 6. Discovery | Incomplete | High |
-| 7. SEO base | Mostly complete | Medium |
+| 2. Authoring | Complete | Atelier Desktop, ADR 0007 |
+| 3. Media | Complete | — |
+| 4. Publishing | Complete | Put site online; Git/Vercel at operator handoff |
+| 5. Site structure | Complete | — |
+| 6. Discovery | Complete | Sitemap, RSS, search, robots.txt |
+| 7. SEO base | Complete | Meta, OG, JSON-LD |
 | 8. Portability | Complete | — |
 
-Rough maturity against the micro-CMS contract: **~70%**. Four pillars are solid, three are partial, one (discovery) is clearly behind.
+Rough maturity against the micro-CMS contract: **~90%**. Tier 1 ([#72](https://github.com/gcomneno/atelier-kit/issues/72)) and Tier 2 ([#73](https://github.com/gcomneno/atelier-kit/issues/73)) are shipped. Remaining gaps are explicit non-goals (multi-user, revision UI, hosted Path A studio, scheduled publish).
 
 ## In the studied subset
 
@@ -150,7 +150,7 @@ These capabilities belong in the micro-CMS promise:
 - Studio for visual editing of config and content;
 - media upload with alt text;
 - validation and publish-readiness tooling;
-- per-page SEO metadata and social previews;
+- per-page SEO metadata, social previews, sitemap, RSS, search and JSON-LD (news/about);
 - portable YAML content and kit upgrade path;
 - configurable appearance and home layout without a page builder;
 - Signal Clouds and Visitor Brief as a privacy-friendly contact pattern.
@@ -175,14 +175,15 @@ If Atelier-Kit is presented as a micro-CMS, buyers will expect **CMS behavior**,
 
 | Expectation | Current state | Impact on claim |
 |---|---|---|
-| “I manage content in a browser” | Studio is local/dev-first | High |
-| “I publish without knowing Git” | **Put site online** in `/studio/readiness` (Git in background) | Low — after handoff |
-| “Search engines can index everything” | No sitemap | Medium–high |
-| “I can search the catalog” | No on-site search | Medium |
-| “My blog has a feed” | No RSS | Medium (writing template) |
+| “I manage content in a browser” | **Atelier Desktop** → localhost `/studio` (ADR 0007) | Low — after Desktop handoff |
+| “I publish without knowing Git” | **Put site online** in `/studio/readiness` (Git in background) | Low — after operator configures deploy |
+| “Search engines can index everything” | `/sitemap.xml` + `/robots.txt` | Addressed |
+| “I can search the catalog” | Client-side search in visitor header | Addressed |
+| “My blog has a feed” | `/news/rss.xml` | Addressed |
 | “Two people edit the site” | No multi-user permissions | Low — **out of scope** for current target |
+| “I edit from any browser on the live URL” | Production `/studio` returns 404; Path A deferred | Medium — use Desktop or operator |
 
-Closing the first two gaps is required for **Level 3** ([`product-levels.md`](product-levels.md)). Closing sitemap, search and RSS makes the micro-CMS claim defensible **today** for operator-assisted clients.
+The micro-CMS claim is **defensible today** for operator-assisted or Desktop handoff. See [`product-levels.md`](product-levels.md) Level 3.
 
 ## Recommended messaging
 
@@ -190,9 +191,9 @@ Closing the first two gaps is required for **Level 3** ([`product-levels.md`](pr
 
 > Atelier-Kit is a micro-CMS for creative showcases. It gives you structured content, visual editing, media, publishing and SEO basics — without database, plugins, comments or a shop.
 
-**Honest qualifier (until Level 3 is complete):**
+**Honest qualifier:**
 
-> Today, Atelier-Kit is strongest with guided setup or operator handoff. Full self-service authoring and publish without a terminal are on the roadmap.
+> Atelier-Kit is a micro-CMS via **Atelier Desktop** and guided publish — not via wp-admin on shared hosting. The operator configures Git and Vercel once at handoff; the client edits locally and clicks **Put site online**.
 
 **Do not say:**
 
@@ -204,9 +205,9 @@ Closing the first two gaps is required for **Level 3** ([`product-levels.md`](pr
 
 This section records product decisions from the micro-CMS positioning review. It supersedes the informal priority list below for committed work.
 
-### Tier 1 — committed (epic)
+### Tier 1 — complete (epic [#72](https://github.com/gcomneno/atelier-kit/issues/72))
 
-These five deliverables close the micro-CMS contract. Track as a single epic with one issue per item.
+These five deliverables close the micro-CMS contract. Shipped in v0.1.20.
 
 | # | Deliverable | Pillar | Notes |
 |---|---|---|---|
@@ -216,17 +217,15 @@ These five deliverables close the micro-CMS contract. Track as a single epic wit
 | 4 | **Client-side search** | Discovery | Item and news titles; aligns with ADR 0006 phase 2 |
 | 5 | **RSS feed for news** | Discovery | Important for writing-oriented showcases |
 
-**Epic:** [#72 — Micro-CMS contract Tier 1](https://github.com/gcomneno/atelier-kit/issues/72) — details in [`micro-cms-epic.md`](micro-cms-epic.md)
+Details in [`micro-cms-epic.md`](micro-cms-epic.md).
 
-### Tier 2 — after Tier 1
+### Tier 2 — complete
 
 | Deliverable | Pillar | Scope |
 |---|---|---|
 | **JSON-LD structured data** | SEO | `BlogPosting` on news detail, `Person` or `Organization` on about — not full schema on every item |
 
-JSON-LD is useful but not required for a credible micro-CMS. Sitemap, search and RSS deliver more discovery value. Item pages can stay without schema or use minimal `CreativeWork` later if needed. Do **not** use `Product` without checkout semantics.
-
-**Issue:** [#73 — JSON-LD Tier 2](https://github.com/gcomneno/atelier-kit/issues/73)
+Shipped in v0.1.20 ([#73](https://github.com/gcomneno/atelier-kit/issues/73)). Item pages stay without schema; do **not** use `Product` without checkout semantics.
 
 ### Explicitly out of scope
 

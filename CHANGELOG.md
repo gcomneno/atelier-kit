@@ -4,12 +4,24 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
-### Changed
-
-- Kit demo content restored to neutral English starter (`example-item`, `starter-selection`); zoo-themed config, news and scratch collections removed.
+## v0.1.20 - 2026-07-08
 
 ### Added
 
+- **Micro-CMS Tier 1** (epic [#72](https://github.com/gcomneno/atelier-kit/issues/72)):
+  - **XML sitemap** at `/sitemap.xml` for all public routes ([#69](https://github.com/gcomneno/atelier-kit/issues/69)).
+  - **`/robots.txt`** with `Sitemap:` reference when served.
+  - **RSS feed** at `/news/rss.xml` ([#71](https://github.com/gcomneno/atelier-kit/issues/71)).
+  - **Client-side search** on item and news titles in the visitor header ([#70](https://github.com/gcomneno/atelier-kit/issues/70)).
+  - **Production-safe authoring** via **Atelier Desktop** (Path B, ADR 0007) ([#67](https://github.com/gcomneno/atelier-kit/issues/67)).
+  - **Put site online** — guided publish from `/studio/readiness` without terminal commands for the client ([#68](https://github.com/gcomneno/atelier-kit/issues/68)).
+- **Micro-CMS Tier 2:** JSON-LD structured data on news (`BlogPosting`) and about pages ([#73](https://github.com/gcomneno/atelier-kit/issues/73)).
+- Product docs: [`micro-cms-positioning.md`](docs/product/micro-cms-positioning.md), [`micro-cms-epic.md`](docs/product/micro-cms-epic.md), [ADR 0007](docs/architecture/adr-0007-production-safe-studio-desktop.md).
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) and GitHub issue templates (bug, feature, docs).
+
+### Changed
+
+- Kit demo content restored to neutral English starter (`example-item`, `starter-selection`); zoo-themed config, news and scratch collections removed.
 - **Studio Help** (`/studio/help`): workflow, site/content map, item detail guide, publish commands, **client site upgrade** steps and YAML-only limits.
 - **Item meta editor** in Studio: editable/reorderable detail rows, datalist suggestions, hierarchy via `Gruppo › Voce` (or `>`) with grouped public rendering.
 - **News** Studio parity with items/collections: manual order, delete and `sort_order`.
@@ -17,9 +29,6 @@ All notable changes to Atelier-Kit will be documented in this file.
 - **Site typography** presets (Google Fonts) in Studio appearance settings.
 - **Studio system** page for operator locale and related local settings.
 - Shared **form status / dirty-state** helpers across Studio save flows.
-
-### Changed
-
 - Italian Studio labels: **Novità**, **Nuvole di Segnali**, **Salva Nuvole**, **Entità** terminology throughout.
 - **Visitor Brief** and **Signal Cloud** colors follow site theme tokens; brief layout background swap.
 - **MetaInfo** renders group headers with indented children (no separator line under the group title).

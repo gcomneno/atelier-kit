@@ -18,6 +18,9 @@
     dirtyControl.checkDirty?.();
   }
 
+  /**
+   * @param {number} index
+   */
   async function moveUp(index) {
     if (index <= 0) {
       return;
@@ -29,6 +32,9 @@
     await notifyDirty();
   }
 
+  /**
+   * @param {number} index
+   */
   async function moveDown(index) {
     if (index >= rows.length - 1) {
       return;
@@ -40,6 +46,9 @@
     await notifyDirty();
   }
 
+  /**
+   * @param {number} index
+   */
   async function removeRow(index) {
     rows = rows.filter((_, rowIndex) => rowIndex !== index);
     await notifyDirty();

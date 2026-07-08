@@ -1,6 +1,7 @@
 <script>
   import { tick } from 'svelte';
   import MetaInfo from '$lib/components/MetaInfo.svelte';
+  import ImageLightbox from '$lib/components/ImageLightbox.svelte';
   import PageSocialMeta from '$lib/components/PageSocialMeta.svelte';
   import SignalCloud from '$lib/components/SignalCloud.svelte';
   import VisitorBrief from '$lib/components/VisitorBrief.svelte';
@@ -21,6 +22,7 @@
   /** @type {HTMLParagraphElement | undefined} */
   let descriptionEl;
   let descriptionCanToggle = false;
+  let lightboxOpen = false;
 
   $: item.id, resetDescription();
   $: item.description, descriptionEl, queueDescriptionMeasure();
@@ -124,7 +126,12 @@
   <article class="item-detail">
     <section class="hero" aria-labelledby="item-title">
       <div class="image-column">
-        <div class="image-frame">
+        <button
+          type="button"
+          class="image-frame image-trigger"
+          aria-label={t('imageLightbox.enlarge', { title: item.title })}
+          on:click={() => (lightboxOpen = true)}
+        >
           <img
             src={resolveItemCoverSrc(item)}
             alt={item.image_alt || item.title}
@@ -141,7 +148,12 @@
               img.src = resolveItemCoverFallbackSrc(item);
             }}
           />
-        </div>
+        </button>
+        <ImageLightbox
+          bind:open={lightboxOpen}
+          src={resolveItemCoverSrc(item)}
+          alt={item.image_alt || item.title}
+        />
       </div>
 
       <div class="content-column">
@@ -286,6 +298,18 @@
     border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent));
     background: var(--site-surface-color, rgb(255 255 255 / 0.72));
     box-shadow: 0 24px 60px color-mix(in srgb, var(--site-base-color, #0f0e0d) 35%, black);
+  }
+
+  .image-trigger {
+    padding: 0;
+    cursor: zoom-in;
+    font: inherit;
+    color: inherit;
+  }
+
+  .image-trigger:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 45%, transparent);
+    outline-offset: 4px;
   }
 
   img {

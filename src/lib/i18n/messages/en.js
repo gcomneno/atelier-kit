@@ -1146,6 +1146,15 @@ export default {
       dimensions: 'Dimensions',
       availability: 'Availability'
     },
+    imageLightbox: {
+      dialogLabel: 'Enlarged image',
+      enlarge: 'View larger image: {title}',
+      fitLegend: 'Image fit',
+      fitCover: 'Cover',
+      fitContain: 'Fit',
+      fitNatural: '1:1',
+      close: 'Close'
+    },
     visitorBrief: {
       contactEyebrow: 'Contact without a form',
       heading: 'Write with a ready message',

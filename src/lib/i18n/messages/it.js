@@ -1155,6 +1155,15 @@ export default {
       dimensions: 'Dimensioni',
       availability: 'Disponibilità'
     },
+    imageLightbox: {
+      dialogLabel: 'Immagine ingrandita',
+      enlarge: 'Ingrandisci immagine: {title}',
+      fitLegend: 'Adattamento immagine',
+      fitCover: 'Copertina',
+      fitContain: 'Intera',
+      fitNatural: '1:1',
+      close: 'Chiudi'
+    },
     visitorBrief: {
       contactEyebrow: 'Contatto senza modulo',
       heading: 'Scrivi il tuo messaggio preparato',

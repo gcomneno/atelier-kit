@@ -4,6 +4,12 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.22 - 2026-07-08
+
+### Added
+
+- **Image lightbox** on item detail and news pages: click the hero image for a full-screen view with cover / fit / 1:1 modes (`ImageLightbox`).
+
 ## v0.1.21 - 2026-07-08
 
 ### Added

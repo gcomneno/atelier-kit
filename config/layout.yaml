@@ -3,16 +3,14 @@ layout:
   blocks:
     about:
       enabled: true
-      placement: menu
-      label: Chi sono
+      placement: sidebar
     news:
       enabled: true
-      placement: menu
-      count: 1
-      label: News
+      placement: sidebar
+      count: 3
     collections:
       enabled: true
       placement: sidebar
     catalog:
       enabled: true
-      placement: menu
+      placement: main

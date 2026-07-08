@@ -4,6 +4,10 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+### Changed
+
+- Kit demo content restored to neutral English starter (`example-item`, `starter-selection`); zoo-themed config, news and scratch collections removed.
+
 ### Added
 
 - **Studio Help** (`/studio/help`): workflow, site/content map, item detail guide, publish commands, **client site upgrade** steps and YAML-only limits.

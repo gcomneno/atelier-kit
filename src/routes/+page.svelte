@@ -272,7 +272,7 @@
     text-transform: uppercase;
   }
 
-  h1 {
+  .hero-head :global(h1) {
     max-width: 16ch;
     margin: 0;
     font-size: clamp(2.8rem, 10vw, 6.5rem);
@@ -280,7 +280,7 @@
     letter-spacing: -0.04em;
   }
 
-  .tagline {
+  .hero-head :global(.tagline) {
     max-width: 42rem;
     margin: 0;
     color: color-mix(in srgb, var(--site-text-color, #4f4236) 88%, transparent);
@@ -288,7 +288,7 @@
     line-height: 1.35;
   }
 
-  .hero-epigraph {
+  .hero-head :global(.hero-epigraph) {
     max-width: 22ch;
     margin: 0;
     font-style: italic;
@@ -300,11 +300,11 @@
     color: color-mix(in srgb, var(--site-text-color, #4f4236) 92%, transparent);
   }
 
-  .hero-epigraph::before {
+  .hero-head :global(.hero-epigraph:not(.hero-epigraph--component-quotes))::before {
     content: '«\202f';
   }
 
-  .hero-epigraph::after {
+  .hero-head :global(.hero-epigraph:not(.hero-epigraph--component-quotes))::after {
     content: '\202f»';
   }
 
@@ -323,7 +323,7 @@
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.12);
   }
 
-  .hero-intro {
+  .hero-intro-card :global(.hero-intro) {
     margin: 0;
     font-style: normal;
     color: var(--site-text-color, #5d4a36);
@@ -332,7 +332,7 @@
     white-space: pre-line;
   }
 
-  .hero-intro-card .hero-intro + .hero-intro {
+  .hero-intro-card :global(.hero-intro + .hero-intro) {
     margin-top: 0.85rem;
   }
 

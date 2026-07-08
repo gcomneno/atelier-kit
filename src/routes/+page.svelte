@@ -22,11 +22,18 @@
   const catalogIntro = $derived(data.catalog.intro.trim());
   const showAboutMain = $derived(Boolean(data.main?.about));
   const showNewsMain = $derived((data.main?.newsPosts?.length ?? 0) > 0);
+  const documentTitle = $derived(
+    data.site.intro_title || data.site.header_title || data.site.name || data.site.tagline
+  );
 </script>
 
 <svelte:head>
-  <title>{data.site.intro_title}</title>
-  <meta name="description" content={data.site.tagline} />
+  {#if documentTitle}
+    <title>{documentTitle}</title>
+  {/if}
+  {#if data.site.tagline}
+    <meta name="description" content={data.site.tagline} />
+  {/if}
 </svelte:head>
 
 <!-- Sidebar layout applies on home (`/`) only; see getCatalogSidebarPageData() in showcase.js -->
@@ -34,8 +41,12 @@
   <main>
     <div class="home-intro">
       <section class="hero hero-head">
-        <h1>{data.site.intro_title}</h1>
-        <p class="tagline hero-epigraph">{data.site.tagline}</p>
+        {#if data.site.intro_title}
+          <h1>{data.site.intro_title}</h1>
+        {/if}
+        {#if data.site.tagline}
+          <p class="tagline hero-epigraph">{data.site.tagline}</p>
+        {/if}
 
         {#if data.site.hero_intro}
           <p class="hero-intro">{data.site.hero_intro}</p>

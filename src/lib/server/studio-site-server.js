@@ -335,8 +335,16 @@ export async function saveSiteAction({ request }) {
     const introTitle = optionalField(formData.get('intro_title'));
     site.header_title = headerTitle;
     site.intro_title = introTitle;
-    site.name = introTitle || headerTitle || readString(site, 'name');
-    site.tagline = requiredField(formData.get('tagline'), t('fields.tagline'), locale);
+
+    const syncedName = introTitle || headerTitle;
+
+    if (syncedName) {
+      site.name = syncedName;
+    } else {
+      delete site.name;
+    }
+
+    site.tagline = optionalField(formData.get('tagline'));
     site.hero_intro = optionalField(formData.get('hero_intro'));
     site.hero_signature = optionalField(formData.get('hero_signature'));
     site.footer_note = optionalField(formData.get('footer_note'));

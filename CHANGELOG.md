@@ -4,6 +4,14 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.24 - 2026-07-08
+
+### Fixed
+
+- **Branding titles**: empty intro no longer inherits header; clearing both titles no longer keeps stale `site.name`.
+- **Tagline** optional in Studio Identity; hidden on home when empty.
+- Studio appearance label: removed duplicate «(optional)» on background image field.
+
 ## v0.1.23 - 2026-07-08
 
 ### Added

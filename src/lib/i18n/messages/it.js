@@ -264,7 +264,7 @@ export default {
         preview: 'Sfondo',
         previewHeading: 'Titolo',
         previewCard: 'Card',
-        backgroundImage: 'Immagine di sfondo (opzionale)',
+        backgroundImage: 'Immagine di sfondo',
         backgroundHint: 'JPG, PNG o WebP. Salvata in static/images/site/background.*',
         backgroundVsBanner:
           'Usa questo campo per uno sfondo a tutta pagina o una fascia alta sotto l’header. Se il sito ha una home personalizzata, potrebbe usare solo questo asset al posto del hero banner.',
@@ -290,6 +290,7 @@ export default {
         currentHeaderLogo: 'Attuale: {path}',
         removeHeaderLogo: 'Rimuovi logo header',
         tagline: 'Sottotitolo',
+        taglineHint: 'Riga breve sotto il titolo introduttivo in home. Lascia vuoto per nascondere.',
         heroIntro: 'Testo introduttivo in home',
         heroIntroHint:
           'Un Invio va a capo; una riga vuota separa i paragrafi. Modifica solo il testo: stile e impaginazione restano quelli del tema.',

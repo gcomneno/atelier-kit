@@ -116,8 +116,13 @@ function validateSite() {
     return;
   }
 
-  requireString(site, 'name', source);
-  requireString(site, 'tagline', source);
+  if ('tagline' in site && site.tagline !== undefined && typeof site.tagline !== 'string') {
+    failKey('missingField', { source, field: 'tagline' });
+  }
+
+  if ('name' in site && site.name !== undefined && typeof site.name !== 'string') {
+    failKey('missingField', { source, field: 'name' });
+  }
 
   if ('appearance' in site && site.appearance !== undefined) {
     validateAppearance(site.appearance, source);

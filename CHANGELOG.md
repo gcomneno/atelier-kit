@@ -4,6 +4,12 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.27 - 2026-07-08
+
+### Fixed
+
+- Studio identity: removed duplicate «(opzionale)» from the footer note label — the optional badge on `StudioFieldLabel` already marks the field (same pattern as tagline and signature; follows #94).
+
 ## v0.1.26 - 2026-07-08
 
 ### Changed

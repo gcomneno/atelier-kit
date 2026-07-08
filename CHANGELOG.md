@@ -4,6 +4,12 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.1.26 - 2026-07-08
+
+### Changed
+
+- **Hero intro card** ([#100](https://github.com/gcomneno/atelier-kit/issues/100)): `hero_signature` now renders inside the same decorative card as `hero_intro`, right-aligned at the bottom. Signature-only or intro-only layouts still work.
+
 ## v0.1.25 - 2026-07-08
 
 ### Changed

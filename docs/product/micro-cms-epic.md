@@ -4,17 +4,17 @@ This file tracks the committed micro-CMS roadmap from [`micro-cms-positioning.md
 
 ## GitHub tracking
 
-| Item | Issue |
-|---|---|
-| **Epic — Tier 1** | [#72](https://github.com/gcomneno/atelier-kit/issues/72) |
-| 1. Production-safe Studio | [#67](https://github.com/gcomneno/atelier-kit/issues/67) — **Path B:** [ADR 0007](../architecture/adr-0007-production-safe-studio-desktop.md) |
-| 2. Terminal-free publish | [#68](https://github.com/gcomneno/atelier-kit/issues/68) |
-| 3. XML sitemap | [#69](https://github.com/gcomneno/atelier-kit/issues/69) |
-| 4. Client-side search | [#70](https://github.com/gcomneno/atelier-kit/issues/70) |
-| 5. RSS feed | [#71](https://github.com/gcomneno/atelier-kit/issues/71) |
-| **Tier 2 — JSON-LD** | [#73](https://github.com/gcomneno/atelier-kit/issues/73) |
+| Item | Issue | Status |
+|---|---|---|
+| **Epic — Tier 1** | [#72](https://github.com/gcomneno/atelier-kit/issues/72) | Closed — v0.1.20 |
+| 1. Production-safe Studio | [#67](https://github.com/gcomneno/atelier-kit/issues/67) | Closed — Path B, [ADR 0007](../architecture/adr-0007-production-safe-studio-desktop.md) |
+| 2. Terminal-free publish | [#68](https://github.com/gcomneno/atelier-kit/issues/68) | Closed |
+| 3. XML sitemap | [#69](https://github.com/gcomneno/atelier-kit/issues/69) | Closed |
+| 4. Client-side search | [#70](https://github.com/gcomneno/atelier-kit/issues/70) | Closed |
+| 5. RSS feed | [#71](https://github.com/gcomneno/atelier-kit/issues/71) | Closed |
+| **Tier 2 — JSON-LD** | [#73](https://github.com/gcomneno/atelier-kit/issues/73) | Closed |
 
-Issues were enabled on `gcomneno/atelier-kit` on 2026-07-07.
+Issues were enabled on `gcomneno/atelier-kit` on 2026-07-07. Tier 1 and Tier 2 completed 2026-07-08.
 
 ---
 

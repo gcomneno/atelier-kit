@@ -2,9 +2,9 @@
 
 These recipes show practical ways to customize Atelier-Kit for small creative showcases.
 
-They are intentionally file-based.
+They are intentionally file-based. Edit through **Studio** or **Atelier Desktop**, or by hand in YAML — see [`docs/product/micro-cms-positioning.md`](../product/micro-cms-positioning.md).
 
-No CMS. No database. No admin UI. No contact-form backend.
+No database. No contact-form backend.
 
 ## Before choosing a recipe
 

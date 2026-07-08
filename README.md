@@ -35,10 +35,14 @@ No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 - Client site upgrade command (`npm run site:upgrade`).
 - Configurable site appearance from studio.
 - Item meta presets for common creative showcase types.
+- **Micro-CMS discovery:** XML sitemap (`/sitemap.xml`), `robots.txt`, RSS feed (`/news/rss.xml`), client-side search on items and news.
+- **Structured data:** JSON-LD on news and about pages.
+- **Atelier Desktop** (Tauri) for client authoring without exposing `/studio` on production (ADR 0007).
+- **Put site online** — one-click publish from `/studio/readiness` without terminal commands for the client.
 
 ## Current release
 
-Latest release: **v0.1.13** — Publish live, Atelier Desktop (Tauri), studio Help page.
+Latest release: **v0.1.20** — Micro-CMS Tier 1 and Tier 2 (sitemap, RSS, search, JSON-LD, Desktop authoring, guided publish).
 
 See [GitHub Releases](https://github.com/gcomneno/atelier-kit/releases) for highlights and validation notes.
 
@@ -252,12 +256,15 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 - `docs/usage/scaffold-templates.md` explains supported scaffold templates and their boundaries.
 - `docs/usage/manual-client-setup.md` explains manual client setup when no template fits.
 - `docs/product/positioning.md` explains the product direction.
+- `docs/product/micro-cms-positioning.md` explains the micro-CMS contract and WordPress comparison.
+- `docs/product/micro-cms-epic.md` tracks the micro-CMS epic and issues.
 - `docs/product/product-levels.md` explains developer-assisted, guided and no-code levels.
 - `docs/product/no-code-roadmap.md` explains the staged no-code authoring roadmap.
 - `docs/usage/site-wizard.md` explains the guided setup wizard.
-- `docs/usage/studio.md` explains the local studio prototype.
+- `docs/usage/studio.md` explains Studio and Atelier Desktop authoring.
 - `docs/architecture/adr-0001-configurable-showcase-kit.md` explains the main architecture decision.
 - `docs/architecture/adr-0002-local-studio-research.md` records local studio architecture research.
+- `docs/architecture/adr-0007-production-safe-studio-desktop.md` records the production-safe authoring decision.
 
 ## Support
 
@@ -271,6 +278,6 @@ To report bugs, suggest scoped features or improve docs, see [`CONTRIBUTING.md`]
 
 ## Status
 
-Atelier-Kit is in early development.
+Atelier-Kit is an early-stage **micro-CMS for creative showcases** — file-based content, local Studio / Atelier Desktop authoring, and static-friendly deploy.
 
-The first goal is to build a clean configurable showcase template before adding any advanced storage, dashboard or server-side analytics.
+See [`docs/product/micro-cms-positioning.md`](docs/product/micro-cms-positioning.md) for scope and maturity.

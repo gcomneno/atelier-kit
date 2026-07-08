@@ -1,11 +1,20 @@
 <script>
+  import SiteSearch from '$lib/components/SiteSearch.svelte';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   /** @typedef {{ id: string, url: string }} SocialLink */
   /** @typedef {{ href: string, label: string }} MenuNavItem */
+  /** @typedef {import('$lib/search-index.js').SearchEntry} SearchEntry */
 
-  /** @type {{ site: { name: string }, menuNav?: MenuNavItem[], socialLinks?: SocialLink[], footer?: { show_social: boolean } | null, overlay?: boolean }} */
-  let { site, menuNav = [], socialLinks = [], footer = null, overlay = false } = $props();
+  /** @type {{ site: { name: string }, menuNav?: MenuNavItem[], socialLinks?: SocialLink[], footer?: { show_social: boolean } | null, overlay?: boolean, searchIndex?: SearchEntry[] }} */
+  let {
+    site,
+    menuNav = [],
+    socialLinks = [],
+    footer = null,
+    overlay = false,
+    searchIndex = []
+  } = $props();
 
   const t = useVisitorI18n();
 
@@ -25,8 +34,12 @@
   <div class="header-inner">
     <a class="site-name" href="/">{site.name}</a>
 
-    {#if menuNav.length > 0 || (footer?.show_social && socialLinks.length > 0)}
+    {#if searchIndex.length > 0 || menuNav.length > 0 || (footer?.show_social && socialLinks.length > 0)}
       <div class="header-actions">
+        {#if searchIndex.length > 0}
+          <SiteSearch entries={searchIndex} {overlay} />
+        {/if}
+
         {#if menuNav.length > 0}
           <nav class="site-nav" aria-label={t('common.siteNav')}>
             {#each menuNav as item (item.href)}

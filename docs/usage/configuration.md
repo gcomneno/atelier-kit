@@ -78,6 +78,12 @@ When you publish news posts under `content/news/`, Atelier-Kit also serves an RS
 
 Each entry includes title, date, excerpt (or first body line), link and optional image. The news index page (`/news`) links the feed with `<link rel="alternate" type="application/rss+xml">`. Set `site.url` so feed links use your production domain.
 
+### On-site search
+
+When you have items or news posts, the visitor header shows a search field. It filters **client-side** on item and news titles (and optional subtitles or excerpts). No backend or database is required; the index is built at build time from your YAML files.
+
+Keyboard navigation: arrow keys move between results, Enter opens the highlighted match, Escape closes the panel. Labels follow the site language (`site.language`).
+
 ## Catalog configuration
 
 Edit:

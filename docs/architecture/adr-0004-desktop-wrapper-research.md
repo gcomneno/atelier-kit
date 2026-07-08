@@ -54,4 +54,5 @@ Phase 1 is enough for assisted client handoff today. Phase 2 becomes worthwhile 
 ## Related docs
 
 - [`adr-0003-publishing-and-service-model.md`](adr-0003-publishing-and-service-model.md)
+- [`adr-0007-production-safe-studio-desktop.md`](adr-0007-production-safe-studio-desktop.md) — production-safe authoring (Path B)
 - [`studio.md`](../usage/studio.md)

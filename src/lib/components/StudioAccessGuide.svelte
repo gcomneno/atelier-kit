@@ -12,6 +12,10 @@
 
   <ul>
     <li>
+      <strong>{t('studio.common.desktopClient')}</strong>
+      {t('studio.accessGuide.desktopClient')}
+    </li>
+    <li>
       <strong>{t('studio.common.localOnly')}</strong>
       {t('studio.accessGuide.localOnly')}
     </li>

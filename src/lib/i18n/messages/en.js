@@ -645,6 +645,7 @@ export default {
       warm: 'Warm atelier (default)',
       neutral: 'Neutral paper',
       dark: 'Dark studio',
+      noir: 'Noir',
       custom: 'Custom colors'
     },
     font: {

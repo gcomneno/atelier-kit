@@ -10,6 +10,28 @@ Configure the site, add items and images, deploy the showcase.
 
 No cart. No checkout. No accounts. No public comments. No contact-form swamp.
 
+## Studio — local authoring
+
+Atelier-Kit includes **Studio**, a browser-based editor for the whole site — no YAML by hand, no WordPress, no database.
+
+From the project folder:
+
+```bash
+npm run studio
+```
+
+Opens `http://127.0.0.1:5173/studio` on localhost only. Studio writes directly to `config/`, `content/` and item images on disk.
+
+**What you can edit in Studio**
+
+- Site identity, appearance, layout, hero, footer, contact and social links
+- Catalog items (with photo upload), collections, news and Signal Clouds
+- About page and publish readiness (Content Doctor + **Put site online**)
+
+**Production stays read-only** — `/studio` is disabled on Vercel. Clients use **Atelier Desktop** (Tauri) for the same UI without exposing authoring on the live URL.
+
+→ Full guide: [`docs/usage/studio.md`](docs/usage/studio.md) · Desktop: [`desktop/README.md`](desktop/README.md)
+
 ## Features
 
 - SvelteKit application.
@@ -78,6 +100,12 @@ Preview the site locally:
 
 ```bash
 npm run preview
+```
+
+Open Studio (local authoring UI):
+
+```bash
+npm run studio
 ```
 
 ## First customization path
@@ -278,6 +306,6 @@ To report bugs, suggest scoped features or improve docs, see [`CONTRIBUTING.md`]
 
 ## Status
 
-Atelier-Kit is an early-stage **micro-CMS for creative showcases** — file-based content, local Studio / Atelier Desktop authoring, and static-friendly deploy.
+Atelier-Kit is an early-stage **micro-CMS for creative showcases** — file-based content, **local Studio** / Atelier Desktop authoring, and static-friendly deploy.
 
 See [`docs/product/micro-cms-positioning.md`](docs/product/micro-cms-positioning.md) for scope and maturity.

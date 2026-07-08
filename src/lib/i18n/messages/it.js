@@ -652,6 +652,7 @@ export default {
       warm: 'Atelier caldo (predefinito)',
       neutral: 'Carta neutra',
       dark: 'Studio scuro',
+      noir: 'Noir',
       custom: 'Colori personalizzati'
     },
     font: {

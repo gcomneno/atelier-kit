@@ -140,7 +140,7 @@ The studio is **local authoring only**. Follow these rules:
 3. Bind to localhost only — do not expose the dev server on your network.
 4. `/studio` write routes are disabled in production builds. Never set `ATELIER_STUDIO=1` on Vercel or other hosted environments.
 5. Preview visitor pages at `http://127.0.0.1:5173/` in a separate tab after saving.
-6. Publish with `npm run publish -- --deploy` when ready.
+6. **Publish:** open `/studio/readiness` and click **Put site online** (or **Metti online**). No terminal commands required.
 7. Keep Git backups before large edits. Item photos live in `static/images/items/`.
 
 Open `/studio/help` for this guidance in the studio UI.
@@ -152,21 +152,27 @@ Open `/studio/help` for this guidance in the studio UI.
 
 ## What the studio does not do
 
-- deploy the site;
-- initialize Git;
-- replace `content:doctor`, `check` or `build` for final launch;
-- expose write access in production.
+- initialize Git (operator sets this up at handoff);
+- link Vercel or GitHub (operator sets this up at handoff);
+- expose write access on the public production URL.
 
 ## Before publishing
 
-Open `/studio/readiness` or run:
+Open **`/studio/readiness`** in Atelier Desktop or local studio:
+
+1. Review **Content Doctor** notes in plain language.
+2. Click **Put site online** / **Metti online** when ready.
+
+The studio runs content checks, build, save, and deploy in the background. You see plain-language success or failure messages; technical details are optional.
+
+**Operator alternative:** from the project folder:
 
 ```bash
 npm run publish
 npm run publish -- --deploy
 ```
 
-**Publish live** on the readiness page runs publish prep, commits `config/`, `content/` and `static/images/`, pushes to Git and deploys with Vercel CLI. Requires Git `origin`, credentials and a linked Vercel project on the operator machine.
+Requires Git `origin`, credentials and a linked Vercel project — configured during operator handoff, not by the client.
 
 See [`deploy-vercel.md`](deploy-vercel.md) and [`../product/service-package.md`](../product/service-package.md).
 

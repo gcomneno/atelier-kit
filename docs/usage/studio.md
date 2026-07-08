@@ -4,7 +4,19 @@ The local studio is Atelier-Kit Level 3 authoring.
 
 It provides a browser UI for editing file-based site content without opening YAML files manually.
 
-## Command
+## Recommended access — Atelier Desktop (clients)
+
+For non-technical clients, **Atelier Desktop** is the primary authoring path (ADR 0007). The live site stays read-only; editing happens on the client machine only.
+
+1. Operator scaffolds the site and runs `npm install` once.
+2. Client installs **Atelier Desktop** (see [`desktop/README.md`](../../desktop/README.md)).
+3. Client chooses the site folder → **Open studio** — localhost starts with `ATELIER_STUDIO=1` and opens `/studio` in a webview.
+4. Client edits in the browser UI; saves write YAML and images to disk.
+5. Publish via `/studio/readiness` or operator-assisted deploy.
+
+Operators can use `npm run studio:launch` instead of Desktop.
+
+## Command (operators)
 
 ```bash
 npm run studio
@@ -25,6 +37,19 @@ npm run dev
 
 Studio write routes remain disabled outside development unless `ATELIER_STUDIO=1` is set.
 
+## Security model
+
+| | |
+|---|---|
+| **Who can write** | Operator or client with the site folder and an active local studio session |
+| **When** | Local dev server running with `ATELIER_STUDIO=1` on `127.0.0.1` |
+| **Where** | Localhost only — `config/`, `content/`, approved `static/images/` |
+| **Production** | `/studio` returns **404**. Never set `ATELIER_STUDIO=1` on Vercel or other hosted environments |
+
+Implementation: `src/lib/server/studio-guard.js`. Full decision record: [ADR 0007](../architecture/adr-0007-production-safe-studio-desktop.md).
+
+Hosted studio with production auth (Path A) is **out of scope** for the current micro-CMS contract; see ADR 0007 for rationale.
+
 ## Studio scope
 
 The studio edits:
@@ -36,6 +61,7 @@ The studio edits:
 - catalog labels and visible fields (`config/catalog.yaml`)
 - items with photo upload (`content/items/*.yaml`, `static/images/items/`)
 - collections (`content/collections/*.yaml`)
+- news posts (`content/news/*.yaml`)
 - Signal Cloud questions and answer labels (`config/signal-clouds.yaml`)
 - publish readiness via Content Doctor (`/studio/readiness`)
 
@@ -65,6 +91,9 @@ The studio does **not** yet:
 | `/studio/items/[id]` | Edit one item and upload its photo |
 | `/studio/collections` | List collections |
 | `/studio/collections/[id]` | Edit one collection |
+| `/studio/news` | List news posts |
+| `/studio/news/new` | Create a news post |
+| `/studio/news/[id]` | Edit one news post |
 | `/studio/signal-clouds` | Visitor questions and answer labels |
 | `/studio/readiness` | Content Doctor publish review |
 | `/studio/help` | Safe studio access and publishing guidance |
@@ -106,14 +135,20 @@ Studio labels, save messages, Content Doctor output and `npm run publish` banner
 
 The studio is **local authoring only**. Follow these rules:
 
-1. Start with `npm run studio:launch` from the client site folder (not from Atelier-Kit itself).
-2. Bind to localhost only — do not expose the dev server on your network.
-3. `/studio` write routes are disabled in production builds. Never set `ATELIER_STUDIO=1` on Vercel or other hosted environments.
-4. Preview visitor pages at `http://127.0.0.1:5173/` in a separate tab after saving.
-5. Publish with `npm run publish -- --deploy` when ready.
-6. Keep Git backups before large edits. Item photos live in `static/images/items/`.
+1. **Clients:** use **Atelier Desktop** (see [`desktop/README.md`](../../desktop/README.md)) — no terminal required after handoff.
+2. **Operators:** start with `npm run studio:launch` from the client site folder.
+3. Bind to localhost only — do not expose the dev server on your network.
+4. `/studio` write routes are disabled in production builds. Never set `ATELIER_STUDIO=1` on Vercel or other hosted environments.
+5. Preview visitor pages at `http://127.0.0.1:5173/` in a separate tab after saving.
+6. Publish with `npm run publish -- --deploy` when ready.
+7. Keep Git backups before large edits. Item photos live in `static/images/items/`.
 
 Open `/studio/help` for this guidance in the studio UI.
+
+## Related docs
+
+- [`../architecture/adr-0007-production-safe-studio-desktop.md`](../architecture/adr-0007-production-safe-studio-desktop.md) — production-safe authoring decision (Path B)
+- [`../architecture/adr-0002-local-studio-research.md`](../architecture/adr-0002-local-studio-research.md)
 
 ## What the studio does not do
 
@@ -137,7 +172,7 @@ See [`deploy-vercel.md`](deploy-vercel.md) and [`../product/service-package.md`]
 
 ## Related docs
 
-- [`../architecture/adr-0002-local-studio-research.md`](../architecture/adr-0002-local-studio-research.md)
+- [`../architecture/adr-0007-production-safe-studio-desktop.md`](../architecture/adr-0007-production-safe-studio-desktop.md)
 - [`../architecture/adr-0003-publishing-and-service-model.md`](../architecture/adr-0003-publishing-and-service-model.md)
 - [`../product/product-levels.md`](../product/product-levels.md)
 - [`../product/no-code-roadmap.md`](../product/no-code-roadmap.md)

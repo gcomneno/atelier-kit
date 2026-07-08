@@ -54,11 +54,11 @@ A credible micro-CMS inspired by WordPress should cover eight pillars. Each pill
 | Admin UI for CRUD | Visual editing without YAML | **Studio** (`npm run studio`) |
 | Preview before publish | Yes | Dev server / preview |
 | Pre-save validation | Yes | Content validate + Content Doctor |
-| Browser-accessible admin | Yes for a finished micro-CMS | Studio write routes only in dev or with `ATELIER_STUDIO=1`; **404 in production** |
-| No terminal required | Yes at Level 3 | Partial — Desktop (Tauri), publish script; full terminal-free use is future work ([#52](https://github.com/gcomneno/atelier-kit/issues/52)) |
+| Browser-accessible admin | Yes for a finished micro-CMS | **Atelier Desktop** → localhost `/studio` (ADR 0007). Production URL is read-only; `/studio` returns 404 on Vercel |
+| No terminal required | Yes at Level 3 | **Atelier Desktop** for clients; `studio:launch` for operators ([#67](https://github.com/gcomneno/atelier-kit/issues/67)) |
 | Revision history | Nice to have | Git only; no restore UI — **out of scope** (Git is enough) |
 
-**Status:** core exists; **self-service authoring for non-technical clients is not finished**.
+**Status:** **client-grade via Atelier Desktop** (Path B, ADR 0007). Hosted production studio (Path A) deferred.
 
 ### 3. Media
 
@@ -132,7 +132,7 @@ A credible micro-CMS inspired by WordPress should cover eight pillars. Each pill
 | Pillar | Status | Priority to close gaps |
 |---|---|---|
 | 1. Content model | Complete | — |
-| 2. Authoring | Partial | Critical |
+| 2. Authoring | Mostly complete (Desktop) | — |
 | 3. Media | Complete | Low |
 | 4. Publishing | Partial | High |
 | 5. Site structure | Complete | Low |
@@ -210,7 +210,7 @@ These five deliverables close the micro-CMS contract. Track as a single epic wit
 
 | # | Deliverable | Pillar | Notes |
 |---|---|---|---|
-| 1 | **Production-safe Studio** — browser-accessible authoring outside dev-only | Authoring | Hosted studio with minimal auth, or Desktop as primary client surface |
+| 1 | **Production-safe Studio** — browser-accessible authoring outside dev-only | Authoring | **Atelier Desktop** (Path B, ADR 0007). Hosted auth (Path A) deferred |
 | 2 | **Terminal-free publish** | Publishing | Builds on [#52](https://github.com/gcomneno/atelier-kit/issues/52) where applicable |
 | 3 | **XML sitemap** | Discovery | All public routes (items, collections, news, about, legal) |
 | 4 | **Client-side search** | Discovery | Item and news titles; aligns with ADR 0006 phase 2 |

@@ -165,7 +165,8 @@ function validateSite() {
   }
 }
 
-const APPEARANCE_PRESETS = new Set(['warm', 'neutral', 'dark', 'custom']);
+const APPEARANCE_PRESETS = new Set(['warm', 'neutral', 'dark', 'noir', 'custom']);
+const BACKGROUND_FITS = new Set(['top', 'center', 'contain']);
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
 /**
@@ -184,7 +185,15 @@ function validateAppearance(appearance, source) {
     }
   }
 
-  for (const field of ['base_color', 'accent_color', 'text_color', 'heading_color', 'card_color']) {
+  for (const field of [
+    'base_color',
+    'accent_color',
+    'text_color',
+    'heading_color',
+    'card_color',
+    'header_title_color',
+    'intro_title_color'
+  ]) {
     if (!(field in appearance) || appearance[field] === undefined) {
       continue;
     }
@@ -206,6 +215,12 @@ function validateAppearance(appearance, source) {
   if ('font_preset' in appearance && appearance.font_preset !== undefined) {
     if (typeof appearance.font_preset !== 'string' || !isFontPreset(appearance.font_preset)) {
       failKey('appearanceFontPresetInvalid', { source });
+    }
+  }
+
+  if ('background_fit' in appearance && appearance.background_fit !== undefined) {
+    if (typeof appearance.background_fit !== 'string' || !BACKGROUND_FITS.has(appearance.background_fit)) {
+      failKey('appearanceBackgroundFitInvalid', { source });
     }
   }
 }

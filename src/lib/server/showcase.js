@@ -311,6 +311,10 @@ export function getSiteConfig() {
 
   return {
     name: requiredString(site, 'name', 'config/site.yaml'),
+    header_title: optionalString(site, 'header_title'),
+    intro_title: optionalString(site, 'intro_title'),
+    header_logo: optionalString(site, 'header_logo'),
+    header_logo_alt: optionalString(site, 'header_logo_alt'),
     tagline: requiredString(site, 'tagline', 'config/site.yaml'),
     language: optionalString(site, 'language', 'en'),
     hero_intro: optionalString(site, 'hero_intro'),

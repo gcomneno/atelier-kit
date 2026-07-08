@@ -19,6 +19,7 @@
       .join('; ')
   );
   const hasBackgroundImage = $derived(Boolean(data.appearance?.background_image));
+  const backgroundFit = $derived(data.appearance?.background_fit ?? 'top');
   const publicFontHref = $derived(
     isStudio ? null : fontStylesheetHref(data.appearance?.font_preset ?? 'inter')
   );
@@ -54,6 +55,7 @@
   <div
     class="site-root"
     class:has-background-image={hasBackgroundImage}
+    data-bg-fit={hasBackgroundImage ? backgroundFit : undefined}
     style={`${appearanceStyle}${hasBackgroundImage ? `; --site-bg-url: url(${data.appearance.background_image})` : ''}`}
   >
     <SiteHeader
@@ -148,6 +150,67 @@
       var(--site-base-color, #f8f0e4);
   }
 
+  .site-root.has-background-image[data-bg-fit='center'] {
+    background:
+      radial-gradient(
+        circle at top left,
+        color-mix(in srgb, var(--site-accent-color, #d6be9a) 35%, transparent),
+        transparent 32rem
+      ),
+      var(--site-bg-url) center center / cover no-repeat,
+      var(--site-base-color, #f8f0e4);
+  }
+
+  .site-root.has-background-image[data-bg-fit='contain'] {
+    background:
+      radial-gradient(
+        circle at top left,
+        color-mix(in srgb, var(--site-accent-color, #d6be9a) 35%, transparent),
+        transparent 32rem
+      ),
+      var(--site-bg-url) center center / contain no-repeat,
+      var(--site-base-color, #f8f0e4);
+  }
+
+  .site-root :global(.page-shell:not(.with-sidebar) .home-intro) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: min(72vh, calc(100vh - 9rem));
+    text-align: center;
+  }
+
+  .site-root :global(.page-shell:not(.with-sidebar) .hero-head) {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    width: 100%;
+    text-align: center;
+  }
+
+  .site-root :global(.page-shell:not(.with-sidebar) .hero-head h1) {
+    max-width: 20ch;
+    color: var(--site-intro-title-color, var(--site-heading-color, var(--site-text-color, #2f281f)));
+    text-align: center;
+  }
+
+  .site-root :global(.page-shell:not(.with-sidebar) .hero-head .tagline),
+  .site-root :global(.page-shell:not(.with-sidebar) .hero-head .hero-intro),
+  .site-root :global(.page-shell:not(.with-sidebar) .hero-head .hero-signature) {
+    text-align: center;
+    margin-inline: auto;
+  }
+
+  .site-root :global(.page-shell:not(.with-sidebar) .hero-head .hero-intro) {
+    width: min(100%, 46rem);
+  }
+
+  .site-root :global(.page-shell:not(.with-sidebar) .hero-head .hero-signature) {
+    max-width: 46rem;
+  }
+
   /* Chrome <111 (e.g. Windows 7) — no color-mix(): keep solid theme colors */
   @supports not (color: color-mix(in srgb, red, blue)) {
     .site-root,
@@ -161,6 +224,16 @@
       background-position: center top;
       background-size: cover;
       background-repeat: no-repeat;
+    }
+
+    .site-root.has-background-image[data-bg-fit='center'] {
+      background-position: center center;
+      background-size: cover;
+    }
+
+    .site-root.has-background-image[data-bg-fit='contain'] {
+      background-position: center center;
+      background-size: contain;
     }
 
     :global(.catalog-sidebar--dark),
@@ -178,6 +251,20 @@
     :global(.catalog-sidebar--dark .widget) {
       background-color: var(--site-card-color, var(--site-base-color, #f8f0e4));
     }
+  }
+
+  .site-root > :global(main) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .site-root > :global(main .page-shell) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
   }
 
   .site-kit-credit-bar {

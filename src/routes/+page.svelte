@@ -25,7 +25,7 @@
 </script>
 
 <svelte:head>
-  <title>{data.site.name}</title>
+  <title>{data.site.intro_title}</title>
   <meta name="description" content={data.site.tagline} />
 </svelte:head>
 
@@ -34,7 +34,7 @@
   <main>
     <div class="home-intro">
       <section class="hero hero-head">
-        <h1>{data.site.name}</h1>
+        <h1>{data.site.intro_title}</h1>
         <p class="tagline hero-epigraph">{data.site.tagline}</p>
 
         {#if data.site.hero_intro}

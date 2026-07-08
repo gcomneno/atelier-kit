@@ -15,7 +15,7 @@
     title={`${KIT_NAME} on GitHub`}
   >
     {parts.brand}
-  </a>
+  </a>{parts.suffix}
 </p>
 
 <style>

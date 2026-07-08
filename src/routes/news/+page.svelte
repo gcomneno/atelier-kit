@@ -32,6 +32,7 @@
 <svelte:head>
   <title>{t('news.pageTitle')} · {data.site.name}</title>
   <meta name="description" content={t('news.metaDescription', { siteName: data.site.name })} />
+  <link rel="alternate" type="application/rss+xml" title="{data.site.name} — News" href={data.feedUrl} />
 </svelte:head>
 
 <main class="news-page">

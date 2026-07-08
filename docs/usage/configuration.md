@@ -287,3 +287,9 @@ Rules:
 - WhatsApp uses a `wa.me` link;
 - no message is sent automatically;
 - no message is stored by Atelier-Kit.
+
+## Item image galleries
+
+Items can keep using the legacy `image_file` / `image_alt` fields, or optionally define an `images` gallery for the visitor item page.
+
+See [`item-images.md`](item-images.md) for the gallery schema, compatibility rules, and current Studio limitations.

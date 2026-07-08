@@ -10,6 +10,7 @@ import {
   normalizeItemPreset,
   titleFromItemId
 } from '../src/lib/item-presets.js';
+import { getItemCoverImage } from '../src/lib/item-images.js';
 
 const ROOT = process.cwd();
 const ITEMS_DIR = path.join(ROOT, 'content/items');
@@ -193,7 +194,7 @@ function listItems() {
       id: item.id ?? file.replace(/\.yaml$/, ''),
       title: item.title ?? '',
       status: item.status ?? '',
-      image: item.image_file ?? ''
+      image: getItemCoverImage(item).file
     };
   });
 

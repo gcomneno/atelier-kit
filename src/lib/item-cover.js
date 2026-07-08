@@ -1,23 +1,25 @@
+import { getItemCoverImage, ITEM_IMAGE_PLACEHOLDER } from './item-images.js';
+
 /**
- * @param {{ image_file?: string }} item
+ * @param {unknown} item
  */
 export function resolveItemCoverSrc(item) {
-  return item.image_file ?? '/images/items/placeholder.svg';
+  return getItemCoverImage(item).file;
 }
 
 /**
- * @param {{ image_file?: string }} item
+ * @param {unknown} item
  */
 export function resolveItemCoverFallbackSrc(item) {
-  const primary = item.image_file;
+  const primary = getItemCoverImage(item).file;
 
   if (!primary) {
-    return '/images/items/placeholder.svg';
+    return ITEM_IMAGE_PLACEHOLDER;
   }
 
   if (/\.jpe?g$/i.test(primary)) {
     return primary.replace(/\.jpe?g$/i, '.svg');
   }
 
-  return '/images/items/placeholder.svg';
+  return ITEM_IMAGE_PLACEHOLDER;
 }

@@ -1,15 +1,19 @@
 <script>
   import { splitParagraphs } from '$lib/text-blocks.js';
+  import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
 
+  const siteLabel = $derived(resolveDocumentTitle(data.site));
+  const pageTitle = $derived(formatPageTitle(data.legal.title, data.site));
+
   const paragraphs = $derived(splitParagraphs(data.legal.body));
 </script>
 
 <svelte:head>
-  <title>{data.legal.title} · {data.site.name}</title>
+  <title>{pageTitle}</title>
 </svelte:head>
 
 <main class="legal-page">
@@ -17,7 +21,9 @@
 
   <article>
     <header>
-      <p class="eyebrow">{data.site.name}</p>
+      {#if siteLabel}
+        <p class="eyebrow">{siteLabel}</p>
+      {/if}
       <h1>{data.legal.title}</h1>
     </header>
 

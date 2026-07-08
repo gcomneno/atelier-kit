@@ -1,20 +1,24 @@
 <script>
   import JsonLd from '$lib/components/JsonLd.svelte';
   import { splitParagraphs } from '$lib/text-blocks.js';
+  import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
 
   const introParagraphs = $derived(splitParagraphs(data.about.intro));
+  const siteLabel = $derived(resolveDocumentTitle(data.site));
+  const pageTitle = $derived(formatPageTitle(data.about.title, data.site));
+  const metaDescription = $derived(
+    data.about.intro ||
+      (siteLabel ? t('about.metaDescription', { siteName: siteLabel }) : data.about.title)
+  );
 </script>
 
 <svelte:head>
-  <title>{data.about.title} · {data.site.name}</title>
-  <meta
-    name="description"
-    content={data.about.intro || t('about.metaDescription', { siteName: data.site.name })}
-  />
+  <title>{pageTitle}</title>
+  <meta name="description" content={metaDescription} />
 </svelte:head>
 
 <JsonLd data={data.jsonLd} />

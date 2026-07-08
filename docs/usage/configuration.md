@@ -41,8 +41,9 @@ site:
 
 Fields:
 
-- `name` appears as the main site name.
-- `tagline` appears near the site heading.
+- `name` is a legacy site label kept in sync when you save **Site identity** in Studio (`intro_title` or `header_title`). Optional — omit or leave empty for hero-first layouts.
+- `tagline` appears near the home hero heading when set. Optional.
+- `header_title` and `intro_title` (Studio → Site identity) control the visitor nav title and home hero heading respectively; both are optional.
 - `language` sets `<html lang="…">`, the studio / CLI operator UI locale, **and** visitor-facing UI labels (`en`, `it`, `it-IT`, etc.). YAML content (item titles, about text, news bodies) is not auto-translated.
 - `notice` can be used for demo warnings or short publishing notes.
 - `footer_note` is optional client text on the home page when no multi-column footer is configured (`config/footer.yaml`). The **Atelier-Kit credit** (`Built with Atelier-Kit` / `Realizzato con Atelier-Kit`) is added automatically by the framework in the site footer and is not editable in YAML.

@@ -52,3 +52,24 @@ export function resolveDocumentTitle(site) {
     trimOrEmpty(site.tagline)
   );
 }
+
+/**
+ * Page `<title>` suffix when a site label exists; otherwise just the page label.
+ *
+ * @param {string} pageTitle
+ * @param {{ name?: string, intro_title?: string, header_title?: string, tagline?: string }} site
+ */
+export function formatPageTitle(pageTitle, site) {
+  const siteTitle = resolveDocumentTitle(site);
+  const trimmedPage = trimOrEmpty(pageTitle);
+
+  if (!siteTitle) {
+    return trimmedPage;
+  }
+
+  if (!trimmedPage) {
+    return siteTitle;
+  }
+
+  return `${trimmedPage} · ${siteTitle}`;
+}

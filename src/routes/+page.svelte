@@ -1,6 +1,7 @@
 <script>
   import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
   import ItemCard from '$lib/components/ItemCard.svelte';
+  import { resolveDocumentTitle, resolveIntroTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
@@ -22,9 +23,8 @@
   const catalogIntro = $derived(data.catalog.intro.trim());
   const showAboutMain = $derived(Boolean(data.main?.about));
   const showNewsMain = $derived((data.main?.newsPosts?.length ?? 0) > 0);
-  const documentTitle = $derived(
-    data.site.intro_title || data.site.header_title || data.site.name || data.site.tagline
-  );
+  const introTitle = $derived(resolveIntroTitle(data.site));
+  const documentTitle = $derived(resolveDocumentTitle(data.site));
 </script>
 
 <svelte:head>
@@ -41,8 +41,8 @@
   <main>
     <div class="home-intro">
       <section class="hero hero-head">
-        {#if data.site.intro_title}
-          <h1>{data.site.intro_title}</h1>
+        {#if introTitle}
+          <h1>{introTitle}</h1>
         {/if}
         {#if data.site.tagline}
           <p class="tagline hero-epigraph">{data.site.tagline}</p>

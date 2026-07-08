@@ -15,6 +15,7 @@
     "item:list": "node scripts/item.js list",
     "item:validate": "node scripts/item.js validate",
     "content:doctor": "node scripts/content-doctor.js",
+    "test": "node --test src/lib/site-branding.test.js",
     "site:scaffold": "node scripts/scaffold-client.js",
     "site:upgrade": "node scripts/site-upgrade.js",
     "site:wizard": "node scripts/site-wizard.js",

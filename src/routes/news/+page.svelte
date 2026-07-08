@@ -1,8 +1,16 @@
 <script>
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+  import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
+
+  const siteLabel = $derived(resolveDocumentTitle(data.site));
+  const pageTitle = $derived(formatPageTitle(t('news.pageTitle'), data.site));
+  const metaDescription = $derived(
+    siteLabel ? t('news.metaDescription', { siteName: siteLabel }) : t('news.title')
+  );
+  const feedTitle = $derived(siteLabel ? `${siteLabel} — ${t('news.pageTitle')}` : t('news.pageTitle'));
 
   function formatDate(/** @type {string} */ value) {
     const parsed = new Date(`${value}T12:00:00`);
@@ -30,16 +38,18 @@
 </script>
 
 <svelte:head>
-  <title>{t('news.pageTitle')} · {data.site.name}</title>
-  <meta name="description" content={t('news.metaDescription', { siteName: data.site.name })} />
-  <link rel="alternate" type="application/rss+xml" title="{data.site.name} — News" href={data.feedUrl} />
+  <title>{pageTitle}</title>
+  <meta name="description" content={metaDescription} />
+  <link rel="alternate" type="application/rss+xml" title={feedTitle} href={data.feedUrl} />
 </svelte:head>
 
 <main class="news-page">
   <a class="back-link" href="/">{t('common.backToShowcase')}</a>
 
   <header class="page-header">
-    <p class="eyebrow">{data.site.name}</p>
+    {#if siteLabel}
+      <p class="eyebrow">{siteLabel}</p>
+    {/if}
     <h1>{t('news.title')}</h1>
   </header>
 

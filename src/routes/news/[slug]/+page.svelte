@@ -4,12 +4,16 @@
   import JsonLd from '$lib/components/JsonLd.svelte';
   import PageSocialMeta from '$lib/components/PageSocialMeta.svelte';
   import { isBookReadingFormat } from '$lib/book-content.js';
+  import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
 
   let lightboxOpen = $state(false);
+
+  const siteLabel = $derived(resolveDocumentTitle(data.site));
+  const pageTitle = $derived(formatPageTitle(data.post.title, data.site));
 
   const isBookLayout = $derived(
     isBookReadingFormat(data.post.reading_format, data.post.id)
@@ -39,7 +43,7 @@
 </script>
 
 <svelte:head>
-  <title>{data.post.title} · {data.site.name}</title>
+  <title>{pageTitle}</title>
   <meta name="description" content={data.post.excerpt || data.post.title} />
 </svelte:head>
 
@@ -63,7 +67,9 @@
 
     <article>
       <header>
-        <p class="eyebrow">{data.site.name}</p>
+        {#if siteLabel}
+          <p class="eyebrow">{siteLabel}</p>
+        {/if}
         <time datetime={data.post.date}>{formatDate(data.post.date)}</time>
         <h1>{data.post.title}</h1>
       </header>

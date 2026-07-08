@@ -1,4 +1,5 @@
 import { resolveAbsoluteImageUrl, resolveAbsoluteUrl } from '$lib/site-meta.js';
+import { resolveDocumentTitle } from '$lib/site-branding.js';
 import { getNewsPosts, getSiteConfig } from '$lib/server/showcase.js';
 
 /**
@@ -88,6 +89,8 @@ function enclosureMimeType(path) {
  */
 export function buildNewsFeed(origin) {
   const site = getSiteConfig();
+  const siteLabel = resolveDocumentTitle(site);
+  const tagline = typeof site.tagline === 'string' ? site.tagline.trim() : '';
 
   /** @param {string} path */
   const absolute = (path) => resolveAbsoluteUrl(path, origin, site.url);
@@ -115,9 +118,9 @@ export function buildNewsFeed(origin) {
   });
 
   return {
-    title: `${site.name} — News`,
+    title: siteLabel ? `${siteLabel} — News` : 'News',
     link: absolute('/news'),
-    description: site.tagline || site.name,
+    description: tagline || siteLabel || '',
     language: site.language || 'en',
     feedUrl: absolute('/news/rss.xml'),
     items

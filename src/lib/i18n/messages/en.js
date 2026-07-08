@@ -295,7 +295,7 @@ export default {
         heroSignature: 'Signature',
         heroSignatureHint:
           'Personal sign-off on the home page, shown below the intro and right-aligned. Leave empty to hide.',
-        footerNote: 'Footer note (optional)',
+        footerNote: 'Footer note',
         footerNoteHint: 'Short client text on the home page when no multi-column footer is configured. The Atelier-Kit credit is added automatically and cannot be removed.',
         save: 'Save settings'
       },

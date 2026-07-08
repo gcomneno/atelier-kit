@@ -34,6 +34,11 @@ import {
 } from '$lib/server/studio-io.js';
 import { isValidSocialUrl, normalizeSocialId, SOCIAL_NETWORK_IDS } from '$lib/social-networks.js';
 import { isValidFooterHref } from '$lib/footer-links.js';
+import {
+  parseTaglineDisplay,
+  resolveTaglineQuoteColor,
+  validateEditorialFields
+} from '$lib/editorial-markup.js';
 
 const MAX_FOOTER_COLUMNS = 4;
 const MAX_FOOTER_LINKS = 4;
@@ -121,6 +126,7 @@ export function loadSiteForm() {
     header_logo: readString(site, 'header_logo'),
     header_logo_alt: readString(site, 'header_logo_alt'),
     tagline: readString(site, 'tagline'),
+    tagline_display: parseTaglineDisplay(isRecord(site.tagline_display) ? site.tagline_display : null),
     hero_intro: readString(site, 'hero_intro'),
     hero_signature: readString(site, 'hero_signature'),
     language: readString(site, 'language', 'en'),
@@ -333,6 +339,19 @@ export async function saveSiteAction({ request }) {
     const site = { ...data.site };
     const headerTitle = optionalField(formData.get('header_title'));
     const introTitle = optionalField(formData.get('intro_title'));
+    const tagline = optionalField(formData.get('tagline'));
+    const heroIntro = optionalField(formData.get('hero_intro'));
+
+    const editorialErrors = validateEditorialFields({
+      tagline,
+      intro_title: introTitle,
+      hero_intro: heroIntro
+    });
+
+    if (editorialErrors.length > 0) {
+      throw new Error(editorialErrors[0]);
+    }
+
     site.header_title = headerTitle;
     site.intro_title = introTitle;
 
@@ -344,10 +363,21 @@ export async function saveSiteAction({ request }) {
       delete site.name;
     }
 
-    site.tagline = optionalField(formData.get('tagline'));
-    site.hero_intro = optionalField(formData.get('hero_intro'));
+    site.tagline = tagline;
+    site.hero_intro = heroIntro;
     site.hero_signature = optionalField(formData.get('hero_signature'));
     site.footer_note = optionalField(formData.get('footer_note'));
+
+    const taglineWrap = String(formData.get('tagline_display_wrap') ?? 'none');
+
+    if (taglineWrap === 'epigraph') {
+      site.tagline_display = {
+        wrap: 'epigraph',
+        quote_color: resolveTaglineQuoteColor(formData.get('tagline_display_quote_color'))
+      };
+    } else {
+      delete site.tagline_display;
+    }
 
     let headerLogo = String(formData.get('header_logo') ?? readString(site, 'header_logo')).trim();
 

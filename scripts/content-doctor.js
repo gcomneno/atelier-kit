@@ -3,6 +3,7 @@ import path from 'node:path';
 import { parse } from 'yaml';
 import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
+import { validateEditorialFields } from '../src/lib/editorial-markup.js';
 
 const ROOT = process.cwd();
 const STRICT_MODE = process.argv.includes('--strict');
@@ -229,6 +230,23 @@ function inspectSite() {
       action: t('doctor.warnings.siteDemoTitle.action'),
       detail: site.name,
       technical: 'Site name still contains "demo".'
+    });
+  }
+
+  const editorialErrors = validateEditorialFields({
+    tagline: typeof site.tagline === 'string' ? site.tagline : '',
+    intro_title: typeof site.intro_title === 'string' ? site.intro_title : '',
+    hero_intro: typeof site.hero_intro === 'string' ? site.hero_intro : ''
+  });
+
+  for (const error of editorialErrors) {
+    addWarning({
+      source,
+      title: t('doctor.warnings.editorialMarkup.title'),
+      problem: t('doctor.warnings.editorialMarkup.problem', { detail: error }),
+      action: t('doctor.warnings.editorialMarkup.action'),
+      detail: error,
+      technical: error
     });
   }
 }

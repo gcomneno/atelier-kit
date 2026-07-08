@@ -48,11 +48,15 @@
           <p class="tagline hero-epigraph">{data.site.tagline}</p>
         {/if}
 
-        {#if data.site.hero_intro}
-          <p class="hero-intro">{data.site.hero_intro}</p>
-        {/if}
-        {#if data.site.hero_signature}
-          <p class="hero-signature">{data.site.hero_signature}</p>
+        {#if data.site.hero_intro || data.site.hero_signature}
+          <div class="hero-intro-card">
+            {#if data.site.hero_intro}
+              <p class="hero-intro">{data.site.hero_intro}</p>
+            {/if}
+            {#if data.site.hero_signature}
+              <p class="hero-signature">{data.site.hero_signature}</p>
+            {/if}
+          </div>
         {/if}
       </section>
 
@@ -293,21 +297,25 @@
     content: '\202f»';
   }
 
-  .hero-intro {
-    font-style: normal;
+  .hero-intro-card {
     width: fit-content;
     max-width: 46rem;
     margin: 1.25rem 0 0;
     padding: 1rem 1.2rem;
     border: 1px solid color-mix(in srgb, var(--site-accent-color, #dfc9aa) 55%, transparent);
     border-radius: 20px;
-    color: var(--site-text-color, #5d4a36);
     background: color-mix(
       in srgb,
       var(--site-base-color, #fffaf2) 72%,
       var(--site-accent-color, #dfc9aa) 28%
     );
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.12);
+  }
+
+  .hero-intro {
+    margin: 0;
+    font-style: normal;
+    color: var(--site-text-color, #5d4a36);
     font-size: clamp(1.05rem, 2.5vw, 1.2rem);
     line-height: 1.65;
     white-space: pre-line;
@@ -315,13 +323,16 @@
 
   .hero-signature {
     font-style: normal;
-    max-width: 46rem;
-    margin: 0.85rem 0 0 auto;
+    margin: 0.85rem 0 0;
     text-align: right;
     color: color-mix(in srgb, var(--site-text-color, #5d4a36) 72%, transparent);
     font-size: clamp(1rem, 2.2vw, 1.1rem);
     line-height: 1.5;
     white-space: pre-line;
+  }
+
+  .hero-intro-card:not(:has(.hero-intro)) .hero-signature {
+    margin-top: 0;
   }
 
   .hero-banner {

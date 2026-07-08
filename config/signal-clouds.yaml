@@ -1,23 +1,32 @@
 signal_clouds:
-  - id: motivo-visita
+  - id: feeling
     enabled: true
-    question: Cosa ti porta al parco?
-    hint: Una sola risposta — puoi cambiare idea in qualsiasi momento.
+    question: "This creation feels..."
+    hint: "Choose the word that fits best."
     options:
-      - id: famiglia
-        label: Giornata in famiglia
-      - id: scuola
-        label: Gita scolastica
-      - id: appassionato
-        label: Sono un appassionato di fauna
-  - id: impressione
+      - id: quiet
+        label: "quiet"
+      - id: playful
+        label: "playful"
+      - id: mysterious
+        label: "mysterious"
+      - id: delicate
+        label: "delicate"
+      - id: bold
+        label: "bold"
+
+  - id: imagined_place
     enabled: true
-    question: Che impressione ti fa questo animale?
-    hint: Scegli l'opzione che ti rappresenta meglio adesso.
+    question: "I would imagine it..."
+    hint: "Choose one possible place or role."
     options:
-      - id: delicata
-        label: Delicata e silenziosa
-      - id: vivace
-        label: Vivace e curiosa
-      - id: maestosa
-        label: Maestosa, da osservare con calma
+      - id: at_home
+        label: "at home"
+      - id: as_gift
+        label: "as a gift"
+      - id: on_a_shelf
+        label: "on a shelf"
+      - id: in_a_studio
+        label: "in a studio"
+      - id: as_collection_piece
+        label: "as a collection piece"

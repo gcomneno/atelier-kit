@@ -1,0 +1,91 @@
+import { resolveAbsoluteImageUrl, resolveAbsoluteUrl } from '$lib/site-meta.js';
+
+/**
+ * @param {{ excerpt?: string, body: string }} post
+ */
+function postDescription(post) {
+  if (post.excerpt) {
+    return post.excerpt;
+  }
+
+  const firstLine = post.body.split('\n').find((line) => line.trim() !== '');
+
+  return firstLine?.trim() ?? '';
+}
+
+/**
+ * @param {string} date
+ */
+function formatDatePublished(date) {
+  const parsed = new Date(`${date}T12:00:00Z`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return date;
+  }
+
+  return parsed.toISOString();
+}
+
+/**
+ * @param {{ id: string, title: string, date: string, excerpt?: string, body: string, image_file?: string }} post
+ * @param {{ name: string, url?: string, og_image?: string }} site
+ * @param {string} origin
+ */
+export function buildBlogPostingJsonLd(post, site, origin) {
+  const pageUrl = resolveAbsoluteUrl(`/news/${post.id}`, origin, site.url);
+  const description = postDescription(post);
+  const imageFile = post.image_file || site.og_image;
+  const image = imageFile ? resolveAbsoluteImageUrl(imageFile, origin, site.url) : '';
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    datePublished: formatDatePublished(post.date),
+    description,
+    url: pageUrl,
+    mainEntityOfPage: pageUrl,
+    publisher: {
+      '@type': 'Organization',
+      name: site.name
+    },
+    ...(image ? { image } : {})
+  };
+}
+
+/**
+ * @param {NonNullable<ReturnType<import('$lib/server/showcase.js').getAboutConfig>>} about
+ * @param {{ name: string, url?: string }} site
+ * @param {string} origin
+ */
+export function buildAboutPageJsonLd(about, site, origin) {
+  const pageUrl = resolveAbsoluteUrl('/about', origin, site.url);
+  const description = about.intro || about.title;
+
+  /** @type {Record<string, unknown>} */
+  const mainEntity = about.portrait
+    ? {
+        '@type': 'Person',
+        name: about.title,
+        description,
+        ...(about.portrait.image_file
+          ? {
+              image: resolveAbsoluteImageUrl(about.portrait.image_file, origin, site.url)
+            }
+          : {})
+      }
+    : {
+        '@type': 'Organization',
+        name: site.name,
+        description
+      };
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: about.title,
+    description,
+    url: pageUrl,
+    mainEntity
+  };
+}

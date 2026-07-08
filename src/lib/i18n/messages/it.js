@@ -95,6 +95,24 @@ export default {
       requiredWhenEnabled: 'Obbligatorio se attivo',
       atLeastOne: 'Scegli almeno uno'
     },
+    editorial: {
+      toolbar: 'Enfasi testo',
+      preview: 'Anteprima',
+      tags: {
+        accent: 'Accento',
+        intro: 'Intro',
+        heading: 'Titolo',
+        muted: 'Tenue'
+      },
+      taglineWrap: 'Virgolette',
+      taglineWrapNone: 'Predefinito tema',
+      taglineWrapEpigraph: 'Epigrafe « »',
+      quoteColor: 'Colore virgolette',
+      quoteColorText: 'Testo',
+      quoteColorAccent: 'Accento',
+      quoteColorHeading: 'Titolo',
+      quoteColorIntro: 'Titolo intro'
+    },
     accessGuide: {
       title: 'Accesso consigliato',
       intro: 'Come usare lo studio in sicurezza e pubblicare le modifiche online.',
@@ -853,6 +871,12 @@ export default {
         title: 'Titolo sito',
         problem: 'Il titolo pubblico contiene ancora la parola "demo".',
         action: 'Apri config/site.yaml e imposta il nome reale che i visitatori devono vedere.'
+      },
+      editorialMarkup: {
+        title: 'Markup editoriale',
+        problem: 'Un campo testo del sito contiene tag Atelier Mark non validi: {detail}',
+        action:
+          'Apri Studio → Identità sito e correggi i tag evidenziati, oppure rimuovi le parentesi { e }.'
       },
       siteNoticeStarter: {
         title: 'Banner avviso sito',

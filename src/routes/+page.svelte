@@ -1,6 +1,8 @@
 <script>
   import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
+  import EditorialText from '$lib/components/EditorialText.svelte';
   import ItemCard from '$lib/components/ItemCard.svelte';
+  import { splitEditorialParagraphs, stripEditorialMarkup } from '$lib/editorial-markup.js';
   import { resolveDocumentTitle, resolveIntroTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
@@ -23,16 +25,18 @@
   const catalogIntro = $derived(data.catalog.intro.trim());
   const showAboutMain = $derived(Boolean(data.main?.about));
   const showNewsMain = $derived((data.main?.newsPosts?.length ?? 0) > 0);
+  const heroIntroParagraphs = $derived(splitEditorialParagraphs(data.site.hero_intro));
   const introTitle = $derived(resolveIntroTitle(data.site));
-  const documentTitle = $derived(resolveDocumentTitle(data.site));
+  const documentTitle = $derived(stripEditorialMarkup(resolveDocumentTitle(data.site)));
+  const metaDescription = $derived(stripEditorialMarkup(data.site.tagline));
 </script>
 
 <svelte:head>
   {#if documentTitle}
     <title>{documentTitle}</title>
   {/if}
-  {#if data.site.tagline}
-    <meta name="description" content={data.site.tagline} />
+  {#if metaDescription}
+    <meta name="description" content={metaDescription} />
   {/if}
 </svelte:head>
 
@@ -42,16 +46,23 @@
     <div class="home-intro">
       <section class="hero hero-head">
         {#if introTitle}
-          <h1>{introTitle}</h1>
+          <EditorialText tag="h1" value={introTitle} />
         {/if}
         {#if data.site.tagline}
-          <p class="tagline hero-epigraph">{data.site.tagline}</p>
+          <EditorialText
+            tag="p"
+            class="tagline hero-epigraph"
+            value={data.site.tagline}
+            display={data.site.tagline_display}
+          />
         {/if}
 
         {#if data.site.hero_intro || data.site.hero_signature}
           <div class="hero-intro-card">
             {#if data.site.hero_intro}
-              <p class="hero-intro">{data.site.hero_intro}</p>
+              {#each heroIntroParagraphs as paragraph (paragraph)}
+                <EditorialText tag="p" class="hero-intro" value={paragraph} />
+              {/each}
             {/if}
             {#if data.site.hero_signature}
               <p class="hero-signature">{data.site.hero_signature}</p>
@@ -319,6 +330,10 @@
     font-size: clamp(1.05rem, 2.5vw, 1.2rem);
     line-height: 1.65;
     white-space: pre-line;
+  }
+
+  .hero-intro-card .hero-intro + .hero-intro {
+    margin-top: 0.85rem;
   }
 
   .hero-signature {

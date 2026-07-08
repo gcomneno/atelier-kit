@@ -1,4 +1,5 @@
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
+import { buildSearchIndex } from '$lib/server/search-index.js';
 import { resolveAbsoluteImageUrl } from '$lib/site-meta.js';
 import { getFooterConfig, getLayoutConfig, getLayoutMenuNav, getSiteConfig, getSocialConfig, isFooterActive } from '$lib/server/showcase.js';
 
@@ -26,6 +27,7 @@ export function load({ url }) {
     socialLinks: social.links,
     footer,
     footerActive: isFooterActive(footer),
-    menuNav
+    menuNav,
+    searchIndex: buildSearchIndex()
   };
 }

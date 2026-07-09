@@ -17,6 +17,7 @@ import {
   writeItemRecord
 } from '$lib/server/studio-io.js';
 import { flattenMetaForEdit } from '$lib/item-meta.js';
+import { getStudioItemCoverFields, syncItemGalleryCover } from '$lib/studio-item-gallery.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 
 function readString(record, key, fallback = '') {
@@ -27,6 +28,7 @@ function readString(record, key, fallback = '') {
 function loadItemForm(id) {
   const item = readItemRecord(id);
   const meta = Array.isArray(item.meta) ? item.meta : [];
+  const coverFields = getStudioItemCoverFields(item);
 
   return {
     id: readString(item, 'id', id),
@@ -34,8 +36,8 @@ function loadItemForm(id) {
     subtitle: readString(item, 'subtitle'),
     status: readString(item, 'status'),
     price_mode: readString(item, 'price_mode', 'hidden'),
-    image_file: readString(item, 'image_file'),
-    image_alt: readString(item, 'image_alt'),
+    image_file: coverFields.image_file,
+    image_alt: coverFields.image_alt,
     description: readString(item, 'description'),
     notice: readString(item, 'notice'),
     metaRows: flattenMetaForEdit(meta)
@@ -94,6 +96,7 @@ export const actions = {
         imageFile = await saveItemImageUpload(params.id, upload, locale);
       }
 
+      const imageAlt = optionalField(formData.get('image_alt'));
       const item = {
         id: readString(original, 'id', params.id),
         title: requiredField(formData.get('title'), t('fields.itemTitle'), locale),
@@ -101,7 +104,8 @@ export const actions = {
         status: optionalField(formData.get('status')),
         price_mode: optionalField(formData.get('price_mode'), 'hidden'),
         image_file: imageFile,
-        image_alt: optionalField(formData.get('image_alt')),
+        image_alt: imageAlt,
+        ...syncItemGalleryCover(original, imageFile, imageAlt),
         description: requiredField(formData.get('description'), t('fields.description'), locale),
         notice: optionalField(formData.get('notice')),
         meta: parseItemMetaFromForm(formData, locale)

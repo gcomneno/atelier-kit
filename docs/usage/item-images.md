@@ -66,4 +66,6 @@ Catalog cards intentionally keep using only the cover image.
 
 The Studio item editor still manages the single cover image fields for now: `image_file`, `image_alt`, and the existing single upload control.
 
-Gallery editing from Studio, including upload, reorder, and remove controls, is future work. For now, edit `images` manually in the YAML file.
+When an item already has `images`, Studio preserves the gallery on save and syncs the effective gallery cover entry with the edited cover path and alt text.
+
+Gallery editing from Studio, including add, upload, reorder, and remove controls, is future work. For now, edit the full `images` list manually in the YAML file.

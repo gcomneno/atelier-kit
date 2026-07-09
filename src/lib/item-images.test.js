@@ -94,6 +94,6 @@ test('getItemCoverImage falls back to first gallery image when no cover role exi
 
   assert.deepEqual(cover, {
     file: '/images/items/first.jpg',
-    alt: ''
+    alt: 'First view'
   });
 });

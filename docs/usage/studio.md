@@ -211,4 +211,6 @@ See [`deploy-vercel.md`](deploy-vercel.md) and [`../product/service-package.md`]
 
 The item editor currently manages the legacy cover image fields: `image_file`, `image_alt`, and the single item upload control.
 
-Multi-image item galleries are supported in YAML through `images`, but Studio upload, reorder, and remove controls are not implemented yet. Edit galleries manually in `content/items/*.yaml` and run `npm run content:validate`.
+Multi-image item galleries are supported in YAML through `images`. When an existing item has `images`, Studio preserves the gallery on save and syncs the effective cover entry with the edited cover path and alt text.
+
+Studio add, upload, reorder, and remove controls for gallery entries are not implemented yet. Edit galleries manually in `content/items/*.yaml` and run `npm run content:validate`.

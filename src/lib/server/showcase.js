@@ -324,6 +324,7 @@ export function getSiteConfig() {
     hero_intro: optionalString(site, 'hero_intro'),
     hero_signature: optionalString(site, 'hero_signature'),
     footer_note: optionalString(site, 'footer_note'),
+    notice: optionalString(site, 'notice'),
     url: optionalString(site, 'url'),
     og_image: optionalString(site, 'og_image'),
     appearance: resolveSiteAppearance(isRecord(site.appearance) ? site.appearance : undefined),

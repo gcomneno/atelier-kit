@@ -91,6 +91,7 @@
   .image-wrap {
     display: block;
     flex: 0 0 auto;
+    aspect-ratio: 2 / 3;
     overflow: hidden;
     line-height: 0;
     background: color-mix(in srgb, var(--site-base-color, #f8f0e4) 88%, white);
@@ -99,7 +100,8 @@
   img {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
   }
 
   .body {

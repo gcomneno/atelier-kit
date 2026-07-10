@@ -48,7 +48,7 @@ npm run site:wizard -- --yes \
   --language it \
   --email studio@example.com \
   --first-item-title "Anello Onda" \
-  --collection-title "Entità disponibili"
+  --collection-title "Oggetti disponibili"
 ```
 
 **Option B — Scaffold only:**

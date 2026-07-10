@@ -37,7 +37,7 @@ Esegui **da dentro** `atelier-kit`. Il wizard:
 
 - copia il kit nella cartella cliente;
 - applica titolo, tagline, lingua, email;
-- rinomina titolo della prima entità e della prima collezione;
+- rinomina titolo del primo oggetto e della prima collezione;
 - lancia `content:validate` (non fa `npm install`).
 
 ```bash
@@ -115,7 +115,7 @@ static/images/items/pippa.jpg
 …
 ```
 
-Poi in studio → **Entità** → campo immagine, es. `/images/items/simba.jpg`.
+Poi in studio → **Oggetti** → campo immagine, es. `/images/items/simba.jpg`.
 
 ---
 
@@ -151,10 +151,10 @@ cd ~/Progetti/atelier-kit/desktop && npm run tauri dev
 | **Contatti** | Email e WhatsApp reali dello zoo |
 | **Footer** | Copyright, riga legale, link privacy/cookie |
 | **Segnali** | Es. tipo visita (famiglia/scuola), quando, cosa interessa (visita guidata, laboratorio…) |
-| **Entità** | Testo, meta (habitat, dieta, curiosità), status (`in mostra`), foto per ogni animale |
+| **Oggetti** | Testo, meta (habitat, dieta, curiosità), status (`in mostra`), foto per ogni animale |
 | **Collezioni** | Crea aree: Savana africana, Mondo polare, Fattoria didattica, Bosco… **e assegna gli animali** |
 
-> `item:new` crea le entità ma **non** le mette nelle collezioni: le collezioni vanno configurate in studio.
+> `item:new` crea gli oggetti ma **non** li mette nelle collezioni: le collezioni vanno configurate in studio.
 
 Salva ogni sezione e usa **Anteprima** per controllare.
 
@@ -233,7 +233,7 @@ npm run publish -- --deploy
 
 Messaggio tipo:
 
-> Il sito è online. Per aggiornare un animale o un testo: apri **Atelier Desktop**, scegli la cartella del parco, clicca **Open studio**. Per foto nuove, inviale all’operatore o caricale in **Entità**.
+> Il sito è online. Per aggiornare un animale o un testo: apri **Atelier Desktop**, scegli la cartella del parco, clicca **Open studio**. Per foto nuove, inviale all’operatore o caricale in **Oggetti**.
 
 Consegnare:
 

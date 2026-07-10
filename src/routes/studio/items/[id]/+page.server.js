@@ -17,7 +17,12 @@ import {
   writeItemRecord
 } from '$lib/server/studio-io.js';
 import { flattenMetaForEdit } from '$lib/item-meta.js';
-import { getStudioItemCoverFields, syncItemGalleryCover } from '$lib/studio-item-gallery.js';
+import {
+  getStudioItemCoverFields,
+  getStudioItemGalleryRows,
+  parseStudioItemGalleryFromForm,
+  syncItemGalleryCover
+} from '$lib/studio-item-gallery.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 
 function readString(record, key, fallback = '') {
@@ -38,6 +43,7 @@ function loadItemForm(id) {
     price_mode: readString(item, 'price_mode', 'hidden'),
     image_file: coverFields.image_file,
     image_alt: coverFields.image_alt,
+    galleryRows: getStudioItemGalleryRows(item),
     description: readString(item, 'description'),
     notice: readString(item, 'notice'),
     metaRows: flattenMetaForEdit(meta)
@@ -90,13 +96,20 @@ export const actions = {
       const original = readItemRecord(params.id);
       const formData = await request.formData();
       const upload = formData.get('image_upload');
-      let imageFile = requiredField(formData.get('image_file'), t('studio.itemsEdit.imagePath'), locale);
+      let galleryImages = parseStudioItemGalleryFromForm(formData, locale);
+      let coverFields = getStudioItemCoverFields({ images: galleryImages });
+      let imageFile = coverFields.image_file;
+      let imageAlt = coverFields.image_alt;
 
       if (upload instanceof File && upload.size > 0) {
         imageFile = await saveItemImageUpload(params.id, upload, locale);
+        galleryImages =
+          syncItemGalleryCover({ images: galleryImages }, imageFile, imageAlt).images ?? galleryImages;
+        coverFields = getStudioItemCoverFields({ images: galleryImages });
+        imageFile = coverFields.image_file;
+        imageAlt = coverFields.image_alt;
       }
 
-      const imageAlt = optionalField(formData.get('image_alt'));
       const item = {
         id: readString(original, 'id', params.id),
         title: requiredField(formData.get('title'), t('fields.itemTitle'), locale),
@@ -105,7 +118,7 @@ export const actions = {
         price_mode: optionalField(formData.get('price_mode'), 'hidden'),
         image_file: imageFile,
         image_alt: imageAlt,
-        ...syncItemGalleryCover(original, imageFile, imageAlt),
+        images: galleryImages,
         description: requiredField(formData.get('description'), t('fields.description'), locale),
         notice: optionalField(formData.get('notice')),
         meta: parseItemMetaFromForm(formData, locale)

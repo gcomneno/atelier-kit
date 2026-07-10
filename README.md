@@ -25,7 +25,7 @@ Opens `http://127.0.0.1:5173/studio` on localhost only. Studio writes directly t
 **What you can edit in Studio**
 
 - Site identity, appearance, layout, hero, footer, contact and social links
-- Catalog items (with photo upload), collections, news and Signal Clouds
+- Catalog items (with photo upload), collections, news, Signal Clouds and public FAQ answers
 - About page and publish readiness (Content Doctor + **Put site online**)
 
 **Production stays read-only** — `/studio` is disabled on Vercel. Clients use **Atelier Desktop** (Tauri) for the same UI without exposing authoring on the live URL.
@@ -46,6 +46,8 @@ Opens `http://127.0.0.1:5173/studio` on localhost only. Studio writes directly t
 - Single-choice Signal Cloud answers.
 - Browser-local Signal Cloud selections.
 - Copyable Visitor Brief generated from Signal Cloud selections.
+- Public `/faq` page projected from selected Signal Cloud records.
+- Conditional FAQ navigation and schema.org `FAQPage` JSON-LD.
 - Placeholder image for quick setup.
 - Content validation script.
 - Content Doctor pre-publish warnings.
@@ -58,7 +60,7 @@ Opens `http://127.0.0.1:5173/studio` on localhost only. Studio writes directly t
 - Configurable site appearance from studio.
 - Item meta presets for common creative showcase types.
 - **Micro-CMS discovery:** XML sitemap (`/sitemap.xml`), `robots.txt`, RSS feed (`/news/rss.xml`), client-side search on items and news.
-- **Structured data:** JSON-LD on news and about pages.
+- **Structured data:** JSON-LD on news, about and eligible FAQ pages.
 - **Atelier Desktop** (Tauri) for client authoring without exposing `/studio` on production (ADR 0007).
 - **Put site online** — one-click publish from `/studio/readiness` without terminal commands for the client.
 
@@ -195,6 +197,18 @@ Rules:
 - multiple-choice clouds are intentionally out of scope;
 - no public counters are shown;
 - no personal data is collected.
+
+## Public FAQ
+
+A Signal Cloud can optionally publish an official editorial answer on `/faq`.
+
+The FAQ is configured inside the same record in `config/signal-clouds.yaml`; there is no separate FAQ content file.
+
+A record appears publicly only when the cloud is enabled, `faq.visible` is true, and both the shared question and `faq.answer` are non-empty. Optional `faq.group` and non-negative `faq.order` values control presentation.
+
+When at least one eligible entry exists, Atelier-Kit adds the FAQ link to public navigation and emits schema.org `FAQPage` JSON-LD. Otherwise `/faq` shows an empty state and the navigation link stays hidden.
+
+FAQ publishing is purely editorial: there is no visitor submission endpoint, inbox, moderation queue or stored message.
 
 ## Visitor Brief
 

@@ -151,28 +151,62 @@ config/signal-clouds.yaml
 config/contact.yaml
 ```
 
+Each Signal Cloud can serve two related purposes from the same record:
+
+- a single-choice visitor question on item pages;
+- an optional editorial answer published on `/faq`.
+
+There is no separate `config/faq.yaml`. The Signal Cloud remains the single source of truth.
+
 Example:
 
 ```yaml
 signal_clouds:
-  - id: mood
-    question: "What does this item suggest?"
+  - id: shipping
+    enabled: true
+    question: "Do you ship throughout Italy?"
+    hint: "Choose the option that best matches your need."
+
     options:
-      - id: calm
-        label: "Calm"
-      - id: playful
-        label: "Playful"
-      - id: ceremonial
-        label: "Ceremonial"
+      - id: italy
+        label: "Delivery within Italy"
+
+    faq:
+      visible: true
+      answer: >
+        Yes, we ship throughout Italy.
+      order: 10
+      group: "Shipping"
 ```
 
-Rules:
+Signal Cloud rules:
 
 - each cloud represents one question;
 - each option needs a stable `id`;
 - each cloud is single-choice;
 - browser-local selections are keyed by item id, cloud id and option id;
-- no server-side storage is used in Atelier-Kit 1.0.
+- no server-side visitor submission or message storage is used.
+
+Public FAQ rules:
+
+- `question` is reused as the public FAQ question;
+- `faq.answer` is the official editorial answer;
+- `faq.visible: true` opts the record into `/faq`;
+- the cloud itself must also have `enabled: true`;
+- both `question` and `faq.answer` must contain non-empty text;
+- `faq.group` is an optional public section heading;
+- `faq.order` is an optional non-negative integer; lower values appear first;
+- entries without `order`, or with the same order, keep their source-file order;
+- `group` and `order` are presentation metadata and are not added to JSON-LD.
+
+The `/faq` route always exists:
+
+- when eligible entries exist, it renders accessible `<details>` / `<summary>` blocks;
+- the public navigation adds the FAQ link only when at least one entry is eligible;
+- when no entry is eligible, `/faq` shows an empty state and emits no `FAQPage` JSON-LD;
+- when entries exist, Atelier-Kit emits schema.org `FAQPage` JSON-LD automatically.
+
+Legacy Signal Clouds without a `faq` object remain valid.
 
 ## Item configuration
 

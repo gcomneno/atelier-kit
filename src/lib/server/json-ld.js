@@ -1,5 +1,6 @@
 import { resolveAbsoluteImageUrl, resolveAbsoluteUrl } from '$lib/site-meta.js';
 import { resolveDocumentTitle } from '$lib/site-branding.js';
+import { buildFaqPageSchema } from '$lib/signal-cloud-faq.js';
 
 /**
  * @param {{ excerpt?: string, body: string }} post
@@ -95,4 +96,15 @@ export function buildAboutPageJsonLd(about, site, origin) {
     url: pageUrl,
     mainEntity
   };
+}
+
+/**
+ * @param {Array<{ question: string, answer: string }>} entries
+ * @param {{ url?: string }} site
+ * @param {string} origin
+ */
+export function buildFaqPageJsonLd(entries, site, origin) {
+  const pageUrl = resolveAbsoluteUrl('/faq', origin, site.url);
+
+  return buildFaqPageSchema(entries, pageUrl);
 }

@@ -712,6 +712,16 @@ export default {
       question: 'Question',
       hint: 'Hint',
       answer: 'Answer · {id}',
+      faqTitle: 'Public FAQ',
+      faqQuestionHint:
+        'The public FAQ question reuses the Signal Cloud question above. It is not duplicated.',
+      faqVisible: 'Show on the public FAQ page',
+      faqAnswer: 'Public answer',
+      faqAnswerHint: 'Required when this FAQ is visible.',
+      faqGroup: 'Group',
+      faqGroupHint: 'Optional heading used to group related FAQ entries.',
+      faqOrder: 'Order',
+      faqOrderHint: 'Optional whole number. Lower numbers appear first.',
       save: 'Save Signal Clouds',
       enabled: 'Show on item pages',
       remove: 'Remove signal',
@@ -1070,6 +1080,17 @@ export default {
     cloudMustBeObject: '{source}: every cloud must be an object.',
     cloudOptionsRequired: '{source}:{cloudId}: options must be a non-empty array.',
     optionMustBeObject: '{source}:{cloudId}: every option must be an object.',
+    cloudFaqMustBeObject: '{source}:{cloudId}: faq must be an object when provided.',
+    cloudFaqVisibleMustBeBoolean:
+      '{source}:{cloudId}: faq.visible must be true or false when provided.',
+    cloudFaqAnswerRequired:
+      '{source}:{cloudId}: faq.answer is required and must not be empty when faq.visible is true.',
+    cloudFaqAnswerMustBeString:
+      '{source}:{cloudId}: faq.answer must be a string when provided.',
+    cloudFaqGroupMustBeString:
+      '{source}:{cloudId}: faq.group must be a string when provided.',
+    cloudFaqOrderMustBeInteger:
+      '{source}:{cloudId}: faq.order must be a non-negative whole number when provided.',
     missingAboutObject: '{source}: missing "about" object.',
     sectionMustBeObject: '{sectionSource}: section must be an object.',
     missingContactObject: '{source}: missing "contact" object.',
@@ -1187,6 +1208,15 @@ export default {
       pageTitle: 'About',
       metaDescription: 'Story and background from {siteName}.',
       eyebrow: 'About'
+    },
+    faq: {
+      navLabel: 'FAQ',
+      pageTitle: 'Frequently asked questions',
+      metaDescription: 'Answers to common questions from {siteName}.',
+      eyebrow: 'FAQ',
+      title: 'Frequently asked questions',
+      intro: 'Practical answers to common questions.',
+      empty: 'No frequently asked questions are available yet.'
     },
     collections: {
       pageTitle: 'Collections',

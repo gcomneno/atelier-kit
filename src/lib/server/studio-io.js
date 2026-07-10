@@ -11,6 +11,7 @@ import {
   titleFromItemId
 } from '$lib/item-presets.js';
 import { buildItemGalleryImageFilename } from '$lib/studio-item-gallery.js';
+export { applySignalCloudsFromForm } from '$lib/studio-signal-clouds.js';
 import {
   collectMetaSuggestions,
   flattenMetaForEdit,
@@ -1165,35 +1166,6 @@ export function readSignalCloudRecords(locale = 'en') {
   }
 
   return clouds;
-}
-
-/**
- * @param {FormData} formData
- */
-export function applySignalCloudsFromForm(originalClouds, formData) {
-  if (!Array.isArray(originalClouds)) {
-    return [];
-  }
-
-  return originalClouds.map((cloud, cloudIndex) => {
-    const updated = {
-      id: cloud.id,
-      enabled: checkboxEnabled(formData.get(`cloud_${cloudIndex}_enabled`)),
-      question: optionalField(formData.get(`cloud_${cloudIndex}_question`), cloud.question),
-      hint: optionalField(formData.get(`cloud_${cloudIndex}_hint`), cloud.hint ?? ''),
-      options: Array.isArray(cloud.options)
-        ? cloud.options.map((option, optionIndex) => ({
-            id: option.id,
-            label: optionalField(
-              formData.get(`cloud_${cloudIndex}_option_${optionIndex}_label`),
-              option.label
-            )
-          }))
-        : []
-    };
-
-    return updated;
-  });
 }
 
 /**

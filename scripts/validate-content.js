@@ -13,6 +13,7 @@ import {
 import { isReadingFormat } from '../src/lib/reading-formats.js';
 import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
 import { isFontPreset } from '../src/lib/site-typography.js';
+import { getSignalCloudFaqIssues } from '../src/lib/signal-cloud-faq-validation.js';
 
 const ROOT = process.cwd();
 const t = createTranslator(loadOperatorLocale());
@@ -403,6 +404,13 @@ function validateSignalClouds() {
     clouds.map((cloud) => cloud?.id).filter(Boolean),
     'signal cloud id'
   );
+
+  for (const issue of getSignalCloudFaqIssues(clouds)) {
+    failKey(issue.key, {
+      source,
+      cloudId: issue.cloudId
+    });
+  }
 
   for (const cloud of clouds) {
     if (!cloud || typeof cloud !== 'object' || Array.isArray(cloud)) {

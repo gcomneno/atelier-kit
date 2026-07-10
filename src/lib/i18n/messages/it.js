@@ -719,6 +719,16 @@ export default {
       question: 'Domanda',
       hint: 'Suggerimento',
       answer: 'Risposta · {id}',
+      faqTitle: 'FAQ pubblica',
+      faqQuestionHint:
+        'La domanda pubblica riutilizza la domanda della Signal Cloud qui sopra. Non viene duplicata.',
+      faqVisible: 'Mostra nella pagina FAQ pubblica',
+      faqAnswer: 'Risposta pubblica',
+      faqAnswerHint: 'Obbligatoria quando questa FAQ è visibile.',
+      faqGroup: 'Gruppo',
+      faqGroupHint: 'Titolo facoltativo per raggruppare FAQ correlate.',
+      faqOrder: 'Ordine',
+      faqOrderHint: 'Numero intero facoltativo. I numeri più bassi compaiono prima.',
       save: 'Salva Signal Cloud',
       enabled: 'Mostra sulle pagine degli oggetti',
       remove: 'Rimuovi signal',
@@ -1077,6 +1087,18 @@ export default {
     cloudMustBeObject: '{source}: ogni cloud deve essere un oggetto.',
     cloudOptionsRequired: '{source}:{cloudId}: options deve essere un array non vuoto.',
     optionMustBeObject: '{source}:{cloudId}: ogni option deve essere un oggetto.',
+    cloudFaqMustBeObject:
+      '{source}:{cloudId}: faq deve essere un oggetto quando presente.',
+    cloudFaqVisibleMustBeBoolean:
+      '{source}:{cloudId}: faq.visible deve essere true o false quando presente.',
+    cloudFaqAnswerRequired:
+      '{source}:{cloudId}: faq.answer è obbligatoria e non può essere vuota quando faq.visible è true.',
+    cloudFaqAnswerMustBeString:
+      '{source}:{cloudId}: faq.answer deve essere una stringa quando presente.',
+    cloudFaqGroupMustBeString:
+      '{source}:{cloudId}: faq.group deve essere una stringa quando presente.',
+    cloudFaqOrderMustBeInteger:
+      '{source}:{cloudId}: faq.order deve essere un numero intero non negativo quando presente.',
     missingAboutObject: '{source}: manca l’oggetto "about".',
     sectionMustBeObject: '{sectionSource}: la sezione deve essere un oggetto.',
     missingContactObject: '{source}: manca l’oggetto "contact".',
@@ -1196,6 +1218,15 @@ export default {
       pageTitle: 'Chi siamo',
       metaDescription: 'Storia e background di {siteName}.',
       eyebrow: 'Chi siamo'
+    },
+    faq: {
+      navLabel: 'FAQ',
+      pageTitle: 'Domande frequenti',
+      metaDescription: 'Risposte alle domande frequenti di {siteName}.',
+      eyebrow: 'FAQ',
+      title: 'Domande frequenti',
+      intro: 'Risposte pratiche alle domande più comuni.',
+      empty: 'Non sono ancora disponibili domande frequenti.'
     },
     collections: {
       pageTitle: 'Collezioni',

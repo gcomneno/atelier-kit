@@ -15,12 +15,14 @@
   const siteForm = $derived(form?.siteForm ?? data.siteForm);
   let isDirty = $state(false);
   let removeHeaderLogo = $state(false);
+  let removeFavicon = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};
 
   $effect(() => {
     siteForm;
     removeHeaderLogo = false;
+    removeFavicon = false;
     dirtyControl.resetBaseline?.();
   });
 </script>
@@ -93,6 +95,29 @@
 
     <label>
       <StudioFieldLabel
+        label={t('studio.site.identity.favicon')}
+        optional
+        hint={t('studio.site.identity.faviconHint')}
+      />
+      {#if siteForm.favicon}
+        <span class="hint current-logo">
+          {t('studio.site.identity.currentFavicon', { path: siteForm.favicon })}
+        </span>
+        <img class="favicon-preview" src={siteForm.favicon} alt="" aria-hidden="true" />
+      {/if}
+      <input type="file" name="favicon_upload" accept="image/jpeg,image/png,image/webp" disabled={removeFavicon} />
+      <input type="hidden" name="favicon" value={removeFavicon ? '' : siteForm.favicon} />
+    </label>
+
+    {#if siteForm.favicon}
+      <label class="checkbox">
+        <input type="checkbox" name="remove_favicon" bind:checked={removeFavicon} />
+        {t('studio.site.identity.removeFavicon')}
+      </label>
+    {/if}
+
+    <label>
+      <StudioFieldLabel
         label={t('studio.site.identity.tagline')}
         optional
         hint={t('studio.site.identity.taglineHint')}
@@ -150,6 +175,14 @@
     display: block;
     max-width: min(16rem, 100%);
     max-height: 4rem;
+    margin: 0 0 0.75rem;
+    object-fit: contain;
+  }
+
+  .favicon-preview {
+    display: block;
+    width: 2.5rem;
+    height: 2.5rem;
     margin: 0 0 0.75rem;
     object-fit: contain;
   }

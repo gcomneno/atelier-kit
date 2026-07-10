@@ -213,6 +213,18 @@ function validateSite() {
     validateOgImage(site.og_image, source);
   }
 
+  if ('favicon' in site && site.favicon !== undefined && site.favicon !== '') {
+    if (typeof site.favicon !== 'string' || !site.favicon.startsWith('/images/site/')) {
+      failKey('siteFaviconInvalid', { source });
+    } else {
+      const staticFaviconPath = path.join(ROOT, 'static', site.favicon.slice(1));
+
+      if (!existsSync(staticFaviconPath)) {
+        failKey('imageFileMissing', { source, imageFile: site.favicon });
+      }
+    }
+  }
+
   if (site.hero_banner && typeof site.hero_banner === 'object' && !Array.isArray(site.hero_banner)) {
     const banner = site.hero_banner;
     const bannerSource = `${source}:hero_banner`;

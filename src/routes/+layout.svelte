@@ -13,6 +13,21 @@
 
   setVisitorI18nContext(() => data.locale);
 
+  /**
+   * @param {string} href
+   */
+  function faviconTypeFromHref(href) {
+    const lower = href.toLowerCase();
+
+    if (lower.endsWith('.svg')) return 'image/svg+xml';
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.webp')) return 'image/webp';
+    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+    if (lower.endsWith('.ico')) return 'image/x-icon';
+
+    return undefined;
+  }
+
   const appearanceStyle = $derived(
     Object.entries(appearanceCssVariables(data.appearance))
       .map(([key, value]) => `${key}: ${value}`)
@@ -23,12 +38,19 @@
   const publicFontHref = $derived(
     isStudio ? null : fontStylesheetHref(data.appearance?.font_preset ?? 'inter')
   );
+  const faviconHref = $derived(data.site?.favicon || '/favicon.svg');
+  const faviconType = $derived(faviconTypeFromHref(faviconHref));
   const appearanceRootStyle = $derived(
     `:root, body { ${appearanceStyle}; color-scheme: var(--site-color-scheme, light); background-color: var(--site-base-color, #f8f0e4); color: var(--site-text-color, #2f281f); font-family: var(--site-font-family, ui-sans-serif, system-ui, sans-serif); }`
   );
 </script>
 
 <svelte:head>
+  <link rel="icon" href={faviconHref} type={faviconType} />
+  {#if faviconHref === '/favicon.svg'}
+    <link rel="alternate icon" href="/favicon.ico" />
+  {/if}
+
   {#if isStudio}
     {@html STUDIO_HEAD_STYLE}
   {:else}

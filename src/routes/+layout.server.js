@@ -25,6 +25,7 @@ export function load({ url }) {
       intro_title: site.intro_title,
       header_logo: site.header_logo,
       header_logo_alt: site.header_logo_alt,
+      favicon: site.favicon,
       tagline: site.tagline
     },
     seo: {

@@ -54,7 +54,7 @@ Hosted studio with production auth (Path A) is **out of scope** for the current 
 
 The studio edits:
 
-- site identity (`config/site.yaml`)
+- site identity, header logo and favicon (`config/site.yaml`, `static/images/site/`)
 - site appearance — background and text colors (`config/site.yaml` → `appearance`)
 - contact actions (`config/contact.yaml`)
 - about page (`config/about.yaml`)
@@ -126,6 +126,17 @@ site:
 Presets: `warm` (default), `neutral`, `dark`, or `custom` with explicit hex colors.
 
 Optional **background image** upload (JPG/PNG/WebP) saved to `static/images/site/background.*`.
+
+## Site favicon
+
+Open **Site → Identity** to upload a custom browser tab icon. Studio accepts JPG, PNG and WebP files, saves them under `static/images/site/favicon.*`, and writes the public path to `config/site.yaml`:
+
+```yaml
+site:
+  favicon: /images/site/favicon.png
+```
+
+Remove the custom favicon to fall back to the default Atelier-Kit `/favicon.svg`.
 
 ## Atelier Mark
 

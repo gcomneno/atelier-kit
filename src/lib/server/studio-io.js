@@ -686,6 +686,32 @@ export async function saveHeaderLogoUpload(file, locale = 'en') {
   return `/images/site/${filename}`;
 }
 
+
+/**
+ * @param {File} file
+ * @param {string} [locale]
+ */
+export async function saveSiteFaviconUpload(file, locale = 'en') {
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error(translate('errors.imageRequired', locale));
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error(translate('errors.imageSize', locale));
+  }
+
+  const extension = imageExtensionFromName(file.name, locale);
+  const siteImagesDir = path.join(ROOT, 'static/images/site');
+  mkdirSync(siteImagesDir, { recursive: true });
+
+  const filename = `favicon.${extension}`;
+  const absolutePath = path.join(siteImagesDir, filename);
+  const buffer = Buffer.from(await file.arrayBuffer());
+  writeFileSync(absolutePath, buffer);
+
+  return `/images/site/${filename}`;
+}
+
 export function defaultItemImagePath(id) {
   assertContentId(id, 'Item id');
   return `/images/items/${id}.jpg`;

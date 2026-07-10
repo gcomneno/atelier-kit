@@ -141,7 +141,7 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 22rem));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
     justify-content: center;
     gap: 1.2rem;
   }

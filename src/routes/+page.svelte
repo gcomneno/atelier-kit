@@ -474,10 +474,17 @@
   .collection-grid,
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 22rem));
     justify-content: center;
     align-items: start;
     gap: 1.2rem;
+  }
+
+  .collection-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 22rem));
   }
 
   .collection-card {

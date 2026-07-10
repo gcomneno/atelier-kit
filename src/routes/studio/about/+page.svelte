@@ -34,6 +34,7 @@
   <form
     method="POST"
     action="?/saveAbout"
+    enctype="multipart/form-data"
     use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
     use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
     class="studio-form"

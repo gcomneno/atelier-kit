@@ -51,7 +51,6 @@ export function studioFormDirty(node, params) {
       params = next;
       params.dirtyControl.resetBaseline = captureBaseline;
       params.dirtyControl.checkDirty = checkDirty;
-      queueMicrotask(captureBaseline);
     },
     destroy() {
       node.removeEventListener('input', checkDirty);

@@ -670,7 +670,7 @@ export default {
       sectionLegend: 'Sezione opzionale',
       sectionHeading: 'Titolo sezione',
       sectionBody: 'Testo sezione',
-      save: 'Salva pagina Chi siamo'
+      save: 'Salva pagina'
     },
     catalog: {
       pageTitle: 'Studio · Catalogo',

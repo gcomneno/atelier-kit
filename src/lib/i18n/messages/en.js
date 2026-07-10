@@ -594,6 +594,9 @@ export default {
       galleryMoveUp: 'Move image {position} up',
       galleryMoveDown: 'Move image {position} down',
       galleryEmpty: 'No gallery images yet. Add one with the button below.',
+      galleryUpload: 'Append gallery image',
+      galleryUploadHint:
+        'Upload one JPG, PNG or WebP at a time. Saved under static/images/items/ without replacing existing images.',
       titleField: 'Item title',
       subtitle: 'Subtitle',
       status: 'Status',

@@ -1,6 +1,8 @@
 import { getItemCoverImage } from './item-images.js';
 import { translate } from './i18n/index.js';
 
+const ITEM_GALLERY_IMAGE_PLACEHOLDER = '/images/items/placeholder.svg';
+
 /**
  * @param {unknown} value
  * @returns {value is Record<string, unknown>}
@@ -137,6 +139,70 @@ export function parseStudioItemGalleryFromForm(formData, locale = 'en') {
   }
 
   return images;
+}
+
+/**
+ * Appends one uploaded image to the item gallery.
+ *
+ * Legacy image_file/image_alt values are promoted to the first cover entry before
+ * appending the newly uploaded image.
+ *
+ * @param {unknown} original
+ * @param {string} imageFile
+ * @param {string} imageAlt
+ * @param {string} imageRole
+ * @returns {{ images: unknown[] }}
+ */
+export function appendItemGalleryImage(original, imageFile, imageAlt = '', imageRole = '') {
+  const normalizedRole = cleanString(imageRole);
+  const newEntry = {
+    file: cleanString(imageFile),
+    alt: cleanString(imageAlt),
+    ...(normalizedRole ? { role: normalizedRole } : {})
+  };
+
+  if (isRecord(original) && Array.isArray(original.images)) {
+    return { images: [...original.images, newEntry] };
+  }
+
+  const coverImage = getItemCoverImage(original);
+  const seedGallery =
+    coverImage.file && coverImage.file !== ITEM_GALLERY_IMAGE_PLACEHOLDER
+      ? [
+          {
+            file: coverImage.file,
+            alt: coverImage.alt,
+            role: coverImage.role || 'cover'
+          }
+        ]
+      : [];
+
+  return { images: [...seedGallery, newEntry] };
+}
+
+/**
+ * Builds the first available filename for a gallery upload.
+ *
+ * @param {string} id
+ * @param {string} extension
+ * @param {(filename: string) => boolean} exists
+ * @returns {string}
+ */
+export function buildItemGalleryImageFilename(id, extension, exists) {
+  const normalizedExtension = extension === 'jpeg' ? 'jpg' : extension;
+  const base = `${id}-gallery`;
+  let index = 0;
+
+  while (true) {
+    const suffix = index === 0 ? '' : `-${index + 1}`;
+    const filename = `${base}${suffix}.${normalizedExtension}`;
+
+    if (!exists(filename)) {
+      return filename;
+    }
+
+    index += 1;
+  }
 }
 
 /**

@@ -4,6 +4,7 @@ import { error, fail, isRedirect, redirect } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
 import {
   assertContentId,
+  deleteItemImageUpload,
   deleteItemRecord,
   itemRecordExists,
   listItemMetaSuggestions,
@@ -12,12 +13,14 @@ import {
   readItemRecord,
   requiredField,
   runStructuralValidation,
+  saveItemGalleryImageUpload,
   saveItemImageUpload,
   validationMessage,
   writeItemRecord
 } from '$lib/server/studio-io.js';
 import { flattenMetaForEdit } from '$lib/item-meta.js';
 import {
+  appendItemGalleryImage,
   getStudioItemCoverFields,
   getStudioItemGalleryRows,
   parseStudioItemGalleryFromForm,
@@ -96,6 +99,8 @@ export const actions = {
       const original = readItemRecord(params.id);
       const formData = await request.formData();
       const upload = formData.get('image_upload');
+      const galleryUpload = formData.get('gallery_upload');
+      let uploadedGalleryImage = '';
       let galleryImages = parseStudioItemGalleryFromForm(formData, locale);
       let coverFields = getStudioItemCoverFields({ images: galleryImages });
       let imageFile = coverFields.image_file;
@@ -110,21 +115,49 @@ export const actions = {
         imageAlt = coverFields.image_alt;
       }
 
-      const item = {
-        id: readString(original, 'id', params.id),
-        title: requiredField(formData.get('title'), t('fields.itemTitle'), locale),
-        subtitle: optionalField(formData.get('subtitle')),
-        status: optionalField(formData.get('status')),
-        price_mode: optionalField(formData.get('price_mode'), 'hidden'),
-        image_file: imageFile,
-        image_alt: imageAlt,
-        images: galleryImages,
-        description: requiredField(formData.get('description'), t('fields.description'), locale),
-        notice: optionalField(formData.get('notice')),
-        meta: parseItemMetaFromForm(formData, locale)
-      };
+      try {
+        if (galleryUpload instanceof File && galleryUpload.size > 0) {
+          uploadedGalleryImage = await saveItemGalleryImageUpload(
+            params.id,
+            galleryUpload,
+            locale
+          );
 
-      writeItemRecord(params.id, item);
+          galleryImages = appendItemGalleryImage(
+            { images: galleryImages },
+            uploadedGalleryImage,
+            optionalField(formData.get('gallery_upload_alt')),
+            optionalField(formData.get('gallery_upload_role'))
+          ).images;
+
+          coverFields = getStudioItemCoverFields({ images: galleryImages });
+          imageFile = coverFields.image_file;
+          imageAlt = coverFields.image_alt;
+        }
+
+        const item = {
+          id: readString(original, 'id', params.id),
+          title: requiredField(formData.get('title'), t('fields.itemTitle'), locale),
+          subtitle: optionalField(formData.get('subtitle')),
+          status: optionalField(formData.get('status')),
+          price_mode: optionalField(formData.get('price_mode'), 'hidden'),
+          image_file: imageFile,
+          image_alt: imageAlt,
+          images: galleryImages,
+          description: requiredField(formData.get('description'), t('fields.description'), locale),
+          notice: optionalField(formData.get('notice')),
+          meta: parseItemMetaFromForm(formData, locale)
+        };
+
+        writeItemRecord(params.id, item);
+      } catch (writeError) {
+        if (uploadedGalleryImage) {
+          deleteItemImageUpload(uploadedGalleryImage);
+        }
+
+        throw writeError;
+      }
+
       const validation = runStructuralValidation();
 
       return {

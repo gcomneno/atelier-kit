@@ -79,6 +79,71 @@
           </label>
         {/each}
 
+        <fieldset class="faq-fields">
+          <legend>{t('studio.signals.faqTitle')}</legend>
+
+          <p class="field-hint">
+            {t('studio.signals.faqQuestionHint')}
+          </p>
+
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              name={`cloud_${cloudIndex}_faq_visible`}
+              checked={cloud.faq.visible}
+              onchange={(event) => {
+                const answer = event.currentTarget.form?.elements.namedItem(
+                  `cloud_${cloudIndex}_faq_answer`
+                );
+
+                if (answer instanceof HTMLTextAreaElement) {
+                  answer.required = event.currentTarget.checked;
+                }
+              }}
+            />
+            {t('studio.signals.faqVisible')}
+          </label>
+
+          <label>
+            <StudioFieldLabel
+              label={t('studio.signals.faqAnswer')}
+              hint={t('studio.signals.faqAnswerHint')}
+            />
+            <textarea
+              name={`cloud_${cloudIndex}_faq_answer`}
+              rows="4"
+              required={cloud.faq.visible}
+            >{cloud.faq.answer}</textarea>
+          </label>
+
+          <label>
+            <StudioFieldLabel
+              label={t('studio.signals.faqGroup')}
+              optional
+              hint={t('studio.signals.faqGroupHint')}
+            />
+            <input
+              name={`cloud_${cloudIndex}_faq_group`}
+              value={cloud.faq.group}
+            />
+          </label>
+
+          <label>
+            <StudioFieldLabel
+              label={t('studio.signals.faqOrder')}
+              optional
+              hint={t('studio.signals.faqOrderHint')}
+            />
+            <input
+              type="number"
+              min="0"
+              step="1"
+              name={`cloud_${cloudIndex}_faq_order`}
+              value={cloud.faq.order}
+            />
+          </label>
+        </fieldset>
+
         <button
           type="submit"
           class="remove-button"
@@ -119,6 +184,24 @@
 
   .checkbox input {
     width: auto;
+  }
+
+  .faq-fields {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border: 1px solid var(--studio-border);
+    border-radius: 0.75rem;
+  }
+
+  .faq-fields legend {
+    padding: 0 0.35rem;
+  }
+
+  .field-hint {
+    margin: 0;
+    color: var(--studio-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
   }
 
   .remove-button {

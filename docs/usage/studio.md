@@ -62,7 +62,7 @@ The studio edits:
 - items with photo upload (`content/items/*.yaml`, `static/images/items/`)
 - collections (`content/collections/*.yaml`)
 - news posts (`content/news/*.yaml`)
-- Signal Cloud questions and answer labels (`config/signal-clouds.yaml`)
+- Signal Cloud questions, answer labels and optional public FAQ answers (`config/signal-clouds.yaml`)
 - publish readiness via Content Doctor (`/studio/readiness`)
 
 The studio does **not** yet:
@@ -94,9 +94,38 @@ The studio does **not** yet:
 | `/studio/news` | List news posts |
 | `/studio/news/new` | Create a news post |
 | `/studio/news/[id]` | Edit one news post |
-| `/studio/signal-clouds` | Visitor questions and answer labels |
+| `/studio/signal-clouds` | Visitor questions, answer labels and public FAQ projection |
 | `/studio/readiness` | Content Doctor publish review |
 | `/studio/help` | Safe studio access and publishing guidance |
+
+## Signal Clouds and the public FAQ
+
+Open `/studio/signal-clouds` to edit each shared visitor question.
+
+For every Signal Cloud, Studio exposes:
+
+- whether the question is enabled on item pages;
+- the shared question and hint;
+- selectable answer labels;
+- whether the same question is visible on `/faq`;
+- the official public FAQ answer;
+- an optional group heading;
+- an optional non-negative integer order.
+
+The public FAQ does not use a separate content file. Studio writes the nested `faq` object into the same record in `config/signal-clouds.yaml`.
+
+A FAQ entry is published only when:
+
+- the Signal Cloud is enabled;
+- **Show on the public FAQ page** is selected;
+- the shared question is non-empty;
+- the public answer is non-empty.
+
+Studio requires the public answer when FAQ visibility is selected and rejects invalid FAQ data before writing YAML. Structural validation applies the same rules when running `npm run content:validate`.
+
+The FAQ link appears in public navigation only when at least one eligible entry exists. `/faq` itself remains available with an empty state when no FAQ is published. Eligible entries also generate schema.org `FAQPage` JSON-LD automatically.
+
+There is no visitor inbox, submission queue or moderation workflow. FAQ content is entirely editorial.
 
 ## Item photos
 

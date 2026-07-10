@@ -114,9 +114,25 @@ Confirm item vocabulary (`piece` / `pieces`, `work` / `works`, etc.) and visible
 - **Create:** `/studio/news/new` — title, date, excerpt, body
 - **Edit:** update posts for writing-oriented showcases
 
-### 2.8 Signal Clouds (`/studio/signal-clouds`)
+### 2.8 Signal Clouds and public FAQ (`/studio/signal-clouds`)
 
 Localize questions and answer labels for the client’s contact flow.
+
+For questions that also need an official public answer:
+
+1. keep the Signal Cloud enabled;
+2. select **Show on the public FAQ page**;
+3. write the public answer;
+4. optionally set a group and non-negative integer order.
+
+The same Signal Cloud record drives both the visitor question and `/faq`; do not create a separate FAQ file.
+
+Confirm in preview that:
+
+- the FAQ navigation link appears when at least one entry is eligible;
+- questions, answers, groups and ordering are correct;
+- `/faq` shows an empty state when none are published;
+- there is no inbox or moderation queue to explain to the client.
 
 ### 2.9 Publish readiness (`/studio/readiness`)
 
@@ -155,6 +171,8 @@ See [`deploy-vercel.md`](../usage/deploy-vercel.md).
 - [ ] Collections list and detail pages work
 - [ ] About page reads correctly
 - [ ] Signal Clouds + Visitor Brief produce a copyable message
+- [ ] `/faq` shows the intended editorial entries, ordering and groups
+- [ ] FAQ navigation is hidden when no eligible entry exists
 - [ ] Contact email/WhatsApp links use real client details
 - [ ] `/studio` returns 404 on production (expected — see [ADR 0007](../architecture/adr-0007-production-safe-studio-desktop.md))
 
@@ -212,7 +230,7 @@ Use this agenda with the client.
 | Add or edit items | `/studio/items` + photo upload |
 | Collections | `/studio/collections` |
 | News posts | `/studio/news` |
-| Visitor questions | `/studio/signal-clouds` |
+| Visitor questions and public FAQ answers | `/studio/signal-clouds` |
 | Check before publish | `/studio/readiness` |
 
 ### 5.3 What stays operator-only (for now)
@@ -314,6 +332,8 @@ Contact [operator name/email] for deploy help or kit updates.
 - [ ] All items have photos and descriptions
 - [ ] Collections reference valid item ids
 - [ ] Signal Clouds match client language and intent
+- [ ] Public FAQ answers, visibility, groups and order reviewed
+- [ ] Client understands that FAQ content is editorial and has no submission inbox
 - [ ] `content:doctor --strict` passes
 - [ ] `npm run publish` succeeds
 - [ ] Production deploy verified

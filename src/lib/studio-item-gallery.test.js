@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  appendItemGalleryImage,
+  buildItemGalleryImageFilename,
   getStudioItemCoverFields,
   getStudioItemGalleryRows,
   parseStudioItemGalleryFromForm,
@@ -146,6 +148,75 @@ test('parseStudioItemGalleryFromForm requires at least one image', () => {
   assert.throws(
     () => parseStudioItemGalleryFromForm(new FormData()),
     /Add at least one gallery image/
+  );
+});
+
+test('appendItemGalleryImage preserves existing gallery order', () => {
+  assert.deepEqual(
+    appendItemGalleryImage(
+      {
+        images: [
+          {
+            file: '/images/items/first.jpg',
+            alt: 'First view',
+            role: 'cover'
+          }
+        ]
+      },
+      '/images/items/detail.jpg',
+      'Detail view',
+      'detail'
+    ),
+    {
+      images: [
+        {
+          file: '/images/items/first.jpg',
+          alt: 'First view',
+          role: 'cover'
+        },
+        {
+          file: '/images/items/detail.jpg',
+          alt: 'Detail view',
+          role: 'detail'
+        }
+      ]
+    }
+  );
+});
+
+test('appendItemGalleryImage seeds legacy cover before uploaded gallery image', () => {
+  assert.deepEqual(
+    appendItemGalleryImage(
+      {
+        image_file: '/images/items/legacy.jpg',
+        image_alt: 'Legacy cover'
+      },
+      '/images/items/detail.jpg',
+      '',
+      ''
+    ),
+    {
+      images: [
+        {
+          file: '/images/items/legacy.jpg',
+          alt: 'Legacy cover',
+          role: 'cover'
+        },
+        {
+          file: '/images/items/detail.jpg',
+          alt: ''
+        }
+      ]
+    }
+  );
+});
+
+test('buildItemGalleryImageFilename skips existing gallery filenames', () => {
+  const existing = new Set(['example-gallery.jpg', 'example-gallery-2.jpg']);
+
+  assert.equal(
+    buildItemGalleryImageFilename('example', 'jpeg', (filename) => existing.has(filename)),
+    'example-gallery-3.jpg'
   );
 });
 

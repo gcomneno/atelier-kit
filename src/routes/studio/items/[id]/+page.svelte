@@ -96,6 +96,29 @@
 
     <StudioItemGalleryFields bind:rows={galleryRows} {dirtyControl} />
 
+    <div class="gallery-upload">
+      <label>
+        <StudioFieldLabel
+          label={t('studio.itemsEdit.galleryUpload')}
+          optional
+          hint={t('studio.itemsEdit.galleryUploadHint')}
+        />
+        <input type="file" name="gallery_upload" accept="image/jpeg,image/png,image/webp" />
+      </label>
+
+      <div class="gallery-upload-meta">
+        <label>
+          <StudioFieldLabel label={t('studio.itemsEdit.galleryAlt')} optional />
+          <input name="gallery_upload_alt" />
+        </label>
+
+        <label>
+          <StudioFieldLabel label={t('studio.itemsEdit.galleryRole')} optional />
+          <input name="gallery_upload_role" />
+        </label>
+      </div>
+    </div>
+
     <label>
       <StudioFieldLabel label={t('studio.itemsEdit.titleField')} required />
       <input name="title" value={itemForm.title} required />
@@ -173,6 +196,12 @@
     width: 100%;
     max-height: 280px;
     object-fit: cover;
+  }
+
+  .gallery-upload,
+  .gallery-upload-meta {
+    display: grid;
+    gap: 0.85rem;
   }
 
   .actions {

@@ -10,6 +10,7 @@ import {
   normalizeItemPreset,
   titleFromItemId
 } from '$lib/item-presets.js';
+import { buildItemGalleryImageFilename } from '$lib/studio-item-gallery.js';
 import {
   collectMetaSuggestions,
   flattenMetaForEdit,
@@ -584,6 +585,59 @@ export async function saveItemImageUpload(id, file, locale = 'en') {
   writeFileSync(absolutePath, buffer);
 
   return `/images/items/${filename}`;
+}
+
+/**
+ * @param {string} id
+ * @param {File} file
+ * @param {string} [locale]
+ */
+export async function saveItemGalleryImageUpload(id, file, locale = 'en') {
+  assertContentId(id, translate('fields.itemId', locale), locale);
+
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error(translate('errors.imageRequired', locale));
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error(translate('errors.imageSize', locale));
+  }
+
+  const extension = imageExtensionFromName(file.name, locale);
+  const imagesDir = path.join(ROOT, 'static/images/items');
+  mkdirSync(imagesDir, { recursive: true });
+
+  const filename = buildItemGalleryImageFilename(id, extension, (candidate) =>
+    existsSync(path.join(imagesDir, candidate))
+  );
+  const absolutePath = path.join(imagesDir, filename);
+  const buffer = Buffer.from(await file.arrayBuffer());
+  writeFileSync(absolutePath, buffer);
+
+  return `/images/items/${filename}`;
+}
+
+/**
+ * Removes an item image previously written by Studio when a later save step fails.
+ *
+ * @param {string} imagePath
+ */
+export function deleteItemImageUpload(imagePath) {
+  if (typeof imagePath !== 'string' || !imagePath.startsWith('/images/items/')) {
+    return;
+  }
+
+  const filename = path.basename(imagePath);
+
+  if (filename !== imagePath.slice('/images/items/'.length)) {
+    return;
+  }
+
+  const absolutePath = path.join(ROOT, 'static/images/items', filename);
+
+  if (existsSync(absolutePath)) {
+    unlinkSync(absolutePath);
+  }
 }
 
 /**

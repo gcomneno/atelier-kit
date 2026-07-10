@@ -28,6 +28,7 @@ import {
   runStructuralValidation,
   saveSiteBackgroundUpload,
   saveHeaderLogoUpload,
+  saveSiteFaviconUpload,
   saveHeroBannerUpload,
   validationMessage,
   writeProjectYaml
@@ -125,6 +126,7 @@ export function loadSiteForm() {
     intro_title: readString(site, 'intro_title'),
     header_logo: readString(site, 'header_logo'),
     header_logo_alt: readString(site, 'header_logo_alt'),
+    favicon: readString(site, 'favicon'),
     tagline: readString(site, 'tagline'),
     tagline_display: parseTaglineDisplay(isRecord(site.tagline_display) ? site.tagline_display : null),
     hero_intro: readString(site, 'hero_intro'),
@@ -397,6 +399,24 @@ export async function saveSiteAction({ request }) {
     } else {
       delete site.header_logo;
       delete site.header_logo_alt;
+    }
+
+    let favicon = String(formData.get('favicon') ?? readString(site, 'favicon')).trim();
+
+    if (checkboxEnabled(formData.get('remove_favicon'))) {
+      favicon = '';
+    } else {
+      const faviconUpload = formData.get('favicon_upload');
+
+      if (faviconUpload instanceof File && faviconUpload.size > 0) {
+        favicon = await saveSiteFaviconUpload(faviconUpload, locale);
+      }
+    }
+
+    if (favicon) {
+      site.favicon = favicon;
+    } else {
+      delete site.favicon;
     }
 
     writeProjectYaml('config/site.yaml', { site });

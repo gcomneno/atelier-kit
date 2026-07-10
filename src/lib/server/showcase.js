@@ -319,6 +319,7 @@ export function getSiteConfig() {
       'intro_title' in site ? optionalString(site, 'intro_title') : optionalString(site, 'name'),
     header_logo: optionalString(site, 'header_logo'),
     header_logo_alt: optionalString(site, 'header_logo_alt'),
+    favicon: optionalString(site, 'favicon'),
     tagline: optionalString(site, 'tagline'),
     language: optionalString(site, 'language', 'en'),
     hero_intro: optionalString(site, 'hero_intro'),

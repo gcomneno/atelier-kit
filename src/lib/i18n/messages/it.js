@@ -339,6 +339,10 @@ export default {
         headerLogoAlt: 'Descrizione logo',
         currentHeaderLogo: 'Attuale: {path}',
         removeHeaderLogo: 'Rimuovi logo header',
+        favicon: 'Favicon / icona scheda browser',
+        faviconHint: 'JPG, PNG o WebP. Salvata in static/images/site/favicon.*. Lascia vuoto per usare l’icona predefinita di Atelier-Kit.',
+        currentFavicon: 'Favicon attuale: {path}',
+        removeFavicon: 'Rimuovi favicon personalizzata',
         tagline: 'Sottotitolo',
         taglineHint: 'Riga breve sotto il titolo introduttivo in home. Lascia vuoto per nascondere.',
         heroIntro: 'Testo introduttivo in home',
@@ -1039,6 +1043,7 @@ export default {
     ogImageInvalid: '{source}: site.og_image deve essere una stringa non vuota quando presente.',
     ogImageUrlInvalid: '{source}: site.og_image deve essere un URL http o https valido.',
     ogImagePathInvalid: '{source}: site.og_image deve essere un percorso sotto /images/ o un URL https completo.',
+    siteFaviconInvalid: '{source}: site.favicon deve essere un percorso sotto /images/site/ quando presente.',
     missingCatalogObject: '{source}: manca l’oggetto "catalog".',
     catalogSortInvalid:
       '{source}: catalog.sort deve essere uno tra: manual, title_asc, title_desc.',

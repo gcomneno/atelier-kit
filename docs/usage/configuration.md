@@ -64,6 +64,7 @@ Fields:
 - `footer_note` is optional client text on the home page when no multi-column footer is configured (`config/footer.yaml`). The **Atelier-Kit credit** (`Built with Atelier-Kit` / `Realizzato con Atelier-Kit`) is added automatically by the framework in the site footer and is not editable in YAML.
 - `url` is an optional canonical public site URL (`https://…`). Used when building absolute Open Graph image links, the XML sitemap (`/sitemap.xml`), the news RSS feed (`/news/rss.xml`), and the `Sitemap:` line in `/robots.txt`. Leave empty to use the current request host.
 - `og_image` is an optional social preview image for Facebook, Instagram and similar link unfurlers. Use a path under `/images/…` (for example `/images/site/og.jpg`) or a full `https://` URL. Recommended size: 1200×630.
+- `favicon` is an optional browser tab icon path. Studio saves uploaded favicons under `static/images/site/favicon.*` and stores the public path, for example `/images/site/favicon.png`. Omit the field or leave it empty to use the default Atelier-Kit icon.
 
 ## Discovery (sitemap and RSS)
 

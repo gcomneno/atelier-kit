@@ -146,12 +146,12 @@ cd ~/Progetti/atelier-kit/desktop && npm run tauri dev
 | Sezione | Cosa fare |
 |---------|-----------|
 | **Sito** | Titolo, tagline, avviso orari, lingua `it` |
-| **Catalogo** | `item_name_singular`: **animale** · `item_name_plural`: **animali** · nascondi prezzo/materiali/dimensioni se non servono |
+| **Catalogo** | Testo introduttivo, ordinamento e limite card in home |
 | **Chi siamo** | Storia del parco, come visitare, scuole e gruppi |
 | **Contatti** | Email e WhatsApp reali dello zoo |
 | **Footer** | Copyright, riga legale, link privacy/cookie |
 | **Segnali** | Es. tipo visita (famiglia/scuola), quando, cosa interessa (visita guidata, laboratorio…) |
-| **Oggetti** | Testo, meta (habitat, dieta, curiosità), status (`in mostra`), foto per ogni animale |
+| **Oggetti** | Nomi pubblici (`item_name_singular`: **animale** · `item_name_plural`: **animali**), testo, meta (habitat, dieta, curiosità), status (`in mostra`), foto per ogni animale |
 | **Collezioni** | Crea aree: Savana africana, Mondo polare, Fattoria didattica, Bosco… **e assegna gli animali** |
 
 > `item:new` crea gli oggetti ma **non** li mette nelle collezioni: le collezioni vanno configurate in studio.

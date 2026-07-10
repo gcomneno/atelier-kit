@@ -12,6 +12,13 @@ const SKIP_DIR_NAMES = new Set(['.git', 'node_modules', '.svelte-kit', '.vercel'
 const SOURCE_POINTER = '.atelier-kit-source';
 const UPGRADE_MANIFEST = '.atelier-kit-upgrade.json';
 const PRESERVE_MANIFEST = '.atelier-kit-preserve';
+const CORE_MANAGED_PRESERVE_PATTERNS = [
+  { prefix: 'src/lib/server/', label: 'src/lib/server/*' },
+  { prefix: 'src/lib/components/', label: 'src/lib/components/*' },
+  { prefix: 'src/routes/items/', label: 'src/routes/items/*' },
+  { prefix: 'src/routes/studio/', label: 'src/routes/studio/*' },
+  { prefix: 'scripts/', label: 'scripts/*' }
+];
 
 function usage() {
   console.log(`Usage:
@@ -202,6 +209,45 @@ function collectFiles(rootDir, prefix) {
 }
 
 /**
+ * @param {string} preservePath
+ */
+function normalizePreservePath(preservePath) {
+  return preservePath.replaceAll('\\', '/').replace(/^\/+/, '').replace(/\/+$/, '');
+}
+
+/**
+ * @param {string} preservePath
+ * @returns {string | null}
+ */
+function matchCoreManagedPreservePattern(preservePath) {
+  const normalized = normalizePreservePath(preservePath);
+
+  for (const { prefix, label } of CORE_MANAGED_PRESERVE_PATTERNS) {
+    const directory = prefix.replace(/\/$/, '');
+
+    if (normalized === directory || normalized.startsWith(prefix)) {
+      return label;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * @param {Set<string>} preservePaths
+ * @returns {{ path: string, pattern: string }[]}
+ */
+function findCoreManagedPreserveEntries(preservePaths) {
+  return [...preservePaths]
+    .map((preservePath) => {
+      const pattern = matchCoreManagedPreservePattern(preservePath);
+      return pattern ? { path: preservePath, pattern } : null;
+    })
+    .filter((entry) => entry !== null)
+    .sort((a, b) => a.path.localeCompare(b.path));
+}
+
+/**
  * @param {string} clientRoot
  * @returns {Set<string>}
  */
@@ -218,6 +264,8 @@ function loadPreservePaths(clientRoot) {
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line && !line.startsWith('#'))
+      .map((line) => normalizePreservePath(line))
+      .filter((line) => line)
   );
 }
 
@@ -294,9 +342,10 @@ function buildScriptPlan(kitRoot, clientRoot) {
  * @param {string} kitRoot
  * @param {string} clientRoot
  * @param {string | null} kitVersion
+ * @param {{ path: string, pattern: string }[]} coreManagedPreserveEntries
  * @returns {boolean}
  */
-function printPlan(filePlan, scriptPlan, kitRoot, clientRoot, kitVersion) {
+function printPlan(filePlan, scriptPlan, kitRoot, clientRoot, kitVersion, coreManagedPreserveEntries) {
   console.log('Atelier-Kit site upgrade');
   console.log(`Kit:    ${kitRoot}${kitVersion ? ` (${kitVersion})` : ''}`);
   console.log(`Client: ${clientRoot}`);
@@ -304,6 +353,19 @@ function printPlan(filePlan, scriptPlan, kitRoot, clientRoot, kitVersion) {
   console.log('Protected (never touched): config/, content/, static/images/items/');
   console.log(`Preserved (skipped when listed in ${PRESERVE_MANIFEST}):`);
   console.log('');
+
+  if (coreManagedPreserveEntries.length > 0) {
+    console.warn(`WARNING: ${PRESERVE_MANIFEST} contains core-managed Atelier-Kit paths.`);
+    console.warn('These entries can silently fork kit internals inside the client site.');
+    console.warn('Move customization into config/, content/, static assets, or upstream Atelier-Kit features.');
+    console.warn('Core-managed preserve entries:');
+
+    for (const entry of coreManagedPreserveEntries) {
+      console.warn(`  ! ${entry.path} (matches ${entry.pattern})`);
+    }
+
+    console.log('');
+  }
 
   const total =
     filePlan.add.length + filePlan.update.length + filePlan.remove.length + scriptPlan.length;
@@ -552,9 +614,17 @@ async function main() {
 
   const kitVersion = detectKitVersion(kitRoot);
   const preservePaths = loadPreservePaths(clientRoot);
+  const coreManagedPreserveEntries = findCoreManagedPreserveEntries(preservePaths);
   const filePlan = buildFilePlan(kitRoot, clientRoot, preservePaths);
   const scriptPlan = buildScriptPlan(kitRoot, clientRoot);
-  const hasChanges = printPlan(filePlan, scriptPlan, kitRoot, clientRoot, kitVersion);
+  const hasChanges = printPlan(
+    filePlan,
+    scriptPlan,
+    kitRoot,
+    clientRoot,
+    kitVersion,
+    coreManagedPreserveEntries
+  );
 
   if (!hasChanges) {
     return;

@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getStudioItemCoverFields, syncItemGalleryCover } from './studio-item-gallery.js';
+import {
+  getStudioItemCoverFields,
+  getStudioItemGalleryRows,
+  parseStudioItemGalleryFromForm,
+  syncItemGalleryCover
+} from './studio-item-gallery.js';
 
 test('getStudioItemCoverFields returns the effective gallery cover', () => {
   assert.deepEqual(
@@ -35,6 +40,112 @@ test('getStudioItemCoverFields keeps legacy cover compatibility', () => {
       image_file: '/images/items/legacy.jpg',
       image_alt: 'Legacy cover'
     }
+  );
+});
+
+test('getStudioItemGalleryRows returns editable images entries in order', () => {
+  assert.deepEqual(
+    getStudioItemGalleryRows({
+      images: [
+        {
+          file: ' /images/items/detail.jpg ',
+          alt: ' Detail view ',
+          role: ' detail '
+        },
+        {
+          file: '/images/items/cover.jpg',
+          alt: 'Cover view',
+          role: 'cover'
+        }
+      ]
+    }),
+    [
+      {
+        file: '/images/items/detail.jpg',
+        alt: 'Detail view',
+        role: 'detail'
+      },
+      {
+        file: '/images/items/cover.jpg',
+        alt: 'Cover view',
+        role: 'cover'
+      }
+    ]
+  );
+});
+
+test('getStudioItemGalleryRows creates a legacy cover row when images are absent', () => {
+  assert.deepEqual(
+    getStudioItemGalleryRows({
+      image_file: '/images/items/legacy.jpg',
+      image_alt: 'Legacy cover'
+    }),
+    [
+      {
+        file: '/images/items/legacy.jpg',
+        alt: 'Legacy cover',
+        role: 'cover'
+      }
+    ]
+  );
+});
+
+test('parseStudioItemGalleryFromForm preserves submitted gallery order', () => {
+  const formData = new FormData();
+  formData.append('gallery_files', ' /images/items/detail.jpg ');
+  formData.append('gallery_alts', ' Detail view ');
+  formData.append('gallery_roles', ' detail ');
+  formData.append('gallery_files', '/images/items/cover.jpg');
+  formData.append('gallery_alts', 'Cover view');
+  formData.append('gallery_roles', 'cover');
+
+  assert.deepEqual(parseStudioItemGalleryFromForm(formData), [
+    {
+      file: '/images/items/detail.jpg',
+      alt: 'Detail view',
+      role: 'detail'
+    },
+    {
+      file: '/images/items/cover.jpg',
+      alt: 'Cover view',
+      role: 'cover'
+    }
+  ]);
+});
+
+test('parseStudioItemGalleryFromForm skips fully empty rows and omits empty roles', () => {
+  const formData = new FormData();
+  formData.append('gallery_files', '');
+  formData.append('gallery_alts', '');
+  formData.append('gallery_roles', '');
+  formData.append('gallery_files', '/images/items/cover.jpg');
+  formData.append('gallery_alts', 'Cover view');
+  formData.append('gallery_roles', '');
+
+  assert.deepEqual(parseStudioItemGalleryFromForm(formData), [
+    {
+      file: '/images/items/cover.jpg',
+      alt: 'Cover view'
+    }
+  ]);
+});
+
+test('parseStudioItemGalleryFromForm requires a file when row metadata is filled', () => {
+  const formData = new FormData();
+  formData.append('gallery_files', '');
+  formData.append('gallery_alts', 'Cover view');
+  formData.append('gallery_roles', 'cover');
+
+  assert.throws(
+    () => parseStudioItemGalleryFromForm(formData),
+    /Each gallery image row needs an image path/
+  );
+});
+
+test('parseStudioItemGalleryFromForm requires at least one image', () => {
+  assert.throws(
+    () => parseStudioItemGalleryFromForm(new FormData()),
+    /Add at least one gallery image/
   );
 });
 

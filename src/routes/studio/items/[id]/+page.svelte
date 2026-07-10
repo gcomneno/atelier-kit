@@ -3,11 +3,13 @@
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
+  import StudioItemGalleryFields from '$lib/components/StudioItemGalleryFields.svelte';
   import StudioItemMetaFields from '$lib/components/StudioItemMetaFields.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
   /** @typedef {{ label: string, value: string }} MetaEditRow */
+  /** @typedef {{ file: string, alt: string, role: string }} GalleryEditRow */
 
   const t = useI18n();
 
@@ -16,16 +18,36 @@
   const itemForm = $derived(form?.itemForm ?? data.itemForm);
   const metaSuggestions = $derived(form?.metaSuggestions ?? data.metaSuggestions);
 
+  /** @type {GalleryEditRow[]} */
+  let galleryRows = $state([]);
   /** @type {MetaEditRow[]} */
   let metaRows = $state([]);
   let isDirty = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};
 
+  const previewImage = $derived(getPreviewImage(galleryRows, itemForm.title));
+
   $effect(() => {
+    galleryRows = itemForm.galleryRows.map((/** @type {GalleryEditRow} */ row) => ({ ...row }));
     metaRows = itemForm.metaRows.map((/** @type {MetaEditRow} */ row) => ({ ...row }));
     dirtyControl.resetBaseline?.();
   });
+
+  /**
+   * @param {GalleryEditRow[]} rows
+   * @param {string} fallbackAlt
+   */
+  function getPreviewImage(rows, fallbackAlt) {
+    const cover = rows.find((row) => row.role.trim() === 'cover' && row.file.trim() !== '');
+    const first = rows.find((row) => row.file.trim() !== '');
+    const image = cover ?? first;
+
+    return {
+      file: image?.file.trim() || '/images/items/placeholder.svg',
+      alt: image?.alt.trim() || fallbackAlt
+    };
+  }
 
   function confirmDelete() {
     return confirm(
@@ -60,7 +82,7 @@
     <StudioFormLegend />
 
     <div class="image-preview">
-      <img src={itemForm.image_file} alt={itemForm.image_alt || itemForm.title} />
+      <img src={previewImage.file} alt={previewImage.alt} />
     </div>
 
     <label>
@@ -72,15 +94,7 @@
       <input type="file" name="image_upload" accept="image/jpeg,image/png,image/webp" />
     </label>
 
-    <label>
-      <StudioFieldLabel label={t('studio.itemsEdit.imagePath')} required />
-      <input name="image_file" value={itemForm.image_file} required />
-    </label>
-
-    <label>
-      <StudioFieldLabel label={t('studio.itemsEdit.imageAlt')} optional />
-      <input name="image_alt" value={itemForm.image_alt} />
-    </label>
+    <StudioItemGalleryFields bind:rows={galleryRows} {dirtyControl} />
 
     <label>
       <StudioFieldLabel label={t('studio.itemsEdit.titleField')} required />

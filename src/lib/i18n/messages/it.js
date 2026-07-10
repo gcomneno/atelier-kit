@@ -599,6 +599,9 @@ export default {
       galleryMoveUp: 'Sposta l’immagine {position} verso l’alto',
       galleryMoveDown: 'Sposta l’immagine {position} verso il basso',
       galleryEmpty: 'Nessuna immagine in galleria. Aggiungine una con il pulsante sotto.',
+      galleryUpload: 'Aggiungi immagine alla galleria',
+      galleryUploadHint:
+        'Carica un JPG, PNG o WebP alla volta. Salvata in static/images/items/ senza sostituire immagini esistenti.',
       titleField: 'Titolo oggetto',
       subtitle: 'Sottotitolo',
       status: 'Stato',

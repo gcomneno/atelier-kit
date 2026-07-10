@@ -208,8 +208,8 @@ export default {
       },
       contentPages: {
         about: 'Pagina /about: titolo, intro, sezioni e ritratto opzionale.',
-        catalog: 'Nome oggetto al singolare/plurale, intro catalogo, sort e limite card in home.',
-        items: 'Elenco oggetti: modifica scheda, riordino card, creazione ed eliminazione.',
+        catalog: 'Intro catalogo, ordinamento e limite card in home.',
+        items: 'Nomi oggetto, elenco oggetti, modifica scheda, riordino card, creazione ed eliminazione.',
         collections: 'Gruppi curati di oggetti, ordine sul sito e ordine degli oggetti nella pagina collezione.',
         news: 'Post /news: creazione, modifica, riordino ed eliminazione.',
         signals: 'Signal Cloud globali: domande a scelta singola sulle pagine degli oggetti e nel messaggio visitatore.'
@@ -548,6 +548,11 @@ export default {
       title: 'Oggetti',
       count: '{count} file in content/items/',
       createLink: '+ Crea nuovo oggetto',
+      namesLegend: 'Nomi oggetti',
+      namesHint: 'Scegli come chiamare un singolo oggetto e il relativo plurale nelle pagine pubbliche.',
+      singular: 'Nome oggetto (singolare)',
+      plural: 'Nome oggetto (plurale)',
+      saveNames: 'Salva nomi oggetti',
       empty: 'Nessun oggetto ancora.',
       orderLegend: 'Ordine nel catalogo',
       orderHint:
@@ -679,10 +684,7 @@ export default {
     catalog: {
       pageTitle: 'Studio · Catalogo',
       intro:
-        'Come si presenta il catalogo sul sito pubblico: nomi degli oggetti, testi, ordinamento e anteprima in home. I contenuti delle singole schede si gestiscono in Oggetti.',
-      namesLegend: 'Nomi oggetti',
-      singular: 'Nome oggetto (singolare)',
-      plural: 'Nome oggetto (plurale)',
+        'Come si presenta il catalogo sul sito pubblico: testi, ordinamento e anteprima in home. I contenuti delle singole schede si gestiscono in Oggetti.',
       presentationLegend: 'Pagina catalogo',
       eyebrow: 'Etichetta sopra il titolo',
       introField: 'Testo introduttivo',
@@ -788,6 +790,7 @@ export default {
     removeCloudError: 'Impossibile rimuovere il signal.',
     cloudRemoved: 'Signal rimosso. Aggiorna l’anteprima per verificare le pagine degli oggetti.',
     saveItemError: 'Impossibile salvare l\'oggetto.',
+    saveItemNamesError: 'Impossibile salvare i nomi degli oggetti.',
     saveItemOrderError: 'Impossibile salvare l\'ordine degli oggetti.',
     deleteItemError: 'Impossibile eliminare l\'oggetto.',
     saveCollectionError: 'Impossibile salvare la collezione.',

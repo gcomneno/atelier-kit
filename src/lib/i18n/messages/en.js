@@ -543,6 +543,11 @@ export default {
       title: 'Items',
       count: '{count} item file(s) in content/items/',
       createLink: '+ Create new item',
+      namesLegend: 'Item names',
+      namesHint: 'Choose how a single item and multiple items are named on public pages.',
+      singular: 'Item name (singular)',
+      plural: 'Item name (plural)',
+      saveNames: 'Save item names',
       empty: 'No items yet.',
       orderLegend: 'Catalog order',
       orderHint:
@@ -672,10 +677,7 @@ export default {
     catalog: {
       pageTitle: 'Studio · Catalog',
       intro:
-        'How the public catalog presents itself: entity names, copy, sort order and home preview. Individual item content is managed under Items.',
-      namesLegend: 'Entity names',
-      singular: 'Item name (singular)',
-      plural: 'Item name (plural)',
+        'How the public catalog presents itself: copy, sort order and home preview. Individual item content is managed under Items.',
       presentationLegend: 'Catalog page',
       eyebrow: 'Label above the title',
       introField: 'Intro text',
@@ -781,6 +783,7 @@ export default {
     removeCloudError: 'Could not remove signal.',
     cloudRemoved: 'Signal removed. Refresh the preview to confirm item pages.',
     saveItemError: 'Could not save item.',
+    saveItemNamesError: 'Could not save item names.',
     saveItemOrderError: 'Could not save item order.',
     deleteItemError: 'Could not delete item.',
     saveCollectionError: 'Could not save collection.',

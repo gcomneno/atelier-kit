@@ -329,6 +329,8 @@ Upgrade behaviour:
 
 - `config/`, `content/` and `static/images/items/` are always protected.
 - Paths in `.atelier-kit-preserve` are skipped during upgrade (shown as `Preserve` in the plan).
+- Keep `.atelier-kit-preserve` for exceptional client-owned files only. Do not preserve Atelier-Kit core-managed paths such as `src/lib/server/*`, `src/lib/components/*`, `src/routes/items/*`, `src/routes/studio/*`, or `scripts/*`: that silently forks kit internals inside the client.
+- `site:upgrade` warns when `.atelier-kit-preserve` contains core-managed paths. Move customization into `config/`, `content/`, static assets, or an upstream Atelier-Kit feature instead.
 - Everything else under `src/` and `scripts/` syncs from the kit.
 
 Prefer **small kit PRs** and cherry-pick framework fixes into preserved files when needed, instead of blind full upgrades.

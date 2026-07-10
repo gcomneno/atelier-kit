@@ -1,6 +1,7 @@
 <script>
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
@@ -12,18 +13,27 @@
 
   let { data, form } = $props();
 
+  const objectNamesForm = $derived(form?.objectNamesForm ?? data.objectNamesForm);
   const items = $derived(/** @type {ItemSummary[]} */ (form?.items ?? data.items));
   const itemById = $derived(Object.fromEntries(items.map((/** @type {ItemSummary} */ item) => [item.id, item])));
 
   /** @type {string[]} */
   let orderedIds = $state([]);
-  let isDirty = $state(false);
+  let itemNamesDirty = $state(false);
+  let orderDirty = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
-  const dirtyControl = {};
+  const itemNamesDirtyControl = {};
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
+  const orderDirtyControl = {};
 
   $effect(() => {
     orderedIds = items.map((/** @type {ItemSummary} */ item) => item.id);
-    dirtyControl.resetBaseline?.();
+    orderDirtyControl.resetBaseline?.();
+  });
+
+  $effect(() => {
+    objectNamesForm;
+    itemNamesDirtyControl.resetBaseline?.();
   });
 
   /**
@@ -38,7 +48,7 @@
     [next[index - 1], next[index]] = [next[index], next[index - 1]];
     orderedIds = next;
     await tick();
-    dirtyControl.checkDirty?.();
+    orderDirtyControl.checkDirty?.();
   }
 
   /**
@@ -53,7 +63,7 @@
     [next[index + 1], next[index]] = [next[index], next[index + 1]];
     orderedIds = next;
     await tick();
-    dirtyControl.checkDirty?.();
+    orderDirtyControl.checkDirty?.();
   }
 </script>
 
@@ -78,6 +88,39 @@
 {/if}
 
 <section class="studio-panel">
+  <form
+    method="POST"
+    action="?/saveItemNames"
+    use:studioFormDirty={{ setDirty: (value) => (itemNamesDirty = value), dirtyControl: itemNamesDirtyControl }}
+    use:enhance={() => studioFormEnhanceDirty(itemNamesDirtyControl)}
+    class="studio-form"
+  >
+    <StudioFormLegend />
+
+    <fieldset>
+      <legend>{t('studio.items.namesLegend')}</legend>
+      <p class="hint">{t('studio.items.namesHint')}</p>
+
+      <label>
+        <StudioFieldLabel label={t('studio.items.singular')} required />
+        <input name="item_name_singular" value={objectNamesForm.item_name_singular} required />
+      </label>
+
+      <label>
+        <StudioFieldLabel label={t('studio.items.plural')} required />
+        <input name="item_name_plural" value={objectNamesForm.item_name_plural} required />
+      </label>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit" disabled={!itemNamesDirty}>{t('studio.items.saveNames')}</button>
+    </div>
+
+    <StudioFormStatus message={form?.itemNamesMessage} status={form?.itemNamesStatus} />
+  </form>
+</section>
+
+<section class="studio-panel">
   <div class="panel-heading">
     <h2>{t('studio.items.title')}</h2>
     <p>{t('studio.items.count', { count: items.length })}</p>
@@ -90,8 +133,8 @@
     <form
       method="POST"
       action="?/saveItemOrder"
-      use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
-      use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+      use:studioFormDirty={{ setDirty: (value) => (orderDirty = value), dirtyControl: orderDirtyControl }}
+      use:enhance={() => studioFormEnhanceDirty(orderDirtyControl)}
       class="studio-form"
     >
       <StudioFormLegend />
@@ -127,7 +170,7 @@
       </fieldset>
 
       <div class="actions">
-        <button type="submit" disabled={!isDirty}>{t('studio.items.saveOrder')}</button>
+        <button type="submit" disabled={!orderDirty}>{t('studio.items.saveOrder')}</button>
       </div>
 
       <StudioFormStatus message={form?.itemOrderMessage} status={form?.itemOrderStatus} />

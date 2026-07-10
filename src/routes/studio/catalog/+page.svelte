@@ -41,20 +41,6 @@
     <StudioFormLegend />
 
     <fieldset>
-      <legend>{t('studio.catalog.namesLegend')}</legend>
-
-      <label>
-        <StudioFieldLabel label={t('studio.catalog.singular')} required />
-        <input name="item_name_singular" value={catalogForm.item_name_singular} required />
-      </label>
-
-      <label>
-        <StudioFieldLabel label={t('studio.catalog.plural')} required />
-        <input name="item_name_plural" value={catalogForm.item_name_plural} required />
-      </label>
-    </fieldset>
-
-    <fieldset>
       <legend>{t('studio.catalog.presentationLegend')}</legend>
 
       <label>

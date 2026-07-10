@@ -30,10 +30,11 @@ export const actions = {
     try {
       const formData = await request.formData();
 
+      const currentCatalogForm = loadCatalogForm(locale);
+
       writeCatalogForm(
         {
-          item_name_singular: formData.get('item_name_singular'),
-          item_name_plural: formData.get('item_name_plural'),
+          ...currentCatalogForm,
           eyebrow: formData.get('eyebrow'),
           intro: formData.get('intro'),
           sort: formData.get('sort'),

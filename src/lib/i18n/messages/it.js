@@ -19,7 +19,7 @@ export default {
         footer: 'Footer',
         about: 'Chi siamo',
         catalog: 'Catalogo',
-        items: 'Entità',
+        items: 'Oggetti',
         news: 'Novità',
         collections: 'Collezioni',
         signals: 'Signal Cloud',
@@ -46,7 +46,7 @@ export default {
         content: {
           eyebrow: 'Editoriale',
           title: 'Pagine e opere',
-          description: 'Testi, catalogo, entità, collezioni, news e Signal Cloud visitatore.'
+          description: 'Testi, catalogo, oggetti, collezioni, news e Signal Cloud visitatore.'
         },
         publish: {
           eyebrow: 'Online',
@@ -139,7 +139,7 @@ export default {
         site: 'Vetrina e impostazioni sito',
         atelierMark: 'Atelier Mark',
         content: 'Contenuti editoriali',
-        itemPage: 'Scheda entità (pagina dettaglio)',
+        itemPage: 'Scheda oggetto (pagina dettaglio)',
         publish: 'Anteprima e pubblicazione',
         upgrade: 'Aggiornamento siti clienti',
         limits: 'Cosa resta solo nei file YAML',
@@ -152,7 +152,7 @@ export default {
           1: 'Scegli l’area dal menu a sinistra (o dalla Panoramica). Ogni pagina salva file YAML nel progetto.',
           2: 'Compila i campi e premi Salva. I campi con * sono obbligatori; (opzionale) puoi lasciarli vuoti.',
           3: 'Apri Anteprima in un’altra scheda e ricarica dopo ogni salvataggio importante.',
-          4: 'Per liste ordinate (entità, collezioni, news) usa le frecce ↑↓ e Salva ordinamento.',
+          4: 'Per liste ordinate (oggetti, collezioni, news) usa le frecce ↑↓ e Salva ordinamento.',
           5: 'Prima del lancio passa da Pronto al lancio: Content Doctor, validazione e publish prep.'
         }
       },
@@ -166,7 +166,7 @@ export default {
         appearance: 'Preset colori, cinque colori editabili, font Google e sfondo opzionale.',
         hero: 'Banner in home: immagine, testo e visibilità.',
         layout: 'Preset layout, blocchi home/sidebar/menu e ordine widget.',
-        contact: 'Email e WhatsApp per la scheda visitatore sulle pagine entità.',
+        contact: 'Email e WhatsApp per la scheda visitatore sulle pagine degli oggetti.',
         social: 'Link Instagram, Facebook, X nel footer.',
         footer: 'Colonne link, copyright e riga legale.'
       },
@@ -204,37 +204,37 @@ export default {
         title: 'Contenuti editoriali',
         intro: 'Testi e catalogo: ogni voce corrisponde a un file sotto content/ o config/.',
         orderNote:
-          'L’ordine manuale in catalogo (Entità / Collezioni / News) scrive sort_order nei file YAML e vale su home, sidebar e liste pubbliche.'
+          'L’ordine manuale in catalogo (Oggetti / Collezioni / News) scrive sort_order nei file YAML e vale su home, sidebar e liste pubbliche.'
       },
       contentPages: {
         about: 'Pagina /about: titolo, intro, sezioni e ritratto opzionale.',
-        catalog: 'Nome entità al singolare/plurale, intro catalogo, sort e limite card in home.',
-        items: 'Elenco entità: modifica scheda, riordino card, creazione ed eliminazione.',
-        collections: 'Gruppi curati di entità, ordine sul sito e ordine entità nella pagina collezione.',
+        catalog: 'Nome oggetto al singolare/plurale, intro catalogo, sort e limite card in home.',
+        items: 'Elenco oggetti: modifica scheda, riordino card, creazione ed eliminazione.',
+        collections: 'Gruppi curati di oggetti, ordine sul sito e ordine degli oggetti nella pagina collezione.',
         news: 'Post /news: creazione, modifica, riordino ed eliminazione.',
-        signals: 'Signal Cloud globali: domande a scelta singola sulle pagine entità e nel messaggio visitatore.'
+        signals: 'Signal Cloud globali: domande a scelta singola sulle pagine degli oggetti e nel messaggio visitatore.'
       },
       itemPage: {
-        title: 'Scheda entità — pagina dettaglio pubblica',
+        title: 'Scheda oggetto — pagina dettaglio pubblica',
         intro:
-          'La pagina /items/{id} unisce il contenuto dell’entità e impostazioni condivise. Non tutto si configura nella stessa schermata Studio.',
-        inStudioTitle: 'Nella scheda Studio → Entità → {id}',
+          'La pagina /items/{id} unisce il contenuto dell’oggetto e impostazioni condivise. Non tutto si configura nella stessa schermata Studio.',
+        inStudioTitle: 'Nella scheda Studio → Oggetti → {id}',
         inStudio: {
           1: 'Titolo, sottotitolo, stato, descrizione e avviso.',
           2: 'Immagine: upload JPG/PNG/WebP o percorso in static/images/items/.',
-          3: 'Dettagli entità: voci editabili e riordinabili; usa Gruppo › Voce (o >) per raggruppare in evidenza sul sito.',
-          4: 'Elimina entità rimuove il file YAML e l’eventuale foto caricata.'
+          3: 'Dettagli oggetto: voci editabili e riordinabili; usa Gruppo › Voce (o >) per raggruppare in evidenza sul sito.',
+          4: 'Elimina oggetto rimuove il file YAML e l’eventuale foto caricata.'
         },
         elsewhereTitle: 'Altrove in Studio',
         elsewhere: {
-          1: 'Signal Cloud → domande/risposte mostrate sotto la scheda (uguali per tutte le entità).',
+          1: 'Signal Cloud → domande/risposte mostrate sotto la scheda (uguali per tutti gli oggetti).',
           2: 'Sito → Contatto → email/WhatsApp e etichette pulsanti della scheda visitatore.',
           3: 'Sito → Aspetto → colori e font della pagina.',
-          4: 'Catalogo + ordine in Entità → navigazione «precedente / successiva» e posizione card.',
-          5: 'Collezioni → in quali gruppi compare l’entità.'
+          4: 'Catalogo + ordine in Oggetti → navigazione «precedente / successiva» e posizione card.',
+          5: 'Collezioni → in quali gruppi compare l’oggetto.'
         },
         previewNote:
-          'Usa Anteprima entità in cima alla scheda Studio per aprire /items/{id} in una nuova scheda.'
+          'Usa Anteprima oggetto in cima alla scheda Studio per aprire /items/{id} in una nuova scheda.'
       },
       publish: {
         title: 'Anteprima e pubblicazione',
@@ -279,8 +279,8 @@ export default {
         title: 'Cosa resta solo nei file YAML',
         intro: 'Alcune opzioni avanzate non hanno ancora un campo in Studio.',
         items: {
-          1: 'Dettagli entità oltre un livello di raggruppamento (Gruppo › Voce): content/items/{id}.yaml.',
-          2: 'Link preview esterno sull’entità (campo preview con href e label).',
+          1: 'Dettagli oggetto oltre un livello di raggruppamento (Gruppo › Voce): content/items/{id}.yaml.',
+          2: 'Link preview esterno sull’oggetto (campo preview con href e label).',
           3: 'Testi legali completi: config/legal.yaml.'
         }
       }
@@ -499,7 +499,7 @@ export default {
       count: '{count} file di collezione in content/collections/',
       createLink: '+ Crea nuova collezione',
       empty: 'Nessuna collezione ancora.',
-      itemCount: '{count} entità',
+      itemCount: '{count} oggetti',
       orderLegend: 'Ordine sul sito',
       orderHint:
         'Le frecce riordinano le collezioni in home, sidebar e pagina /collections. Salva per scrivere sort_order nei file YAML.',
@@ -512,28 +512,28 @@ export default {
       intro:
         'Crea un nuovo file in content/collections/. Usa lettere minuscole, numeri e trattini per l’id, ad esempio entita-estate.',
       title: 'Nuova collezione',
-      introPanel: 'Scegli quali entità appartengono a questo gruppo.',
+      introPanel: 'Scegli quali oggetti appartengono a questo gruppo.',
       id: 'Id collezione',
       idHint: 'Non modificabile in seguito. Diventa nome file e slug URL.',
       idPattern: 'Usa solo lettere minuscole, numeri e trattini.',
       titleField: 'Titolo collezione',
       description: 'Descrizione collezione',
-      includedItems: 'Entità incluse',
-      noItems: 'Nessuna entità disponibile.',
-      createItemFirst: 'Crea prima un\'entità',
+      includedItems: 'Oggetti inclusi',
+      noItems: 'Nessun oggetto disponibile.',
+      createItemFirst: 'Crea prima un oggetto',
       create: 'Crea collezione',
       cancel: 'Annulla'
     },
     collectionsEdit: {
       intro:
-        'Modifica testo pubblico, scegli le entità e imposta l’ordine nella pagina collezione.',
+        'Modifica testo pubblico, scegli gli oggetti e imposta l’ordine nella pagina collezione.',
       collectionId: 'Id collezione: {id}',
       titleField: 'Titolo collezione',
       description: 'Descrizione collezione',
-      itemOrder: 'Ordine entità',
+      itemOrder: 'Ordine oggetti',
       orderHint: 'L’ordine sotto viene usato nella pagina pubblica della collezione.',
-      noItemsSelected: 'Nessuna entità selezionata. Aggiungile dall’elenco sotto.',
-      addItems: 'Aggiungi entità',
+      noItemsSelected: 'Nessun oggetto selezionato. Aggiungili dall’elenco sotto.',
+      addItems: 'Aggiungi oggetti',
       add: 'Aggiungi',
       remove: 'Rimuovi',
       save: 'Salva collezione',
@@ -543,54 +543,54 @@ export default {
         'Eliminare la collezione «{title}» ({id})? Verrà rimosso il file YAML. L\'operazione non si può annullare da qui.'
     },
     items: {
-      pageTitle: 'Studio · Entità',
-      intro: 'Scegli un\'entità da modificare, riordina le card del catalogo o creane una nuova.',
-      title: 'Entità',
-      count: '{count} file entità in content/items/',
-      createLink: '+ Crea nuova entità',
-      empty: 'Nessuna entità ancora.',
+      pageTitle: 'Studio · Oggetti',
+      intro: 'Scegli un oggetto da modificare, riordina le card del catalogo o creane una nuova.',
+      title: 'Oggetti',
+      count: '{count} file in content/items/',
+      createLink: '+ Crea nuovo oggetto',
+      empty: 'Nessun oggetto ancora.',
       orderLegend: 'Ordine nel catalogo',
       orderHint:
-        'Usato sul sito quando in Catalogo è impostato «Manuale». Le frecce riordinano le card entità; salva per applicare.',
+        'Usato sul sito quando in Catalogo è impostato «Manuale». Le frecce riordinano le card degli oggetti; salva per applicare.',
       saveOrder: 'Salva ordinamento',
-      deletedSuccess: 'Entità «{title}» eliminata.',
-      missingItem: 'L\'entità «{id}» non esiste più. Potrebbe essere stata eliminata.'
+      deletedSuccess: 'Oggetto «{title}» eliminato.',
+      missingItem: 'L\'oggetto «{id}» non esiste più. Potrebbe essere stata eliminata.'
     },
     itemsNew: {
-      pageTitle: 'Studio · Nuova entità',
+      pageTitle: 'Studio · Nuovo oggetto',
       intro:
         'Crea un nuovo file in content/items/. Usa lettere minuscole, numeri e trattini per l’id, ad esempio anello-argento.',
-      title: 'Nuova entità',
+      title: 'Nuovo oggetto',
       introPanel: 'I campi meta iniziali dipendono dal preset scelto.',
-      id: 'Id entità',
+      id: 'Id oggetto',
       idHint: 'Non modificabile in seguito. Diventa nome file e slug URL.',
       idPattern: 'Usa solo lettere minuscole, numeri e trattini.',
-      titleField: 'Titolo entità',
+      titleField: 'Titolo oggetto',
       preset: 'Preset meta',
       description: 'Descrizione',
       photo: 'Foto (opzionale)',
       photoHint: 'JPG, PNG o WebP. Salvata come static/images/items/{id}.jpg',
-      create: 'Crea entità',
+      create: 'Crea oggetto',
       cancel: 'Annulla'
     },
     itemsEdit: {
       intro:
-        'Modifica i contenuti pubblici dell\'entità. Carica una foto qui o usa il campo percorso immagine per casi avanzati.',
-      preview: 'Anteprima entità',
-      itemId: 'Id entità: {id}',
+        'Modifica i contenuti pubblici dell\'oggetto. Carica una foto qui o usa il campo percorso immagine per casi avanzati.',
+      preview: 'Anteprima oggetto',
+      itemId: 'Id oggetto: {id}',
       uploadPhoto: 'Carica foto',
       uploadHint:
         'Salvata come static/images/items/{id}.jpg (o .png / .webp). Il percorso immagine si aggiorna automaticamente.',
       imagePath: 'Percorso immagine',
       imageAlt: 'Descrizione immagine',
-      titleField: 'Titolo entità',
+      titleField: 'Titolo oggetto',
       subtitle: 'Sottotitolo',
       status: 'Stato',
       priceMode: 'Modalità prezzo',
       description: 'Descrizione',
-      notice: 'Avviso entità',
-      noticeHint: 'Lascia vuoto per nascondere l’avviso nella pagina entità.',
-      details: 'Dettagli entità',
+      notice: 'Avviso oggetto',
+      noticeHint: 'Lascia vuoto per nascondere l’avviso nella pagina dell’oggetto.',
+      details: 'Dettagli oggetto',
       detailsHint:
         'Aggiungi, rinomina e riordina le voci mostrate nel blocco Dettagli sulla pagina pubblica. Usa «Gruppo › Voce» (o «Gruppo > Voce») per creare un titolo in evidenza con sottovoci indentate. I menu a tendina propongono nomi e valori già usati nel catalogo.',
       detailsEmpty: 'Nessuna voce di dettaglio. Aggiungine una con il pulsante sotto.',
@@ -598,11 +598,11 @@ export default {
       detailValue: 'Valore',
       detailAdd: '+ Aggiungi voce',
       detailRemove: 'Rimuovi',
-      save: 'Salva entità',
-      back: 'Torna alle entità',
-      delete: 'Elimina entità',
+      save: 'Salva oggetto',
+      back: 'Torna agli oggetti',
+      delete: 'Elimina oggetto',
       deleteConfirm:
-        'Eliminare l\'entità «{title}» ({id})? Verranno rimossi il file YAML e l\'eventuale foto caricata. L\'operazione non si può annullare da qui.'
+        'Eliminare l\'oggetto «{title}» ({id})? Verranno rimossi il file YAML e l\'eventuale foto caricata. L\'operazione non si può annullare da qui.'
     },
     news: {
       pageTitle: 'Studio · News',
@@ -679,17 +679,17 @@ export default {
     catalog: {
       pageTitle: 'Studio · Catalogo',
       intro:
-        'Come si presenta il catalogo sul sito pubblico: nomi entità, testi, ordinamento e anteprima in home. I contenuti delle singole schede si gestiscono in Entità.',
-      namesLegend: 'Nomi entità',
-      singular: 'Nome entità (singolare)',
-      plural: 'Nome entità (plurale)',
+        'Come si presenta il catalogo sul sito pubblico: nomi degli oggetti, testi, ordinamento e anteprima in home. I contenuti delle singole schede si gestiscono in Oggetti.',
+      namesLegend: 'Nomi oggetti',
+      singular: 'Nome oggetto (singolare)',
+      plural: 'Nome oggetto (plurale)',
       presentationLegend: 'Pagina catalogo',
       eyebrow: 'Etichetta sopra il titolo',
       introField: 'Testo introduttivo',
       introHint: 'Mostrato nella sezione catalogo in home e su /catalog. Lascia vuoto per il testo predefinito del tema (solo su /catalog).',
       listingLegend: 'Elenco',
       sort: 'Ordinamento',
-      sortManual: 'Manuale (come da ordine nella scheda entità, poi titolo)',
+      sortManual: 'Manuale (come da ordine nella scheda oggetto, poi titolo)',
       sortTitleAsc: 'Titolo A → Z',
       sortTitleDesc: 'Titolo Z → A',
       homeLimit: 'Limite in home',
@@ -699,12 +699,12 @@ export default {
     signals: {
       pageTitle: 'Studio · Signal Cloud',
       intro:
-        'Modifica domande per i visitatori ed etichette risposta. Gli id domanda e risposta restano fissi così le pagine entità esistenti restano stabili.',
+        'Modifica domande per i visitatori ed etichette risposta. Gli id domanda e risposta restano fissi così le pagine degli oggetti esistenti restano stabili.',
       question: 'Domanda',
       hint: 'Suggerimento',
       answer: 'Risposta · {id}',
       save: 'Salva Signal Cloud',
-      enabled: 'Mostra sulle pagine entità',
+      enabled: 'Mostra sulle pagine degli oggetti',
       remove: 'Rimuovi signal',
       removeConfirm:
         'Rimuovere il signal "{id}"? Verrà eliminato da config/signal-clouds.yaml. Ripristina da Git se serve.'
@@ -748,7 +748,7 @@ export default {
   fields: {
     id: 'Id',
     collectionId: 'Id collezione',
-    itemId: 'Id entità',
+    itemId: 'Id oggetto',
     siteTitle: 'Titolo del sito',
     tagline: 'Sottotitolo',
     language: 'Lingua',
@@ -761,14 +761,14 @@ export default {
     whatsappLabel: 'Etichetta pulsante WhatsApp',
     collectionTitle: 'Titolo collezione',
     collectionDescription: 'Descrizione collezione',
-    itemTitle: 'Titolo entità',
+    itemTitle: 'Titolo oggetto',
     newsId: 'Id post',
     newsTitle: 'Titolo post',
     newsDate: 'Data di pubblicazione',
     newsBody: 'Testo post',
     description: 'Descrizione',
-    itemNameSingular: 'Nome entità (singolare)',
-    itemNamePlural: 'Nome entità (plurale)',
+    itemNameSingular: 'Nome oggetto (singolare)',
+    itemNamePlural: 'Nome oggetto (plurale)',
     aboutTitle: 'Titolo pagina Chi siamo'
   },
   server: {
@@ -786,19 +786,19 @@ export default {
     saveCatalogError: 'Impossibile salvare le impostazioni catalogo.',
     saveCloudsError: 'Impossibile salvare Signal Cloud.',
     removeCloudError: 'Impossibile rimuovere il signal.',
-    cloudRemoved: 'Signal rimosso. Aggiorna l’anteprima per verificare le pagine entità.',
-    saveItemError: 'Impossibile salvare l\'entità.',
-    saveItemOrderError: 'Impossibile salvare l\'ordine delle entità.',
-    deleteItemError: 'Impossibile eliminare l\'entità.',
+    cloudRemoved: 'Signal rimosso. Aggiorna l’anteprima per verificare le pagine degli oggetti.',
+    saveItemError: 'Impossibile salvare l\'oggetto.',
+    saveItemOrderError: 'Impossibile salvare l\'ordine degli oggetti.',
+    deleteItemError: 'Impossibile eliminare l\'oggetto.',
     saveCollectionError: 'Impossibile salvare la collezione.',
     saveCollectionOrderError: 'Impossibile salvare l\'ordine delle collezioni.',
     deleteCollectionError: 'Impossibile eliminare la collezione.',
     saveNewsOrderError: 'Impossibile salvare l\'ordine dei post news.',
     deleteNewsError: 'Impossibile eliminare il post news.',
-    createItemError: 'Impossibile creare l\'entità.',
+    createItemError: 'Impossibile creare l\'oggetto.',
     createCollectionError: 'Impossibile creare la collezione.',
     createNewsError: 'Impossibile creare il post news.',
-    itemNotFound: 'Entità non trovata',
+    itemNotFound: 'Oggetto non trovato',
     collectionNotFound: 'Collezione non trovata',
     saveNewsError: 'Impossibile salvare il post news.',
     newsNotFound: 'Post news non trovato'
@@ -807,12 +807,12 @@ export default {
     required: '{label} è obbligatorio.',
     idFormat: '{label} deve usare solo lettere minuscole, numeri e trattini.',
     yamlObject: '{path} deve contenere un oggetto YAML.',
-    itemExists: 'Esiste già un\'entità con id "{id}".',
-    itemOrderEmpty: 'L’ordine entità non può essere vuoto.',
-    itemOrderDuplicate: 'L’ordine entità contiene id duplicati.',
-    itemOrderIncomplete: 'L’ordine deve includere tutte le entità del catalogo.',
+    itemExists: 'Esiste già un oggetto con id "{id}".',
+    itemOrderEmpty: 'L’ordine degli oggetti non può essere vuoto.',
+    itemOrderDuplicate: 'L’ordine degli oggetti contiene id duplicati.',
+    itemOrderIncomplete: 'L’ordine deve includere tutti gli oggetti del catalogo.',
     itemInCollections:
-      'Impossibile eliminare l\'entità: è usata nelle collezioni {collections}. Rimuovila prima da quelle collezioni.',
+      'Impossibile eliminare l\'oggetto: è usato nelle collezioni {collections}. Rimuovila prima da quelle collezioni.',
     collectionExists: 'Esiste già una collezione con id "{id}".',
     collectionNotFound: 'Collezione non trovata.',
     collectionOrderEmpty: 'L’ordine collezioni non può essere vuoto.',
@@ -823,7 +823,7 @@ export default {
     newsOrderIncomplete: 'L’ordine deve includere tutti i post news.',
     newsNotFound: 'Post news «{id}» non trovato.',
     metaLabelRequired: 'Ogni voce di dettaglio deve avere un nome.',
-    collectionNeedsItems: 'Scegli almeno un\'entità per questa collezione.',
+    collectionNeedsItems: 'Scegli almeno un oggetto per questa collezione.',
     newsExists: 'Esiste già un post news con id "{id}".',
     newsDateInvalid: 'La data di pubblicazione deve usare il formato YYYY-MM-DD.',
     imageType: 'Usa un’immagine JPG, PNG o WebP.',
@@ -865,7 +865,7 @@ export default {
       problemFormat: 'Questo file ha un problema di formattazione.',
       problemStructure: 'Questo file non è stato letto come file di contenuto normale.',
       actionFormat: 'Apri il file e correggi il problema indicato sotto, oppure confrontalo con un file di esempio funzionante.',
-      actionStructure: 'Apri il file e verifica che la struttura corrisponda agli altri file config o entità.'
+      actionStructure: 'Apri il file e verifica che la struttura corrisponda agli altri file config o oggetto.'
     },
     fields: {
       siteName: 'Titolo sito',
@@ -878,12 +878,12 @@ export default {
       emailSubject: 'Prefisso oggetto email',
       whatsappLabel: 'Etichetta pulsante WhatsApp',
       whatsappPhone: 'Numero WhatsApp',
-      itemId: 'Id entità',
-      itemTitle: 'Titolo entità',
-      itemDescription: 'Descrizione entità',
-      itemSubtitle: 'Sottotitolo entità',
-      itemStatus: 'Stato entità',
-      itemNotice: 'Avviso entità',
+      itemId: 'Id oggetto',
+      itemTitle: 'Titolo oggetto',
+      itemDescription: 'Descrizione oggetto',
+      itemSubtitle: 'Sottotitolo oggetto',
+      itemStatus: 'Stato oggetto',
+      itemNotice: 'Avviso oggetto',
       itemImageAlt: 'Descrizione immagine',
       newsId: 'Id post',
       newsTitle: 'Titolo post',
@@ -943,17 +943,17 @@ export default {
       metaPlaceholder: {
         title: '{label} su "{itemTitle}"',
         problem: '"{label}" sembra ancora testo segnaposto.',
-        action: 'Apri {source} e sostituisci "{label}" con informazioni reali su questa entità.'
+        action: 'Apri {source} e sostituisci "{label}" con informazioni reali su questo oggetto.'
       },
       itemsFolderMissing: {
-        title: 'Cartella entità',
-        problem: 'Il sito non ha ancora una cartella entità.',
-        action: 'Crea almeno un\'entità con npm run item:new oppure aggiungi un file YAML in content/items/.'
+        title: 'Cartella oggetti',
+        problem: 'Il sito non ha ancora una cartella oggetti.',
+        action: 'Crea almeno un oggetto con npm run item:new oppure aggiungi un file YAML in content/items/.'
       },
       itemsFolderEmpty: {
-        title: 'Cartella entità',
-        problem: 'Il sito non contiene ancora entità.',
-        action: 'Crea almeno un\'entità con npm run item:new prima di pubblicare.'
+        title: 'Cartella oggetti',
+        problem: 'Il sito non contiene ancora oggetti.',
+        action: 'Crea almeno un oggetto con npm run item:new prima di pubblicare.'
       },
       itemFieldStarter: {
         title: '{fieldTitle} per "{itemTitle}"',
@@ -961,30 +961,30 @@ export default {
         action: 'Apri {source} e aggiorna {fieldTitle} con contenuto reale.'
       },
       itemTestId: {
-        title: 'Entità "{itemTitle}"',
-        problem: 'Questo id entità sembra una voce di test o esempio.',
-        action: 'Crea un\'entità reale con npm run item:new oppure rinomina l’id prima di pubblicare.'
+        title: 'Oggetto "{itemTitle}"',
+        problem: 'Questo id oggetto sembra una voce di test o esempio.',
+        action: 'Crea un oggetto reale con npm run item:new oppure rinomina l’id prima di pubblicare.'
       },
       itemPlaceholderImage: {
         title: 'Immagine per "{itemTitle}"',
-        problem: 'Questa entità usa ancora l’immagine segnaposto neutra.',
-        action: 'Aggiungi una foto reale in static/images/items/ e aggiorna il percorso nel file entità.'
+        problem: 'Questo oggetto usa ancora l’immagine segnaposto neutra.',
+        action: 'Aggiungi una foto reale in static/images/items/ e aggiorna il percorso nel file dell’oggetto.'
       },
       itemDraftStatus: {
         title: 'Stato pubblicazione per "{itemTitle}"',
-        problem: 'Questa entità è ancora contrassegnata come "{status}".',
+        problem: 'Questo oggetto è ancora contrassegnata come "{status}".',
         action:
-          'Apri il file entità e imposta uno stato pronto per il pubblico, ad es. "available", oppure rimuovi lo stato se non lo usi.'
+          'Apri il file dell’oggetto e imposta uno stato pronto per il pubblico, ad es. "available", oppure rimuovi lo stato se non lo usi.'
       },
       itemShortDescription: {
         title: 'Descrizione per "{itemTitle}"',
-        problem: 'La descrizione dell\'entità è molto breve e può sembrare incompleta ai visitatori.',
-        action: 'Apri il file entità e aggiungi una descrizione più chiara dell’oggetto, opera o progetto.'
+        problem: 'La descrizione dell\'oggetto è molto breve e può sembrare incompleta ai visitatori.',
+        action: 'Apri il file dell’oggetto e aggiungi una descrizione più chiara dell’oggetto, opera o progetto.'
       },
       itemNoMeta: {
         title: 'Dettagli per "{itemTitle}"',
-        problem: 'Questa entità non ha ancora campi dettaglio aggiuntivi.',
-        action: 'Aggiungi dettagli utili come materiale, dimensioni, disponibilità o tecnica nel file entità.'
+        problem: 'Questo oggetto non ha ancora campi dettaglio aggiuntivi.',
+        action: 'Aggiungi dettagli utili come materiale, dimensioni, disponibilità o tecnica nel file dell’oggetto.'
       },
       newsFieldStarter: {
         title: '{fieldTitle} per "{postTitle}"',
@@ -1052,7 +1052,7 @@ export default {
     catalogEyebrowInvalid: '{source}: catalog.eyebrow deve essere una stringa quando presente.',
     catalogIntroInvalid: '{source}: catalog.intro deve essere una stringa quando presente.',
     routeSegmentUnsupported:
-      '{source}: route_segment non è supportato in Atelier-Kit 1.0. Le entità stanno sotto /items.',
+      '{source}: route_segment non è supportato in Atelier-Kit 1.0. Gli oggetti vivono sotto /items.',
     missingSignalCloudsArray: '{source}: manca l’array "signal_clouds".',
     cloudMustBeObject: '{source}: ogni cloud deve essere un oggetto.',
     cloudOptionsRequired: '{source}:{cloudId}: options deve essere un array non vuoto.',
@@ -1096,14 +1096,14 @@ export default {
     legalPagesMustBeObject: '{source}: "legal.pages" deve essere un oggetto.',
     legalPageMustBeObject: '{source}: la pagina deve essere un oggetto.',
     itemsDirMissing: 'La cartella content/items non esiste.',
-    itemsDirEmpty: 'content/items deve contenere almeno un file .yaml entità.',
+    itemsDirEmpty: 'content/items deve contenere almeno un file .yaml oggetto.',
     imageFileMustStartWithSlash: '{source}: image_file deve iniziare con "/".',
     imageFileMissing: '{source}: image_file non esiste in static/: {imageFile}',
     collectionIdInvalid: '{source}: id deve usare solo lettere minuscole, numeri e trattini singoli.',
     collectionIdFilenameMismatch: '{source}: id deve corrispondere al nome file "{expectedId}".',
     collectionItemsRequired: '{source}: "items" deve essere un array non vuoto.',
-    collectionItemRefInvalid: '{itemSource}: il riferimento entità deve essere una stringa non vuota.',
-    collectionItemRefUnknown: '{itemSource}: id entità sconosciuto "{itemId}".',
+    collectionItemRefInvalid: '{itemSource}: il riferimento oggetto deve essere una stringa non vuota.',
+    collectionItemRefUnknown: '{itemSource}: id oggetto sconosciuto "{itemId}".',
     newsIdInvalid: '{source}: l’id deve usare solo lettere minuscole, numeri e trattini singoli.',
     newsIdFilenameMismatch: '{source}: l’id deve corrispondere al nome file "{expectedId}".',
     newsDateInvalid: '{source}: la data deve usare il formato YYYY-MM-DD.',
@@ -1128,7 +1128,7 @@ export default {
     email: 'Email',
     whatsapp: 'WhatsApp',
     whatsappDisabled: 'disattivato',
-    firstItemTitle: 'Titolo prima entità',
+    firstItemTitle: 'Titolo primo oggetto',
     collectionTitle: 'Titolo collezione',
     complete: 'Configurazione guidata completata.',
     nextSteps: 'Prossimi passi:',
@@ -1141,7 +1141,7 @@ export default {
     targetFolder: 'Cartella destinazione (percorso relativo)',
     whatsappPhone: 'Numero WhatsApp (opzionale)',
     notice: 'Avviso pubblico sito (opzionale, vuoto = nascosto)',
-    firstItemOptional: 'Titolo prima entità (opzionale)',
+    firstItemOptional: 'Titolo primo oggetto (opzionale)',
     collectionOptional: 'Titolo collezione (opzionale)',
     confirmProceed: 'Procedere con questa configurazione?',
     templates: {
@@ -1195,7 +1195,7 @@ export default {
     catalogListing: {
       metaDescription: 'Tutte le {itemPlural} di {siteName}.',
       intro: 'Esplora tutte le {itemPlural} della vetrina.',
-      empty: 'Nessuna entità nel catalogo per ora.'
+      empty: 'Nessun oggetto nel catalogo per ora.'
     },
     layout: {
       blocks: {
@@ -1213,21 +1213,21 @@ export default {
     },
     search: {
       label: 'Cerca',
-      placeholder: 'Cerca entità e notizie…',
+      placeholder: 'Cerca oggetti e notizie…',
       resultsLabel: 'Risultati di ricerca',
       noResults: 'Nessun risultato per "{query}".',
-      resultTypeItem: 'Entità',
+      resultTypeItem: 'Oggetto',
       resultTypeNews: 'Notizia'
     },
     item: {
       visitorBriefEyebrow: 'Scheda visitatore',
-      talkAboutTitle: 'Parla di questa entità',
+      talkAboutTitle: 'Parla di questo oggetto',
       talkAboutIntro:
         'Scegli alcune preferenze qui sotto. Atelier-Kit preparerà un messaggio da copiare o inviare via email o WhatsApp.',
       details: 'Dettagli',
       synopsisReadMore: 'Leggi tutto',
       synopsisShowLess: 'Mostra meno',
-      pageNavAriaLabel: 'Navigazione entità',
+      pageNavAriaLabel: 'Navigazione oggetti',
       previousItem: '← Precedente',
       previousItemAria: 'Vai a {title}',
       nextItem: 'Successiva →',
@@ -1261,7 +1261,7 @@ export default {
       interestLine: 'Mi interessa "{title}".',
       impressionsHeading: 'Le mie impressioni:',
       noSelections: 'Le mie impressioni: nessuna scelta Signal Cloud per ora.',
-      itemPageLine: 'Pagina dell\'entità: {url}',
+      itemPageLine: 'Pagina dell\'oggetto: {url}',
       emailSubjectPrefix: 'Interesse per'
     },
     signalCloud: {
@@ -1272,9 +1272,9 @@ export default {
       chooseOption: 'Scegli {label}'
     },
     error: {
-      itemNotFoundTitle: 'Entità non trovata',
+      itemNotFoundTitle: 'Oggetto non trovato',
       itemNotFoundBody:
-        'L\'entità richiesta non esiste nel catalogo. Potrebbe essere stata rimossa o l\'indirizzo non è più valido.',
+        'L\'oggetto richiesto non esiste nel catalogo. Potrebbe essere stata rimossa o l\'indirizzo non è più valido.',
       itemNotFoundId: 'Richiesta: {id}',
       pageNotFoundTitle: 'Pagina non trovata',
       pageNotFoundBody: 'La pagina che cerchi non esiste o non è più disponibile.',

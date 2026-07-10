@@ -60,7 +60,7 @@ catalog:
     show_meta: true
 ```
 
-Adjust for figurines (`entità`) or stickers as needed.
+Adjust for figurines (`oggetti`) or stickers as needed.
 
 ## 3. Create a collection item
 

@@ -24,6 +24,7 @@ import { getDefaultLayoutBlockLabel } from '$lib/layout-block-labels.js';
 import { normalizeMetaHierarchy } from '$lib/item-meta.js';
 import { getItemCoverImage, normalizeItemImages } from '$lib/item-images.js';
 import { parseTaglineDisplay } from '$lib/editorial-markup.js';
+import { projectFaqEntries } from '$lib/signal-cloud-faq.js';
 
 const configFiles = import.meta.glob('/config/*.yaml', {
   query: '?raw',
@@ -420,6 +421,17 @@ function sortCatalogItems(items, sortMode) {
 
     return left.title.localeCompare(right.title);
   });
+}
+
+export function getFaqEntries() {
+  const data = readYaml('/config/signal-clouds.yaml');
+  const clouds = data.signal_clouds;
+
+  if (!Array.isArray(clouds)) {
+    throw new Error('config/signal-clouds.yaml: missing "signal_clouds" array.');
+  }
+
+  return projectFaqEntries(clouds);
 }
 
 export function getSignalClouds() {

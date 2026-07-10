@@ -1,8 +1,17 @@
+import { createTranslator } from '$lib/i18n/index.js';
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
 import { buildSearchIndex } from '$lib/server/search-index.js';
 import { resolveAbsoluteImageUrl } from '$lib/site-meta.js';
 import { resolveDocumentTitle } from '$lib/site-branding.js';
-import { getFooterConfig, getLayoutConfig, getLayoutMenuNav, getSiteConfig, getSocialConfig, isFooterActive } from '$lib/server/showcase.js';
+import {
+  getFaqEntries,
+  getFooterConfig,
+  getLayoutConfig,
+  getLayoutMenuNav,
+  getSiteConfig,
+  getSocialConfig,
+  isFooterActive
+} from '$lib/server/showcase.js';
 
 /** @param {{ url: URL }} event */
 export function load({ url }) {
@@ -10,9 +19,15 @@ export function load({ url }) {
   const social = getSocialConfig();
   const footer = getFooterConfig();
   const locale = resolveLocale(site.language);
+  const t = createTranslator(locale);
   const ogImage = resolveAbsoluteImageUrl(site.og_image, url.origin, site.url);
   const layout = getLayoutConfig();
-  const menuNav = getLayoutMenuNav(layout, locale);
+  const layoutMenuNav = getLayoutMenuNav(layout, locale);
+  const faqEntries = getFaqEntries();
+  const menuNav =
+    faqEntries.length > 0
+      ? [...layoutMenuNav, { href: '/faq', label: t('visitor.faq.navLabel') }]
+      : layoutMenuNav;
   const documentTitle = resolveDocumentTitle(site);
 
   return {

@@ -11,20 +11,11 @@ import {
   writeSignalCloudRecords
 } from '$lib/server/studio-io.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
+import { getStudioSignalCloudRows } from '$lib/studio-signal-clouds.js';
+import { getSignalCloudFaqIssues } from '$lib/signal-cloud-faq-validation.js';
 
 function loadSignalCloudForm(locale) {
-  return readSignalCloudRecords(locale).map((cloud) => ({
-    id: cloud.id,
-    enabled: cloud.enabled !== false,
-    question: typeof cloud.question === 'string' ? cloud.question : '',
-    hint: typeof cloud.hint === 'string' ? cloud.hint : '',
-    options: Array.isArray(cloud.options)
-      ? cloud.options.map((option) => ({
-          id: option.id,
-          label: typeof option.label === 'string' ? option.label : ''
-        }))
-      : []
-  }));
+  return getStudioSignalCloudRows(readSignalCloudRecords(locale));
 }
 
 export function load() {
@@ -48,6 +39,18 @@ export const actions = {
       const formData = await request.formData();
       const original = readSignalCloudRecords(locale);
       const clouds = applySignalCloudsFromForm(original, formData);
+      const faqIssue = getSignalCloudFaqIssues(clouds)[0];
+
+      if (faqIssue) {
+        return fail(400, {
+          cloudStatus: 'error',
+          cloudMessage: t(`validate.${faqIssue.key}`, {
+            source: 'config/signal-clouds.yaml',
+            cloudId: faqIssue.cloudId
+          }),
+          clouds: getStudioSignalCloudRows(clouds)
+        });
+      }
 
       writeSignalCloudRecords(clouds);
       const validation = runStructuralValidation();

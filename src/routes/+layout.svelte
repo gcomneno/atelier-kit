@@ -5,7 +5,8 @@
   import SiteHeader from '$lib/components/SiteHeader.svelte';
   import { setVisitorI18nContext } from '$lib/i18n/visitor-context.js';
   import { appearanceCssVariables } from '$lib/site-appearance.js';
-  import { fontStylesheetHref } from '$lib/site-typography.js';
+  import { editorialFontPresets } from '$lib/editorial-markup.js';
+  import { fontStylesheetHrefs } from '$lib/site-typography.js';
   import { STUDIO_HEAD_STYLE } from '$lib/studio-theme.js';
 
   let { children, data } = $props();
@@ -35,8 +36,13 @@
   );
   const hasBackgroundImage = $derived(Boolean(data.appearance?.background_image));
   const backgroundFit = $derived(data.appearance?.background_fit ?? 'top');
-  const publicFontHref = $derived(
-    isStudio ? null : fontStylesheetHref(data.appearance?.font_preset ?? 'inter')
+  const publicFontHrefs = $derived(
+    isStudio
+      ? []
+      : fontStylesheetHrefs([
+          data.appearance?.font_preset ?? 'inter',
+          ...editorialFontPresets(data.site?.tagline, data.site?.intro_title, data.site?.hero_intro)
+        ])
   );
   const faviconHref = $derived(data.site?.favicon || '/favicon.svg');
   const faviconType = $derived(faviconTypeFromHref(faviconHref));
@@ -55,10 +61,12 @@
     {@html STUDIO_HEAD_STYLE}
   {:else}
     {@html `<style id="site-appearance">${appearanceRootStyle}</style>`}
-    {#if publicFontHref}
+    {#if publicFontHrefs.length > 0}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-      <link rel="stylesheet" href={publicFontHref} />
+      {#each publicFontHrefs as href (href)}
+        <link rel="stylesheet" {href} />
+      {/each}
     {/if}
   {/if}
   {#if data.seo?.ogImage}

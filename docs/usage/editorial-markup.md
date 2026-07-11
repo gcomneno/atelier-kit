@@ -1,6 +1,6 @@
 # Atelier Mark — editorial inline tokens
 
-**Atelier Mark** lets operators emphasize words in short site texts using **theme colors**, not CSS or HTML.
+**Atelier Mark** lets operators emphasize words in short site texts using **theme colors and registered font presets**, not CSS or HTML.
 
 ADR: [`docs/adr/0008-atelier-mark-editorial-inline-tokens.md`](../adr/0008-atelier-mark-editorial-inline-tokens.md)
 
@@ -22,9 +22,12 @@ Plain text without `{` is unchanged.
 | `{intro}…{/intro}` | Intro title color |
 | `{heading}…{/heading}` | Heading color |
 | `{muted}…{/muted}` | Muted text |
+| `{font:fraunces}…{/font}` | Fraunces font preset |
+
+Font IDs are exactly the presets from Site appearance: `system`, `inter`, `source-serif`, `fraunces`, `dm-sans`, `lora`. Inline fonts override the site-wide font only for the wrapped text. `system` uses the device sans-serif and makes no external request; Google Fonts are loaded only for presets actually used by the site-wide setting or inline markup. URLs, free-form family names, CSS and unknown presets are rejected.
 
 - Literal braces: `{{` and `}}`
-- **No nesting** in v1
+- **No nesting**, including between color and font tags
 - Unknown or unclosed tags are rejected on save
 
 ### Example (Club-style tagline)
@@ -41,7 +44,7 @@ Visitor: dark `« »`, accent-colored body, no duplicate guillemets.
 
 ## Studio
 
-Use the toolbar buttons above tagline / intro fields to wrap the selection. Preview shows the result with your current appearance preset.
+Use the toolbar buttons and font selector above tagline / intro fields to wrap the selection. Preview shows the result with your current appearance preset and loads only the Google Fonts used in its markup.
 
 Open **Studio → Help** (`/studio/help`) for a short operator summary in the studio UI.
 
@@ -59,4 +62,5 @@ Open **Studio → Help** (`/studio/help`) for a short operator summary in the st
 
 - Item/news bodies
 - Custom hex colors or HTML
+- Custom font names, URLs or CSS
 - Nested tags

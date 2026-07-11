@@ -41,7 +41,8 @@ export function load({ url }) {
       header_logo: site.header_logo,
       header_logo_alt: site.header_logo_alt,
       favicon: site.favicon,
-      tagline: site.tagline
+      tagline: site.tagline,
+      hero_intro: site.hero_intro
     },
     seo: {
       ogImage,

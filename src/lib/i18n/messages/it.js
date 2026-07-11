@@ -97,6 +97,7 @@ export default {
     },
     editorial: {
       toolbar: 'Enfasi testo',
+      inlineFont: 'Font inline',
       preview: 'Anteprima',
       tags: {
         accent: 'Accento',
@@ -173,7 +174,7 @@ export default {
       atelierMark: {
         title: 'Atelier Mark — enfasi inline nei testi',
         intro:
-          'Atelier Mark colora parole in testi brevi del sito usando i token del tema — senza HTML né CSS personalizzato. Testo senza { resta invariato.',
+          'Atelier Mark colora parole o applica un preset font supportato nei testi brevi del sito — senza HTML, CSS personalizzato o URL font. Testo senza { resta invariato.',
         whereTitle: 'Dove funziona',
         where: {
           1: 'Studio → Sito → Identità → Tagline (virgolette epigrafe « » opzionali).',
@@ -186,12 +187,12 @@ export default {
           2: '{intro}…{/intro} — colore titolo intro',
           3: '{heading}…{/heading} — colore titoli',
           4: '{muted}…{/muted} — testo tenue',
-          5: 'Parentesi graffe letterali: {{ e }}. I tag non si annidano in v1. Tag sconosciuti o non chiusi bloccano Salva.'
+          5: '{font:fraunces}…{/font} — preset font supportato. Parentesi graffe letterali: {{ e }}. I tag non si annidano. Tag sconosciuti o non chiusi bloccano Salva.'
         },
         studioTitle: 'In Studio',
         studio: {
           1: 'Apri Sito → Identità e usa la barra strumenti sopra tagline, titolo intro o testo home intro.',
-          2: 'Seleziona il testo e clicca Accento, Intro, Titolo o Tenue per avvolgere la selezione.',
+          2: 'Seleziona il testo e scegli un ruolo colore o uno dei preset font inline supportati.',
           3: 'Controlla l’anteprima live sotto il campo con il preset aspetto corrente.',
           4: 'Solo per la tagline: scegli Epigrafe « » per virgolette gestite dal componente con colore virgolette separato.'
         },
@@ -1061,6 +1062,7 @@ export default {
     metaEntryNeedsValueOrChildren:
       '{source}:{entryPath}: la voce meta deve avere un "value" non vuoto oppure "children" non vuoti.',
     missingSiteObject: '{source}: manca l’oggetto "site".',
+    editorialMarkupInvalid: '{source}: markup Atelier Mark non valido: {detail}',
     appearanceMustBeObject: '{source}: site.appearance deve essere un oggetto quando presente.',
     appearancePresetInvalid: '{source}: site.appearance.preset deve essere uno tra: warm, neutral, dark, noir, custom.',
     appearanceColorInvalid: '{source}: site.appearance.{field} deve essere un colore hex come #f8f0e4.',

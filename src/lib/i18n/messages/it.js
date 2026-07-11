@@ -168,7 +168,7 @@ export default {
         hero: 'Banner in home: immagine, testo e visibilità.',
         layout: 'Preset layout, blocchi home/sidebar/menu e ordine widget.',
         contact: 'Email e WhatsApp per la scheda visitatore sulle pagine degli oggetti.',
-        social: 'Link Instagram, Facebook, X nel footer.',
+        social: 'Link Instagram, Facebook, X e GitHub nell’header e nel footer.',
         footer: 'Colonne link, copyright e riga legale.'
       },
       atelierMark: {
@@ -394,6 +394,8 @@ export default {
         instagram: 'URL Instagram',
         facebook: 'URL Facebook',
         x: 'URL X (Twitter)',
+        github: 'URL GitHub',
+        githubHint: 'Qualsiasi URL GitHub http o https valido, inclusa una pagina GitHub Sponsors.',
         save: 'Salva social'
       },
       footer: {
@@ -1112,7 +1114,7 @@ export default {
     missingSocialObject: '{source}: manca l’oggetto "social".',
     socialLinksMustBeArray: '{source}: "social.links" deve essere un array.',
     socialLinkMustBeObject: '{source}: il link deve essere un oggetto.',
-    socialLinkIdInvalid: '{source}: id deve essere uno tra: instagram, facebook, x (ricevuto "{id}").',
+    socialLinkIdInvalid: '{source}: id deve essere uno tra: instagram, facebook, x, github (ricevuto "{id}").',
     socialLinkUrlInvalid: '{source}: url deve essere un URL http o https valido.',
     missingFooterObject: '{source}: manca l’oggetto "footer".',
     footerColumnsMustBeArray: '{source}: "footer.columns" deve essere un array se presente.',
@@ -1341,7 +1343,8 @@ export default {
     social: {
       instagram: 'Instagram',
       facebook: 'Facebook',
-      x: 'X (Twitter)'
+      x: 'X (Twitter)',
+      github: 'Sostieni su GitHub Sponsors'
     }
   }
 };

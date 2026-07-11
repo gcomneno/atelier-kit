@@ -33,7 +33,11 @@ import {
   validationMessage,
   writeProjectYaml
 } from '$lib/server/studio-io.js';
-import { isValidSocialUrl, normalizeSocialId, SOCIAL_NETWORK_IDS } from '$lib/social-networks.js';
+import {
+  socialFormToLinks,
+  socialLinksToForm,
+  SOCIAL_NETWORK_IDS
+} from '$lib/social-networks.js';
 import { isValidFooterHref } from '$lib/footer-links.js';
 import {
   parseTaglineDisplay,
@@ -137,33 +141,13 @@ export function loadSiteForm() {
 }
 
 export function loadSocialForm() {
-  /** @type {Record<'instagram' | 'facebook' | 'x', string>} */
-  const urls = {
-    instagram: '',
-    facebook: '',
-    x: ''
-  };
-
   const data = readProjectYaml('config/social.yaml');
   const social = data.social;
 
   if (!isRecord(social) || !Array.isArray(social.links)) {
-    return urls;
+    return socialLinksToForm([]);
   }
-
-  for (const entry of social.links) {
-    if (!isRecord(entry)) {
-      continue;
-    }
-
-    const id = normalizeSocialId(readString(entry, 'id'));
-
-    if (id) {
-      urls[id] = readString(entry, 'url');
-    }
-  }
-
-  return urls;
+  return socialLinksToForm(social.links);
 }
 
 function emptyFooterForm(columnCount = MAX_FOOTER_COLUMNS) {
@@ -521,22 +505,13 @@ export async function saveSocialAction({ request }) {
   const formData = await request.formData();
 
   try {
-    /** @type {{ id: 'instagram' | 'facebook' | 'x', url: string }[]} */
-    const links = [];
-
+    /** @type {Record<string, string>} */
+    const values = {};
     for (const id of SOCIAL_NETWORK_IDS) {
-      const url = optionalField(formData.get(`url_${id}`));
-
-      if (url === '') {
-        continue;
-      }
-
-      if (!isValidSocialUrl(url)) {
-        throw new Error(t('errors.socialUrlInvalid', { network: id }));
-      }
-
-      links.push({ id, url });
+      values[id] = optionalField(formData.get(`url_${id}`));
     }
+    const { links, invalidId } = socialFormToLinks(values);
+    if (invalidId) throw new Error(t('errors.socialUrlInvalid', { network: invalidId }));
 
     writeProjectYaml('config/social.yaml', { social: { links } });
     const validation = runStructuralValidation();

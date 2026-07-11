@@ -44,7 +44,11 @@
 
     {#each SOCIAL_NETWORK_IDS as networkId}
       <label>
-        <StudioFieldLabel label={t(`studio.site.social.${networkId}`)} optional />
+        <StudioFieldLabel
+          label={t(`studio.site.social.${networkId}`)}
+          hint={networkId === 'github' ? t('studio.site.social.githubHint') : ''}
+          optional
+        />
         <input name={`url_${networkId}`} type="url" value={socialForm[networkId]} />
       </label>
     {/each}

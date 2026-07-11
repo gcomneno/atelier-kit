@@ -5,6 +5,7 @@ import { resolveAbsoluteImageUrl } from '$lib/site-meta.js';
 import { resolveDocumentTitle } from '$lib/site-branding.js';
 import {
   getFaqEntries,
+  getAboutConfig,
   getFooterConfig,
   getLayoutConfig,
   getLayoutMenuNav,
@@ -29,6 +30,7 @@ export function load({ url }) {
       ? [...layoutMenuNav, { href: '/faq', label: t('visitor.faq.navLabel') }]
       : layoutMenuNav;
   const documentTitle = resolveDocumentTitle(site);
+  const aboutPortrait = getAboutConfig()?.portrait ?? null;
 
   return {
     locale,
@@ -51,6 +53,7 @@ export function load({ url }) {
     socialLinks: social.links,
     footer,
     footerActive: isFooterActive(footer),
+    aboutPortrait,
     menuNav,
     searchIndex: buildSearchIndex()
   };

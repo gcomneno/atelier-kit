@@ -25,6 +25,7 @@ import { normalizeMetaHierarchy } from '$lib/item-meta.js';
 import { getItemCoverImage, normalizeItemImages } from '$lib/item-images.js';
 import { parseTaglineDisplay } from '$lib/editorial-markup.js';
 import { projectFaqEntries } from '$lib/signal-cloud-faq.js';
+import { parseAboutPortrait } from '$lib/about-config.js';
 
 const configFiles = import.meta.glob('/config/*.yaml', {
   query: '?raw',
@@ -503,28 +504,6 @@ export function getAboutConfig() {
     intro: optionalString(about, 'intro'),
     sections,
     portrait: parseAboutPortrait(about)
-  };
-}
-
-/**
- * @param {Record<string, unknown>} about
- */
-function parseAboutPortrait(about) {
-  const portrait = about.portrait;
-
-  if (!isRecord(portrait) || portrait.show !== true) {
-    return null;
-  }
-
-  const imageFile = optionalString(portrait, 'image_file');
-
-  if (!imageFile) {
-    return null;
-  }
-
-  return {
-    image_file: imageFile,
-    image_alt: optionalString(portrait, 'image_alt') ?? optionalString(about, 'title') ?? 'Portrait'
   };
 }
 

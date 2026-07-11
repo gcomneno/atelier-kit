@@ -50,7 +50,8 @@ export const actions = {
           portrait_image_file: showPortrait ? portraitImageFile : current.portrait_image_file,
           portrait_image_alt: showPortrait
             ? formData.get('portrait_image_alt')
-            : current.portrait_image_alt
+            : current.portrait_image_alt,
+          portrait_caption: formData.get('portrait_caption')
         },
         locale
       );

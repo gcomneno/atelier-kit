@@ -691,6 +691,8 @@ export default {
       portraitUpload: 'Carica foto',
       portraitUploadHint: 'JPEG, PNG o WebP. Se disattivi la visualizzazione, la foto resta salvata ma non compare sul sito.',
       portraitAlt: 'Testo alternativo foto',
+      portraitCaption: 'Didascalia visibile della foto',
+      portraitCaptionHint: 'Opzionale. Supporta Atelier Mark e compare sotto il ritratto.',
       sectionLegend: 'Sezione opzionale',
       sectionHeading: 'Titolo sezione',
       sectionBody: 'Testo sezione',

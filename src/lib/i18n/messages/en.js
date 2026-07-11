@@ -684,6 +684,8 @@ export default {
       portraitUpload: 'Upload photo',
       portraitUploadHint: 'JPEG, PNG or WebP. If display is off, the photo stays saved but hidden on the public site.',
       portraitAlt: 'Photo alt text',
+      portraitCaption: 'Visible photo caption',
+      portraitCaptionHint: 'Optional. Supports Atelier Mark and appears below the portrait.',
       sectionLegend: 'Optional section',
       sectionHeading: 'Section heading',
       sectionBody: 'Section body',

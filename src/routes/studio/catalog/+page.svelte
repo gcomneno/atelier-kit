@@ -44,7 +44,11 @@
       <legend>{t('studio.catalog.presentationLegend')}</legend>
 
       <label>
-        <StudioFieldLabel label={t('studio.catalog.eyebrow')} optional />
+        <StudioFieldLabel
+          label={t('studio.catalog.eyebrow')}
+          optional
+          hint={t('studio.catalog.eyebrowHint')}
+        />
         <input name="eyebrow" value={catalogForm.eyebrow} />
       </label>
 

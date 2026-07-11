@@ -1,6 +1,8 @@
 <script>
   import { resolveItemCoverFallbackSrc, resolveItemCoverSrc } from '$lib/item-cover.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
 
   let { item } = $props();
   const t = useVisitorI18n();
@@ -30,13 +32,15 @@
       <p class="status">{item.status}</p>
     {/if}
 
-    <h2>{item.title}</h2>
+    <h2><EditorialText value={item.title} /></h2>
 
     {#if item.subtitle}
-      <p class="subtitle">{item.subtitle}</p>
+      <EditorialText tag="p" class="subtitle" value={item.subtitle} />
     {/if}
 
-    <p class="description">{item.description}</p>
+    {#each splitEditorialParagraphs(item.description) as paragraph}
+      <EditorialText tag="p" class="description" value={paragraph} />
+    {/each}
 
     <dl>
       {#if item.material}
@@ -133,7 +137,7 @@
     color: var(--site-heading-color, var(--site-text-color, #2f281f));
   }
 
-  .subtitle {
+  :global(.subtitle) {
     margin: 0.35rem 0 0;
     color: var(--site-muted-text-color, #725f4a);
     font-size: 0.88rem;
@@ -145,7 +149,7 @@
     overflow: hidden;
   }
 
-  .description {
+  :global(.description) {
     margin: 0.75rem 0 0;
     color: color-mix(in srgb, var(--site-text-color, #4f4236) 84%, transparent);
     font-size: 0.92rem;

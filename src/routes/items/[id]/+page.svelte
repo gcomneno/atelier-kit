@@ -5,6 +5,9 @@
   import PageSocialMeta from '$lib/components/PageSocialMeta.svelte';
   import SignalCloud from '$lib/components/SignalCloud.svelte';
   import VisitorBrief from '$lib/components/VisitorBrief.svelte';
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { markedTextToPlainText } from '$lib/marked-text.js';
+  import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
   import { getItemCoverImage, getItemCoverIndex, normalizeItemImages } from '$lib/item-images.js';
   import { resolveItemCoverFallbackSrc } from '$lib/item-cover.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
@@ -98,8 +101,8 @@
 </script>
 
 <svelte:head>
-  <title>{item.title}</title>
-  <meta name="description" content={item.description} />
+  <title>{markedTextToPlainText(item.title)}</title>
+  <meta name="description" content={markedTextToPlainText(item.description)} />
 </svelte:head>
 
 <PageSocialMeta
@@ -114,7 +117,7 @@
       <a
         class="nav-link back-link"
         href={`/items/${previousItem.id}`}
-        aria-label={t('item.previousItemAria', { title: previousItem.title })}
+        aria-label={t('item.previousItemAria', { title: markedTextToPlainText(previousItem.title) })}
       >
         {t('item.previousItem')}
       </a>
@@ -126,7 +129,7 @@
       <a
         class="nav-link next-link"
         href={`/items/${nextItem.id}`}
-        aria-label={t('item.nextItemAria', { title: nextItem.title })}
+        aria-label={t('item.nextItemAria', { title: markedTextToPlainText(nextItem.title) })}
       >
         {t('item.nextItem')}
       </a>
@@ -139,7 +142,7 @@
         <button
           type="button"
           class="image-frame image-trigger"
-          aria-label={t('imageLightbox.enlarge', { title: item.title })}
+          aria-label={t('imageLightbox.enlarge', { title: markedTextToPlainText(item.title) })}
           on:click={() => openImageLightbox(coverIndex)}
         >
           <img
@@ -190,16 +193,20 @@
             <p class="status">{item.status}</p>
           {/if}
 
-          <h1 id="item-title">{item.title}</h1>
+          <h1 id="item-title"><EditorialText value={item.title} /></h1>
 
           {#if item.subtitle}
-            <p class="subtitle">{item.subtitle}</p>
+            <EditorialText tag="p" class="subtitle" value={item.subtitle} />
           {/if}
         </header>
 
         <div class="description-block">
           <div class="description-shell" class:expanded={descriptionExpanded}>
-            <p class="description" use:trackDescription>{item.description}</p>
+            <div class="description" use:trackDescription>
+              {#each splitEditorialParagraphs(item.description) as paragraph}
+                <EditorialText tag="p" value={paragraph} />
+              {/each}
+            </div>
 
             {#if descriptionCanToggle}
               <div class="description-actions">
@@ -227,7 +234,9 @@
         {/if}
 
         {#if item.notice}
-          <p class="notice">{item.notice}</p>
+          {#each splitEditorialParagraphs(item.notice) as paragraph}
+            <EditorialText tag="p" class="notice" value={paragraph} />
+          {/each}
         {/if}
       </div>
     </section>
@@ -393,14 +402,14 @@
     letter-spacing: -0.04em;
   }
 
-  .subtitle,
+  :global(.subtitle),
   .description,
-  .notice,
+  :global(.notice),
   .status {
     margin: 0;
   }
 
-  .subtitle {
+  :global(.subtitle) {
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 68%, transparent);
     font-size: 1.1rem;
   }
@@ -505,7 +514,7 @@
     white-space: normal;
   }
 
-  .notice {
+  :global(.notice) {
     border-left: 3px solid color-mix(in srgb, var(--site-text-color, #2f281f) 24%, transparent);
     padding-left: 0.85rem;
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 68%, transparent);

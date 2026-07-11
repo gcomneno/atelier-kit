@@ -15,6 +15,7 @@ import {
   writeNewsRecord
 } from '$lib/server/studio-io.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
+import { assertValidMarkedText } from '$lib/marked-text.js';
 
 function readString(record, key, fallback = '') {
   const value = record[key];
@@ -79,6 +80,11 @@ export const actions = {
       assertContentId(params.id, t('fields.newsId'), locale);
       const original = readNewsRecord(params.id);
       const formData = await request.formData();
+      assertValidMarkedText([
+        { path: `news.${params.id}.title`, value: String(formData.get('title') ?? '') },
+        { path: `news.${params.id}.excerpt`, value: String(formData.get('excerpt') ?? ''), mode: 'multiline' },
+        { path: `news.${params.id}.body`, value: String(formData.get('body') ?? ''), mode: 'multiline' }
+      ]);
       const upload = formData.get('image_upload');
       let imageFile = optionalField(formData.get('image_file'));
 

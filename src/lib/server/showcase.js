@@ -928,6 +928,35 @@ export function getNewsPost(id) {
   return getNewsPosts().find((post) => post.id === id);
 }
 
+/** All normalized public marked source used by registry-driven font discovery. */
+export function getPublicMarkedTextValues() {
+  const site = getSiteConfig();
+  const catalog = getCatalogConfig();
+  const about = getAboutConfig();
+  const footer = getFooterConfig();
+  const layout = getLayoutConfig();
+  const contact = getContactConfig();
+  const clouds = getSignalClouds();
+  const faqEntries = getFaqEntries();
+  const banner = /** @type {{ description?: string, caption?: string }} */ (site.hero_banner ?? {});
+
+  return [
+    site.tagline, site.header_title, site.intro_title, site.hero_intro, site.hero_signature, site.footer_note,
+    banner.description, banner.caption, catalog.eyebrow, catalog.intro,
+    about?.title, about?.intro, about?.portrait?.caption,
+    ...(about?.sections.flatMap((section) => [section.heading, section.body]) ?? []),
+    ...getItems().flatMap((item) => [item.title, item.subtitle, item.description, item.notice]),
+    ...getCollections().flatMap((collection) => [collection.title, collection.description]),
+    ...getNewsPosts().flatMap((post) => [post.title, post.excerpt, post.body]),
+    footer?.copyright, footer?.legal_line,
+    ...(footer?.columns.flatMap((column) => [column.title, ...column.links.map((link) => link.label)]) ?? []),
+    ...Object.values(layout.blocks).map((block) => block.label),
+    contact.email.label, contact.whatsapp.label,
+    ...clouds.flatMap((cloud) => [cloud.question, cloud.hint, ...cloud.options.map((option) => option.label)]),
+    ...faqEntries.flatMap((entry) => [entry.question, entry.answer, entry.group])
+  ].filter((value) => typeof value === 'string');
+}
+
 /**
  * @typedef {import('$lib/layout-blocks.js').LayoutBlockId} LayoutBlockId
  * @typedef {import('$lib/layout-blocks.js').LayoutBlockConfig} LayoutBlockConfig

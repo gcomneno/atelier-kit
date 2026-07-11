@@ -144,13 +144,16 @@ test('font discovery uses only a renderable normalized portrait caption', () => 
   assert.deepEqual(editorialFontPresets(emptyCaption?.caption), []);
 });
 
-test('layout font discovery consumes the normalized public portrait without a duplicate helper', () => {
+test('layout font discovery consumes the canonical marked registry including the portrait caption', () => {
   const config = readFileSync(new URL('./about-config.js', import.meta.url), 'utf8');
+  const showcase = readFileSync(new URL('./server/showcase.js', import.meta.url), 'utf8');
   const serverLayout = readFileSync(new URL('../routes/+layout.server.js', import.meta.url), 'utf8');
   const layout = readFileSync(new URL('../routes/+layout.svelte', import.meta.url), 'utf8');
+
   assert.doesNotMatch(config, /aboutCaptionFontPresets/);
-  assert.match(serverLayout, /getAboutConfig\(\)\?\.portrait \?\? null/);
-  assert.match(layout, /data\.aboutPortrait\?\.caption/);
+  assert.match(showcase, /about\?\.portrait\?\.caption/);
+  assert.match(serverLayout, /markedTextValues:\s*getPublicMarkedTextValues\(\)/);
+  assert.match(layout, /markedTextFontPresets\(data\.markedTextValues \?\? \[\]\)/);
 });
 
 test('public component conditionally renders semantic figcaption through EditorialText', () => {

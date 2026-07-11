@@ -5,7 +5,7 @@
   import SiteHeader from '$lib/components/SiteHeader.svelte';
   import { setVisitorI18nContext } from '$lib/i18n/visitor-context.js';
   import { appearanceCssVariables } from '$lib/site-appearance.js';
-  import { editorialFontPresets } from '$lib/editorial-markup.js';
+  import { markedTextFontPresets } from '$lib/marked-text.js';
   import { fontStylesheetHrefs } from '$lib/site-typography.js';
   import { STUDIO_HEAD_STYLE } from '$lib/studio-theme.js';
 
@@ -41,12 +41,7 @@
       ? []
       : fontStylesheetHrefs([
           data.appearance?.font_preset ?? 'inter',
-          ...editorialFontPresets(
-            data.site?.tagline,
-            data.site?.intro_title,
-            data.site?.hero_intro,
-            data.aboutPortrait?.caption
-          )
+          ...markedTextFontPresets(data.markedTextValues ?? [])
         ])
   );
   const faviconHref = $derived(data.site?.favicon || '/favicon.svg');

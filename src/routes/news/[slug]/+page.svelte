@@ -6,24 +6,25 @@
   import { isBookReadingFormat } from '$lib/book-content.js';
   import { formatPageTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
+  import { markedTextToPlainText } from '$lib/marked-text.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
 
   let lightboxOpen = $state(false);
 
-  const pageTitle = $derived(formatPageTitle(data.post.title, data.site));
+  const pageTitle = $derived(
+    formatPageTitle(markedTextToPlainText(data.post.title), data.site)
+  );
 
   const isBookLayout = $derived(
     isBookReadingFormat(data.post.reading_format, data.post.id)
   );
 
   const paragraphs = $derived(
-    data.post.body
-      .trim()
-      .split(/\n\s*\n/)
-      .map((paragraph) => paragraph.trim())
-      .filter(Boolean)
+    splitEditorialParagraphs(data.post.body)
   );
 
   function formatDate(/** @type {string} */ value) {
@@ -43,7 +44,7 @@
 
 <svelte:head>
   <title>{pageTitle}</title>
-  <meta name="description" content={data.post.excerpt || data.post.title} />
+  <meta name="description" content={markedTextToPlainText(data.post.excerpt || data.post.title)} />
 </svelte:head>
 
 <PageSocialMeta
@@ -68,7 +69,7 @@
       <header>
         <p class="eyebrow">{data.pageEyebrow}</p>
         <time datetime={data.post.date}>{formatDate(data.post.date)}</time>
-        <h1>{data.post.title}</h1>
+        <h1><EditorialText value={data.post.title} /></h1>
       </header>
 
       {#if data.post.image_file}
@@ -76,22 +77,22 @@
           <button
             type="button"
             class="hero-image-trigger"
-            aria-label={t('imageLightbox.enlarge', { title: data.post.title })}
+            aria-label={t('imageLightbox.enlarge', { title: markedTextToPlainText(data.post.title) })}
             onclick={() => (lightboxOpen = true)}
           >
-            <img src={data.post.image_file} alt={data.post.image_alt || data.post.title} />
+            <img src={data.post.image_file} alt={data.post.image_alt || markedTextToPlainText(data.post.title)} />
           </button>
         </figure>
         <ImageLightbox
           bind:open={lightboxOpen}
           src={data.post.image_file}
-          alt={data.post.image_alt || data.post.title}
+          alt={data.post.image_alt || markedTextToPlainText(data.post.title)}
         />
       {/if}
 
       <div class="body">
         {#each paragraphs as paragraph}
-          <p>{paragraph}</p>
+          <EditorialText tag="p" value={paragraph} />
         {/each}
       </div>
     </article>
@@ -180,7 +181,7 @@
     gap: 1.1rem;
   }
 
-  .body p {
+  .body :global(p) {
     margin: 0;
     color: var(--site-text-color, #e8e0d4);
     font-size: clamp(1.12rem, 2.4vw, 1.25rem);

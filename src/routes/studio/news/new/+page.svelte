@@ -1,4 +1,5 @@
 <script>
+  import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -51,7 +52,7 @@
 
     <label>
       <StudioFieldLabel label={t('studio.newsNew.titleField')} optional />
-      <input name="title" value={newsForm.title} />
+      <MarkedTextField name="title" value={newsForm.title} />
     </label>
 
     <label>
@@ -61,12 +62,12 @@
 
     <label>
       <StudioFieldLabel label={t('studio.newsNew.excerpt')} optional hint={t('studio.newsNew.excerptHint')} />
-      <textarea name="excerpt" rows="2">{newsForm.excerpt}</textarea>
+      <MarkedTextField name="excerpt" value={newsForm.excerpt} multiline rows={2} />
     </label>
 
     <label>
       <StudioFieldLabel label={t('studio.newsNew.body')} required />
-      <textarea name="body" rows="8" required>{newsForm.body}</textarea>
+      <MarkedTextField name="body" value={newsForm.body} multiline rows={8} />
     </label>
 
     <label>

@@ -39,6 +39,7 @@ import {
   SOCIAL_NETWORK_IDS
 } from '$lib/social-networks.js';
 import { isValidFooterHref } from '$lib/footer-links.js';
+import { assertValidMarkedText } from '$lib/marked-text.js';
 import {
   parseTaglineDisplay,
   resolveTaglineQuoteColor,
@@ -327,6 +328,8 @@ export async function saveSiteAction({ request }) {
     const introTitle = optionalField(formData.get('intro_title'));
     const tagline = optionalField(formData.get('tagline'));
     const heroIntro = optionalField(formData.get('hero_intro'));
+    const heroSignature = optionalField(formData.get('hero_signature'));
+    const footerNote = optionalField(formData.get('footer_note'));
 
     const editorialErrors = validateEditorialFields({
       tagline,
@@ -337,6 +340,8 @@ export async function saveSiteAction({ request }) {
     if (editorialErrors.length > 0) {
       throw new Error(editorialErrors[0]);
     }
+
+    assertValidMarkedText([{ path: 'site.header_title', value: headerTitle }]);
 
     site.header_title = headerTitle;
     site.intro_title = introTitle;
@@ -351,8 +356,12 @@ export async function saveSiteAction({ request }) {
 
     site.tagline = tagline;
     site.hero_intro = heroIntro;
-    site.hero_signature = optionalField(formData.get('hero_signature'));
-    site.footer_note = optionalField(formData.get('footer_note'));
+    assertValidMarkedText([
+      { path: 'site.hero_signature', value: heroSignature, mode: 'multiline' },
+      { path: 'site.footer_note', value: footerNote }
+    ]);
+    site.hero_signature = heroSignature;
+    site.footer_note = footerNote;
 
     const taglineWrap = String(formData.get('tagline_display_wrap') ?? 'none');
 
@@ -470,6 +479,11 @@ export async function saveContactAction({ request }) {
         phone: whatsappPhone
       }
     };
+
+    assertValidMarkedText([
+      { path: 'contact.email.label', value: contact.email.label },
+      { path: 'contact.whatsapp.label', value: contact.whatsapp.label }
+    ]);
 
     writeProjectYaml('config/contact.yaml', { contact });
     const validation = runStructuralValidation();
@@ -597,6 +611,17 @@ export async function saveFooterAction({ request }) {
       show_social: checkboxEnabled(formData.get('show_social'))
     };
 
+    assertValidMarkedText([
+      { path: 'footer.copyright', value: footer.copyright },
+      { path: 'footer.legal_line', value: footer.legal_line },
+      ...columns.flatMap((column, columnIndex) => [
+        { path: `footer.columns.${columnIndex}.title`, value: column.title },
+        ...column.links.map((link, linkIndex) => ({
+          path: `footer.columns.${columnIndex}.links.${linkIndex}.label`, value: link.label
+        }))
+      ])
+    ]);
+
     writeProjectYaml('config/footer.yaml', { footer });
     const validation = runStructuralValidation();
     const socialUrls = loadSocialForm();
@@ -670,6 +695,10 @@ export async function saveLayoutAction({ request }) {
       preset: resolveLayoutPreset(DEFAULT_LAYOUT_PRESET, blocks),
       blocks
     };
+
+    assertValidMarkedText(Object.entries(blocks).map(([blockId, block]) => ({
+      path: `layout.blocks.${blockId}.label`, value: block.label
+    })));
 
     writeProjectYaml('config/layout.yaml', { layout });
     const validation = runStructuralValidation();
@@ -768,13 +797,6 @@ export async function saveHeroBannerAction({ request }) {
     const existingBanner = isRecord(site.hero_banner) ? site.hero_banner : {};
     const upload = formData.get('banner_upload');
     let imageFile = String(formData.get('banner_image_file') ?? '').trim();
-
-    if (checkboxEnabled(formData.get('remove_hero_image'))) {
-      imageFile = '';
-    } else if (upload instanceof File && upload.size > 0) {
-      imageFile = await saveHeroBannerUpload(upload, locale);
-    }
-
     const show = checkboxEnabled(formData.get('show_banner'));
     const caption = show
       ? optionalField(formData.get('banner_caption'))
@@ -782,6 +804,18 @@ export async function saveHeroBannerAction({ request }) {
     const description = show
       ? optionalField(formData.get('banner_description'))
       : optionalField(existingBanner.description);
+
+    assertValidMarkedText([
+      { path: 'site.hero_banner.description', value: description, mode: 'multiline' },
+      { path: 'site.hero_banner.caption', value: caption }
+    ]);
+
+    if (checkboxEnabled(formData.get('remove_hero_image'))) {
+      imageFile = '';
+    } else if (upload instanceof File && upload.size > 0) {
+      imageFile = await saveHeroBannerUpload(upload, locale);
+    }
+
     const href = show ? optionalField(formData.get('banner_href')) : optionalField(existingBanner.href);
 
     if (show && imageFile === '') {

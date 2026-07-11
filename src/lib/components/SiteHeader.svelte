@@ -1,4 +1,6 @@
 <script>
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { markedTextToPlainText } from '$lib/marked-text.js';
   import SiteSearch from '$lib/components/SiteSearch.svelte';
   import SocialIcon from '$lib/components/SocialIcon.svelte';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
@@ -22,7 +24,7 @@
 
   const headerTitle = $derived(resolveHeaderTitle(site));
   const headerLogo = $derived(site.header_logo?.trim() || '');
-  const headerLogoAlt = $derived(site.header_logo_alt?.trim() || headerTitle);
+  const headerLogoAlt = $derived(site.header_logo_alt?.trim() || markedTextToPlainText(headerTitle));
 
   /** @param {string} id */
   function ariaLabel(id) {
@@ -44,7 +46,7 @@
         <img class="site-logo" src={headerLogo} alt={headerLogoAlt} />
       {/if}
       {#if headerTitle}
-        <span class="site-name">{headerTitle}</span>
+        <EditorialText tag="span" class="site-name" value={headerTitle} />
       {/if}
     </a>
 
@@ -53,7 +55,7 @@
         {#if menuNav.length > 0}
           <nav class="site-nav" aria-label={t('common.siteNav')}>
             {#each menuNav as item (item.href)}
-              <a class="site-nav-link" href={item.href}>{item.label}</a>
+              <a class="site-nav-link" href={item.href}><EditorialText value={item.label} /></a>
             {/each}
           </nav>
         {/if}
@@ -102,7 +104,7 @@
     backdrop-filter: blur(4px);
   }
 
-  .site-header.overlay .site-name {
+  .site-header.overlay :global(.site-name) {
     color: var(--site-header-title-color, var(--site-heading-color, var(--site-text-color, #e8e0d4)));
     text-shadow: 0 1px 16px rgb(0 0 0 / 0.65);
   }
@@ -139,7 +141,7 @@
     object-fit: contain;
   }
 
-  .site-name {
+  :global(.site-name) {
     font-size: clamp(0.95rem, 2.5vw, 1.1rem);
     font-weight: 600;
     letter-spacing: 0.03em;

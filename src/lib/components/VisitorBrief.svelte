@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+  import { markedTextToPlainText } from '$lib/marked-text.js';
 
   /** @typedef {{ id: string, title: string }} BriefItem */
   /** @typedef {{ id: string, label: string }} SignalOption */
@@ -88,13 +89,13 @@
    * @returns {string}
    */
   function buildBrief(item, answers, itemUrl) {
-    const lines = [t('visitorBrief.interestLine', { title: item.title }), ''];
+    const lines = [t('visitorBrief.interestLine', { title: markedTextToPlainText(item.title) }), ''];
 
     if (answers.length > 0) {
       lines.push(t('visitorBrief.impressionsHeading'));
 
       for (const answer of answers) {
-        lines.push(`- ${answer.question}: ${answer.label}`);
+        lines.push(`- ${markedTextToPlainText(answer.question)}: ${markedTextToPlainText(answer.label)}`);
       }
     } else {
       lines.push(t('visitorBrief.noSelections'));
@@ -138,7 +139,7 @@
       rawPrefix === '' || rawPrefix === 'Interest in'
         ? t('visitorBrief.emailSubjectPrefix')
         : rawPrefix;
-    const subject = `${subjectPrefix} "${item.title}"`;
+    const subject = `${subjectPrefix} "${markedTextToPlainText(item.title)}"`;
 
     return `mailto:${encodeURIComponent(email.address)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(briefText)}`;
   }

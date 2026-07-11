@@ -2,6 +2,8 @@
   import JsonLd from '$lib/components/JsonLd.svelte';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
   import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
 
   /**
    * @typedef {{
@@ -89,14 +91,16 @@
       {#each groups as group}
         <section class="faq-group">
           {#if group.name}
-            <h2>{group.name}</h2>
+            <h2><EditorialText value={group.name} /></h2>
           {/if}
 
           <div class="faq-list">
             {#each group.entries as entry (entry.id)}
               <details>
-                <summary>{entry.question}</summary>
-                <p class="answer">{entry.answer}</p>
+                <summary><EditorialText value={entry.question} /></summary>
+                {#each splitEditorialParagraphs(entry.answer) as paragraph}
+                  <EditorialText tag="p" class="answer" value={paragraph} />
+                {/each}
               </details>
             {/each}
           </div>
@@ -205,7 +209,7 @@
     outline-offset: 3px;
   }
 
-  .answer {
+  :global(.answer) {
     margin: 0;
     padding: 0 1.15rem 1.15rem;
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 88%, transparent);

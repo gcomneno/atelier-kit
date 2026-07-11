@@ -22,7 +22,7 @@
     data.catalog.home_limit > 0 && data.items.length > data.catalog.home_limit
   );
   const catalogEyebrow = $derived(data.catalog.eyebrow || t('home.catalogEyebrow'));
-  const catalogIntro = $derived(data.catalog.intro.trim());
+  const catalogIntroParagraphs = $derived(splitEditorialParagraphs(data.catalog.intro));
   const showAboutMain = $derived(Boolean(data.main?.about));
   const showNewsMain = $derived((data.main?.newsPosts?.length ?? 0) > 0);
   const heroIntroParagraphs = $derived(splitEditorialParagraphs(data.site.hero_intro));
@@ -92,20 +92,20 @@
             <a class="hero-banner" href={banner.href}>
               <img src={banner.image_file} alt={banner.image_alt} loading="lazy" width="960" height="360" />
               {#if banner.description}
-                <span class="hero-banner-description">{banner.description}</span>
+                <EditorialText tag="span" class="hero-banner-description" value={banner.description} />
               {/if}
               {#if banner.caption}
-                <span class="hero-banner-caption">{banner.caption}</span>
+                <EditorialText tag="span" class="hero-banner-caption" value={banner.caption} />
               {/if}
             </a>
           {:else}
             <figure class="hero-banner">
               <img src={banner.image_file} alt={banner.image_alt} loading="lazy" width="960" height="360" />
               {#if banner.description}
-                <span class="hero-banner-description">{banner.description}</span>
+                <EditorialText tag="span" class="hero-banner-description" value={banner.description} />
               {/if}
               {#if banner.caption}
-                <figcaption class="hero-banner-caption">{banner.caption}</figcaption>
+                <EditorialText tag="figcaption" class="hero-banner-caption" value={banner.caption} />
               {/if}
             </figure>
           {/if}
@@ -118,9 +118,9 @@
       <section class="home-about" aria-labelledby="home-about-title">
         <h2 id="home-about-title">{data.blockLabels.about}</h2>
         {#if about.intro}
-          <p>{about.intro}</p>
+          {#each splitEditorialParagraphs(about.intro) as paragraph}<EditorialText tag="p" value={paragraph} />{/each}
         {:else if about.sections[0]?.body}
-          <p>{about.sections[0].body}</p>
+          {#each splitEditorialParagraphs(about.sections[0].body) as paragraph}<EditorialText tag="p" value={paragraph} />{/each}
         {/if}
         <p class="text-link"><a href="/about">{t('common.readMore')}</a></p>
       </section>
@@ -134,7 +134,7 @@
             <li>
               <a href={`/news/${post.id}`}>
                 <time datetime={post.date}>{post.date}</time>
-                <span>{post.title}</span>
+                <EditorialText tag="span" value={post.title} />
               </a>
             </li>
           {/each}
@@ -153,8 +153,8 @@
         <div class="collection-grid">
           {#each data.collections as collection}
             <a class="collection-card" href={`/collections/${collection.id}`}>
-              <h3>{collection.title}</h3>
-              <p>{collection.description}</p>
+              <h3><EditorialText value={collection.title} /></h3>
+              {#each splitEditorialParagraphs(collection.description) as paragraph}<EditorialText tag="p" value={paragraph} />{/each}
               <span>{collection.items.length} {collection.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</span>
             </a>
           {/each}
@@ -167,11 +167,11 @@
     {#if showCatalog}
       <section id="catalog" class="catalog" aria-labelledby="catalog-title">
         <div class="section-heading">
-          <p class="eyebrow">{catalogEyebrow}</p>
+          <EditorialText tag="p" class="eyebrow" value={catalogEyebrow} />
           <h2 id="catalog-title">{data.items.length} {data.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</h2>
-          {#if catalogIntro}
-            <p class="catalog-intro">{catalogIntro}</p>
-          {/if}
+          {#each catalogIntroParagraphs as paragraph}
+            <EditorialText tag="p" class="catalog-intro" value={paragraph} />
+          {/each}
         </div>
 
         <div class="grid">
@@ -190,7 +190,7 @@
 
     {#if !data.footerActive && data.site.footer_note}
       <footer>
-        <p>{data.site.footer_note}</p>
+        <EditorialText tag="p" value={data.site.footer_note} />
       </footer>
     {/if}
   </main>
@@ -367,7 +367,7 @@
     text-decoration: none;
   }
 
-  .hero-banner-description {
+  :global(.hero-banner-description) {
     position: absolute;
     z-index: 2;
     inset: 0;
@@ -389,7 +389,7 @@
     pointer-events: none;
   }
 
-  .hero-banner:not(:has(.hero-banner-caption)) .hero-banner-description {
+  .hero-banner:not(:has(:global(.hero-banner-caption))) :global(.hero-banner-description) {
     padding-bottom: 1rem;
   }
 
@@ -416,7 +416,7 @@
     object-position: center;
   }
 
-  .hero-banner-caption {
+  :global(.hero-banner-caption) {
     position: absolute;
     z-index: 2;
     left: 0;
@@ -434,7 +434,7 @@
     text-shadow: 0 1px 10px color-mix(in srgb, var(--site-base-color, #f8f0e4) 65%, rgb(0 0 0 / 0.4));
   }
 
-  a.hero-banner:hover .hero-banner-caption {
+  a.hero-banner:hover :global(.hero-banner-caption) {
     color: color-mix(in srgb, var(--site-accent-color, #8c3a44) 62%, var(--site-text-color, #2f281f));
   }
 
@@ -462,7 +462,7 @@
     font-size: clamp(2rem, 7vw, 4rem);
   }
 
-  .catalog-intro {
+  :global(.catalog-intro) {
     max-width: 42rem;
     margin: 0.75rem auto 0;
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 82%, transparent);
@@ -519,7 +519,7 @@
     font-size: clamp(1.35rem, 4vw, 1.75rem);
   }
 
-  .collection-card p {
+  .collection-card :global(p) {
     margin: 0;
     color: color-mix(in srgb, var(--site-text-color, #4f4236) 84%, transparent);
     line-height: 1.6;
@@ -573,7 +573,7 @@
     color: var(--site-muted-text-color, #7b6a58);
   }
 
-  footer p {
+  footer :global(p) {
     margin: 0;
   }
 </style>

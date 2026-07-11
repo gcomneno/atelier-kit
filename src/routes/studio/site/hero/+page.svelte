@@ -1,4 +1,5 @@
 <script>
+  import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   // @ts-nocheck
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -11,12 +12,13 @@
 
   let { data, form } = $props();
 
-  const siteForm = $derived(form?.siteForm ?? data.siteForm);
-  const appearanceForm = $derived(form?.appearanceForm ?? data.appearanceForm);
+  const siteForm = $derived(data.siteForm);
+  const appearanceForm = $derived(data.appearanceForm);
   const heroBannerForm = $derived(form?.heroBannerForm ?? data.heroBannerForm);
   let showBanner = $state(false);
   let removeHeroImage = $state(false);
   let isDirty = $state(false);
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};
   /** @type {HTMLInputElement | null} */
   let bannerUploadInput = $state(null);
@@ -109,7 +111,7 @@
           optional
           hint={t('studio.site.heroBanner.bannerDescriptionHint')}
         />
-        <textarea name="banner_description" rows="3">{heroBannerForm.description}</textarea>
+        <MarkedTextField name="banner_description" value={heroBannerForm.description} multiline rows={3} />
       </label>
 
       <label>
@@ -118,7 +120,7 @@
           optional
           hint={t('studio.site.heroBanner.captionHint')}
         />
-        <input name="banner_caption" value={heroBannerForm.caption} />
+        <MarkedTextField name="banner_caption" value={heroBannerForm.caption} />
       </label>
 
       <label>

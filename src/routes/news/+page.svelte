@@ -1,4 +1,5 @@
 <script>
+  import EditorialText from '$lib/components/EditorialText.svelte';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
   import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
 
@@ -67,7 +68,7 @@
 
               <div class="post-copy">
                 <time datetime={post.date}>{formatDate(post.date)}</time>
-                <h2>{post.title}</h2>
+                <h2><EditorialText value={post.title} /></h2>
                 {#if listTeaser(post)}
                   <p>{listTeaser(post)}</p>
                 {/if}

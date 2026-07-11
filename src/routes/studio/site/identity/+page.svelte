@@ -1,7 +1,7 @@
 <script>
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
-  import EditorialField from '$lib/components/EditorialField.svelte';
+  import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
@@ -89,7 +89,7 @@
         optional
         hint={t('studio.site.identity.headerTitleHint')}
       />
-      <input name="header_title" value={siteForm.header_title} />
+      <MarkedTextField name="header_title" value={siteForm.header_title} />
     </label>
 
     <label>
@@ -98,7 +98,7 @@
         optional
         hint={t('studio.site.identity.introTitleHint')}
       />
-      <EditorialField name="intro_title" value={siteForm.intro_title} onvaluechange={updateEditorialDraft} />
+      <MarkedTextField name="intro_title" value={siteForm.intro_title} onvaluechange={updateEditorialDraft} />
     </label>
 
     <label>
@@ -157,7 +157,7 @@
         optional
         hint={t('studio.site.identity.taglineHint')}
       />
-      <EditorialField
+      <MarkedTextField
         name="tagline"
         value={siteForm.tagline}
         display={siteForm.tagline_display}
@@ -172,7 +172,7 @@
         optional
         hint={t('studio.site.identity.heroIntroHint')}
       />
-      <EditorialField name="hero_intro" value={siteForm.hero_intro} multiline rows={12} onvaluechange={updateEditorialDraft} />
+      <MarkedTextField name="hero_intro" value={siteForm.hero_intro} multiline rows={12} onvaluechange={updateEditorialDraft} />
     </label>
 
     <label>
@@ -181,7 +181,7 @@
         optional
         hint={t('studio.site.identity.heroSignatureHint')}
       />
-      <textarea name="hero_signature" rows="3">{siteForm.hero_signature}</textarea>
+      <MarkedTextField name="hero_signature" value={siteForm.hero_signature} multiline rows={3} />
     </label>
 
     <label>
@@ -190,7 +190,7 @@
         optional
         hint={t('studio.site.identity.footerNoteHint')}
       />
-      <input name="footer_note" value={siteForm.footer_note} />
+      <MarkedTextField name="footer_note" value={siteForm.footer_note} />
     </label>
 
     <div class="actions">

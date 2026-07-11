@@ -1,10 +1,14 @@
 <script>
   import { untrack } from 'svelte';
   import { useI18n } from '$lib/i18n/context.js';
-  import { EDITORIAL_MARK_TAGS, parseEditorialMarkup } from '$lib/editorial-markup.js';
+  import {
+    EDITORIAL_MARK_TAGS,
+    parseEditorialMarkup
+  } from '$lib/editorial-markup.js';
+  import { FONT_PRESET_IDS } from '$lib/site-typography.js';
   import EditorialText from '$lib/components/EditorialText.svelte';
 
-  /** @type {{ name: string, hint?: string, value?: string, rows?: number, multiline?: boolean, display?: { wrap?: string, quote_color?: string } | null, showEpigraphControls?: boolean }} */
+  /** @type {{ name: string, hint?: string, value?: string, rows?: number, multiline?: boolean, display?: { wrap?: string, quote_color?: string } | null, showEpigraphControls?: boolean, onvaluechange?: (name: string, value: string) => void }} */
   let {
     name,
     hint = '',
@@ -12,7 +16,8 @@
     rows = 3,
     multiline = false,
     display = null,
-    showEpigraphControls = false
+    showEpigraphControls = false,
+    onvaluechange
   } = $props();
 
   const t = useI18n();
@@ -28,6 +33,10 @@
     draft = value;
     wrapDraft = display?.wrap ?? 'none';
     quoteColorDraft = display?.quote_color ?? 'text';
+  });
+
+  $effect(() => {
+    onvaluechange?.(name, draft);
   });
 
   const previewDisplay = $derived(
@@ -51,7 +60,8 @@
     const start = field.selectionStart ?? draft.length;
     const end = field.selectionEnd ?? draft.length;
     const selected = draft.slice(start, end);
-    const wrapped = `{${tag}}${selected}{/${tag}}`;
+    const closeTag = tag.startsWith('font:') ? 'font' : tag;
+    const wrapped = `{${tag}}${selected}{/${closeTag}}`;
     draft = `${draft.slice(0, start)}${wrapped}${draft.slice(end)}`;
 
     queueMicrotask(() => {
@@ -64,6 +74,14 @@
       field.setSelectionRange(cursor, cursor);
     });
   }
+
+  /** @param {Event & { currentTarget: HTMLSelectElement }} event */
+  function applyFont(event) {
+    const preset = event.currentTarget.value;
+    if (!preset) return;
+    wrapSelection(`font:${preset}`);
+    event.currentTarget.value = '';
+  }
 </script>
 
 <div class="editorial-field">
@@ -73,6 +91,12 @@
         {t(`studio.editorial.tags.${tag}`)}
       </button>
     {/each}
+    <select class="toolbar-select" aria-label={t('studio.editorial.inlineFont')} onchange={applyFont}>
+      <option value="">{t('studio.editorial.inlineFont')}</option>
+      {#each FONT_PRESET_IDS as preset (preset)}
+        <option value={preset}>{t(`presets.font.${preset}`)}</option>
+      {/each}
+    </select>
   </div>
 
   {#if multiline}
@@ -144,6 +168,17 @@
 
   .toolbar-button:hover {
     background: color-mix(in srgb, var(--studio-accent, #4f6f8f) 12%, white);
+  }
+
+  .toolbar-select {
+    max-width: 15rem;
+    border: 1px solid color-mix(in srgb, var(--studio-border, #c8d0e0) 85%, transparent);
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    background: color-mix(in srgb, var(--studio-panel-bg, #f7f9fc) 88%, white);
+    color: var(--studio-text, #1f2937);
+    font: inherit;
+    font-size: 0.82rem;
   }
 
   .epigraph-controls {

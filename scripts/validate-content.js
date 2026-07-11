@@ -3,6 +3,7 @@ import path from 'node:path';
 import { parse } from 'yaml';
 import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
+import { validateEditorialFields } from '../src/lib/editorial-markup.js';
 import { isValidFooterHref } from '../src/lib/footer-links.js';
 import { isHomeShowMode, isLayoutPreset, MAX_CATALOG_HOME_LIMIT, MAX_LATEST_NEWS_COUNT } from '../src/lib/layout-presets.js';
 import {
@@ -198,6 +199,21 @@ function validateSite() {
 
   if ('name' in site && site.name !== undefined && typeof site.name !== 'string') {
     failKey('missingField', { source, field: 'name' });
+  }
+
+  for (const field of ['intro_title', 'hero_intro']) {
+    if (field in site && site[field] !== undefined && typeof site[field] !== 'string') {
+      failKey('missingField', { source, field });
+    }
+  }
+
+  const editorialErrors = validateEditorialFields({
+    tagline: typeof site.tagline === 'string' ? site.tagline : '',
+    intro_title: typeof site.intro_title === 'string' ? site.intro_title : '',
+    hero_intro: typeof site.hero_intro === 'string' ? site.hero_intro : ''
+  });
+  for (const detail of editorialErrors) {
+    failKey('editorialMarkupInvalid', { source, detail });
   }
 
   if ('appearance' in site && site.appearance !== undefined) {

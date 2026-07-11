@@ -96,6 +96,7 @@ export default {
     },
     editorial: {
       toolbar: 'Text emphasis',
+      inlineFont: 'Inline font',
       preview: 'Preview',
       tags: {
         accent: 'Accent',
@@ -172,7 +173,7 @@ export default {
       atelierMark: {
         title: 'Atelier Mark — inline text emphasis',
         intro:
-          'Atelier Mark lets you color words in short site texts using theme tokens — no HTML or custom CSS. Plain text without { stays unchanged.',
+          'Atelier Mark lets you color words or apply a supported font preset in short site texts — no HTML, custom CSS or font URLs. Plain text without { stays unchanged.',
         whereTitle: 'Where it works',
         where: {
           1: 'Studio → Site → Identity → Tagline (optional epigraph guillemets « »).',
@@ -185,12 +186,12 @@ export default {
           2: '{intro}…{/intro} — intro title color',
           3: '{heading}…{/heading} — heading color',
           4: '{muted}…{/muted} — muted text',
-          5: 'Literal braces: {{ and }}. Tags cannot nest in v1. Unknown or unclosed tags block Save.'
+          5: '{font:fraunces}…{/font} — supported font preset. Literal braces: {{ and }}. Tags cannot nest. Unknown or unclosed tags block Save.'
         },
         studioTitle: 'In Studio',
         studio: {
           1: 'Open Site → Identity and use the toolbar above tagline, intro title or home intro.',
-          2: 'Select text and click Accent, Intro, Heading or Muted to wrap the selection.',
+          2: 'Select text and choose a color role or one of the supported inline font presets.',
           3: 'Check the live preview under the field with your current appearance preset.',
           4: 'For tagline only: choose Epigraph quotes to render « » with a separate quote color.'
         },
@@ -1054,6 +1055,7 @@ export default {
     metaEntryNeedsValueOrChildren:
       '{source}:{entryPath}: meta entry must have either a non-empty "value" or non-empty "children".',
     missingSiteObject: '{source}: missing "site" object.',
+    editorialMarkupInvalid: '{source}: invalid Atelier Mark markup: {detail}',
     appearanceMustBeObject: '{source}: site.appearance must be an object when present.',
     appearancePresetInvalid: '{source}: site.appearance.preset must be one of: warm, neutral, dark, noir, custom.',
     appearanceColorInvalid: '{source}: site.appearance.{field} must be a hex color like #f8f0e4.',

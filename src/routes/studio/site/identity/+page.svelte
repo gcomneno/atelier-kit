@@ -1,10 +1,13 @@
 <script>
   import { enhance } from '$app/forms';
+  import { untrack } from 'svelte';
   import EditorialField from '$lib/components/EditorialField.svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
+  import { editorialFontPresets } from '$lib/editorial-markup.js';
+  import { fontStylesheetHrefs } from '$lib/site-typography.js';
   import { studioFormDirty } from '$lib/studio-form-dirty.js';
   import { studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
@@ -18,9 +21,38 @@
   let removeFavicon = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};
+  let editorialDrafts = $state(
+    untrack(() => ({
+      intro_title: siteForm.intro_title,
+      tagline: siteForm.tagline,
+      hero_intro: siteForm.hero_intro
+    }))
+  );
+
+  const previewFontHrefs = $derived(
+    fontStylesheetHrefs(
+      editorialFontPresets(
+        editorialDrafts.intro_title,
+        editorialDrafts.tagline,
+        editorialDrafts.hero_intro
+      )
+    )
+  );
+
+  /** @param {string} name @param {string} value */
+  function updateEditorialDraft(name, value) {
+    if (name === 'intro_title' || name === 'tagline' || name === 'hero_intro') {
+      editorialDrafts[name] = value;
+    }
+  }
 
   $effect(() => {
     siteForm;
+    editorialDrafts = {
+      intro_title: siteForm.intro_title,
+      tagline: siteForm.tagline,
+      hero_intro: siteForm.hero_intro
+    };
     removeHeaderLogo = false;
     removeFavicon = false;
     dirtyControl.resetBaseline?.();
@@ -29,6 +61,9 @@
 
 <svelte:head>
   <title>{t('studio.site.pageTitle')}</title>
+  {#each previewFontHrefs as href (href)}
+    <link rel="stylesheet" {href} />
+  {/each}
 </svelte:head>
 
 <p class="studio-intro">{t('studio.site.intro')}</p>
@@ -63,7 +98,7 @@
         optional
         hint={t('studio.site.identity.introTitleHint')}
       />
-      <EditorialField name="intro_title" value={siteForm.intro_title} />
+      <EditorialField name="intro_title" value={siteForm.intro_title} onvaluechange={updateEditorialDraft} />
     </label>
 
     <label>
@@ -127,6 +162,7 @@
         value={siteForm.tagline}
         display={siteForm.tagline_display}
         showEpigraphControls
+        onvaluechange={updateEditorialDraft}
       />
     </label>
 
@@ -136,7 +172,7 @@
         optional
         hint={t('studio.site.identity.heroIntroHint')}
       />
-      <EditorialField name="hero_intro" value={siteForm.hero_intro} multiline rows={12} />
+      <EditorialField name="hero_intro" value={siteForm.hero_intro} multiline rows={12} onvaluechange={updateEditorialDraft} />
     </label>
 
     <label>

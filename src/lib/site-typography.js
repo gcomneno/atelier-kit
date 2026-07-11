@@ -69,3 +69,8 @@ export function fontFamilyCss(preset) {
 export function fontStylesheetHref(preset) {
   return FONT_PRESETS[resolveFontPreset(preset)].googleFontsHref;
 }
+
+/** @param {Iterable<FontPreset>} presets @returns {string[]} */
+export function fontStylesheetHrefs(presets) {
+  return [...new Set([...presets].map(fontStylesheetHref).filter((href) => href !== null))];
+}

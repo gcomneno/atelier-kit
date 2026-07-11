@@ -4,6 +4,31 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.3.0 - 2026-07-11
+
+### Added
+
+- **Item image galleries** ([#118](https://github.com/gcomneno/atelier-kit/pull/118)): optional multi-image galleries for item detail pages, with thumbnails, lightbox navigation, cover resolution and backward compatibility with `image_file` / `image_alt`.
+- **Studio gallery management** ([#141](https://github.com/gcomneno/atelier-kit/pull/141), [#142](https://github.com/gcomneno/atelier-kit/pull/142)): add, remove, reorder and upload item gallery images directly from Studio, including alternative text, optional roles and cover selection.
+- **Configurable site favicon** ([#138](https://github.com/gcomneno/atelier-kit/pull/138)): upload, remove and validate the public favicon from Studio → Site identity.
+- **Signal Cloud FAQ** ([#143](https://github.com/gcomneno/atelier-kit/pull/143)): generate a public `/faq` page and `FAQPage` JSON-LD from eligible Signal Cloud records, with Studio controls for visibility, answer, grouping and order.
+- **Atelier Mark inline fonts** ([#144](https://github.com/gcomneno/atelier-kit/pull/144)): apply registered typography presets with `{font:preset}...{/font}` in tagline, intro title and home intro, with safe validation, Studio preview and deduplicated font loading.
+
+### Changed
+
+- **Atelier Mark documentation** ([#116](https://github.com/gcomneno/atelier-kit/pull/116)): document syntax, supported fields, Studio workflow, display options and validation in Studio Help and operator guides.
+- **Italian Studio terminology** ([#139](https://github.com/gcomneno/atelier-kit/pull/139)): replace the editor-facing term `Entità` with `Oggetto`, without changing routes, schemas or stored content.
+- **Object naming controls** ([#140](https://github.com/gcomneno/atelier-kit/pull/140)): move singular and plural item-name settings from Studio Catalog to Studio Items while preserving the existing configuration schema.
+
+### Fixed
+
+- Preserve existing `images[]` galleries when items are edited through Studio ([#122](https://github.com/gcomneno/atelier-kit/pull/122)).
+- Enforce a stable `2 / 3` image frame on item cards ([#124](https://github.com/gcomneno/atelier-kit/pull/124)).
+- Restore `site.notice` in the loaded site configuration contract ([#125](https://github.com/gcomneno/atelier-kit/pull/125)).
+- Warn when `.atelier-kit-preserve` contains core-managed paths that may block safe upgrades ([#132](https://github.com/gcomneno/atelier-kit/pull/132)).
+- Restore the Studio About save action and dirty-state behavior ([#135](https://github.com/gcomneno/atelier-kit/pull/135)).
+- Let collection cards fill the available public layout width without altering regular item-card sizing ([#136](https://github.com/gcomneno/atelier-kit/pull/136)).
+
 ## v0.2.0 - 2026-07-08
 
 ### Added

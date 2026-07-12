@@ -26,7 +26,7 @@
         </nav>
 
         <header>
-          <p class="eyebrow">{t('collections.collectionEyebrow')}</p>
+          <p class="eyebrow">{data.pageEyebrow}</p>
           <h1>{data.collection.title}</h1>
           <p>{data.collection.description}</p>
         </header>

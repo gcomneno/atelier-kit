@@ -6,6 +6,7 @@ import {
   getLayoutConfig,
   getSiteConfig
 } from '$lib/server/showcase.js';
+import { getLayoutPageEyebrow } from '$lib/layout-block-labels.js';
 
 /** @type {import('./$types').PageServerLoad} */
 export function load({ params }) {
@@ -22,6 +23,7 @@ export function load({ params }) {
     site: getSiteConfig(),
     catalog: getCatalogConfig(),
     collection,
+    pageEyebrow: getLayoutPageEyebrow(homeLayout.blockLabels, 'collections'),
     ...homeLayout
   };
 }

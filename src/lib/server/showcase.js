@@ -20,7 +20,11 @@ import {
 import { isValidSocialUrl, normalizeSocialId } from '$lib/social-networks.js';
 import { resolveSiteAppearance } from '$lib/site-appearance.js';
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
-import { getDefaultLayoutBlockLabel } from '$lib/layout-block-labels.js';
+import {
+  getLayoutBlockLabels,
+  getLayoutPageEyebrow,
+  resolveLayoutBlockLabel
+} from '$lib/layout-block-labels.js';
 import { normalizeMetaHierarchy } from '$lib/item-meta.js';
 import { getItemCoverImage, normalizeItemImages } from '$lib/item-images.js';
 import { parseTaglineDisplay } from '$lib/editorial-markup.js';
@@ -978,39 +982,19 @@ export function isCatalogSidebarActive(layout) {
 }
 
 /**
- * @typedef {{ surface?: 'menu' | 'main' | 'sidebar' }} LayoutBlockLabelOptions
+ * Route-data contract for a public page backed by a Layout block.
+ *
  * @param {LayoutBlockId} blockId
- * @param {LayoutBlockConfig} block
- * @param {string} locale
- * @param {LayoutBlockLabelOptions} [_options]
  */
-export function resolveLayoutBlockLabel(blockId, block, locale, _options = {}) {
-  const custom = typeof block.label === 'string' ? block.label.trim() : '';
+export function getLayoutPageData(blockId) {
+  const layout = getLayoutConfig();
+  const locale = resolveLocale(getSiteConfig().language);
+  const blockLabels = getLayoutBlockLabels(layout, locale);
 
-  if (custom) {
-    return custom;
-  }
-
-  return getDefaultLayoutBlockLabel(blockId, locale);
-}
-
-/**
- * @param {LayoutConfig} layout
- * @param {string} locale
- */
-export function getLayoutBlockLabels(layout, locale) {
-  /** @type {Record<LayoutBlockId, string>} */
-  const labels = /** @type {Record<LayoutBlockId, string>} */ ({});
-
-  for (const blockId of LAYOUT_BLOCK_IDS) {
-    const placement = effectiveBlockPlacement(layout.preset, layout.blocks, blockId);
-    const surface =
-      placement === 'menu' ? 'menu' : placement === 'main' ? 'main' : 'sidebar';
-
-    labels[blockId] = resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale, { surface });
-  }
-
-  return labels;
+  return {
+    blockLabels,
+    pageEyebrow: getLayoutPageEyebrow(blockLabels, blockId)
+  };
 }
 
 /**

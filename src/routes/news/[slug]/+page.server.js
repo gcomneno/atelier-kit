@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import { buildBlogPostingJsonLd } from '$lib/server/json-ld.js';
 import { resolveAbsoluteImageUrl } from '$lib/site-meta.js';
 import { formatPageTitle } from '$lib/site-branding.js';
-import { getNewsPost, getSiteConfig } from '$lib/server/showcase.js';
+import { getLayoutPageData, getNewsPost, getSiteConfig } from '$lib/server/showcase.js';
 
 /** @type {import('./$types').PageServerLoad} */
 export function load({ params, url }) {
@@ -18,6 +18,7 @@ export function load({ params, url }) {
   return {
     site,
     post,
+    ...getLayoutPageData('news'),
     seo: {
       ogTitle: formatPageTitle(post.title, site),
       ogDescription: description,

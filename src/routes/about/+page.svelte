@@ -47,7 +47,7 @@
       {/if}
 
       <div class="page-heading">
-        <p class="eyebrow">{t('about.eyebrow')}</p>
+        <p class="eyebrow">{data.pageEyebrow}</p>
         <h1>{data.about.title}</h1>
       </div>
 

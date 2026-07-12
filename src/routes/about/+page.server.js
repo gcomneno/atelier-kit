@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { buildAboutPageJsonLd } from '$lib/server/json-ld.js';
-import { getAboutConfig, getSiteConfig } from '$lib/server/showcase.js';
+import { getAboutConfig, getLayoutPageData, getSiteConfig } from '$lib/server/showcase.js';
 
 /** @type {import('./$types').PageServerLoad} */
 export function load({ url }) {
@@ -15,6 +15,7 @@ export function load({ url }) {
   return {
     site,
     about,
+    ...getLayoutPageData('about'),
     jsonLd: buildAboutPageJsonLd(about, site, url.origin)
   };
 }

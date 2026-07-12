@@ -47,9 +47,7 @@
   <a class="back-link" href="/">{t('common.backToShowcase')}</a>
 
   <header class="page-header">
-    {#if siteLabel}
-      <p class="eyebrow">{siteLabel}</p>
-    {/if}
+    <p class="eyebrow">{data.pageEyebrow}</p>
     <h1>{t('news.title')}</h1>
   </header>
 

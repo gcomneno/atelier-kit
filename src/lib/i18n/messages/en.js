@@ -696,7 +696,8 @@ export default {
       intro:
         'How the public catalog presents itself: copy, sort order and home preview. Individual item content is managed under Items.',
       presentationLegend: 'Catalog page',
-      eyebrow: 'Label above the title',
+      eyebrow: 'Home catalog eyebrow',
+      eyebrowHint: 'Optional label above the catalog section title on the home page. The /catalog page uses the label set under Site → Layout.',
       introField: 'Intro text',
       introHint: 'Shown in the home catalog section and on /catalog. Leave empty for the theme default (on /catalog only).',
       listingLegend: 'Listing',

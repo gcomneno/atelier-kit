@@ -152,7 +152,9 @@ site:
     preset: warm
 ```
 
-Presets: `warm` (default), `neutral`, `dark`, or `custom` with explicit hex colors.
+Color presets: `warm` (default), `neutral`, `dark`, `noir`, `intimate`, `space`,
+`funny-coloured`, and `custom` with explicit hex colors. The color preset and font preset are
+separate settings: changing one does not change the other.
 
 Optional **background image** upload (JPG/PNG/WebP) saved to `static/images/site/background.*`.
 

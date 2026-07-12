@@ -4,7 +4,7 @@
 /**
  * @typedef {{
  *   enabled: boolean,
- *   placement: LayoutPlacement,
+ *   placements: LayoutPlacement[],
  *   count?: number,
  *   label?: string
  * }} LayoutBlockConfig
@@ -13,12 +13,15 @@
 /** @type {LayoutBlockId[]} */
 export const LAYOUT_BLOCK_IDS = ['about', 'news', 'collections', 'catalog'];
 
+/** @type {LayoutPlacement[]} */
+export const LAYOUT_PLACEMENTS = ['main', 'sidebar', 'menu'];
+
 /** @type {Record<LayoutBlockId, LayoutBlockConfig>} */
 export const DEFAULT_LAYOUT_BLOCKS = {
-  about: { enabled: true, placement: 'sidebar' },
-  news: { enabled: true, placement: 'sidebar', count: 3 },
-  collections: { enabled: true, placement: 'sidebar' },
-  catalog: { enabled: true, placement: 'main' }
+  about: { enabled: true, placements: ['sidebar'] },
+  news: { enabled: true, placements: ['sidebar'], count: 3 },
+  collections: { enabled: true, placements: ['sidebar'] },
+  catalog: { enabled: true, placements: ['main'] }
 };
 
 /**
@@ -26,7 +29,7 @@ export const DEFAULT_LAYOUT_BLOCKS = {
  * @returns {value is LayoutPlacement}
  */
 export function isLayoutPlacement(value) {
-  return value === 'main' || value === 'sidebar' || value === 'menu';
+  return typeof value === 'string' && LAYOUT_PLACEMENTS.includes(/** @type {LayoutPlacement} */ (value));
 }
 
 /**
@@ -57,7 +60,7 @@ function normalizeNewsCount(value, fallback) {
 function cloneBlock(block) {
   return {
     enabled: block.enabled,
-    placement: block.placement,
+    placements: [...block.placements],
     ...(typeof block.count === 'number' ? { count: block.count } : {}),
     ...(typeof block.label === 'string' && block.label !== '' ? { label: block.label } : {})
   };
@@ -92,8 +95,16 @@ export function normalizeLayoutBlocks(raw) {
       blocks[id].enabled = block.enabled;
     }
 
-    if (isLayoutPlacement(block.placement)) {
-      blocks[id].placement = block.placement;
+    const placements = normalizePlacements(block.placements);
+
+    if (placements !== null) {
+      blocks[id].placements = placements;
+    } else if (isLayoutPlacement(block.placement)) {
+      blocks[id].placements = [block.placement];
+    }
+
+    if (blocks[id].enabled && blocks[id].placements.length === 0) {
+      blocks[id].placements = [...DEFAULT_LAYOUT_BLOCKS[id].placements];
     }
 
     if (id === 'news' && 'count' in block) {
@@ -113,7 +124,20 @@ export function normalizeLayoutBlocks(raw) {
 }
 
 /**
- * Migrate legacy `home` + `sidebar` flags into block placement.
+ * @param {unknown} value
+ * @returns {LayoutPlacement[] | null}
+ */
+function normalizePlacements(value) {
+  if (!Array.isArray(value) || value.some((placement) => !isLayoutPlacement(placement))) {
+    return null;
+  }
+
+  const selected = new Set(value);
+  return LAYOUT_PLACEMENTS.filter((placement) => selected.has(placement));
+}
+
+/**
+ * Migrate legacy `home` + `sidebar` flags into block placements.
  *
  * @param {Record<string, unknown>} layout
  * @returns {Record<LayoutBlockId, LayoutBlockConfig>}
@@ -148,67 +172,72 @@ export function migrateLegacyLayoutBlocks(layout) {
   );
 
   blocks.about.enabled = sidebarAbout;
-  blocks.about.placement = 'sidebar';
+  blocks.about.placements = ['sidebar'];
 
   blocks.news.enabled = sidebarNews;
-  blocks.news.placement = 'sidebar';
+  blocks.news.placements = ['sidebar'];
   blocks.news.count = newsCount;
 
   blocks.collections.enabled =
     sidebarCollections || homeShow === 'collections' || homeShow === 'both';
-  blocks.collections.placement = sidebarCollections ? 'sidebar' : 'main';
+  blocks.collections.placements = [sidebarCollections ? 'sidebar' : 'main'];
 
   blocks.catalog.enabled = homeShow === 'catalog' || homeShow === 'both';
-  blocks.catalog.placement = 'main';
+  blocks.catalog.placements = ['main'];
 
   return blocks;
 }
 
 /**
- * @param {import('$lib/layout-presets.js').LayoutPreset} preset
  * @param {Record<LayoutBlockId, LayoutBlockConfig>} blocks
  * @param {LayoutBlockId} blockId
- * @returns {'main' | 'sidebar' | 'menu' | null}
+ * @returns {LayoutPlacement[]}
  */
-export function effectiveBlockPlacement(preset, blocks, blockId) {
+export function effectiveBlockPlacements(blocks, blockId) {
   const block = blocks[blockId];
 
   if (!block?.enabled) {
-    return null;
+    return [];
   }
 
-  if (block.placement === 'menu') {
-    return 'menu';
-  }
-
-  if (preset === 'single-column') {
-    return 'main';
-  }
-
-  return block.placement === 'sidebar' ? 'sidebar' : 'main';
+  return normalizePlacements(block.placements) ?? [];
 }
 
 /**
- * @param {import('$lib/layout-presets.js').LayoutPreset} preset
+ * @param {Record<LayoutBlockId, LayoutBlockConfig>} blocks
+ * @param {LayoutBlockId} blockId
+ * @param {LayoutPlacement} placement
+ * @returns {boolean}
+ */
+export function blockHasPlacement(blocks, blockId, placement) {
+  return effectiveBlockPlacements(blocks, blockId).includes(placement);
+}
+
+/**
+ * Enabled block ids projected to a destination, in global Layout order.
+ * @param {Record<LayoutBlockId, LayoutBlockConfig>} blocks
+ * @param {LayoutPlacement} placement
+ * @returns {LayoutBlockId[]}
+ */
+export function layoutBlockIdsForPlacement(blocks, placement) {
+  return LAYOUT_BLOCK_IDS.filter((id) => blockHasPlacement(blocks, id, placement));
+}
+
+/**
  * @param {Record<LayoutBlockId, LayoutBlockConfig>} blocks
  * @returns {boolean}
  */
-export function hasSidebarBlocks(preset, blocks) {
-  return LAYOUT_BLOCK_IDS.some((id) => effectiveBlockPlacement(preset, blocks, id) === 'sidebar');
+export function hasSidebarBlocks(blocks) {
+  return LAYOUT_BLOCK_IDS.some((id) => blockHasPlacement(blocks, id, 'sidebar'));
 }
 
 /**
- * Derive layout preset from block placement.
+ * Derive layout preset from block placements.
  * Sidebar on any enabled block → widget layout; otherwise single column.
  *
- * @param {import('$lib/layout-presets.js').LayoutPreset} _preset
  * @param {Record<LayoutBlockId, LayoutBlockConfig>} blocks
  * @returns {import('$lib/layout-presets.js').LayoutPreset}
  */
-export function resolveLayoutPreset(_preset, blocks) {
-  const usesSidebar = LAYOUT_BLOCK_IDS.some(
-    (id) => blocks[id].enabled && blocks[id].placement === 'sidebar'
-  );
-
-  return usesSidebar ? 'catalog-sidebar' : 'single-column';
+export function resolveLayoutPreset(blocks) {
+  return hasSidebarBlocks(blocks) ? 'catalog-sidebar' : 'single-column';
 }

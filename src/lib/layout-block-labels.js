@@ -1,5 +1,5 @@
 import { createTranslator } from './i18n/index.js';
-import { LAYOUT_BLOCK_IDS, effectiveBlockPlacement } from './layout-blocks.js';
+import { LAYOUT_BLOCK_IDS } from './layout-blocks.js';
 
 /** @typedef {import('$lib/layout-blocks.js').LayoutBlockId} LayoutBlockId */
 
@@ -16,14 +16,12 @@ export function getDefaultLayoutBlockLabel(blockId, locale) {
 
 /**
  * Resolve the effective visitor-facing label for a normalized Layout block.
- * The surface is accepted to keep every projection on one shared contract.
  *
  * @param {LayoutBlockId} blockId
  * @param {import('./layout-blocks.js').LayoutBlockConfig} block
  * @param {string} locale
- * @param {{ surface?: 'menu' | 'main' | 'sidebar' }} [_options]
  */
-export function resolveLayoutBlockLabel(blockId, block, locale, _options = {}) {
+export function resolveLayoutBlockLabel(blockId, block, locale) {
   const custom = typeof block.label === 'string' ? block.label.trim() : '';
 
   return custom || getDefaultLayoutBlockLabel(blockId, locale);
@@ -38,10 +36,7 @@ export function getLayoutBlockLabels(layout, locale) {
   const labels = /** @type {Record<LayoutBlockId, string>} */ ({});
 
   for (const blockId of LAYOUT_BLOCK_IDS) {
-    const placement = effectiveBlockPlacement(layout.preset, layout.blocks, blockId);
-    const surface = placement === 'menu' ? 'menu' : placement === 'main' ? 'main' : 'sidebar';
-
-    labels[blockId] = resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale, { surface });
+    labels[blockId] = resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale);
   }
 
   return labels;

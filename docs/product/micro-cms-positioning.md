@@ -88,7 +88,7 @@ A credible micro-CMS inspired by WordPress should cover eight pillars. Each pill
 |---|---|---|
 | Stable URLs | Yes | SvelteKit routes (`/items/<id>`, `/news/<slug>`, …) |
 | Navigation | Yes | Config-driven nav and layout blocks |
-| Configurable home layout | Limited | Layout presets (`single-column`, `catalog-sidebar`) and block placement |
+| Configurable home layout | Limited | Layout blocks can project to `main`, `sidebar` and `menu`; presets are derived from active sidebar projections |
 | Unlimited custom pages | Not required | Fixed page types only |
 
 **Status:** adequate for creative showcases; not for large corporate sites.

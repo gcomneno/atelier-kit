@@ -4,7 +4,7 @@
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
-  import { LAYOUT_BLOCK_IDS } from '$lib/layout-blocks.js';
+  import { LAYOUT_BLOCK_IDS, LAYOUT_PLACEMENTS } from '$lib/layout-blocks.js';
   import { getDefaultLayoutBlockLabel } from '$lib/layout-block-labels.js';
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
@@ -24,18 +24,18 @@
     collections: false,
     catalog: false
   });
-  /** @type {Record<import('$lib/layout-blocks.js').LayoutBlockId, import('$lib/layout-blocks.js').LayoutPlacement>} */
-  let blockPlacement = $state({
-    about: 'sidebar',
-    news: 'sidebar',
-    collections: 'sidebar',
-    catalog: 'main'
+  /** @type {Record<import('$lib/layout-blocks.js').LayoutBlockId, import('$lib/layout-blocks.js').LayoutPlacement[]>} */
+  let blockPlacements = $state({
+    about: ['sidebar'],
+    news: ['sidebar'],
+    collections: ['sidebar'],
+    catalog: ['main']
   });
 
   $effect(() => {
     for (const blockId of LAYOUT_BLOCK_IDS) {
       blockEnabled[blockId] = layoutForm.blocks[blockId].enabled;
-      blockPlacement[blockId] = layoutForm.blocks[blockId].placement;
+      blockPlacements[blockId] = [...layoutForm.blocks[blockId].placements];
     }
 
     dirtyControl.resetBaseline?.();
@@ -107,16 +107,24 @@
           {/if}
 
           {#if blockEnabled[blockId]}
-            <label class="block-placement">
-              <StudioFieldLabel label={t('studio.site.layout.placement')} required />
-              <select name={`block_${blockId}_placement`} bind:value={blockPlacement[blockId]}>
-                <option value="main">{t('studio.site.layout.placementMain')}</option>
-                <option value="sidebar">{t('studio.site.layout.placementSidebar')}</option>
-                <option value="menu">{t('studio.site.layout.placementMenu')}</option>
-              </select>
-            </label>
+            <fieldset class="block-placements">
+              <legend>{t('studio.site.layout.placements')}</legend>
+              {#each LAYOUT_PLACEMENTS as placement}
+                <label class="checkbox">
+                  <input
+                    type="checkbox"
+                    name={`block_${blockId}_placements`}
+                    value={placement}
+                    bind:group={blockPlacements[blockId]}
+                  />
+                  {t(`studio.site.layout.placement${placement[0].toUpperCase()}${placement.slice(1)}`)}
+                </label>
+              {/each}
+            </fieldset>
           {:else}
-            <input type="hidden" name={`block_${blockId}_placement`} value={blockPlacement[blockId]} />
+            {#each blockPlacements[blockId] as placement}
+              <input type="hidden" name={`block_${blockId}_placements`} value={placement} />
+            {/each}
           {/if}
         </div>
       {/each}
@@ -151,8 +159,21 @@
 
   .block-name,
   .block-news-count,
-  .block-placement {
+  .block-placements {
     min-width: 0;
+  }
+
+  .block-placements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+    padding: 0;
+    border: 0;
+  }
+
+  .block-placements legend {
+    margin-bottom: 0.35rem;
+    font-weight: 600;
   }
 
   .block-news-count {
@@ -194,8 +215,5 @@
       grid-template-columns: auto minmax(0, 1fr) max-content minmax(9.5rem, auto);
     }
 
-    .block-placement select {
-      width: 100%;
-    }
   }
 </style>

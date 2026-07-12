@@ -15,6 +15,7 @@ import {
 } from '$lib/layout-presets.js';
 import {
   LAYOUT_BLOCK_IDS,
+  LAYOUT_PLACEMENTS,
   isLayoutPlacement,
   migrateLegacyLayoutBlocks,
   normalizeLayoutBlocks,
@@ -190,7 +191,7 @@ export function loadLayoutForm() {
     return form;
   }
 
-  form.preset = resolveLayoutPreset(form.preset, form.blocks);
+  form.preset = resolveLayoutPreset(form.blocks);
   return form;
 }
 
@@ -662,9 +663,21 @@ export async function saveLayoutAction({ request }) {
     const blocks = normalizeLayoutBlocks();
 
     for (const blockId of LAYOUT_BLOCK_IDS) {
-      const placementValue = optionalField(formData.get(`block_${blockId}_placement`), 'main');
       blocks[blockId].enabled = checkboxEnabled(formData.get(`block_${blockId}_enabled`));
-      blocks[blockId].placement = isLayoutPlacement(placementValue) ? placementValue : 'main';
+      const submittedPlacements = formData.getAll(`block_${blockId}_placements`);
+
+      if (submittedPlacements.some((value) => typeof value !== 'string' || !isLayoutPlacement(value))) {
+        throw new Error(t('errors.layoutBlockPlacementsInvalid'));
+      }
+
+      const selectedPlacements = new Set(submittedPlacements);
+      blocks[blockId].placements = LAYOUT_PLACEMENTS.filter((placement) =>
+        selectedPlacements.has(placement)
+      );
+
+      if (blocks[blockId].enabled && blocks[blockId].placements.length === 0) {
+        throw new Error(t('errors.layoutBlockPlacementsRequired'));
+      }
 
       const label = optionalField(formData.get(`block_${blockId}_label`));
 
@@ -692,7 +705,7 @@ export async function saveLayoutAction({ request }) {
     blocks.news.count = newsCount;
 
     const layout = {
-      preset: resolveLayoutPreset(DEFAULT_LAYOUT_PRESET, blocks),
+      preset: resolveLayoutPreset(blocks),
       blocks
     };
 

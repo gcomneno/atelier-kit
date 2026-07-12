@@ -15,7 +15,7 @@ function layoutWith(labels = {}) {
     preset: 'single-column',
     blocks: normalizeLayoutBlocks(
       Object.fromEntries(
-        Object.entries(labels).map(([id, label]) => [id, { enabled: true, placement: 'main', label }])
+        Object.entries(labels).map(([id, label]) => [id, { enabled: true, placements: ['main'], label }])
       )
     )
   };
@@ -87,6 +87,16 @@ test('legacy Layout blocks remain compatible when labels are absent', () => {
   assert.equal(labels.news, 'News');
   assert.equal(labels.collections, 'Collections');
   assert.equal(labels.catalog, 'Catalogue');
+});
+
+test('Layout labels do not depend on placement count or order', () => {
+  const first = layoutWith({ about: 'Studio' });
+  const second = layoutWith({ about: 'Studio' });
+  first.blocks.about.placements = ['main'];
+  second.blocks.about.placements = ['menu', 'sidebar', 'main'];
+
+  assert.equal(getLayoutBlockLabels(first, 'en').about, 'Studio');
+  assert.equal(getLayoutBlockLabels(second, 'en').about, 'Studio');
 });
 
 test('catalog.eyebrow does not participate in the /catalog page precedence', () => {

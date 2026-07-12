@@ -4,6 +4,7 @@ import { parse } from 'yaml';
 import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
 import { validateEditorialFields } from '../src/lib/editorial-markup.js';
+import { validateAboutPortraitContent } from '../src/lib/about-config.js';
 
 const ROOT = process.cwd();
 const STRICT_MODE = process.argv.includes('--strict');
@@ -303,6 +304,27 @@ function inspectContact() {
     for (const [key, value] of Object.entries(whatsapp)) {
       inspectDeepStrings(source, `contact.whatsapp.${key}`, value);
     }
+  }
+}
+
+function inspectAbout() {
+  const source = 'config/about.yaml';
+  if (!existsSync(path.join(ROOT, source))) return;
+
+  const data = readYaml(source);
+  if (!data || !isRecord(data.about) || !isRecord(data.about.portrait)) return;
+
+  const errors = validateAboutPortraitContent(data.about);
+
+  for (const error of errors) {
+    addWarning({
+      source,
+      title: t('doctor.warnings.editorialMarkup.title'),
+      problem: t('doctor.warnings.editorialMarkup.problem', { detail: error }),
+      action: t('doctor.warnings.editorialMarkup.action'),
+      detail: error,
+      technical: error
+    });
   }
 }
 
@@ -615,6 +637,7 @@ function printWarnings() {
 }
 
 inspectSite();
+inspectAbout();
 inspectContact();
 inspectSignalClouds();
 inspectItems();

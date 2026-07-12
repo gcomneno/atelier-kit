@@ -20,6 +20,7 @@ import {
 } from '$lib/item-meta.js';
 import { translate } from '$lib/i18n/index.js';
 import { MAX_CATALOG_HOME_LIMIT } from '$lib/layout-presets.js';
+import { buildAboutData, loadAboutFormData } from '$lib/about-config.js';
 
 const ROOT = process.cwd();
 const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -1068,7 +1069,8 @@ export function loadAboutForm(locale = 'en') {
       section_body: '',
       show_portrait: false,
       portrait_image_file: '',
-      portrait_image_alt: ''
+      portrait_image_alt: '',
+      portrait_caption: ''
     };
   }
 
@@ -1079,22 +1081,7 @@ export function loadAboutForm(locale = 'en') {
     throw new Error(translate('errors.missingAbout', locale));
   }
 
-  const sections = Array.isArray(about.sections) ? about.sections : [];
-  const firstSection = sections[0] && typeof sections[0] === 'object' ? sections[0] : {};
-  const portrait =
-    about.portrait && typeof about.portrait === 'object' && !Array.isArray(about.portrait)
-      ? about.portrait
-      : {};
-
-  return {
-    title: typeof about.title === 'string' ? about.title : '',
-    intro: typeof about.intro === 'string' ? about.intro : '',
-    section_heading: typeof firstSection.heading === 'string' ? firstSection.heading : '',
-    section_body: typeof firstSection.body === 'string' ? firstSection.body : '',
-    show_portrait: portrait.show === true,
-    portrait_image_file: typeof portrait.image_file === 'string' ? portrait.image_file : '',
-    portrait_image_alt: typeof portrait.image_alt === 'string' ? portrait.image_alt : ''
-  };
+  return loadAboutFormData(data);
 }
 
 /**
@@ -1103,58 +1090,10 @@ export function loadAboutForm(locale = 'en') {
  */
 export function writeAboutForm(aboutForm, locale = 'en') {
   const existing = readProjectYaml('config/about.yaml');
-  const existingAbout =
-    existing.about && typeof existing.about === 'object' && !Array.isArray(existing.about)
-      ? existing.about
-      : {};
-
-  const title = optionalField(String(aboutForm.title ?? ''));
-  const intro = optionalField(String(aboutForm.intro ?? ''));
-  const sectionHeading = optionalField(String(aboutForm.section_heading ?? ''));
-  const sectionBody = optionalField(String(aboutForm.section_body ?? ''));
-  const showPortrait = aboutForm.show_portrait === true;
-  const portraitImageFile = optionalField(String(aboutForm.portrait_image_file ?? ''));
-  const portraitImageAlt = optionalField(String(aboutForm.portrait_image_alt ?? ''));
-
-  if (title === '') {
+  if (optionalField(String(aboutForm.title ?? '')) === '') {
     throw new Error(translate('errors.aboutTitleRequired', locale));
   }
-
-  /** @type {Record<string, unknown>} */
-  const about = {
-    title,
-    intro
-  };
-
-  const existingSections = Array.isArray(existingAbout.sections) ? existingAbout.sections : [];
-
-  if (sectionHeading !== '' || sectionBody !== '') {
-    about.sections = [
-      {
-        heading: sectionHeading || 'Process',
-        body: sectionBody
-      },
-      ...existingSections.slice(1)
-    ];
-  } else if (existingSections.length > 0) {
-    about.sections = existingSections;
-  }
-
-  if (showPortrait && portraitImageFile !== '') {
-    about.portrait = {
-      show: true,
-      image_file: portraitImageFile,
-      ...(portraitImageAlt !== '' ? { image_alt: portraitImageAlt } : {})
-    };
-  } else if (portraitImageFile !== '') {
-    about.portrait = {
-      show: false,
-      image_file: portraitImageFile,
-      ...(portraitImageAlt !== '' ? { image_alt: portraitImageAlt } : {})
-    };
-  }
-
-  writeProjectYaml('config/about.yaml', { about });
+  writeProjectYaml('config/about.yaml', buildAboutData(existing, aboutForm));
 }
 
 export function readSignalCloudRecords(locale = 'en') {

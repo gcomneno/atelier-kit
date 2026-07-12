@@ -11,8 +11,9 @@ import {
 } from '$lib/layout-presets.js';
 import {
   LAYOUT_BLOCK_IDS,
-  effectiveBlockPlacement,
+  effectiveBlockPlacements,
   hasSidebarBlocks,
+  layoutBlockIdsForPlacement,
   migrateLegacyLayoutBlocks,
   normalizeLayoutBlocks,
   resolveLayoutPreset
@@ -971,7 +972,7 @@ const defaultLayoutBlocks = normalizeLayoutBlocks();
 
 /** @type {LayoutConfig} */
 const DEFAULT_LAYOUT_CONFIG = {
-  preset: resolveLayoutPreset(DEFAULT_LAYOUT_PRESET, defaultLayoutBlocks),
+  preset: resolveLayoutPreset(defaultLayoutBlocks),
   blocks: defaultLayoutBlocks
 };
 
@@ -1002,7 +1003,7 @@ export function getLayoutConfig() {
     : migrateLegacyLayoutBlocks(layout);
 
   return {
-    preset: resolveLayoutPreset(presetValue, blocks),
+    preset: resolveLayoutPreset(blocks),
     blocks
   };
 }
@@ -1011,7 +1012,7 @@ export function getLayoutConfig() {
  * @param {LayoutConfig} layout
  */
 export function isCatalogSidebarActive(layout) {
-  return layout.preset === 'catalog-sidebar' && hasSidebarBlocks(layout.preset, layout.blocks);
+  return layout.preset === 'catalog-sidebar' && hasSidebarBlocks(layout.blocks);
 }
 
 /**
@@ -1036,12 +1037,12 @@ export function getLayoutPageData(blockId) {
 export function getHomeLayoutPageData(layout) {
   const locale = resolveLocale(getSiteConfig().language);
   const blockLabels = getLayoutBlockLabels(layout, locale);
-  /** @type {Record<LayoutBlockId, 'main' | 'sidebar' | null>} */
-  const placements = /** @type {Record<LayoutBlockId, 'main' | 'sidebar' | null>} */ (
+  /** @type {Record<LayoutBlockId, import('$lib/layout-blocks.js').LayoutPlacement[]>} */
+  const placements = /** @type {Record<LayoutBlockId, import('$lib/layout-blocks.js').LayoutPlacement[]>} */ (
     Object.fromEntries(
       LAYOUT_BLOCK_IDS.map((blockId) => [
         blockId,
-        effectiveBlockPlacement(layout.preset, layout.blocks, blockId)
+        effectiveBlockPlacements(layout.blocks, blockId)
       ])
     )
   );
@@ -1049,8 +1050,8 @@ export function getHomeLayoutPageData(layout) {
   const newsCount = layout.blocks.news.count ?? DEFAULT_LATEST_NEWS_COUNT;
 
   const main = {
-    about: placements.about === 'main' ? getAboutConfig() : null,
-    newsPosts: placements.news === 'main' ? getNewsPosts().slice(0, newsCount) : []
+    about: placements.about.includes('main') ? getAboutConfig() : null,
+    newsPosts: placements.news.includes('main') ? getNewsPosts().slice(0, newsCount) : []
   };
 
   const sidebarActive = isCatalogSidebarActive(layout);
@@ -1073,12 +1074,12 @@ export function getHomeLayoutPageData(layout) {
     blockLabels,
     main,
     sidebar: {
-      collections: placements.collections === 'sidebar' ? getCollections() : [],
-      about: placements.about === 'sidebar' ? getAboutConfig() : null,
+      collections: placements.collections.includes('sidebar') ? getCollections() : [],
+      about: placements.about.includes('sidebar') ? getAboutConfig() : null,
       newsPosts:
-        placements.news === 'sidebar' ? getNewsPosts().slice(0, newsCount) : [],
-      catalogItems: placements.catalog === 'sidebar' ? getItems() : [],
-      catalog: placements.catalog === 'sidebar' ? getCatalogConfig() : null
+        placements.news.includes('sidebar') ? getNewsPosts().slice(0, newsCount) : [],
+      catalogItems: placements.catalog.includes('sidebar') ? getItems() : [],
+      catalog: placements.catalog.includes('sidebar') ? getCatalogConfig() : null
     }
   };
 }
@@ -1102,10 +1103,7 @@ export function getLayoutMenuNav(layout, locale) {
   /** @type {LayoutMenuNavItem[]} */
   const items = [];
 
-  for (const blockId of LAYOUT_BLOCK_IDS) {
-    if (effectiveBlockPlacement(layout.preset, layout.blocks, blockId) !== 'menu') {
-      continue;
-    }
+  for (const blockId of layoutBlockIdsForPlacement(layout.blocks, 'menu')) {
 
     if (blockId === 'about') {
       const about = getAboutConfig();
@@ -1113,7 +1111,7 @@ export function getLayoutMenuNav(layout, locale) {
       if (about) {
         items.push({
           href: '/about',
-          label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale, { surface: 'menu' })
+          label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale)
         });
       }
 
@@ -1124,7 +1122,7 @@ export function getLayoutMenuNav(layout, locale) {
       if (getNewsPosts().length > 0) {
         items.push({
           href: '/news',
-          label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale, { surface: 'menu' })
+          label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale)
         });
       }
 
@@ -1135,7 +1133,7 @@ export function getLayoutMenuNav(layout, locale) {
       if (getCollections().length > 0) {
         items.push({
           href: '/collections',
-          label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale, { surface: 'menu' })
+          label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale)
         });
       }
 
@@ -1145,7 +1143,7 @@ export function getLayoutMenuNav(layout, locale) {
     if (blockId === 'catalog' && getItems().length > 0) {
       items.push({
         href: '/catalog',
-        label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale, { surface: 'menu' })
+        label: resolveLayoutBlockLabel(blockId, layout.blocks[blockId], locale)
       });
     }
   }

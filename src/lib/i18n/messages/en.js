@@ -416,11 +416,11 @@ export default {
       layout: {
         title: 'Layout',
         intro:
-          'Choose where about, news, collections and catalog appear on the home page (main column, sidebar or top-right menu).',
+          'Choose one or more places where about, news, collections and catalog appear.',
         blocksLegend: 'Home elements',
         blocksHint:
-          'At least one active element in the sidebar enables a two-column home layout. All in main column or menu → single-column layout.',
-        placement: 'Placement',
+          'Each active element needs at least one destination. A sidebar destination enables the two-column layout.',
+        placements: 'Destinations',
         placementMain: 'Main column',
         placementSidebar: 'Sidebar',
         placementMenu: 'Menu',
@@ -873,7 +873,9 @@ export default {
     footerLinkHrefInvalid:
       'Link "{label}" in column "{column}" must start with "/" or be a valid http or https URL.',
     layoutPresetInvalid: 'Layout preset must be single-column or catalog-sidebar.',
-    layoutLatestNewsCountInvalid: 'Latest news count must be an integer from 1 to {max}.'
+    layoutLatestNewsCountInvalid: 'Latest news count must be an integer from 1 to {max}.',
+    layoutBlockPlacementsInvalid: 'Every destination must be main column, sidebar or menu.',
+    layoutBlockPlacementsRequired: 'Every enabled element needs at least one destination.'
   },
   doctor: {
     foundCount: 'Atelier-Kit content doctor found {count} thing(s) to review before publishing:',
@@ -1124,6 +1126,11 @@ export default {
     layoutBlockIdInvalid: '{source}: invalid layout block id.',
     layoutBlockEnabledInvalid: '{source}: enabled must be true or false when provided.',
     layoutBlockPlacementInvalid: '{source}: placement must be "main", "sidebar" or "menu" when provided.',
+    layoutBlockPlacementsMustBeArray: '{source}: placements must be an array when provided.',
+    layoutBlockPlacementsItemInvalid: '{source}: every placement must be "main", "sidebar" or "menu".',
+    layoutBlockPlacementsDuplicate: '{source}: placements must not contain duplicates.',
+    layoutBlockPlacementsAmbiguous: '{source}: placement and placements must not be provided together.',
+    layoutBlockPlacementsRequired: '{source}: an enabled block must have at least one placement.',
     layoutBlockLabelInvalid: '{source}: label must be a string when provided.',
     layoutHomeMustBeObject: '{source}: layout.home must be an object when provided.',
     layoutHomeShowInvalid:

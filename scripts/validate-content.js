@@ -9,9 +9,9 @@ import { isValidFooterHref } from '../src/lib/footer-links.js';
 import { isHomeShowMode, isLayoutPreset, MAX_CATALOG_HOME_LIMIT, MAX_LATEST_NEWS_COUNT } from '../src/lib/layout-presets.js';
 import {
   isLayoutBlockId,
-  isLayoutPlacement,
   LAYOUT_BLOCK_IDS
 } from '../src/lib/layout-blocks.js';
+import { validateLayoutBlockPlacements } from '../src/lib/layout-block-validation.js';
 import { isReadingFormat } from '../src/lib/reading-formats.js';
 import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
 import { isFontPreset } from '../src/lib/site-typography.js';
@@ -750,12 +750,8 @@ function validateLayout() {
         failKey('layoutBlockEnabledInvalid', { source: blockSource });
       }
 
-      if (
-        'placement' in block &&
-        block.placement !== undefined &&
-        !isLayoutPlacement(block.placement)
-      ) {
-        failKey('layoutBlockPlacementInvalid', { source: blockSource });
+      for (const issue of validateLayoutBlockPlacements(block)) {
+        failKey(issue, { source: blockSource });
       }
 
       if (blockId === 'news' && 'count' in block && block.count !== undefined) {

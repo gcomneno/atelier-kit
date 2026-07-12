@@ -15,6 +15,7 @@ import { validateLayoutBlockPlacements } from '../src/lib/layout-block-validatio
 import { isReadingFormat } from '../src/lib/reading-formats.js';
 import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
 import { isFontPreset } from '../src/lib/site-typography.js';
+import { isAppearancePreset } from '../src/lib/site-appearance.js';
 import { getSignalCloudFaqIssues } from '../src/lib/signal-cloud-faq-validation.js';
 
 const ROOT = process.cwd();
@@ -275,7 +276,6 @@ function validateSite() {
   }
 }
 
-const APPEARANCE_PRESETS = new Set(['warm', 'neutral', 'dark', 'noir', 'custom']);
 const BACKGROUND_FITS = new Set(['top', 'center', 'contain']);
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
@@ -290,7 +290,7 @@ function validateAppearance(appearance, source) {
   }
 
   if ('preset' in appearance && appearance.preset !== undefined) {
-    if (typeof appearance.preset !== 'string' || !APPEARANCE_PRESETS.has(appearance.preset)) {
+    if (!isAppearancePreset(appearance.preset)) {
       failKey('appearancePresetInvalid', { source });
     }
   }

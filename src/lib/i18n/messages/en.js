@@ -167,7 +167,7 @@ export default {
         hero: 'Home banner: image, copy and visibility.',
         layout: 'Layout preset, home/sidebar/menu blocks and widget order.',
         contact: 'Email and WhatsApp for the visitor brief on item pages.',
-        social: 'Instagram, Facebook and X links in the footer.',
+        social: 'Instagram, Facebook, X and GitHub links in the header and footer.',
         footer: 'Link columns, copyright and legal line.'
       },
       atelierMark: {
@@ -392,6 +392,8 @@ export default {
         instagram: 'Instagram URL',
         facebook: 'Facebook URL',
         x: 'X (Twitter) URL',
+        github: 'GitHub URL',
+        githubHint: 'Any valid GitHub http or https URL, including a GitHub Sponsors page.',
         save: 'Save social links'
       },
       footer: {
@@ -1104,7 +1106,7 @@ export default {
     missingSocialObject: '{source}: missing "social" object.',
     socialLinksMustBeArray: '{source}: "social.links" must be an array.',
     socialLinkMustBeObject: '{source}: link must be an object.',
-    socialLinkIdInvalid: '{source}: id must be one of: instagram, facebook, x (got "{id}").',
+    socialLinkIdInvalid: '{source}: id must be one of: instagram, facebook, x, github (got "{id}").',
     socialLinkUrlInvalid: '{source}: url must be a valid http or https URL.',
     missingFooterObject: '{source}: missing "footer" object.',
     footerColumnsMustBeArray: '{source}: "footer.columns" must be an array when provided.',
@@ -1330,7 +1332,8 @@ export default {
     social: {
       instagram: 'Instagram',
       facebook: 'Facebook',
-      x: 'X (Twitter)'
+      x: 'X (Twitter)',
+      github: 'Support on GitHub Sponsors'
     }
   }
 };

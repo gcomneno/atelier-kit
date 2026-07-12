@@ -174,6 +174,9 @@ npm run site:upgrade -- --from ../atelier-kit
 The command:
 
 - copies `src/` and `scripts/` from the kit;
+- installs a missing `vite.config.js` and updates known, unmodified legacy Kit versions; customized,
+  unrecognized Vite configs stay intact and are flagged for manual resolver adoption; preserved Vite
+  configs stay intact because they are explicitly excluded from the upgrade;
 - merges npm scripts from the kit `package.json`;
 - prints a diff summary and asks for confirmation (use `--yes` to skip);
 - never overwrites `config/`, `content/` or `static/images/items/`.

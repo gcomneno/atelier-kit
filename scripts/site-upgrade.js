@@ -6,8 +6,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import readline from 'node:readline/promises';
+import { pathToFileURL } from 'node:url';
 
 const UPGRADE_DIRS = ['src', 'scripts'];
+const VITE_CONFIG = 'vite.config.js';
+// Exact hashes of historical Vite configs verified in the local repository.
+// Only these known, unmodified files are safe to replace automatically.
+const LEGACY_VITE_CONFIG_HASHES = new Set([
+  // v0.1.28-v0.3.0; changelog-based resolver introduced by f6479f9.
+  '4a8d45c2251080019282859b17b04993dfe06568c0214c0e3959b467d2572432',
+  // v0.1.0-v0.1.27; original adapter-vercel config from fa88896.
+  '770285f7986d9f41e809976bbaf616bd97ffd81ff106c59d47f18e8b676deb8a',
+  // Initial SvelteKit adapter-auto starter variant from b5f23b9 (unreleased).
+  '8f489600e36ef36af5b82d1e7733b5026f9d41a49a94302cbb76833033a9254a'
+]);
 const SKIP_DIR_NAMES = new Set(['.git', 'node_modules', '.svelte-kit', '.vercel']);
 const SOURCE_POINTER = '.atelier-kit-source';
 const UPGRADE_MANIFEST = '.atelier-kit-upgrade.json';
@@ -37,6 +49,7 @@ Options:
 
 Notes:
   Syncs src/ and scripts/ from the kit into the client site.
+  Installs a missing Vite config and updates only known, unmodified legacy Kit versions.
   Never touches config/, content/ or static/images/items/.
   Skips paths listed in .atelier-kit-preserve (one relative path per line).
   Merges npm scripts from the kit package.json into the client package.json.
@@ -45,6 +58,7 @@ Notes:
 
 /**
  * @param {string[]} argv
+ * @returns {{ help?: true, from?: string, target?: string, yes?: boolean, dryRun?: boolean }}
  */
 function parseArgs(argv) {
   const args = [...argv];
@@ -53,6 +67,10 @@ function parseArgs(argv) {
 
   while (args.length > 0) {
     const arg = args.shift();
+
+    if (!arg) {
+      continue;
+    }
 
     if (arg === '--') {
       continue;
@@ -274,9 +292,9 @@ function loadPreservePaths(clientRoot) {
  * @param {string} clientRoot
  * @param {Set<string>} preservePaths
  */
-function buildFilePlan(kitRoot, clientRoot, preservePaths) {
-  /** @type {{ add: string[], update: string[], remove: string[], preserve: string[] }} */
-  const plan = { add: [], update: [], remove: [], preserve: [] };
+export function buildFilePlan(kitRoot, clientRoot, preservePaths) {
+  /** @type {{ add: string[], update: string[], remove: string[], preserve: string[], manualReview: string[] }} */
+  const plan = { add: [], update: [], remove: [], preserve: [], manualReview: [] };
 
   for (const dir of UPGRADE_DIRS) {
     const kitFiles = collectFiles(path.join(kitRoot, dir), dir);
@@ -309,11 +327,63 @@ function buildFilePlan(kitRoot, clientRoot, preservePaths) {
     }
   }
 
+  const kitViteConfig = path.join(kitRoot, VITE_CONFIG);
+  const clientViteConfig = path.join(clientRoot, VITE_CONFIG);
+
+  if (preservePaths.has(VITE_CONFIG)) {
+    if (fs.existsSync(clientViteConfig) && hashFile(clientViteConfig) !== hashFile(kitViteConfig)) {
+      plan.preserve.push(VITE_CONFIG);
+    }
+  } else if (!fs.existsSync(clientViteConfig)) {
+    plan.add.push(VITE_CONFIG);
+  } else {
+    const clientHash = hashFile(clientViteConfig);
+
+    if (clientHash !== hashFile(kitViteConfig)) {
+      if (LEGACY_VITE_CONFIG_HASHES.has(clientHash)) {
+        plan.update.push(VITE_CONFIG);
+      } else {
+        plan.manualReview.push(VITE_CONFIG);
+      }
+    }
+  }
+
   plan.add.sort();
   plan.update.sort();
   plan.remove.sort();
   plan.preserve.sort();
+  plan.manualReview.sort();
   return plan;
+}
+
+/**
+ * @param {string} clientRoot
+ * @param {string} kitRoot
+ * @param {string | null} kitVersion
+ * @returns {{ changed: boolean, kitPath: string, previousVersion: string | null }}
+ */
+export function buildMetadataPlan(clientRoot, kitRoot, kitVersion) {
+  const kitPath = path.relative(clientRoot, kitRoot) || '.';
+  let previousVersion = null;
+  let previousKitPath = null;
+
+  try {
+    const manifest = JSON.parse(fs.readFileSync(path.join(clientRoot, UPGRADE_MANIFEST), 'utf8'));
+    previousVersion = typeof manifest.kitVersion === 'string' ? manifest.kitVersion : null;
+    previousKitPath = typeof manifest.kitPath === 'string' ? manifest.kitPath : null;
+  } catch {
+    // A missing or malformed manifest must be replaced by the next upgrade.
+  }
+
+  const pointer = fs.existsSync(path.join(clientRoot, SOURCE_POINTER))
+    ? fs.readFileSync(path.join(clientRoot, SOURCE_POINTER), 'utf8').trim()
+    : null;
+
+  return {
+    changed: previousVersion !== kitVersion || previousKitPath !== kitPath || pointer !== kitPath,
+    kitPath,
+    previousVersion
+  };
 }
 
 /**
@@ -337,15 +407,24 @@ function buildScriptPlan(kitRoot, clientRoot) {
 }
 
 /**
- * @param {{ add: string[], update: string[], remove: string[], preserve: string[] }} filePlan
+ * @param {{ add: string[], update: string[], remove: string[], preserve: string[], manualReview: string[] }} filePlan
  * @param {{ key: string, from?: string, to: string }[]} scriptPlan
+ * @param {{ changed: boolean, kitPath: string, previousVersion: string | null }} metadataPlan
  * @param {string} kitRoot
  * @param {string} clientRoot
  * @param {string | null} kitVersion
  * @param {{ path: string, pattern: string }[]} coreManagedPreserveEntries
  * @returns {boolean}
  */
-function printPlan(filePlan, scriptPlan, kitRoot, clientRoot, kitVersion, coreManagedPreserveEntries) {
+export function printPlan(
+  filePlan,
+  scriptPlan,
+  metadataPlan,
+  kitRoot,
+  clientRoot,
+  kitVersion,
+  coreManagedPreserveEntries
+) {
   console.log('Atelier-Kit site upgrade');
   console.log(`Kit:    ${kitRoot}${kitVersion ? ` (${kitVersion})` : ''}`);
   console.log(`Client: ${clientRoot}`);
@@ -368,15 +447,16 @@ function printPlan(filePlan, scriptPlan, kitRoot, clientRoot, kitVersion, coreMa
   }
 
   const total =
-    filePlan.add.length + filePlan.update.length + filePlan.remove.length + scriptPlan.length;
+    filePlan.add.length + filePlan.update.length + filePlan.remove.length + scriptPlan.length +
+    (metadataPlan.changed ? 1 : 0);
 
-  if (total === 0 && filePlan.preserve.length === 0) {
+  if (total === 0 && filePlan.preserve.length === 0 && filePlan.manualReview.length === 0) {
     console.log('Already up to date.');
     return false;
   }
 
-  if (total === 0 && filePlan.preserve.length > 0) {
-    console.log('No automatic updates. Preserved client files differ from kit:');
+  if (total === 0 && (filePlan.preserve.length > 0 || filePlan.manualReview.length > 0)) {
+    console.log('No automatic file updates. Client-owned files differ from kit:');
   }
 
   if (filePlan.preserve.length > 0) {
@@ -385,6 +465,18 @@ function printPlan(filePlan, scriptPlan, kitRoot, clientRoot, kitVersion, coreMa
     for (const rel of filePlan.preserve) {
       console.log(`  = ${rel}`);
     }
+  }
+
+  if (filePlan.manualReview.length > 0) {
+    console.warn(`Keep customized (${filePlan.manualReview.length}):`);
+
+    for (const rel of filePlan.manualReview) {
+      console.warn(`  = ${rel} (customized or unrecognized; not overwritten)`);
+    }
+
+    console.warn(
+      '  ! Review the current Kit vite.config.js and adopt the new Kit version resolver manually if needed.'
+    );
   }
 
   if (filePlan.add.length > 0) {
@@ -425,6 +517,16 @@ function printPlan(filePlan, scriptPlan, kitRoot, clientRoot, kitVersion, coreMa
     }
   }
 
+  if (metadataPlan.changed) {
+    console.log('Upgrade metadata (1):');
+    console.log(`  ~ ${UPGRADE_MANIFEST}`);
+    console.log(
+      `      kitVersion: ${metadataPlan.previousVersion ?? '(missing)'} -> ${kitVersion ?? '(unknown)'}`
+    );
+    console.log(`      kitPath: ${metadataPlan.kitPath}`);
+    console.log(`  ~ ${SOURCE_POINTER}`);
+  }
+
   return true;
 }
 
@@ -433,7 +535,7 @@ function printPlan(filePlan, scriptPlan, kitRoot, clientRoot, kitVersion, coreMa
  * @param {string} kitRoot
  * @param {string} clientRoot
  */
-function applyFilePlan(filePlan, kitRoot, clientRoot) {
+export function applyFilePlan(filePlan, kitRoot, clientRoot) {
   for (const rel of [...filePlan.add, ...filePlan.update]) {
     const source = path.join(kitRoot, rel);
     const target = path.join(clientRoot, rel);
@@ -473,7 +575,7 @@ function applyScriptPlan(kitRoot, clientRoot) {
  * @param {string} kitRoot
  * @param {string | null} kitVersion
  */
-function writeManifest(clientRoot, kitRoot, kitVersion) {
+export function writeManifest(clientRoot, kitRoot, kitVersion) {
   const relativeKit = path.relative(clientRoot, kitRoot) || '.';
   fs.writeFileSync(path.join(clientRoot, SOURCE_POINTER), `${relativeKit}\n`);
 
@@ -576,7 +678,8 @@ async function confirm(message) {
   return /^y(es)?$/i.test(answer.trim());
 }
 
-async function main() {
+export async function main() {
+  /** @type {{ help?: true, from?: string, target?: string, yes?: boolean, dryRun?: boolean }} */
   let options;
 
   try {
@@ -617,9 +720,11 @@ async function main() {
   const coreManagedPreserveEntries = findCoreManagedPreserveEntries(preservePaths);
   const filePlan = buildFilePlan(kitRoot, clientRoot, preservePaths);
   const scriptPlan = buildScriptPlan(kitRoot, clientRoot);
+  const metadataPlan = buildMetadataPlan(clientRoot, kitRoot, kitVersion);
   const hasChanges = printPlan(
     filePlan,
     scriptPlan,
+    metadataPlan,
     kitRoot,
     clientRoot,
     kitVersion,
@@ -627,10 +732,6 @@ async function main() {
   );
 
   if (!hasChanges) {
-    return;
-  }
-
-  if (filePlan.add.length + filePlan.update.length + filePlan.remove.length + scriptPlan.length === 0) {
     return;
   }
 
@@ -668,7 +769,9 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(`ERROR: ${error instanceof Error ? error.message : String(error)}`);
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((error) => {
+    console.error(`ERROR: ${error instanceof Error ? error.message : String(error)}`);
+    process.exit(1);
+  });
+}

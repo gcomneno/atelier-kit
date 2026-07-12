@@ -11,6 +11,7 @@ import {
   writeAboutForm
 } from '$lib/server/studio-io.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
+import { assertValidMarkedText } from '$lib/marked-text.js';
 
 export function load() {
   guardStudio();
@@ -35,6 +36,13 @@ export const actions = {
       const showPortrait = checkboxEnabled(formData.get('show_portrait'));
       const upload = formData.get('portrait_upload');
       let portraitImageFile = String(formData.get('portrait_image_file') ?? '').trim();
+
+      assertValidMarkedText([
+        { path: 'about.title', value: String(formData.get('title') ?? '') },
+        { path: 'about.intro', value: String(formData.get('intro') ?? ''), mode: 'multiline' },
+        { path: 'about.sections.0.heading', value: String(formData.get('section_heading') ?? '') },
+        { path: 'about.sections.0.body', value: String(formData.get('section_body') ?? ''), mode: 'multiline' }
+      ]);
 
       if (showPortrait && upload instanceof File && upload.size > 0) {
         portraitImageFile = await saveAboutPortraitUpload(upload, locale);

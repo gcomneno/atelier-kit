@@ -1,18 +1,19 @@
 import { resolveAbsoluteImageUrl, resolveAbsoluteUrl } from '$lib/site-meta.js';
 import { resolveDocumentTitle } from '$lib/site-branding.js';
 import { buildFaqPageSchema } from '$lib/signal-cloud-faq.js';
+import { markedTextToPlainText } from '$lib/marked-text.js';
 
 /**
  * @param {{ excerpt?: string, body: string }} post
  */
 function postDescription(post) {
   if (post.excerpt) {
-    return post.excerpt;
+    return markedTextToPlainText(post.excerpt);
   }
 
   const firstLine = post.body.split('\n').find((line) => line.trim() !== '');
 
-  return firstLine?.trim() ?? '';
+  return markedTextToPlainText(firstLine?.trim() ?? '');
 }
 
 /**
@@ -43,7 +44,7 @@ export function buildBlogPostingJsonLd(post, site, origin) {
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
-    headline: post.title,
+    headline: markedTextToPlainText(post.title),
     datePublished: formatDatePublished(post.date),
     description,
     url: pageUrl,
@@ -67,14 +68,14 @@ export function buildBlogPostingJsonLd(post, site, origin) {
  */
 export function buildAboutPageJsonLd(about, site, origin) {
   const pageUrl = resolveAbsoluteUrl('/about', origin, site.url);
-  const description = about.intro || about.title;
+  const description = markedTextToPlainText(about.intro || about.title);
   const siteLabel = resolveDocumentTitle(site);
 
   /** @type {Record<string, unknown>} */
   const mainEntity = about.portrait
     ? {
         '@type': 'Person',
-        name: about.title,
+        name: markedTextToPlainText(about.title),
         description,
         ...(about.portrait.image_file
           ? {
@@ -91,7 +92,7 @@ export function buildAboutPageJsonLd(about, site, origin) {
   return {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
-    name: about.title,
+    name: markedTextToPlainText(about.title),
     description,
     url: pageUrl,
     mainEntity
@@ -106,5 +107,8 @@ export function buildAboutPageJsonLd(about, site, origin) {
 export function buildFaqPageJsonLd(entries, site, origin) {
   const pageUrl = resolveAbsoluteUrl('/faq', origin, site.url);
 
-  return buildFaqPageSchema(entries, pageUrl);
+  return buildFaqPageSchema(entries.map((entry) => ({
+    question: markedTextToPlainText(entry.question),
+    answer: markedTextToPlainText(entry.answer)
+  })), pageUrl);
 }

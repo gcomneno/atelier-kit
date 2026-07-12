@@ -1,4 +1,6 @@
 <script>
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
   import { linkifyPlainText, parseBookContent } from '$lib/book-content.js';
 
   /** @typedef {{ id: string, title: string, excerpt?: string, body: string }} NewsPost */
@@ -22,9 +24,9 @@
     <article class="book-page" aria-labelledby="book-title">
       <header class="book-colophon">
         {#if post.excerpt}
-          <p class="book-series">{post.excerpt}</p>
+          {#each splitEditorialParagraphs(post.excerpt) as paragraph}<EditorialText tag="p" class="book-series" value={paragraph} />{/each}
         {/if}
-        <h1 id="book-title" class="book-edition-title">{post.title}</h1>
+        <h1 id="book-title" class="book-edition-title"><EditorialText value={post.title} /></h1>
       </header>
 
       <div class="book-body">
@@ -125,7 +127,7 @@
     text-align: center;
   }
 
-  .book-series {
+  :global(.book-series) {
     margin: 0 0 0.65rem;
     color: #6f5f4d;
     font-size: 0.82rem;

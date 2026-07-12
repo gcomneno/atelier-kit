@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parse, stringify } from 'yaml';
+import { assertValidMarkedText } from '$lib/marked-text.js';
 import {
   ITEM_PRESET_OPTIONS,
   buildNewItemRecord,
@@ -253,6 +254,12 @@ export function listItemPresetOptions() {
  * @param {Record<string, unknown>} item
  */
 export function writeItemRecord(id, item) {
+  assertValidMarkedText([
+    { path: `items.${id}.title`, value: item.title },
+    { path: `items.${id}.subtitle`, value: item.subtitle },
+    { path: `items.${id}.description`, value: item.description, mode: 'multiline' },
+    { path: `items.${id}.notice`, value: item.notice, mode: 'multiline' }
+  ]);
   writeProjectYaml(recordPath('content/items', id), item);
 }
 
@@ -467,6 +474,10 @@ export function createCollectionRecord(input, locale = 'en') {
  * @param {Record<string, unknown>} collection
  */
 export function writeCollectionRecord(id, collection) {
+  assertValidMarkedText([
+    { path: `collections.${id}.title`, value: collection.title },
+    { path: `collections.${id}.description`, value: collection.description, mode: 'multiline' }
+  ]);
   writeProjectYaml(recordPath('content/collections', id), collection);
 }
 
@@ -946,6 +957,11 @@ export function createNewsRecord(input, locale = 'en') {
  * @param {Record<string, unknown>} post
  */
 export function writeNewsRecord(id, post) {
+  assertValidMarkedText([
+    { path: `news.${id}.title`, value: post.title },
+    { path: `news.${id}.excerpt`, value: post.excerpt, mode: 'multiline' },
+    { path: `news.${id}.body`, value: post.body, mode: 'multiline' }
+  ]);
   writeProjectYaml(recordPath('content/news', id), post);
 }
 
@@ -1015,6 +1031,11 @@ export function writeCatalogForm(catalogForm, locale = 'en') {
   const homeLimitInput = String(catalogForm.home_limit ?? '0').trim();
   const homeLimitRaw = Number.parseInt(homeLimitInput, 10);
   const homeLimit = Number.isInteger(homeLimitRaw) && homeLimitRaw > 0 ? homeLimitRaw : 0;
+
+  assertValidMarkedText([
+    { path: 'catalog.eyebrow', value: eyebrow },
+    { path: 'catalog.intro', value: intro, mode: 'multiline' }
+  ]);
 
   if (singular === '') {
     throw new Error(translate('errors.required', locale, { label: translate('fields.itemNameSingular', locale) }));
@@ -1090,7 +1111,19 @@ export function loadAboutForm(locale = 'en') {
  */
 export function writeAboutForm(aboutForm, locale = 'en') {
   const existing = readProjectYaml('config/about.yaml');
-  if (optionalField(String(aboutForm.title ?? '')) === '') {
+  const title = optionalField(String(aboutForm.title ?? ''));
+  const intro = optionalField(String(aboutForm.intro ?? ''));
+  const sectionHeading = optionalField(String(aboutForm.section_heading ?? ''));
+  const sectionBody = optionalField(String(aboutForm.section_body ?? ''));
+
+  assertValidMarkedText([
+    { path: 'about.title', value: title },
+    { path: 'about.intro', value: intro, mode: 'multiline' },
+    { path: 'about.sections.0.heading', value: sectionHeading },
+    { path: 'about.sections.0.body', value: sectionBody, mode: 'multiline' }
+  ]);
+
+  if (title === '') {
     throw new Error(translate('errors.aboutTitleRequired', locale));
   }
   writeProjectYaml('config/about.yaml', buildAboutData(existing, aboutForm));
@@ -1111,5 +1144,14 @@ export function readSignalCloudRecords(locale = 'en') {
  * @param {unknown[]} clouds
  */
 export function writeSignalCloudRecords(clouds) {
+  assertValidMarkedText(clouds.flatMap((cloud, index) => [
+    { path: `signal_clouds.${index}.question`, value: cloud?.question },
+    { path: `signal_clouds.${index}.hint`, value: cloud?.hint },
+    ...(Array.isArray(cloud?.options) ? cloud.options.map((option, optionIndex) => ({
+      path: `signal_clouds.${index}.options.${optionIndex}.label`, value: option?.label
+    })) : []),
+    { path: `signal_clouds.${index}.faq.answer`, value: cloud?.faq?.answer, mode: 'multiline' },
+    { path: `signal_clouds.${index}.faq.group`, value: cloud?.faq?.group }
+  ]));
   writeProjectYaml('config/signal-clouds.yaml', { signal_clouds: clouds });
 }

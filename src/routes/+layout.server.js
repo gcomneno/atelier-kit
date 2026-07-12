@@ -11,7 +11,8 @@ import {
   getLayoutMenuNav,
   getSiteConfig,
   getSocialConfig,
-  isFooterActive
+  isFooterActive,
+  getPublicMarkedTextValues
 } from '$lib/server/showcase.js';
 
 /** @param {{ url: URL }} event */
@@ -55,6 +56,7 @@ export function load({ url }) {
     footerActive: isFooterActive(footer),
     aboutPortrait,
     menuNav,
-    searchIndex: buildSearchIndex()
+    searchIndex: buildSearchIndex(),
+    markedTextValues: getPublicMarkedTextValues()
   };
 }

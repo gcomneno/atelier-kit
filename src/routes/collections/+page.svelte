@@ -1,5 +1,7 @@
 <script>
   import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
   import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
@@ -55,8 +57,10 @@
       <div class="grid">
         {#each data.collections as collection}
           <a class="collection-card" href={`/collections/${collection.id}`}>
-            <h2>{collection.title}</h2>
-            <p>{collection.description}</p>
+            <h2><EditorialText value={collection.title} /></h2>
+            {#each splitEditorialParagraphs(collection.description) as paragraph}
+              <EditorialText tag="p" value={paragraph} />
+            {/each}
             <span>{collection.items.length} {collection.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</span>
           </a>
         {/each}
@@ -178,7 +182,7 @@
     font-size: clamp(1.35rem, 4vw, 1.75rem);
   }
 
-  .collection-card p {
+  .collection-card :global(p) {
     margin: 0;
     color: var(--site-muted-text-color, #7b6a58);
     line-height: 1.6;

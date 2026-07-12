@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { resolveAbsoluteImageUrl } from '$lib/site-meta.js';
 import { resolveItemCoverSrc } from '$lib/item-cover.js';
+import { markedTextToPlainText } from '$lib/marked-text.js';
 import {
   getCatalogConfig,
   getContactConfig,
@@ -27,8 +28,8 @@ export function load({ params, url }) {
     signalClouds: getSignalClouds(),
     contact: getContactConfig(),
     seo: {
-      ogTitle: item.title,
-      ogDescription: item.description,
+      ogTitle: markedTextToPlainText(item.title),
+      ogDescription: markedTextToPlainText(item.description),
       ogImage: resolveAbsoluteImageUrl(resolveItemCoverSrc(item), url.origin, site.url)
     }
   };

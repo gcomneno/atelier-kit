@@ -1,4 +1,6 @@
 <script>
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
   import { LAYOUT_BLOCK_IDS } from '$lib/layout-blocks.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
@@ -118,7 +120,7 @@
                 <li>
                   <a href={`/news/${post.id}`} class="news-link">
                     <time datetime={post.date}>{formatDate(post.date)}</time>
-                    <span class="news-title">{post.title}</span>
+                    <EditorialText tag="span" class="news-title" value={post.title} />
                     {#if newsTeaser(post)}
                       <span class="news-teaser">{newsTeaser(post)}</span>
                     {/if}
@@ -137,15 +139,17 @@
           <div class="widget-body">
             {#if collections.length === 1}
               {@const collection = collections[0]}
-              <a class="collection-featured" href={`/collections/${collection.id}`}>{collection.title}</a>
+              <a class="collection-featured" href={`/collections/${collection.id}`}><EditorialText value={collection.title} /></a>
               {#if collection.description}
-                <p class="collection-snippet">{collection.description}</p>
+                {#each splitEditorialParagraphs(collection.description) as paragraph}
+                  <EditorialText tag="p" class="collection-snippet" value={paragraph} />
+                {/each}
               {/if}
             {:else}
               <ul class="link-list">
                 {#each collections as collection (collection.id)}
                   <li>
-                    <a href={`/collections/${collection.id}`}>{collection.title}</a>
+                    <a href={`/collections/${collection.id}`}><EditorialText value={collection.title} /></a>
                   </li>
                 {/each}
               </ul>
@@ -167,7 +171,7 @@
             <ul class="link-list">
               {#each catalogItems as item (item.id)}
                 <li>
-                  <a href={`/items/${item.id}`}>{item.title}</a>
+                  <a href={`/items/${item.id}`}><EditorialText value={item.title} /></a>
                 </li>
               {/each}
             </ul>
@@ -306,7 +310,7 @@
     );
   }
 
-  .collection-snippet {
+  :global(.collection-snippet) {
     margin: 0;
     padding: 0 0.55rem;
     color: var(--sidebar-body-color);
@@ -364,7 +368,7 @@
     text-transform: uppercase;
   }
 
-  .news-title {
+  :global(.news-title) {
     color: var(--sidebar-link-color);
     font-size: var(--sidebar-link-size);
     font-weight: var(--sidebar-link-weight);

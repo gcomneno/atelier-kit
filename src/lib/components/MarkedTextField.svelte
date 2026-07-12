@@ -8,13 +8,16 @@
   import { FONT_PRESET_IDS } from '$lib/site-typography.js';
   import EditorialText from '$lib/components/EditorialText.svelte';
 
-  /** @type {{ name: string, hint?: string, value?: string, rows?: number, multiline?: boolean, display?: { wrap?: string, quote_color?: string } | null, showEpigraphControls?: boolean, onvaluechange?: (name: string, value: string) => void }} */
+  /** @type {{ name: string, hint?: string, value?: string, rows?: number, multiline?: boolean, disabled?: boolean, required?: boolean, placeholder?: string, display?: { wrap?: string, quote_color?: string } | null, showEpigraphControls?: boolean, onvaluechange?: (name: string, value: string) => void }} */
   let {
     name,
     hint = '',
     value = '',
     rows = 3,
     multiline = false,
+    disabled = false,
+    required = false,
+    placeholder = '',
     display = null,
     showEpigraphControls = false,
     onvaluechange
@@ -49,6 +52,11 @@
   );
 
   const preview = $derived(parseEditorialMarkup(draft));
+  const previewParagraphs = $derived(
+    multiline
+      ? draft.trim().split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean)
+      : [draft]
+  );
   const previewClass = $derived(showEpigraphControls ? 'tagline hero-epigraph' : 'editorial-preview');
 
   /** @param {string} tag */
@@ -100,9 +108,9 @@
   </div>
 
   {#if multiline}
-    <textarea {name} bind:this={field} bind:value={draft} {rows}></textarea>
+    <textarea {name} bind:this={field} bind:value={draft} {rows} {disabled} {required} {placeholder}></textarea>
   {:else}
-    <input {name} bind:this={field} bind:value={draft} />
+    <input {name} bind:this={field} bind:value={draft} {disabled} {required} {placeholder} />
   {/if}
 
   {#if showEpigraphControls}
@@ -135,7 +143,9 @@
     <div class="preview-panel" aria-live="polite">
       <p class="preview-label">{t('studio.editorial.preview')}</p>
       {#if preview.ok}
-        <EditorialText value={draft} display={previewDisplay} tag="p" class={previewClass} />
+        {#each previewParagraphs as paragraph}
+          <EditorialText value={paragraph} display={previewDisplay} tag="p" class={previewClass} />
+        {/each}
       {:else}
         <p class="preview-error">{preview.errors.join(' ')}</p>
       {/if}

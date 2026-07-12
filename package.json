@@ -11,7 +11,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
     "content:validate": "node scripts/validate-content.js",
-    "test": "node --test src/lib/about-config.test.js src/lib/editorial-markup.test.js src/lib/item-images.test.js src/lib/studio-item-gallery.test.js src/lib/site-branding.test.js src/lib/studio-signal-clouds.test.js src/lib/signal-cloud-faq.test.js src/lib/layout-block-labels.test.js src/lib/social-networks.test.js test/*.test.js",
+    "test": "node --test src/lib/about-config.test.js src/lib/editorial-markup.test.js src/lib/marked-text.test.js src/lib/item-images.test.js src/lib/studio-item-gallery.test.js src/lib/site-branding.test.js src/lib/studio-signal-clouds.test.js src/lib/signal-cloud-faq.test.js src/lib/layout-block-labels.test.js src/lib/social-networks.test.js test/*.test.js",
     "item:new": "node scripts/item.js new",
     "item:list": "node scripts/item.js list",
     "item:validate": "node scripts/item.js validate",

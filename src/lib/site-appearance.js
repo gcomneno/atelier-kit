@@ -1,4 +1,4 @@
-/** @typedef {'warm' | 'neutral' | 'dark' | 'noir' | 'custom'} AppearancePreset */
+/** @typedef {'warm' | 'neutral' | 'dark' | 'noir' | 'intimate' | 'space' | 'funny-coloured' | 'custom'} AppearancePreset */
 /** @typedef {import('./site-typography.js').FontPreset} FontPreset */
 
 /** @typedef {'top' | 'center' | 'contain'} BackgroundFit */
@@ -7,11 +7,15 @@
 
 import { fontFamilyCss, resolveFontPreset } from './site-typography.js';
 
+/** @type {{ id: AppearancePreset, label: string }[]} */
 export const APPEARANCE_PRESET_OPTIONS = [
   { id: 'warm', label: 'Warm atelier (default)' },
   { id: 'neutral', label: 'Neutral paper' },
   { id: 'dark', label: 'Dark studio' },
   { id: 'noir', label: 'Noir' },
+  { id: 'intimate', label: 'Intimate editorial' },
+  { id: 'space', label: 'Shared universe' },
+  { id: 'funny-coloured', label: 'Funny coloured' },
   { id: 'custom', label: 'Custom colors' }
 ];
 
@@ -56,6 +60,36 @@ export const APPEARANCE_PRESETS = {
     card_color: '#1c1a18',
     header_title_color: '#f5efe6',
     intro_title_color: '#8c3a44'
+  },
+  intimate: {
+    preset: 'intimate',
+    base_color: '#f4eee8',
+    accent_color: '#8d4f5b',
+    text_color: '#3f3234',
+    heading_color: '#2f2428',
+    card_color: '#fffaf7',
+    header_title_color: '#7f4d5a',
+    intro_title_color: '#8a4f5b'
+  },
+  space: {
+    preset: 'space',
+    base_color: '#090b1a',
+    accent_color: '#6f8cff',
+    text_color: '#e8ecff',
+    heading_color: '#ffffff',
+    card_color: '#151a33',
+    header_title_color: '#b6c2ff',
+    intro_title_color: '#72d6e8'
+  },
+  'funny-coloured': {
+    preset: 'funny-coloured',
+    base_color: '#fff7e8',
+    accent_color: '#087f7b',
+    text_color: '#2d2a32',
+    heading_color: '#31265a',
+    card_color: '#ffffff',
+    header_title_color: '#6c4bc1',
+    intro_title_color: '#c13d46'
   }
 };
 
@@ -84,13 +118,7 @@ export function resolveBackgroundFit(value) {
  * @returns {value is AppearancePreset}
  */
 export function isAppearancePreset(value) {
-  return (
-    value === 'warm' ||
-    value === 'neutral' ||
-    value === 'dark' ||
-    value === 'noir' ||
-    value === 'custom'
-  );
+  return typeof value === 'string' && APPEARANCE_PRESET_OPTIONS.some(({ id }) => id === value);
 }
 
 /**

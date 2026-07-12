@@ -750,6 +750,9 @@ export default {
       neutral: 'Neutral paper',
       dark: 'Dark studio',
       noir: 'Noir',
+      intimate: 'Intimate editorial',
+      space: 'Shared universe',
+      'funny-coloured': 'Funny coloured',
       custom: 'Custom colors'
     },
     font: {
@@ -1064,7 +1067,7 @@ export default {
     missingSiteObject: '{source}: missing "site" object.',
     editorialMarkupInvalid: '{source}: invalid Atelier Mark markup: {detail}',
     appearanceMustBeObject: '{source}: site.appearance must be an object when present.',
-    appearancePresetInvalid: '{source}: site.appearance.preset must be one of: warm, neutral, dark, noir, custom.',
+    appearancePresetInvalid: '{source}: site.appearance.preset must be one of: warm, neutral, dark, noir, intimate, space, funny-coloured, custom.',
     appearanceColorInvalid: '{source}: site.appearance.{field} must be a hex color like #f8f0e4.',
     appearanceBackgroundInvalid: '{source}: site.appearance.background_image must be a path under /images/site/.',
     appearanceFontPresetInvalid:

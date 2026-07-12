@@ -12,9 +12,9 @@
   const placements = $derived(data.placements);
   const showBannerMain = $derived(Boolean(data.site.hero_banner));
   const showCollections = $derived(
-    placements.collections === 'main' && data.collections.length > 0
+    placements.collections.includes('main') && data.collections.length > 0
   );
-  const showCatalog = $derived(placements.catalog === 'main' && data.items.length > 0);
+  const showCatalog = $derived(placements.catalog.includes('main') && data.items.length > 0);
   const homeCatalogItems = $derived(
     data.catalog.home_limit > 0 ? data.items.slice(0, data.catalog.home_limit) : data.items
   );

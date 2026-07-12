@@ -3,14 +3,18 @@ layout:
   blocks:
     about:
       enabled: true
-      placement: sidebar
+      placements:
+        - sidebar
     news:
       enabled: true
-      placement: sidebar
+      placements:
+        - sidebar
       count: 3
     collections:
       enabled: true
-      placement: sidebar
+      placements:
+        - sidebar
     catalog:
       enabled: true
-      placement: main
+      placements:
+        - main

@@ -419,11 +419,11 @@ export default {
       layout: {
         title: 'Layout',
         intro:
-          'Scegli dove mostrare about, news, collezioni e catalogo in home (colonna principale, sidebar o menù in alto a destra).',
+          'Scegli uno o più punti in cui mostrare about, news, collezioni e catalogo.',
         blocksLegend: 'Elementi in home',
         blocksHint:
-          'Almeno un elemento attivo in sidebar attiva il layout a due colonne sulla home. Tutti in colonna principale o menù → layout a colonna singola.',
-        placement: 'Posizione',
+          'Ogni elemento attivo richiede almeno una destinazione. Una destinazione sidebar abilita il layout a due colonne.',
+        placements: 'Destinazioni',
         placementMain: 'Colonna principale',
         placementSidebar: 'Sidebar',
         placementMenu: 'Menù',
@@ -880,7 +880,9 @@ export default {
     footerLinkHrefInvalid:
       'Il link "{label}" nella colonna "{column}" deve iniziare con "/" o essere un URL http o https valido.',
     layoutPresetInvalid: 'Il preset layout deve essere single-column o catalog-sidebar.',
-    layoutLatestNewsCountInvalid: 'Il numero di ultime news deve essere un intero da 1 a {max}.'
+    layoutLatestNewsCountInvalid: 'Il numero di ultime news deve essere un intero da 1 a {max}.',
+    layoutBlockPlacementsInvalid: 'Ogni destinazione deve essere colonna principale, sidebar o menù.',
+    layoutBlockPlacementsRequired: 'Ogni elemento abilitato richiede almeno una destinazione.'
   },
   doctor: {
     foundCount: 'Content Doctor ha trovato {count} elemento/i da rivedere prima di pubblicare:',
@@ -1132,6 +1134,11 @@ export default {
     layoutBlockIdInvalid: '{source}: id blocco layout non valido.',
     layoutBlockEnabledInvalid: '{source}: enabled deve essere true o false quando presente.',
     layoutBlockPlacementInvalid: '{source}: placement deve essere "main", "sidebar" o "menu" quando presente.',
+    layoutBlockPlacementsMustBeArray: '{source}: placements deve essere un array quando presente.',
+    layoutBlockPlacementsItemInvalid: '{source}: ogni destinazione deve essere "main", "sidebar" o "menu".',
+    layoutBlockPlacementsDuplicate: '{source}: placements non deve contenere duplicati.',
+    layoutBlockPlacementsAmbiguous: '{source}: placement e placements non devono essere presenti insieme.',
+    layoutBlockPlacementsRequired: '{source}: un blocco abilitato deve avere almeno una destinazione.',
     layoutBlockLabelInvalid: '{source}: label deve essere una stringa quando presente.',
     layoutHomeMustBeObject: '{source}: layout.home deve essere un oggetto quando presente.',
     layoutHomeShowInvalid:

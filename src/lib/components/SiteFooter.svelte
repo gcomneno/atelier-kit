@@ -3,6 +3,8 @@
   import KitCredit from '$lib/components/KitCredit.svelte';
   import SocialIcon from '$lib/components/SocialIcon.svelte';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { markedTextToPlainText } from '$lib/marked-text.js';
 
   /** @typedef {{ label: string, href: string }} FooterLink */
   /** @typedef {{ title: string, links: FooterLink[] }} FooterColumn */
@@ -37,8 +39,8 @@
     {#if footer.columns.length > 0}
       <div class="footer-columns">
         {#each footer.columns as column (column.title)}
-          <nav class="footer-column" aria-label={column.title}>
-            <h2 class="column-title">{column.title}</h2>
+          <nav class="footer-column" aria-label={markedTextToPlainText(column.title)}>
+            <h2 class="column-title"><EditorialText value={column.title} /></h2>
             <ul>
               {#each column.links as link (link.href + link.label)}
                 <li>
@@ -48,7 +50,7 @@
                       ? { target: '_blank', rel: 'noopener noreferrer' }
                       : {}}
                   >
-                    {link.label}
+                    <EditorialText value={link.label} />
                   </a>
                 </li>
               {/each}
@@ -76,11 +78,11 @@
       {/if}
 
       {#if footer.copyright}
-        <p class="copyright">{footer.copyright}</p>
+        <EditorialText tag="p" class="copyright" value={footer.copyright} />
       {/if}
 
       {#if footer.legal_line}
-        <p class="legal-line">{footer.legal_line}</p>
+        <EditorialText tag="p" class="legal-line" value={footer.legal_line} />
       {/if}
 
       <KitCredit {locale} />

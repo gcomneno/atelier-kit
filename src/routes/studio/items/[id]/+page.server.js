@@ -27,6 +27,7 @@ import {
   syncItemGalleryCover
 } from '$lib/studio-item-gallery.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
+import { assertValidMarkedText } from '$lib/marked-text.js';
 
 function readString(record, key, fallback = '') {
   const value = record[key];
@@ -98,6 +99,12 @@ export const actions = {
       assertContentId(params.id, t('fields.itemId'), locale);
       const original = readItemRecord(params.id);
       const formData = await request.formData();
+      assertValidMarkedText([
+        { path: `items.${params.id}.title`, value: String(formData.get('title') ?? '') },
+        { path: `items.${params.id}.subtitle`, value: String(formData.get('subtitle') ?? '') },
+        { path: `items.${params.id}.description`, value: String(formData.get('description') ?? ''), mode: 'multiline' },
+        { path: `items.${params.id}.notice`, value: String(formData.get('notice') ?? ''), mode: 'multiline' }
+      ]);
       const upload = formData.get('image_upload');
       const galleryUpload = formData.get('gallery_upload');
       let uploadedGalleryImage = '';

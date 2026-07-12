@@ -1,9 +1,9 @@
 <script>
+  import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
-  import EditorialField from '$lib/components/EditorialField.svelte';
   import EditorialText from '$lib/components/EditorialText.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
@@ -45,12 +45,12 @@
 
     <label>
       <StudioFieldLabel label={t('studio.about.titleField')} required />
-      <input name="title" value={aboutForm.title} required />
+      <MarkedTextField name="title" value={aboutForm.title} />
     </label>
 
     <label>
       <StudioFieldLabel label={t('studio.about.introField')} optional />
-      <textarea name="intro" rows="5">{aboutForm.intro}</textarea>
+      <MarkedTextField name="intro" value={aboutForm.intro} multiline rows={5} />
     </label>
 
     <fieldset>
@@ -102,7 +102,7 @@
           optional
           hint={t('studio.about.portraitCaptionHint')}
         />
-        <EditorialField name="portrait_caption" value={aboutForm.portrait_caption} />
+        <MarkedTextField name="portrait_caption" value={aboutForm.portrait_caption} />
       </label>
     </fieldset>
 
@@ -111,12 +111,12 @@
 
       <label>
         <StudioFieldLabel label={t('studio.about.sectionHeading')} optional />
-        <input name="section_heading" value={aboutForm.section_heading} />
+        <MarkedTextField name="section_heading" value={aboutForm.section_heading} />
       </label>
 
       <label>
         <StudioFieldLabel label={t('studio.about.sectionBody')} optional />
-        <textarea name="section_body" rows="5">{aboutForm.section_body}</textarea>
+        <MarkedTextField name="section_body" value={aboutForm.section_body} multiline rows={5} />
       </label>
     </fieldset>
 

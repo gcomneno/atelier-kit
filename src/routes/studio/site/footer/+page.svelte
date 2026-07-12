@@ -1,4 +1,5 @@
 <script>
+  import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -43,12 +44,12 @@
 
     <label>
       <StudioFieldLabel label={t('studio.site.footer.copyright')} optional />
-      <input name="copyright" value={footerForm.copyright} />
+      <MarkedTextField name="copyright" value={footerForm.copyright} />
     </label>
 
     <label>
       <StudioFieldLabel label={t('studio.site.footer.legalLine')} optional />
-      <input name="legal_line" value={footerForm.legal_line} />
+      <MarkedTextField name="legal_line" value={footerForm.legal_line} />
     </label>
 
     <label class="checkbox">
@@ -67,7 +68,7 @@
             optional
             hint={t('studio.site.footer.columnTitleHint')}
           />
-          <input name={`column_${columnIndex}_title`} value={column.title} />
+          <MarkedTextField name={`column_${columnIndex}_title`} value={column.title} />
         </label>
 
         {#each column.links as link, linkIndex}
@@ -77,7 +78,7 @@
                 label={t('studio.site.footer.linkLabel', { number: linkIndex + 1 })}
                 optional
               />
-              <input
+              <MarkedTextField
                 name={`column_${columnIndex}_link_${linkIndex}_label`}
                 value={link.label}
               />

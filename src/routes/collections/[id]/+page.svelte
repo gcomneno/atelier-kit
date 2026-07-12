@@ -3,16 +3,19 @@
   import ItemCard from '$lib/components/ItemCard.svelte';
   import { formatPageTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
+  import { markedTextToPlainText } from '$lib/marked-text.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
 
-  const pageTitle = $derived(formatPageTitle(data.collection.title, data.site));
+  const pageTitle = $derived(formatPageTitle(markedTextToPlainText(data.collection.title), data.site));
 </script>
 
 <svelte:head>
   <title>{pageTitle}</title>
-  <meta name="description" content={data.collection.description} />
+  <meta name="description" content={markedTextToPlainText(data.collection.description)} />
 </svelte:head>
 
 <div class="page-shell" class:with-sidebar={data.sidebarActive}>
@@ -26,9 +29,11 @@
         </nav>
 
         <header>
-          <p class="eyebrow">{data.pageEyebrow}</p>
-          <h1>{data.collection.title}</h1>
-          <p>{data.collection.description}</p>
+          <EditorialText tag="p" class="eyebrow" value={data.pageEyebrow} />
+          <h1><EditorialText value={data.collection.title} /></h1>
+          {#each splitEditorialParagraphs(data.collection.description) as paragraph}
+            <EditorialText tag="p" value={paragraph} />
+          {/each}
         </header>
       </div>
 
@@ -127,7 +132,7 @@
     letter-spacing: -0.07em;
   }
 
-  header p {
+  header :global(p) {
     max-width: 42rem;
     margin: 0;
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 92%, transparent);

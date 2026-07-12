@@ -3,6 +3,7 @@
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
+  import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
@@ -69,7 +70,7 @@
 
       <label>
         <StudioFieldLabel label={t('studio.site.contact.emailLabel')} optional />
-        <input name="email_label" disabled={!emailEnabled} value={contactForm.email_label} />
+        <MarkedTextField name="email_label" disabled={!emailEnabled} value={contactForm.email_label} />
       </label>
 
       <label>
@@ -106,7 +107,7 @@
 
       <label>
         <StudioFieldLabel label={t('studio.site.contact.whatsappLabel')} optional />
-        <input name="whatsapp_label" disabled={!whatsappEnabled} value={contactForm.whatsapp_label} />
+        <MarkedTextField name="whatsapp_label" disabled={!whatsappEnabled} value={contactForm.whatsapp_label} />
       </label>
     </fieldset>
 

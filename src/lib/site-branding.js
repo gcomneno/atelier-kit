@@ -45,7 +45,7 @@ export function resolveIntroTitle(site) {
  * @param {{ name?: string, intro_title?: string, header_title?: string, tagline?: string }} site
  */
 export function resolveDocumentTitle(site) {
-  return (
+  return markedTextToPlainText(
     resolveIntroTitle(site) ||
     resolveHeaderTitle(site) ||
     trimOrEmpty(site.name) ||
@@ -73,3 +73,4 @@ export function formatPageTitle(pageTitle, site) {
 
   return `${trimmedPage} · ${siteTitle}`;
 }
+import { markedTextToPlainText } from './marked-text.js';

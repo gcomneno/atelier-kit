@@ -1,5 +1,8 @@
 <script>
   import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { markedTextToPlainText } from '$lib/marked-text.js';
+  import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
   import ItemCard from '$lib/components/ItemCard.svelte';
   import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
@@ -8,7 +11,9 @@
   const t = useVisitorI18n();
 
   const siteLabel = $derived(resolveDocumentTitle(data.site));
-  const pageTitle = $derived(formatPageTitle(data.blockLabels.catalog, data.site));
+  const pageTitle = $derived(
+    formatPageTitle(markedTextToPlainText(data.blockLabels.catalog), data.site)
+  );
   const catalogIntro = $derived(
     data.catalog.intro.trim() ||
       t('catalogListing.intro', { itemPlural: data.catalog.item_name_plural })
@@ -19,7 +24,7 @@
           itemPlural: data.catalog.item_name_plural,
           siteName: siteLabel
         })
-      : catalogIntro
+      : markedTextToPlainText(catalogIntro)
   );
 </script>
 
@@ -37,11 +42,11 @@
         </nav>
 
         <header>
-          <p class="eyebrow">{data.pageEyebrow}</p>
+          <EditorialText tag="p" class="eyebrow" value={data.pageEyebrow} />
           <h1>{data.items.length} {data.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</h1>
-          <p>
-            {catalogIntro}
-          </p>
+          {#each splitEditorialParagraphs(catalogIntro) as paragraph}
+            <EditorialText tag="p" value={paragraph} />
+          {/each}
         </header>
       </div>
 
@@ -124,7 +129,7 @@
     margin-bottom: 0;
   }
 
-  .eyebrow {
+  :global(.eyebrow) {
     margin: 0;
     color: color-mix(in srgb, var(--site-accent-color, #7d684f) 72%, var(--site-text-color, #2f281f));
     font-size: 0.8rem;
@@ -140,7 +145,7 @@
     letter-spacing: -0.07em;
   }
 
-  header p,
+  header :global(p),
   .empty {
     max-width: 42rem;
     margin: 0;

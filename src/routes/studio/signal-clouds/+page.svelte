@@ -3,6 +3,7 @@
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
+  import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
@@ -61,18 +62,18 @@
 
         <label>
           <StudioFieldLabel label={t('studio.signals.question')} optional />
-          <input name={`cloud_${cloudIndex}_question`} value={cloud.question} />
+          <MarkedTextField name={`cloud_${cloudIndex}_question`} value={cloud.question} />
         </label>
 
         <label>
           <StudioFieldLabel label={t('studio.signals.hint')} optional />
-          <input name={`cloud_${cloudIndex}_hint`} value={cloud.hint} />
+          <MarkedTextField name={`cloud_${cloudIndex}_hint`} value={cloud.hint} />
         </label>
 
         {#each cloud.options as option, optionIndex}
           <label>
             <StudioFieldLabel label={t('studio.signals.answer', { id: option.id })} optional />
-            <input
+            <MarkedTextField
               name={`cloud_${cloudIndex}_option_${optionIndex}_label`}
               value={option.label}
             />
@@ -109,11 +110,13 @@
               label={t('studio.signals.faqAnswer')}
               hint={t('studio.signals.faqAnswerHint')}
             />
-            <textarea
+            <MarkedTextField
               name={`cloud_${cloudIndex}_faq_answer`}
-              rows="4"
+              value={cloud.faq.answer}
+              multiline
+              rows={4}
               required={cloud.faq.visible}
-            >{cloud.faq.answer}</textarea>
+            />
           </label>
 
           <label>
@@ -122,7 +125,7 @@
               optional
               hint={t('studio.signals.faqGroupHint')}
             />
-            <input
+            <MarkedTextField
               name={`cloud_${cloudIndex}_faq_group`}
               value={cloud.faq.group}
             />

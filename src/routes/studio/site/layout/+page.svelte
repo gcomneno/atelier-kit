@@ -3,6 +3,7 @@
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
+  import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { LAYOUT_BLOCK_IDS } from '$lib/layout-blocks.js';
   import { getDefaultLayoutBlockLabel } from '$lib/layout-block-labels.js';
   import { useI18n } from '$lib/i18n/context.js';
@@ -84,7 +85,7 @@
               optional
               hint={t('studio.site.layout.blockNameHint')}
             />
-            <input
+            <MarkedTextField
               name={`block_${blockId}_label`}
               value={block.label ?? ''}
               placeholder={defaultBlockLabel(blockId)}

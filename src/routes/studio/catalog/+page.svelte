@@ -1,4 +1,5 @@
 <script>
+  import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -49,7 +50,7 @@
           optional
           hint={t('studio.catalog.eyebrowHint')}
         />
-        <input name="eyebrow" value={catalogForm.eyebrow} />
+        <MarkedTextField name="eyebrow" value={catalogForm.eyebrow} />
       </label>
 
       <label>
@@ -58,7 +59,7 @@
           optional
           hint={t('studio.catalog.introHint')}
         />
-        <textarea name="intro" rows="4">{catalogForm.intro}</textarea>
+        <MarkedTextField name="intro" value={catalogForm.intro} multiline rows={4} />
       </label>
     </fieldset>
 

@@ -5,6 +5,7 @@ import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
 import { validateEditorialFields } from '../src/lib/editorial-markup.js';
 import { validateAboutPortraitContent } from '../src/lib/about-config.js';
+import { validateMarkedTextValues } from '../src/lib/marked-text.js';
 
 const ROOT = process.cwd();
 const STRICT_MODE = process.argv.includes('--strict');
@@ -234,11 +235,17 @@ function inspectSite() {
     });
   }
 
-  const editorialErrors = validateEditorialFields({
-    tagline: typeof site.tagline === 'string' ? site.tagline : '',
-    intro_title: typeof site.intro_title === 'string' ? site.intro_title : '',
-    hero_intro: typeof site.hero_intro === 'string' ? site.hero_intro : ''
-  });
+  const banner = isRecord(site.hero_banner) ? site.hero_banner : {};
+  const editorialErrors = validateMarkedTextValues([
+    { path: 'site.tagline', value: site.tagline },
+    { path: 'site.header_title', value: site.header_title },
+    { path: 'site.intro_title', value: site.intro_title },
+    { path: 'site.hero_intro', value: site.hero_intro, mode: 'multiline' },
+    { path: 'site.hero_signature', value: site.hero_signature, mode: 'multiline' },
+    { path: 'site.footer_note', value: site.footer_note },
+    { path: 'site.hero_banner.description', value: banner.description, mode: 'multiline' },
+    { path: 'site.hero_banner.caption', value: banner.caption }
+  ]);
 
   for (const error of editorialErrors) {
     addWarning({
@@ -250,6 +257,50 @@ function inspectSite() {
       technical: error
     });
   }
+}
+
+function reportMarkedErrors(source, values) {
+  for (const error of validateMarkedTextValues(values)) {
+    addWarning({
+      source,
+      title: t('doctor.warnings.editorialMarkup.title'),
+      problem: t('doctor.warnings.editorialMarkup.problem', { detail: error }),
+      action: t('doctor.warnings.editorialMarkup.action'),
+      detail: error,
+      technical: error
+    });
+  }
+}
+
+function inspectMarkedConfig() {
+  const catalog = readYaml('config/catalog.yaml')?.catalog;
+  if (isRecord(catalog)) reportMarkedErrors('config/catalog.yaml', [
+    { path: 'catalog.eyebrow', value: catalog.eyebrow },
+    { path: 'catalog.intro', value: catalog.intro, mode: 'multiline' }
+  ]);
+
+  const about = readYaml('config/about.yaml')?.about;
+  if (isRecord(about)) reportMarkedErrors('config/about.yaml', [
+    { path: 'about.title', value: about.title },
+    { path: 'about.intro', value: about.intro, mode: 'multiline' },
+    ...(Array.isArray(about.sections) ? about.sections.flatMap((section, index) => [
+      { path: `about.sections.${index}.heading`, value: section?.heading },
+      { path: `about.sections.${index}.body`, value: section?.body, mode: 'multiline' }
+    ]) : [])
+  ]);
+
+  const footer = readYaml('config/footer.yaml')?.footer;
+  if (isRecord(footer)) reportMarkedErrors('config/footer.yaml', [
+    { path: 'footer.copyright', value: footer.copyright },
+    { path: 'footer.legal_line', value: footer.legal_line },
+    ...(Array.isArray(footer.columns) ? footer.columns.flatMap((column, index) => [
+      { path: `footer.columns.${index}.title`, value: column?.title },
+      ...(Array.isArray(column?.links) ? column.links.map((link, linkIndex) => ({ path: `footer.columns.${index}.links.${linkIndex}.label`, value: link?.label })) : [])
+    ]) : [])
+  ]);
+
+  const layout = readYaml('config/layout.yaml')?.layout;
+  if (isRecord(layout?.blocks)) reportMarkedErrors('config/layout.yaml', Object.entries(layout.blocks).map(([id, block]) => ({ path: `layout.blocks.${id}.label`, value: block?.label })));
 }
 
 function inspectContact() {
@@ -268,6 +319,10 @@ function inspectContact() {
   const contact = data.contact;
   const email = isRecord(contact.email) ? contact.email : {};
   const whatsapp = isRecord(contact.whatsapp) ? contact.whatsapp : {};
+  reportMarkedErrors(source, [
+    { path: 'contact.email.label', value: email.label },
+    { path: 'contact.whatsapp.label', value: whatsapp.label }
+  ]);
 
   if (email.enabled === true) {
     const address = typeof email.address === 'string' ? email.address.trim().toLowerCase() : '';
@@ -352,6 +407,13 @@ function inspectSignalClouds() {
         : t('doctor.warnings.defaultQuestionLabel', { index: cloudIndex + 1 }));
 
     inspectDeepStrings(source, `signal_clouds[${cloudIndex}]`, cloud);
+    reportMarkedErrors(source, [
+      { path: `signal_clouds.${cloudIndex}.question`, value: cloud.question },
+      { path: `signal_clouds.${cloudIndex}.hint`, value: cloud.hint },
+      ...(Array.isArray(cloud.options) ? cloud.options.map((option, optionIndex) => ({ path: `signal_clouds.${cloudIndex}.options.${optionIndex}.label`, value: option?.label })) : []),
+      { path: `signal_clouds.${cloudIndex}.faq.answer`, value: cloud.faq?.answer, mode: 'multiline' },
+      { path: `signal_clouds.${cloudIndex}.faq.group`, value: cloud.faq?.group }
+    ]);
 
     if (Array.isArray(cloud.options) && cloud.options.length < 2) {
       addWarning({
@@ -460,6 +522,12 @@ function inspectItems() {
     }
 
     inspectMetaEntries(source, itemTitle, item.meta);
+    reportMarkedErrors(source, [
+      { path: `items.${id}.title`, value: item.title },
+      { path: `items.${id}.subtitle`, value: item.subtitle },
+      { path: `items.${id}.description`, value: item.description, mode: 'multiline' },
+      { path: `items.${id}.notice`, value: item.notice, mode: 'multiline' }
+    ]);
 
     if (/(^|[-_])(test|smoke|sample)([-_]|$)/i.test(id)) {
       addWarning({
@@ -514,6 +582,21 @@ function inspectItems() {
         technical: 'Item has no meta information.'
       });
     }
+  }
+}
+
+function inspectCollections() {
+  const dir = path.join(ROOT, 'content/collections');
+  if (!existsSync(dir)) return;
+  for (const file of readdirSync(dir).filter((entry) => entry.endsWith('.yaml')).sort()) {
+    const source = `content/collections/${file}`;
+    const collection = readYaml(source);
+    if (!collection) continue;
+    const id = typeof collection.id === 'string' ? collection.id : file.replace(/\.yaml$/, '');
+    reportMarkedErrors(source, [
+      { path: `collections.${id}.title`, value: collection.title },
+      { path: `collections.${id}.description`, value: collection.description, mode: 'multiline' }
+    ]);
   }
 }
 
@@ -601,6 +684,11 @@ function inspectNews() {
         technical: 'News body is quite short. Consider adding more useful context.'
       });
     }
+    reportMarkedErrors(source, [
+      { path: `news.${id}.title`, value: post.title },
+      { path: `news.${id}.excerpt`, value: post.excerpt, mode: 'multiline' },
+      { path: `news.${id}.body`, value: post.body, mode: 'multiline' }
+    ]);
   }
 }
 
@@ -638,9 +726,11 @@ function printWarnings() {
 
 inspectSite();
 inspectAbout();
+inspectMarkedConfig();
 inspectContact();
 inspectSignalClouds();
 inspectItems();
+inspectCollections();
 inspectNews();
 
 if (warnings.length === 0) {

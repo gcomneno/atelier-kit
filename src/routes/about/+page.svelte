@@ -1,19 +1,20 @@
 <script>
   import JsonLd from '$lib/components/JsonLd.svelte';
-  import { splitParagraphs } from '$lib/text-blocks.js';
+  import EditorialText from '$lib/components/EditorialText.svelte';
+  import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
+  import { markedTextToPlainText } from '$lib/marked-text.js';
   import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
-  import EditorialText from '$lib/components/EditorialText.svelte';
 
   let { data } = $props();
   const t = useVisitorI18n();
 
-  const introParagraphs = $derived(splitParagraphs(data.about.intro));
+  const introParagraphs = $derived(splitEditorialParagraphs(data.about.intro));
   const siteLabel = $derived(resolveDocumentTitle(data.site));
-  const pageTitle = $derived(formatPageTitle(data.about.title, data.site));
+  const pageTitle = $derived(formatPageTitle(markedTextToPlainText(data.about.title), data.site));
   const metaDescription = $derived(
-    data.about.intro ||
-      (siteLabel ? t('about.metaDescription', { siteName: siteLabel }) : data.about.title)
+    markedTextToPlainText(data.about.intro) ||
+      (siteLabel ? t('about.metaDescription', { siteName: siteLabel }) : markedTextToPlainText(data.about.title))
   );
 </script>
 
@@ -48,13 +49,13 @@
 
       <div class="page-heading">
         <p class="eyebrow">{data.pageEyebrow}</p>
-        <h1>{data.about.title}</h1>
+        <h1><EditorialText value={data.about.title} /></h1>
       </div>
 
       {#if introParagraphs.length > 0}
         <div class="intro-block">
           {#each introParagraphs as paragraph}
-            <p>{paragraph}</p>
+            <EditorialText tag="p" value={paragraph} />
           {/each}
         </div>
       {/if}
@@ -62,10 +63,10 @@
 
     {#each data.about.sections as section}
       <section class="about-section">
-        <h2>{section.heading}</h2>
+        <h2><EditorialText value={section.heading} /></h2>
         <div class="section-body">
-          {#each splitParagraphs(section.body) as paragraph}
-            <p>{paragraph}</p>
+          {#each splitEditorialParagraphs(section.body) as paragraph}
+            <EditorialText tag="p" value={paragraph} />
           {/each}
         </div>
       </section>
@@ -173,8 +174,8 @@
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.1);
   }
 
-  .intro-block p,
-  .section-body p {
+  .intro-block :global(p),
+  .section-body :global(p) {
     margin: 0;
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 92%, transparent);
     font-size: 1.05rem;

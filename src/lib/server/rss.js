@@ -1,6 +1,7 @@
 import { resolveAbsoluteImageUrl, resolveAbsoluteUrl } from '$lib/site-meta.js';
 import { resolveDocumentTitle } from '$lib/site-branding.js';
 import { getNewsPosts, getSiteConfig } from '$lib/server/showcase.js';
+import { markedTextToPlainText } from '$lib/marked-text.js';
 
 /**
  * @typedef {{
@@ -54,12 +55,12 @@ function formatRssPubDate(date) {
  */
 function postDescription(post) {
   if (post.excerpt) {
-    return post.excerpt;
+    return markedTextToPlainText(post.excerpt);
   }
 
   const firstLine = post.body.split('\n').find((line) => line.trim() !== '');
 
-  return firstLine?.trim() ?? '';
+  return markedTextToPlainText(firstLine?.trim() ?? '');
 }
 
 /**
@@ -90,7 +91,7 @@ function enclosureMimeType(path) {
 export function buildNewsFeed(origin) {
   const site = getSiteConfig();
   const siteLabel = resolveDocumentTitle(site);
-  const tagline = typeof site.tagline === 'string' ? site.tagline.trim() : '';
+  const tagline = typeof site.tagline === 'string' ? markedTextToPlainText(site.tagline).trim() : '';
 
   /** @param {string} path */
   const absolute = (path) => resolveAbsoluteUrl(path, origin, site.url);
@@ -101,7 +102,7 @@ export function buildNewsFeed(origin) {
     const imageFile = post.image_file;
 
     return {
-      title: post.title,
+      title: markedTextToPlainText(post.title),
       link,
       guid: link,
       pubDate: formatRssPubDate(post.date),

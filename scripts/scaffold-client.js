@@ -204,6 +204,8 @@ contact:
 function writeScaffoldSocial(targetRoot) {
   writeFile(targetRoot, 'config/social.yaml', `
 social:
+  # Supported ids: instagram, facebook, x, github (twitter is accepted as an alias for x).
+  # Example: { id: github, url: "https://github.com/sponsors/your-name" }
   links: []
 `);
 }

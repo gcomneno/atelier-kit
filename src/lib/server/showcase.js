@@ -17,7 +17,11 @@ import {
   normalizeLayoutBlocks,
   resolveLayoutPreset
 } from '$lib/layout-blocks.js';
-import { isValidSocialUrl, normalizeSocialId } from '$lib/social-networks.js';
+import {
+  isValidSocialUrlForNetwork,
+  normalizeSocialId,
+  SOCIAL_NETWORK_IDS
+} from '$lib/social-networks.js';
 import { resolveSiteAppearance } from '$lib/site-appearance.js';
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
 import {
@@ -733,12 +737,12 @@ export function getSocialConfig() {
         const id = normalizeSocialId(idValue);
 
         if (!id) {
-          throw new Error(`${source}: id must be one of: instagram, facebook, x.`);
+          throw new Error(`${source}: id must be one of: ${SOCIAL_NETWORK_IDS.join(', ')}.`);
         }
 
         const url = requiredString(entry, 'url', source);
 
-        if (!isValidSocialUrl(url)) {
+        if (!isValidSocialUrlForNetwork(id, url)) {
           throw new Error(`${source}: url must be a valid http or https URL.`);
         }
 

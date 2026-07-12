@@ -66,6 +66,19 @@ Fields:
 - `og_image` is an optional social preview image for Facebook, Instagram and similar link unfurlers. Use a path under `/images/…` (for example `/images/site/og.jpg`) or a full `https://` URL. Recommended size: 1200×630.
 - `favicon` is an optional browser tab icon path. Studio saves uploaded favicons under `static/images/site/favicon.*` and stores the public path, for example `/images/site/favicon.png`. Omit the field or leave it empty to use the default Atelier-Kit icon.
 
+## Social links
+
+Edit `config/social.yaml` directly or use **Studio → Site → Social**. Supported first-class IDs are `instagram`, `facebook`, `x`, and `github`; the legacy `twitter` alias is normalized to `x`.
+
+```yaml
+social:
+  links:
+    - id: github
+      url: "https://github.com/sponsors/your-name"
+```
+
+Social URLs may use HTTP or HTTPS. GitHub links are not restricted to Sponsors pages. Existing visibility settings in `config/footer.yaml` control whether configured icons appear in the public header and footer.
+
 ## Discovery (sitemap and RSS)
 
 Atelier-Kit generates a sitemap automatically at:

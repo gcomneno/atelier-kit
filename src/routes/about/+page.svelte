@@ -3,6 +3,7 @@
   import { splitParagraphs } from '$lib/text-blocks.js';
   import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+  import EditorialText from '$lib/components/EditorialText.svelte';
 
   let { data } = $props();
   const t = useVisitorI18n();
@@ -30,13 +31,18 @@
     <header class:has-portrait={Boolean(data.about.portrait)}>
       {#if data.about.portrait}
         <figure class="about-portrait">
-          <img
-            src={data.about.portrait.image_file}
-            alt={data.about.portrait.image_alt}
-            width="320"
-            height="320"
-            loading="lazy"
-          />
+          <div class="portrait-image">
+            <img
+              src={data.about.portrait.image_file}
+              alt={data.about.portrait.image_alt}
+              width="320"
+              height="320"
+              loading="lazy"
+            />
+          </div>
+          {#if data.about.portrait.caption}
+            <EditorialText value={data.about.portrait.caption} tag="figcaption" />
+          {/if}
         </figure>
       {/if}
 
@@ -104,6 +110,9 @@
     float: right;
     width: min(10.5rem, 34vw);
     margin: 0.15rem 0 1rem 1.5rem;
+  }
+
+  .portrait-image {
     aspect-ratio: 1;
     overflow: hidden;
     border-radius: 1rem;
@@ -112,12 +121,20 @@
     box-shadow: 0 18px 50px rgb(0 0 0 / 0.12);
   }
 
-  .about-portrait img {
+  .portrait-image img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center top;
+  }
+
+  .about-portrait :global(figcaption) {
+    margin-top: 0.55rem;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 76%, transparent);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    text-wrap: pretty;
   }
 
   .eyebrow {

@@ -3,6 +3,7 @@ import path from 'node:path';
 import { parse } from 'yaml';
 import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
+import { validateAboutPortraitContent } from '../src/lib/about-config.js';
 import { validateEditorialFields } from '../src/lib/editorial-markup.js';
 import { isValidFooterHref } from '../src/lib/footer-links.js';
 import { isHomeShowMode, isLayoutPreset, MAX_CATALOG_HOME_LIMIT, MAX_LATEST_NEWS_COUNT } from '../src/lib/layout-presets.js';
@@ -480,6 +481,19 @@ function validateAbout() {
   if (about.portrait && typeof about.portrait === 'object' && !Array.isArray(about.portrait)) {
     const portrait = about.portrait;
     const portraitSource = `${source}:portrait`;
+
+    if ('caption' in portrait && portrait.caption !== undefined && typeof portrait.caption !== 'string') {
+      failKey('missingField', { source: portraitSource, field: 'caption' });
+    }
+
+    if ('image_alt' in portrait && portrait.image_alt !== undefined && typeof portrait.image_alt !== 'string') {
+      failKey('missingField', { source: portraitSource, field: 'image_alt' });
+    }
+
+    const portraitContentErrors = validateAboutPortraitContent(data.about);
+    for (const detail of portraitContentErrors) {
+      failKey('editorialMarkupInvalid', { source: portraitSource, detail });
+    }
 
     if (portrait.show === true) {
       const imageFile = requireString(portrait, 'image_file', portraitSource);

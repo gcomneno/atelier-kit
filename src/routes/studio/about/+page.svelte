@@ -3,6 +3,8 @@
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
+  import EditorialField from '$lib/components/EditorialField.svelte';
+  import EditorialText from '$lib/components/EditorialText.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
@@ -60,11 +62,16 @@
       </label>
 
       {#if aboutForm.portrait_image_file}
-        <div class="preview">
-          <img
-            src={aboutForm.portrait_image_file}
-            alt={aboutForm.portrait_image_alt || aboutForm.title}
-          />
+        <div class="portrait-preview">
+          <div class="preview-image">
+            <img
+              src={aboutForm.portrait_image_file}
+              alt={aboutForm.portrait_image_alt || aboutForm.title}
+            />
+          </div>
+          {#if aboutForm.portrait_caption.trim()}
+            <EditorialText value={aboutForm.portrait_caption} tag="p" class="preview-caption" />
+          {/if}
         </div>
       {/if}
 
@@ -87,6 +94,15 @@
       <label>
         <StudioFieldLabel label={t('studio.about.portraitAlt')} optional />
         <input name="portrait_image_alt" disabled={!showPortrait} value={aboutForm.portrait_image_alt} />
+      </label>
+
+      <label>
+        <StudioFieldLabel
+          label={t('studio.about.portraitCaption')}
+          optional
+          hint={t('studio.about.portraitCaptionHint')}
+        />
+        <EditorialField name="portrait_caption" value={aboutForm.portrait_caption} />
       </label>
     </fieldset>
 
@@ -113,8 +129,11 @@
 </section>
 
 <style>
-  .preview {
+  .portrait-preview {
     width: min(100%, 10rem);
+  }
+
+  .preview-image {
     aspect-ratio: 1;
     overflow: hidden;
     border-radius: 0.75rem;
@@ -122,11 +141,18 @@
     background: #fff;
   }
 
-  .preview img {
+  .preview-image img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center top;
+  }
+
+  :global(.preview-caption) {
+    margin: 0.45rem 0 0;
+    color: var(--studio-muted, #596579);
+    font-size: 0.82rem;
+    line-height: 1.4;
   }
 </style>

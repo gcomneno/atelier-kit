@@ -90,7 +90,7 @@ export function hasEditorialMarkup(text) {
     return false;
   }
 
-  return /\{(?:\/?[a-z]+(?::[a-z-]+)?|{)/.test(text);
+  return /\{(?:\/?[a-z]+(?::[a-z-]+)?\}|{)/.test(text);
 }
 
 /** @param {...(string | undefined | null)} texts @returns {FontPreset[]} */
@@ -280,6 +280,22 @@ export function validateEditorialField(text, fieldLabel) {
   }
 
   return [];
+}
+
+/**
+ * Reject Atelier Mark syntax in fields whose value must remain literal plain text.
+ * Literal braces that are not recognized by the shared Atelier Mark tokenizer are allowed.
+ *
+ * @param {string | undefined | null} text
+ * @param {string} fieldLabel
+ * @returns {string[]}
+ */
+export function validatePlainTextField(text, fieldLabel) {
+  if (!text?.trim() || !hasEditorialMarkup(text)) {
+    return [];
+  }
+
+  return [`${fieldLabel}: Atelier Mark is not allowed in plain-text fields.`];
 }
 
 /**

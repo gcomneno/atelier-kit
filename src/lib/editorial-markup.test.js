@@ -7,7 +7,8 @@ import {
   splitEditorialParagraphs,
   stripEditorialMarkup,
   validateEditorialFields,
-  validateEditorialParagraphs
+  validateEditorialParagraphs,
+  validatePlainTextField
 } from './editorial-markup.js';
 import { fontStylesheetHrefs } from './site-typography.js';
 
@@ -194,4 +195,13 @@ test('validateEditorialFields aggregates field errors', () => {
 
   assert.ok(errors.length >= 1);
   assert.ok(errors.every((error) => error.startsWith('intro_title:')));
+});
+
+test('plain-text validation rejects Atelier Mark but permits unrelated literal braces', () => {
+  assert.deepEqual(validatePlainTextField('Portrait {front view}', 'image_alt'), []);
+  assert.deepEqual(validatePlainTextField('Work from {2026}', 'image_alt'), []);
+  assert.match(
+    validatePlainTextField('{muted}Portrait{/muted}', 'image_alt').join(' '),
+    /image_alt: Atelier Mark is not allowed/
+  );
 });

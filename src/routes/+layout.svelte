@@ -41,7 +41,12 @@
       ? []
       : fontStylesheetHrefs([
           data.appearance?.font_preset ?? 'inter',
-          ...editorialFontPresets(data.site?.tagline, data.site?.intro_title, data.site?.hero_intro)
+          ...editorialFontPresets(
+            data.site?.tagline,
+            data.site?.intro_title,
+            data.site?.hero_intro,
+            data.aboutPortrait?.caption
+          )
         ])
   );
   const faviconHref = $derived(data.site?.favicon || '/favicon.svg');

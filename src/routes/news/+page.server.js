@@ -1,5 +1,5 @@
 import { resolveAbsoluteUrl } from '$lib/site-meta.js';
-import { getNewsPosts, getSiteConfig } from '$lib/server/showcase.js';
+import { getLayoutPageData, getNewsPosts, getSiteConfig } from '$lib/server/showcase.js';
 
 /** @type {import('./$types').PageServerLoad} */
 export function load({ url }) {
@@ -8,6 +8,7 @@ export function load({ url }) {
   return {
     site,
     posts: getNewsPosts(),
+    ...getLayoutPageData('news'),
     feedUrl: resolveAbsoluteUrl('/news/rss.xml', url.origin, site.url)
   };
 }

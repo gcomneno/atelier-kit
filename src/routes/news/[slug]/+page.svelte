@@ -4,7 +4,7 @@
   import JsonLd from '$lib/components/JsonLd.svelte';
   import PageSocialMeta from '$lib/components/PageSocialMeta.svelte';
   import { isBookReadingFormat } from '$lib/book-content.js';
-  import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
+  import { formatPageTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
@@ -12,7 +12,6 @@
 
   let lightboxOpen = $state(false);
 
-  const siteLabel = $derived(resolveDocumentTitle(data.site));
   const pageTitle = $derived(formatPageTitle(data.post.title, data.site));
 
   const isBookLayout = $derived(
@@ -67,9 +66,7 @@
 
     <article>
       <header>
-        {#if siteLabel}
-          <p class="eyebrow">{siteLabel}</p>
-        {/if}
+        <p class="eyebrow">{data.pageEyebrow}</p>
         <time datetime={data.post.date}>{formatDate(data.post.date)}</time>
         <h1>{data.post.title}</h1>
       </header>

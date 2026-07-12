@@ -9,7 +9,6 @@
 
   const siteLabel = $derived(resolveDocumentTitle(data.site));
   const pageTitle = $derived(formatPageTitle(data.blockLabels.catalog, data.site));
-  const catalogEyebrow = $derived(data.catalog.eyebrow || t('home.catalogEyebrow'));
   const catalogIntro = $derived(
     data.catalog.intro.trim() ||
       t('catalogListing.intro', { itemPlural: data.catalog.item_name_plural })
@@ -38,7 +37,7 @@
         </nav>
 
         <header>
-          <p class="eyebrow">{catalogEyebrow}</p>
+          <p class="eyebrow">{data.pageEyebrow}</p>
           <h1>{data.items.length} {data.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</h1>
           <p>
             {catalogIntro}

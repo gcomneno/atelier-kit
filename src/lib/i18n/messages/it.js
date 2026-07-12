@@ -703,7 +703,8 @@ export default {
       intro:
         'Come si presenta il catalogo sul sito pubblico: testi, ordinamento e anteprima in home. I contenuti delle singole schede si gestiscono in Oggetti.',
       presentationLegend: 'Pagina catalogo',
-      eyebrow: 'Etichetta sopra il titolo',
+      eyebrow: 'Eyebrow catalogo in home',
+      eyebrowHint: 'Etichetta facoltativa sopra il titolo della sezione catalogo in home. La pagina /catalog usa la label configurata in Sito → Layout.',
       introField: 'Testo introduttivo',
       introHint: 'Mostrato nella sezione catalogo in home e su /catalog. Lascia vuoto per il testo predefinito del tema (solo su /catalog).',
       listingLegend: 'Elenco',

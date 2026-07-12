@@ -30,7 +30,7 @@
         </nav>
 
         <header>
-          <p class="eyebrow">{t('collections.eyebrow')}</p>
+          <p class="eyebrow">{data.pageEyebrow}</p>
           <h1>{t('collections.title')}</h1>
           <p>{t('collections.intro', { itemPlural: data.catalog.item_name_plural })}</p>
         </header>

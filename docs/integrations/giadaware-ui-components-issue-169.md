@@ -56,4 +56,32 @@ The integration tests build one temporary fixture by copying the tracked `packag
 4. Remove `giadaware-ui-components` from `package.json`, regenerate `package-lock.json`, and remove the focused vendor directory and upgrade safeguard.
 5. Run install, tests, check, build, content validation, Svelte-tree inspection, and protected-path verification again.
 
-This procedure is documented but has not been timed or rehearsed in a disposable worktree. That exercise remains part of the subsequent evaluation/rollback step.
+This procedure was rehearsed successfully in a disposable worktree; the measured result is recorded below.
+
+## Timed rollback rehearsal
+
+The rollback procedure was executed on 2026-07-13 in a disposable detached Git worktree.
+
+- integration commit: `31edd036d4b4f47c9edd3e9714eb8d10e5e60d39`
+- restored pre-integration commit: `d47dcf6d4fc92c08c53004fa07fd7e16881a4038`
+- elapsed time: **24 seconds**
+- inverse commit application: passed without conflicts
+- restored tree: exactly matched the pre-integration commit
+- local `SocialIcon` and `StudioFormStatus` components: restored
+- package dependency, adapters and vendored artifact: removed
+- `config/`, `content/` and `static/`: unchanged
+- content/config migration required: none
+- accepted integration branch modified by rehearsal: no
+
+Rollback validation passed:
+
+- `npm ci`
+- `npm test`
+- `npm run check`
+- `npm run build`
+- `npm run content:validate`
+- `npm ls svelte --all`
+- `git diff --check`
+
+After the disposable worktree was removed, the accepted integration branch still pointed to the original integration commit with a clean working tree.
+

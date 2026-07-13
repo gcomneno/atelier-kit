@@ -84,4 +84,3 @@ Rollback validation passed:
 - `git diff --check`
 
 After the disposable worktree was removed, the accepted integration branch still pointed to the original integration commit with a clean working tree.
-

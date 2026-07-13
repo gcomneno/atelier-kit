@@ -3,7 +3,7 @@
   import { untrack } from 'svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
-  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
+  import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormEnhance } from '$lib/studio-form-enhance.js';
   import { APPEARANCE_PRESETS, isAppearancePreset } from '$lib/site-appearance.js';

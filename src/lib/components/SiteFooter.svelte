@@ -1,7 +1,7 @@
 <script>
   import { isExternalFooterHref } from '$lib/footer-links.js';
   import KitCredit from '$lib/components/KitCredit.svelte';
-  import SocialIcon from '$lib/components/SocialIcon.svelte';
+  import SocialIcon from '$lib/components/AtelierSocialIcon.svelte';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
   import EditorialText from '$lib/components/EditorialText.svelte';
   import { markedTextToPlainText } from '$lib/marked-text.js';

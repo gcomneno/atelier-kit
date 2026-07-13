@@ -24,6 +24,19 @@ const SKIP_DIR_NAMES = new Set(['.git', 'node_modules', '.svelte-kit', '.vercel'
 const SOURCE_POINTER = '.atelier-kit-source';
 const UPGRADE_MANIFEST = '.atelier-kit-upgrade.json';
 const PRESERVE_MANIFEST = '.atelier-kit-preserve';
+const UI_COMPONENTS_PACKAGE = 'giadaware-ui-components';
+const UI_COMPONENTS_DEPENDENCY =
+  'file:vendor/giadaware-ui-components/fcdb869/giadaware-ui-components-0.0.0.tgz';
+const UI_COMPONENTS_ARTIFACT =
+  'vendor/giadaware-ui-components/fcdb869/giadaware-ui-components-0.0.0.tgz';
+const UI_COMPONENTS_ARTIFACT_SHA256 =
+  'c53b5399520db687f7aef43c15b8b4b6a999a6a80f1bda71e26ff22a35acb7bd';
+const UI_COMPONENTS_IDENTITY =
+  'vendor/giadaware-ui-components/fcdb869/integration.json';
+const UI_COMPONENTS_INTEGRATION_FILES = [
+  UI_COMPONENTS_ARTIFACT,
+  UI_COMPONENTS_IDENTITY
+];
 const CORE_MANAGED_PRESERVE_PATTERNS = [
   { prefix: 'src/lib/server/', label: 'src/lib/server/*' },
   { prefix: 'src/lib/components/', label: 'src/lib/components/*' },
@@ -184,6 +197,15 @@ function resolveKitRoot(clientRoot, fromArg) {
  */
 function hashFile(filePath) {
   const buffer = fs.readFileSync(filePath);
+  return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+/**
+ * @param {string} filePath
+ * @param {(filePath: string) => Buffer} readFile
+ */
+function hashIntegrationFile(filePath, readFile) {
+  const buffer = readFile(filePath);
   return crypto.createHash('sha256').update(buffer).digest('hex');
 }
 
@@ -391,7 +413,8 @@ export function buildMetadataPlan(clientRoot, kitRoot, kitVersion) {
  * @param {string} clientRoot
  * @returns {{ key: string, from?: string, to: string }[]}
  */
-function buildScriptPlan(kitRoot, clientRoot) {
+function buildScriptPlan(kitRoot, clientRoot, packageJsonPreserved = false) {
+  if (packageJsonPreserved) return [];
   const kitPkg = JSON.parse(fs.readFileSync(path.join(kitRoot, 'package.json'), 'utf8'));
   const clientPkg = JSON.parse(fs.readFileSync(path.join(clientRoot, 'package.json'), 'utf8'));
   /** @type {{ key: string, from?: string, to: string }[]} */
@@ -407,8 +430,234 @@ function buildScriptPlan(kitRoot, clientRoot) {
 }
 
 /**
+ * @param {string} kitRoot
+ * @param {string} clientRoot
+ * @returns {{ changed: boolean, from?: string, to: string }}
+ */
+export function buildUiComponentsDependencyPlan(kitRoot, clientRoot) {
+  const kitPkg = JSON.parse(fs.readFileSync(path.join(kitRoot, 'package.json'), 'utf8'));
+  const clientPkg = JSON.parse(fs.readFileSync(path.join(clientRoot, 'package.json'), 'utf8'));
+  const required = kitPkg.dependencies?.[UI_COMPONENTS_PACKAGE];
+
+  if (required !== UI_COMPONENTS_DEPENDENCY) {
+    throw new Error(`Atelier-Kit must declare ${UI_COMPONENTS_PACKAGE} as ${UI_COMPONENTS_DEPENDENCY}`);
+  }
+
+  const current = clientPkg.dependencies?.[UI_COMPONENTS_PACKAGE];
+  return { changed: current !== required, from: current, to: required };
+}
+
+/**
+ * Complete the issue #169 integration preflight before any target mutation.
+ * Preserved identity files are usable only when they are already exact.
+ *
+ * @param {string} kitRoot
+ * @param {string} clientRoot
+ * @param {Set<string>} preservePaths
+ * @param {{ readPreservedFile?: (filePath: string) => Buffer }} [validation]
+ * @returns {{ dependency: { changed: boolean, from?: string, to: string }, artifactChanged: boolean, identityChanged: boolean, packageJsonPreserved: boolean }}
+ */
+export function buildUiComponentsIntegrationPlan(
+  kitRoot,
+  clientRoot,
+  preservePaths,
+  validation = {}
+) {
+  const kitArtifact = path.join(kitRoot, UI_COMPONENTS_ARTIFACT);
+
+  if (!fs.existsSync(kitArtifact) || hashFile(kitArtifact) !== UI_COMPONENTS_ARTIFACT_SHA256) {
+    throw new Error(
+      `Issue #169 source artifact is missing or has the wrong SHA-256: ${UI_COMPONENTS_ARTIFACT}`
+    );
+  }
+
+  const kitIdentity = path.join(kitRoot, UI_COMPONENTS_IDENTITY);
+  let identity;
+  try {
+    identity = JSON.parse(fs.readFileSync(kitIdentity, 'utf8'));
+  } catch {
+    throw new Error(`Issue #169 source identity is missing or invalid: ${UI_COMPONENTS_IDENTITY}`);
+  }
+  if (
+    identity.package !== UI_COMPONENTS_PACKAGE ||
+    identity.version !== '0.0.0' ||
+    identity.sourceCommit !== 'fcdb8693fc69ab37223de76bba714eabaf3a3457' ||
+    identity.filename !== path.basename(UI_COMPONENTS_ARTIFACT) ||
+    identity.sha256 !== UI_COMPONENTS_ARTIFACT_SHA256
+  ) {
+    throw new Error(`Issue #169 source identity does not describe the immutable artifact: ${UI_COMPONENTS_IDENTITY}`);
+  }
+
+  for (const rel of UI_COMPONENTS_INTEGRATION_FILES) {
+    const clientFile = path.join(clientRoot, rel);
+
+    if (preservePaths.has(rel)) {
+      const expectedState = rel === UI_COMPONENTS_ARTIFACT
+        ? `Required state: a readable regular file that exactly matches the Atelier-Kit copy; required SHA-256: ${UI_COMPONENTS_ARTIFACT_SHA256}.`
+        : 'Required state: a readable regular file that exactly matches the Atelier-Kit copy, including the exact integration identity/content.';
+      /** @param {string} problem @param {unknown} [cause] */
+      const preserveError = (problem, cause) => new Error(
+        `${PRESERVE_MANIFEST} preserves required issue #169 file ${rel}, but ${problem}. ` +
+          `${expectedState} Remove or adjust the ${PRESERVE_MANIFEST} rule, or restore the exact required file before retrying.`,
+        cause === undefined ? undefined : { cause }
+      );
+      let clientHash;
+
+      try {
+        if (!fs.statSync(clientFile).isFile()) {
+          throw new Error('the preserved path is not a regular file');
+        }
+        clientHash = hashIntegrationFile(
+          clientFile,
+          validation.readPreservedFile || fs.readFileSync
+        );
+      } catch (error) {
+        throw preserveError('the client file is missing, unreadable, or not a regular file', error);
+      }
+
+      if (clientHash !== hashFile(path.join(kitRoot, rel))) {
+        throw preserveError('its contents do not exactly match the Atelier-Kit copy');
+      }
+    }
+  }
+
+  const clientArtifact = path.join(clientRoot, UI_COMPONENTS_ARTIFACT);
+  const clientIdentity = path.join(clientRoot, UI_COMPONENTS_IDENTITY);
+  const artifactChanged =
+    !fs.existsSync(clientArtifact) || hashFile(clientArtifact) !== UI_COMPONENTS_ARTIFACT_SHA256;
+  const identityChanged =
+    !fs.existsSync(clientIdentity) || hashFile(clientIdentity) !== hashFile(kitIdentity);
+  const packageJsonPreserved = preservePaths.has('package.json');
+  let dependency;
+  try {
+    dependency = buildUiComponentsDependencyPlan(kitRoot, clientRoot);
+  } catch (error) {
+    if (packageJsonPreserved) {
+      throw new Error(
+        `${PRESERVE_MANIFEST} preserves package.json, but its ${UI_COMPONENTS_PACKAGE} dependency cannot be validated. ` +
+          `Expected ${JSON.stringify(UI_COMPONENTS_DEPENDENCY)}. Remove the package.json preserve rule to allow migration, ` +
+          `or repair package.json and set the dependency to the expected value before upgrading. ` +
+          `(${error instanceof Error ? error.message : String(error)})`
+      );
+    }
+    throw error;
+  }
+
+  if (packageJsonPreserved && dependency.changed) {
+    const actual = dependency.from === undefined ? '(missing)' : JSON.stringify(dependency.from);
+    throw new Error(
+      `${PRESERVE_MANIFEST} preserves package.json, but dependencies.${UI_COMPONENTS_PACKAGE} is ${actual}. ` +
+        `Expected ${JSON.stringify(UI_COMPONENTS_DEPENDENCY)}. Remove the package.json preserve rule to allow migration, ` +
+        `or set the dependency to the expected value before upgrading.`
+    );
+  }
+
+  return { dependency, artifactChanged, identityChanged, packageJsonPreserved };
+}
+
+let atomicWriteCounter = 0;
+
+/** @param {string} target */
+function temporarySibling(target) {
+  atomicWriteCounter += 1;
+  return path.join(path.dirname(target), `.${path.basename(target)}.issue-169-${process.pid}-${atomicWriteCounter}.tmp`);
+}
+
+/**
+ * Apply only the giadaware-ui-components issue-169 transaction. The optional
+ * hooks exist solely for deterministic failure-injection tests.
+ *
+ * @param {{ dependency: { changed: boolean }, artifactChanged: boolean, identityChanged: boolean }} plan
+ * @param {string} kitRoot
+ * @param {string} clientRoot
+ * @param {{ key: string, to: string }[]} scriptPlan
+ * @param {{ writeArtifactTemp?: (source: string, temporary: string) => void, afterArtifactInstalled?: () => void, writePackageTemp?: (temporary: string, contents: string) => void, beforePackageRename?: () => void }} [hooks]
+ * @returns {{ dependencyChanged: boolean, artifactChanged: boolean }}
+ */
+export function applyUiComponentsIntegrationPlan(
+  plan,
+  kitRoot,
+  clientRoot,
+  scriptPlan = [],
+  hooks = {}
+) {
+  const artifactTarget = path.join(clientRoot, UI_COMPONENTS_ARTIFACT);
+  const identityTarget = path.join(clientRoot, UI_COMPONENTS_IDENTITY);
+  const packageTarget = path.join(clientRoot, 'package.json');
+  const previousArtifact = fs.existsSync(artifactTarget) ? fs.readFileSync(artifactTarget) : null;
+  const previousIdentity = fs.existsSync(identityTarget) ? fs.readFileSync(identityTarget) : null;
+  /** @type {string[]} */
+  const temporaryFiles = [];
+
+  /** @param {string} target @param {Buffer | null} previous */
+  const restore = (target, previous) => {
+    if (previous === null) {
+      fs.rmSync(target, { force: true });
+      return;
+    }
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    const temporary = temporarySibling(target);
+    fs.writeFileSync(temporary, previous);
+    fs.renameSync(temporary, target);
+  };
+
+  try {
+    if (plan.artifactChanged) {
+      fs.mkdirSync(path.dirname(artifactTarget), { recursive: true });
+      const temporary = temporarySibling(artifactTarget);
+      temporaryFiles.push(temporary);
+      (hooks.writeArtifactTemp || fs.copyFileSync)(path.join(kitRoot, UI_COMPONENTS_ARTIFACT), temporary);
+      if (hashFile(temporary) !== UI_COMPONENTS_ARTIFACT_SHA256) {
+        throw new Error(`Issue #169 temporary artifact has the wrong SHA-256: ${UI_COMPONENTS_ARTIFACT}`);
+      }
+      fs.renameSync(temporary, artifactTarget);
+      if (hashFile(artifactTarget) !== UI_COMPONENTS_ARTIFACT_SHA256) {
+        throw new Error(`Issue #169 installed artifact failed SHA-256 verification: ${UI_COMPONENTS_ARTIFACT}`);
+      }
+      hooks.afterArtifactInstalled?.();
+    }
+
+    if (plan.identityChanged) {
+      fs.mkdirSync(path.dirname(identityTarget), { recursive: true });
+      const temporary = temporarySibling(identityTarget);
+      temporaryFiles.push(temporary);
+      fs.copyFileSync(path.join(kitRoot, UI_COMPONENTS_IDENTITY), temporary);
+      if (hashFile(temporary) !== hashFile(path.join(kitRoot, UI_COMPONENTS_IDENTITY))) {
+        throw new Error(`Issue #169 temporary identity verification failed: ${UI_COMPONENTS_IDENTITY}`);
+      }
+      fs.renameSync(temporary, identityTarget);
+    }
+
+    if (plan.dependency.changed || scriptPlan.length > 0) {
+      if (!fs.existsSync(artifactTarget) || hashFile(artifactTarget) !== UI_COMPONENTS_ARTIFACT_SHA256) {
+        throw new Error(`Issue #169 refuses to migrate package.json without the verified artifact.`);
+      }
+      const packageJson = JSON.parse(fs.readFileSync(packageTarget, 'utf8'));
+      packageJson.dependencies = packageJson.dependencies || {};
+      packageJson.dependencies[UI_COMPONENTS_PACKAGE] = UI_COMPONENTS_DEPENDENCY;
+      packageJson.scripts = packageJson.scripts || {};
+      for (const { key, to } of scriptPlan) packageJson.scripts[key] = to;
+      const contents = `${JSON.stringify(packageJson, null, 2)}\n`;
+      const temporary = temporarySibling(packageTarget);
+      temporaryFiles.push(temporary);
+      (hooks.writePackageTemp || ((file, value) => fs.writeFileSync(file, value)))(temporary, contents);
+      hooks.beforePackageRename?.();
+      fs.renameSync(temporary, packageTarget);
+    }
+
+    return { dependencyChanged: plan.dependency.changed, artifactChanged: plan.artifactChanged };
+  } catch (error) {
+    for (const temporary of temporaryFiles) fs.rmSync(temporary, { force: true });
+    if (plan.identityChanged) restore(identityTarget, previousIdentity);
+    if (plan.artifactChanged) restore(artifactTarget, previousArtifact);
+    throw error;
+  }
+}
+
+/**
  * @param {{ add: string[], update: string[], remove: string[], preserve: string[], manualReview: string[] }} filePlan
  * @param {{ key: string, from?: string, to: string }[]} scriptPlan
+ * @param {{ changed: boolean, from?: string, to: string, artifactChanged: boolean, identityChanged: boolean }} dependencyPlan
  * @param {{ changed: boolean, kitPath: string, previousVersion: string | null }} metadataPlan
  * @param {string} kitRoot
  * @param {string} clientRoot
@@ -419,6 +668,7 @@ function buildScriptPlan(kitRoot, clientRoot) {
 export function printPlan(
   filePlan,
   scriptPlan,
+  dependencyPlan,
   metadataPlan,
   kitRoot,
   clientRoot,
@@ -448,6 +698,9 @@ export function printPlan(
 
   const total =
     filePlan.add.length + filePlan.update.length + filePlan.remove.length + scriptPlan.length +
+    (dependencyPlan.changed ? 1 : 0) +
+    (dependencyPlan.artifactChanged ? 1 : 0) +
+    (dependencyPlan.identityChanged ? 1 : 0) +
     (metadataPlan.changed ? 1 : 0);
 
   if (total === 0 && filePlan.preserve.length === 0 && filePlan.manualReview.length === 0) {
@@ -517,6 +770,23 @@ export function printPlan(
     }
   }
 
+  if (dependencyPlan.changed) {
+    console.log('package.json dependency (1):');
+    console.log(`  ~ dependencies.${UI_COMPONENTS_PACKAGE}`);
+    if (dependencyPlan.from) console.log(`      was: ${dependencyPlan.from}`);
+    console.log(`      now: ${dependencyPlan.to}`);
+  }
+
+  if (dependencyPlan.artifactChanged) {
+    console.log('Issue #169 immutable artifact (1):');
+    console.log(`  ~ ${UI_COMPONENTS_ARTIFACT}`);
+  }
+
+  if (dependencyPlan.identityChanged) {
+    console.log('Issue #169 integration identity (1):');
+    console.log(`  ~ ${UI_COMPONENTS_IDENTITY}`);
+  }
+
   if (metadataPlan.changed) {
     console.log('Upgrade metadata (1):');
     console.log(`  ~ ${UPGRADE_MANIFEST}`);
@@ -550,24 +820,6 @@ export function applyFilePlan(filePlan, kitRoot, clientRoot) {
       fs.rmSync(target, { force: true });
     }
   }
-}
-
-/**
- * @param {string} kitRoot
- * @param {string} clientRoot
- */
-function applyScriptPlan(kitRoot, clientRoot) {
-  const kitPkg = JSON.parse(fs.readFileSync(path.join(kitRoot, 'package.json'), 'utf8'));
-  const clientPkgPath = path.join(clientRoot, 'package.json');
-  const clientPkg = JSON.parse(fs.readFileSync(clientPkgPath, 'utf8'));
-
-  clientPkg.scripts = clientPkg.scripts || {};
-
-  for (const [key, value] of Object.entries(kitPkg.scripts || {})) {
-    clientPkg.scripts[key] = value;
-  }
-
-  fs.writeFileSync(clientPkgPath, `${JSON.stringify(clientPkg, null, 2)}\n`);
 }
 
 /**
@@ -678,7 +930,7 @@ async function confirm(message) {
   return /^y(es)?$/i.test(answer.trim());
 }
 
-export async function main() {
+export async function main(integrationValidation = {}) {
   /** @type {{ help?: true, from?: string, target?: string, yes?: boolean, dryRun?: boolean }} */
   let options;
 
@@ -718,12 +970,24 @@ export async function main() {
   const kitVersion = detectKitVersion(kitRoot);
   const preservePaths = loadPreservePaths(clientRoot);
   const coreManagedPreserveEntries = findCoreManagedPreserveEntries(preservePaths);
+  const integrationPlan = buildUiComponentsIntegrationPlan(
+    kitRoot,
+    clientRoot,
+    preservePaths,
+    integrationValidation
+  );
   const filePlan = buildFilePlan(kitRoot, clientRoot, preservePaths);
-  const scriptPlan = buildScriptPlan(kitRoot, clientRoot);
+  const scriptPlan = buildScriptPlan(kitRoot, clientRoot, integrationPlan.packageJsonPreserved);
+  const dependencyPlan = {
+    ...integrationPlan.dependency,
+    artifactChanged: integrationPlan.artifactChanged,
+    identityChanged: integrationPlan.identityChanged
+  };
   const metadataPlan = buildMetadataPlan(clientRoot, kitRoot, kitVersion);
   const hasChanges = printPlan(
     filePlan,
     scriptPlan,
+    dependencyPlan,
     metadataPlan,
     kitRoot,
     clientRoot,
@@ -750,23 +1014,30 @@ export async function main() {
     }
   }
 
-  applyFilePlan(filePlan, kitRoot, clientRoot);
+  const integrationResult = applyUiComponentsIntegrationPlan(
+    integrationPlan,
+    kitRoot,
+    clientRoot,
+    scriptPlan
+  );
 
-  if (scriptPlan.length > 0) {
-    applyScriptPlan(kitRoot, clientRoot);
-  }
+  applyFilePlan(filePlan, kitRoot, clientRoot);
 
   writeManifest(clientRoot, kitRoot, kitVersion);
 
   console.log('');
   console.log('Upgrade applied.');
   console.log('Next steps:');
+  const dependencyInstallationRequired =
+    integrationResult.dependencyChanged || integrationResult.artifactChanged;
+
+  if (dependencyInstallationRequired) {
+    console.log('  npm install');
+  }
+
   console.log('  npm run check');
   console.log('  npm run build');
 
-  if (scriptPlan.length > 0) {
-    console.log('  npm install   # if kit dependencies changed since last upgrade');
-  }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

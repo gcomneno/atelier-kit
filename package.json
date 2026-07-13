@@ -35,6 +35,7 @@
     "vite": "^8.0.16"
   },
   "dependencies": {
+    "giadaware-ui-components": "file:vendor/giadaware-ui-components/fcdb869/giadaware-ui-components-0.0.0.tgz",
     "yaml": "^2.9.0"
   }
 }

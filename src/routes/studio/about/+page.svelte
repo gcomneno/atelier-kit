@@ -3,7 +3,7 @@
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
-  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
+  import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
   import EditorialText from '$lib/components/EditorialText.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';

@@ -4,7 +4,7 @@
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
-  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
+  import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { editorialFontPresets } from '$lib/editorial-markup.js';
   import { fontStylesheetHrefs } from '$lib/site-typography.js';

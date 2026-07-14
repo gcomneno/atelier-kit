@@ -9,12 +9,23 @@ import {
   socialLinksToForm,
   SOCIAL_NETWORK_IDS
 } from './social-networks.js';
+import { resolveAtelierSocialIconId } from './social-icon-adapter.js';
 
 test('normalizes every supported social id and preserves the twitter alias', () => {
   assert.deepEqual(SOCIAL_NETWORK_IDS, ['instagram', 'facebook', 'x', 'github']);
   for (const id of SOCIAL_NETWORK_IDS) assert.equal(normalizeSocialId(` ${id.toUpperCase()} `), id);
   assert.equal(normalizeSocialId('twitter'), 'x');
   assert.equal(normalizeSocialId('mastodon'), '');
+});
+
+test('social icon adapter admits only Atelier-Kit social ids', () => {
+  for (const id of SOCIAL_NETWORK_IDS) {
+    assert.equal(resolveAtelierSocialIconId(` ${id.toUpperCase()} `), id);
+  }
+  assert.equal(resolveAtelierSocialIconId('twitter'), 'x');
+  assert.equal(resolveAtelierSocialIconId('github-sponsors'), '');
+  assert.equal(resolveAtelierSocialIconId('mastodon'), '');
+  assert.equal(resolveAtelierSocialIconId(''), '');
 });
 
 test('validates GitHub URLs against the canonical GitHub host', () => {
@@ -58,12 +69,11 @@ test('loads, serializes, updates and deletes GitHub values without changing lega
   assert.deepEqual(socialFormToLinks(loaded), { links: [], invalidId: 'github' });
 });
 
-test('Studio and public renderers include GitHub load/save, visibility, icon and localized labels', () => {
+test('Studio and public renderers include GitHub load/save, visibility and localized labels', () => {
   const studioServer = readFileSync('src/lib/server/studio-site-server.js', 'utf8');
   const studioPage = readFileSync('src/routes/studio/site/social/+page.svelte', 'utf8');
   const header = readFileSync('src/lib/components/SiteHeader.svelte', 'utf8');
   const footer = readFileSync('src/lib/components/SiteFooter.svelte', 'utf8');
-  const icon = readFileSync('src/lib/components/SocialIcon.svelte', 'utf8');
   const showcase = readFileSync('src/lib/server/showcase.js', 'utf8');
   const en = readFileSync('src/lib/i18n/messages/en.js', 'utf8');
   const it = readFileSync('src/lib/i18n/messages/it.js', 'utf8');
@@ -74,12 +84,10 @@ test('Studio and public renderers include GitHub load/save, visibility, icon and
   assert.match(studioPage, /SOCIAL_NETWORK_IDS/);
   for (const component of [header, footer]) {
     assert.match(component, /<SocialIcon id=\{link\.id\}/);
+    assert.match(component, /AtelierSocialIcon\.svelte/);
     assert.match(component, /github: t\('social\.github'\)/);
   }
   assert.match(showcase, /isValidSocialUrlForNetwork\(id, url\)/);
-  assert.match(icon, /id === 'github'/);
-  assert.match(icon, /M12 21\.35/);
-  assert.doesNotMatch(icon, /octocat/i);
   assert.match(en, /Support on GitHub Sponsors/);
   assert.match(it, /Sostieni su GitHub Sponsors/);
 });

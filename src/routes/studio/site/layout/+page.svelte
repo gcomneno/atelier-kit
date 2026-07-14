@@ -2,7 +2,7 @@
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
-  import StudioFormStatus from '$lib/components/StudioFormStatus.svelte';
+  import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { LAYOUT_BLOCK_IDS, LAYOUT_PLACEMENTS } from '$lib/layout-blocks.js';
   import { getDefaultLayoutBlockLabel } from '$lib/layout-block-labels.js';

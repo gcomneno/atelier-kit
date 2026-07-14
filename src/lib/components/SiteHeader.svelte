@@ -2,7 +2,7 @@
   import EditorialText from '$lib/components/EditorialText.svelte';
   import { markedTextToPlainText } from '$lib/marked-text.js';
   import SiteSearch from '$lib/components/SiteSearch.svelte';
-  import SocialIcon from '$lib/components/SocialIcon.svelte';
+  import SocialIcon from '$lib/components/AtelierSocialIcon.svelte';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
   import { resolveHeaderTitle } from '$lib/site-branding.js';
 

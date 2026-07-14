@@ -11,6 +11,7 @@ const EXCLUDED_NAMES = new Set([
   '.svelte-kit',
   '.vercel'
 ]);
+const KIT_ONLY_ROOT_NAMES = new Set(['test']);
 
 const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork', 'handmade', 'jewelry', 'collector', 'furniture']);
 
@@ -124,20 +125,20 @@ function ensureInsideReasonableTarget(sourceRoot, targetRoot) {
   }
 }
 
-function copyTree(source, target) {
+function copyTree(source, target, sourceRoot = source) {
   const stat = fs.statSync(source);
 
   if (stat.isDirectory()) {
     const name = path.basename(source);
 
-    if (EXCLUDED_NAMES.has(name)) {
+    if (EXCLUDED_NAMES.has(name) || (source !== sourceRoot && path.dirname(source) === sourceRoot && KIT_ONLY_ROOT_NAMES.has(name))) {
       return;
     }
 
     fs.mkdirSync(target, { recursive: true });
 
     for (const entry of fs.readdirSync(source)) {
-      copyTree(path.join(source, entry), path.join(target, entry));
+      copyTree(path.join(source, entry), path.join(target, entry), sourceRoot);
     }
 
     return;

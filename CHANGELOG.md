@@ -4,6 +4,10 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+### Fixed
+
+- Keep the applied Kit version in the tracked `.atelier-kit-version` file so client deploys retain the correct footer version after upgrades.
+
 ## v0.4.0 - 2026-07-15
 
 ### Added

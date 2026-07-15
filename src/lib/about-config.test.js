@@ -161,6 +161,18 @@ test('public component conditionally renders semantic figcaption through Editori
   assert.match(component, /\{#if data\.about\.portrait\.caption\}[\s\S]*tag="figcaption"/);
 });
 
+test('public About layout uses deterministic responsive grid placement', () => {
+  const component = readFileSync(new URL('../routes/about/+page.svelte', import.meta.url), 'utf8');
+
+  assert.doesNotMatch(component, /\bfloat\s*:/);
+  assert.match(component, /header\.has-portrait\s*\{[\s\S]*grid-template-columns:/);
+  assert.match(component, /header\.has-intro \.about-portrait\s*\{[\s\S]*grid-row:\s*2/);
+  assert.match(component, /\.about-portrait :global\(figcaption\)\s*\{[\s\S]*text-align:\s*center/);
+  assert.match(component, /h1\s*\{[\s\S]*overflow-wrap:\s*anywhere/);
+  assert.match(component, /@media \(max-width: 719px\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(component, /header\.has-portrait \.intro-block\s*\{[\s\S]*grid-row:\s*3/);
+});
+
 test('content checks report invalid caption markup and Atelier Mark in alt text', () => {
   assert.match(
     validateAboutPortraitContent({ portrait: { caption: '{muted}Broken' } }).join(' '),

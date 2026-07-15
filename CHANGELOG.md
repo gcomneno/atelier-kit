@@ -4,6 +4,31 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.4.0 - 2026-07-15
+
+### Added
+
+- **Multiple layout block placements** ([#151](https://github.com/gcomneno/atelier-kit/issues/151), [#158](https://github.com/gcomneno/atelier-kit/pull/158)): place each enabled About, News, Collections or Catalog block in one or more public destinations across the main column, sidebar and menu.
+- **Editorial appearance presets** ([#157](https://github.com/gcomneno/atelier-kit/issues/157), [#159](https://github.com/gcomneno/atelier-kit/pull/159)): add Intimate editorial, Shared universe and Funny coloured as configurable Studio appearance presets.
+- **About portrait captions** ([#153](https://github.com/gcomneno/atelier-kit/pull/153)): add an optional portrait caption with Atelier Mark formatting and Studio preview.
+- **GitHub Sponsors social links** ([#155](https://github.com/gcomneno/atelier-kit/pull/155)): configure and render GitHub Sponsors alongside the existing header and footer social links.
+- **Visitor Brief social actions** ([#178](https://github.com/gcomneno/atelier-kit/issues/178), [#183](https://github.com/gcomneno/atelier-kit/pull/183)): copy the prepared brief and open the configured Facebook or Instagram profile for manual pasting, with clear clipboard and popup fallback feedback.
+
+### Changed
+
+- **Editorial field consistency** ([#156](https://github.com/gcomneno/atelier-kit/pull/156)): standardize Atelier Mark editing and rendering across supported Studio fields and public content.
+- **Reusable UI component trial** ([#160](https://github.com/gcomneno/atelier-kit/issues/160), [#161](https://github.com/gcomneno/atelier-kit/pull/161), [#162](https://github.com/gcomneno/atelier-kit/issues/162), [#163](https://github.com/gcomneno/atelier-kit/pull/163), [#164](https://github.com/gcomneno/atelier-kit/issues/164), [#165](https://github.com/gcomneno/atelier-kit/pull/165), [#166](https://github.com/gcomneno/atelier-kit/pull/166), [#171](https://github.com/gcomneno/atelier-kit/pull/171)): document the component inventory, package boundaries and private `giadaware-ui-components` trial plan, then integrate the immutable trial package for social icons and Studio form status with deterministic scaffold, upgrade and rollback support.
+- **Responsive item detail layout** ([#176](https://github.com/gcomneno/atelier-kit/issues/176), [#179](https://github.com/gcomneno/atelier-kit/pull/179)): arrange Signal Clouds in a responsive grid while keeping Visitor Brief full-width.
+- **Studio shutdown** ([#177](https://github.com/gcomneno/atelier-kit/issues/177), [#182](https://github.com/gcomneno/atelier-kit/pull/182)): replace the live Studio with a terminal stopped page after shutdown, including an explicit close-this-tab fallback when `window.close()` is blocked.
+
+### Fixed
+
+- Resolve the applied Atelier-Kit version correctly after client site upgrades, including supported legacy upgrade paths ([#152](https://github.com/gcomneno/atelier-kit/pull/152)).
+- Use configured layout labels for visitor page eyebrows ([#154](https://github.com/gcomneno/atelier-kit/pull/154)).
+- Keep client test commands runnable after upgrades while preserving client-owned test scripts ([#173](https://github.com/gcomneno/atelier-kit/pull/173)).
+- Mark Atelier Mark toolbar edits as unsaved so Studio save actions and navigation guards react correctly ([#174](https://github.com/gcomneno/atelier-kit/issues/174), [#180](https://github.com/gcomneno/atelier-kit/pull/180)).
+- Keep the About heading, portrait, caption and intro aligned across responsive layouts and long content ([#175](https://github.com/gcomneno/atelier-kit/issues/175), [#181](https://github.com/gcomneno/atelier-kit/pull/181)).
+
 ## v0.3.0 - 2026-07-11
 
 ### Added

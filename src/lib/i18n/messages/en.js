@@ -83,7 +83,10 @@ export default {
         hint: 'You can also press Ctrl+C in the terminal where the server is running.',
         action: 'Stop studio server',
         confirm: 'Stop the Studio server? Saved changes stay on disk, but you will need to restart Studio to keep editing.',
-        success: 'Stopping studio… You can close this tab.',
+        stopping: 'Stopping studio…',
+        success: 'Studio stopped',
+        stopped: 'Studio stopped',
+        fallback: 'Studio stopped. You can close this tab.',
         unavailable: 'Studio shutdown is only available in local authoring mode.'
       }
     },

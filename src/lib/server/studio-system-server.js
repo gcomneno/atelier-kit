@@ -6,6 +6,10 @@ import { guardStudio } from '$lib/server/studio-guard.js';
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 import {
+  isStudioShutdownAllowed,
+  studioShutdownCoordinator
+} from '$lib/studio-shutdown-server.js';
+import {
   readProjectYaml,
   runStructuralValidation,
   validationMessage,
@@ -73,19 +77,35 @@ export async function shutdownStudioAction() {
 
   const t = getOperatorTranslator();
 
-  if (!dev && process.env.ATELIER_STUDIO !== '1') {
+  if (!isStudioShutdownAllowed(dev)) {
     return fail(403, {
       shutdownStatus: 'error',
       shutdownMessage: t('studio.system.shutdown.unavailable')
     });
   }
 
-  setTimeout(() => {
-    process.exit(0);
-  }, 400);
+  studioShutdownCoordinator.request();
 
   return {
     shutdownStatus: 'success',
     shutdownMessage: t('studio.system.shutdown.success')
   };
+}
+
+export async function acknowledgeStudioShutdownAction() {
+  guardStudio();
+
+  const t = getOperatorTranslator();
+  if (!isStudioShutdownAllowed(dev)) {
+    return fail(403, {
+      shutdownStatus: 'error',
+      shutdownMessage: t('studio.system.shutdown.unavailable')
+    });
+  }
+
+  if (!studioShutdownCoordinator.acknowledgeRendered()) {
+    return fail(409, { shutdownStatus: 'error' });
+  }
+
+  return { shutdownStatus: 'acknowledged' };
 }

@@ -2,6 +2,7 @@
 
 import { guardStudio } from '$lib/server/studio-guard.js';
 import {
+  acknowledgeStudioShutdownAction,
   loadLanguageForm,
   saveLanguageAction,
   shutdownStudioAction
@@ -17,5 +18,6 @@ export function load() {
 /** @type {import('./$types').Actions} */
 export const actions = {
   saveLanguage: saveLanguageAction,
-  shutdown: shutdownStudioAction
+  shutdown: shutdownStudioAction,
+  shutdownRendered: acknowledgeStudioShutdownAction
 };

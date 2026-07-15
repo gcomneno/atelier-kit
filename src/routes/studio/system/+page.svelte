@@ -8,7 +8,12 @@
   import { useI18n } from '$lib/i18n/context.js';
   import { resolveLocale, SUPPORTED_LOCALES } from '$lib/i18n/resolve-locale.js';
   import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
-  import { studioFormEnhance } from '$lib/studio-form-enhance.js';
+  import {
+    afterBrowserRender,
+    createStudioShutdownFlow,
+    renderStudioShutdownDocument,
+    showStudioShutdownFallback
+  } from '$lib/studio-shutdown-client.js';
 
   const t = useI18n();
 
@@ -26,8 +31,32 @@
     dirtyControl.resetBaseline?.();
   });
 
-  function confirmShutdown() {
-    return confirm(t('studio.system.shutdown.confirm'));
+  const shutdownFlow = createStudioShutdownFlow({
+    confirmShutdown: () => confirm(t('studio.system.shutdown.confirm')),
+    renderTerminal: () =>
+      renderStudioShutdownDocument(document, {
+        lang: resolveLocale(languageForm.language),
+        pageTitle: t('studio.system.shutdown.stopped'),
+        stopped: t('studio.system.shutdown.stopped'),
+        fallback: t('studio.system.shutdown.fallback')
+      }),
+    afterRender: () => afterBrowserRender(window),
+    closeWindow: () => window.close(),
+    showFallback: () => showStudioShutdownFallback(document),
+    acknowledgeRendered: () =>
+      fetch('?/shutdownRendered', { method: 'POST', keepalive: true }),
+    onPhaseChange: (phase) => (shutdownPending = phase !== 'idle')
+  });
+
+  function handleShutdownResult() {
+    return async ({ result, update }) => {
+      await update({ reset: false });
+      if (result.type === 'success' && result.data?.shutdownStatus === 'success') {
+        await shutdownFlow.complete();
+      } else {
+        shutdownFlow.reset();
+      }
+    };
   }
 </script>
 
@@ -81,26 +110,21 @@
     <form
       method="POST"
       action="?/shutdown"
-      use:enhance={studioFormEnhance}
-      onsubmit={(event) => {
-        if (shutdownPending) {
-          event.preventDefault();
+      use:enhance={({ cancel }) => {
+        if (!shutdownFlow.begin()) {
+          cancel();
           return;
         }
-
-        if (!confirmShutdown()) {
-          event.preventDefault();
-          return;
-        }
-
-        shutdownPending = true;
+        return handleShutdownResult();
       }}
     >
       <p class="hint">{t('studio.system.shutdown.hint')}</p>
 
       <div class="actions">
         <button type="submit" class="danger" disabled={shutdownPending}>
-          {t('studio.system.shutdown.action')}
+          {shutdownPending
+            ? t('studio.system.shutdown.stopping')
+            : t('studio.system.shutdown.action')}
         </button>
       </div>
 

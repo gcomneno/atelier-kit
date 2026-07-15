@@ -84,7 +84,10 @@ export default {
         hint: 'Puoi anche premere Ctrl+C nel terminale dove gira il server.',
         action: 'Arresta server studio',
         confirm: 'Arrestare il server Studio? Le modifiche salvate restano su disco, ma dovrai riavviare Studio per continuare a modificare.',
-        success: 'Arresto studio in corso… Puoi chiudere questa scheda.',
+        stopping: 'Arresto studio in corso…',
+        success: 'Studio arrestato',
+        stopped: 'Studio arrestato',
+        fallback: 'Studio arrestato. Puoi chiudere questa scheda.',
         unavailable: 'L’arresto dello studio è disponibile solo in modalità authoring locale.'
       }
     },

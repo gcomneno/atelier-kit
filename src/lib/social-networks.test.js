@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   isValidSocialUrl,
   isValidSocialUrlForNetwork,
+  getVisitorBriefSocialProfiles,
   normalizeSocialId,
   socialFormToLinks,
   socialLinksToForm,
@@ -96,4 +97,20 @@ test('scaffold documents the complete supported social id set', () => {
   const scaffold = readFileSync('scripts/scaffold-client.js', 'utf8');
   assert.match(scaffold, /instagram, facebook, x, github/);
   assert.match(scaffold, /id: github/);
+});
+
+test('Visitor Brief selects only valid Instagram and Facebook profiles', () => {
+  assert.deepEqual(getVisitorBriefSocialProfiles([
+    { id: 'instagram', url: ' https://instagram.com/example ' },
+    { id: 'facebook', url: 'https://facebook.com/example' },
+    { id: 'github', url: 'https://github.com/sponsors/example' },
+    { id: 'x', url: 'https://x.com/example' },
+    { id: 'instagram', url: 'not a URL' }
+  ]), [
+    { id: 'instagram', url: 'https://instagram.com/example' },
+    { id: 'facebook', url: 'https://facebook.com/example' }
+  ]);
+
+  assert.deepEqual(getVisitorBriefSocialProfiles([]), []);
+  assert.deepEqual(getVisitorBriefSocialProfiles([{ id: 'github', url: 'https://github.com/example' }]), []);
 });

@@ -8,6 +8,11 @@ export const SOCIAL_NETWORK_ALIASES = {
   twitter: 'x'
 };
 
+/** @typedef {'instagram' | 'facebook'} VisitorBriefSocialId */
+
+/** @type {VisitorBriefSocialId[]} */
+export const VISITOR_BRIEF_SOCIAL_IDS = ['instagram', 'facebook'];
+
 /**
  * @param {string} id
  * @returns {SocialNetworkId | ''}
@@ -81,4 +86,32 @@ export function socialFormToLinks(form) {
   }
 
   return { links, invalidId: '' };
+}
+
+/**
+ * Keep only explicitly supported contact profiles for Visitor Brief actions.
+ * Input is normally the normalized output of getSocialConfig(), but URLs are
+ * validated here as well so the public component never receives dead actions.
+ *
+ * @param {unknown[]} links
+ * @returns {{ id: VisitorBriefSocialId, url: string }[]}
+ */
+export function getVisitorBriefSocialProfiles(links) {
+  const profiles = [];
+
+  for (const entry of links) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+    const record = /** @type {Record<string, unknown>} */ (entry);
+    const id = normalizeSocialId(typeof record.id === 'string' ? record.id : '');
+    const url = typeof record.url === 'string' ? record.url.trim() : '';
+
+    if (
+      VISITOR_BRIEF_SOCIAL_IDS.includes(/** @type {VisitorBriefSocialId} */ (id)) &&
+      isValidSocialUrlForNetwork(/** @type {SocialNetworkId} */ (id), url)
+    ) {
+      profiles.push({ id: /** @type {VisitorBriefSocialId} */ (id), url });
+    }
+  }
+
+  return profiles;
 }

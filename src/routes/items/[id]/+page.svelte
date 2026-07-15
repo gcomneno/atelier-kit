@@ -259,7 +259,12 @@
           {/each}
 
           <div class="visitor-brief-row">
-            <VisitorBrief {item} {signalClouds} contact={data.contact} />
+            <VisitorBrief
+              {item}
+              {signalClouds}
+              contact={data.contact}
+              socialProfiles={data.socialProfiles}
+            />
           </div>
         </div>
       </section>

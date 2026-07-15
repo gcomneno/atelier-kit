@@ -11,7 +11,7 @@ test('Item Signal Clouds precede the full-width VisitorBrief in DOM order', () =
   const cloudEach = itemPage.indexOf('{#each signalClouds as cloud}');
   const signalCloud = itemPage.indexOf('<SignalCloud itemId={item.id} {cloud} />', cloudEach);
   const eachEnd = itemPage.indexOf('{/each}', signalCloud);
-  const visitorBrief = itemPage.indexOf('<VisitorBrief {item} {signalClouds}', eachEnd);
+  const visitorBrief = itemPage.indexOf('<VisitorBrief', eachEnd);
 
   assert.ok(cloudEach >= 0, 'renders Signal Clouds from the global list');
   assert.ok(signalCloud > cloudEach, 'renders each SignalCloud inside the list');

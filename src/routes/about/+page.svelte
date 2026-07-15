@@ -29,7 +29,15 @@
   <a class="back-link" href="/">{t('common.backToShowcase')}</a>
 
   <article>
-    <header class:has-portrait={Boolean(data.about.portrait)}>
+    <header
+      class:has-portrait={Boolean(data.about.portrait)}
+      class:has-intro={introParagraphs.length > 0}
+    >
+      <div class="page-heading">
+        <p class="eyebrow">{data.pageEyebrow}</p>
+        <h1><EditorialText value={data.about.title} /></h1>
+      </div>
+
       {#if data.about.portrait}
         <figure class="about-portrait">
           <div class="portrait-image">
@@ -46,11 +54,6 @@
           {/if}
         </figure>
       {/if}
-
-      <div class="page-heading">
-        <p class="eyebrow">{data.pageEyebrow}</p>
-        <h1><EditorialText value={data.about.title} /></h1>
-      </div>
 
       {#if introParagraphs.length > 0}
         <div class="intro-block">
@@ -99,18 +102,34 @@
   }
 
   header {
-    display: flow-root;
+    display: grid;
+    gap: 1rem 1.5rem;
+    min-width: 0;
+  }
+
+  header.has-portrait {
+    grid-template-columns: minmax(0, 1fr) minmax(9rem, 10.5rem);
+    align-items: start;
   }
 
   .page-heading {
     display: grid;
+    grid-column: 1;
+    grid-row: 1;
     gap: 0.45rem;
+    min-width: 0;
   }
 
   .about-portrait {
-    float: right;
-    width: min(10.5rem, 34vw);
-    margin: 0.15rem 0 1rem 1.5rem;
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  header.has-intro .about-portrait {
+    grid-row: 2;
   }
 
   .portrait-image {
@@ -135,6 +154,8 @@
     color: color-mix(in srgb, var(--site-text-color, #2f281f) 76%, transparent);
     font-size: 0.82rem;
     line-height: 1.45;
+    overflow-wrap: anywhere;
+    text-align: center;
     text-wrap: pretty;
   }
 
@@ -153,6 +174,7 @@
     font-size: clamp(2.4rem, 8vw, 4rem);
     line-height: 0.95;
     letter-spacing: -0.05em;
+    overflow-wrap: anywhere;
   }
 
   .intro-block,
@@ -162,7 +184,9 @@
   }
 
   .intro-block {
-    margin-top: 1rem;
+    grid-column: 1;
+    grid-row: 2;
+    min-width: 0;
     padding: 1rem 1.2rem;
     border: 1px solid color-mix(in srgb, var(--site-accent-color, #dfc9aa) 55%, transparent);
     border-radius: 1.25rem;
@@ -201,21 +225,21 @@
   }
 
   @media (max-width: 719px) {
-    .about-portrait {
-      float: none;
-      width: min(100%, 11rem);
-      margin: 0 auto 1.25rem;
-    }
-
     header.has-portrait {
-      display: grid;
-      justify-items: center;
-      text-align: left;
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: stretch;
     }
 
-    header.has-portrait .page-heading,
+    .about-portrait {
+      grid-column: 1;
+      grid-row: 2;
+      width: min(100%, 11rem);
+      margin: 0 auto;
+    }
+
     header.has-portrait .intro-block {
-      width: 100%;
+      grid-column: 1;
+      grid-row: 3;
     }
   }
 </style>

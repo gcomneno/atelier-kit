@@ -130,6 +130,9 @@ npm run site:scaffold -- ../artist-site --template artwork --force
 
 ## After scaffolding
 
+The scaffold detects the source checkout version and generates a canonical, Git-trackable
+`.atelier-kit-version` file in the client. Atelier-Kit itself does not maintain that generated file.
+
 Run the generated site checks from the new client folder:
 
 ```bash
@@ -178,6 +181,8 @@ The command:
   unrecognized Vite configs stay intact and are flagged for manual resolver adoption; preserved Vite
   configs stay intact because they are explicitly excluded from the upgrade;
 - merges npm scripts from the kit `package.json`;
+- writes the tracked `.atelier-kit-version` file used by deployed builds, while retaining the ignored
+  `.atelier-kit-upgrade.json` metadata for compatibility with historical clients;
 - prints a diff summary and asks for confirmation (use `--yes` to skip);
 - never overwrites `config/`, `content/` or `static/images/items/`.
 
@@ -195,4 +200,5 @@ npm run site:upgrade -- --target ../luna-argento --from .
 
 After upgrading, run `npm run check` and `npm run build` in the client folder.
 
-Tag the kit release (`git tag vX.Y.Z`) before upgrading clients so `.atelier-kit-upgrade.json` records the correct version.
+Tag the kit release (`git tag vX.Y.Z`) before upgrading clients so `.atelier-kit-version` and the
+legacy-compatible `.atelier-kit-upgrade.json` metadata record the correct version.

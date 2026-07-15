@@ -398,6 +398,7 @@ test('a fresh scaffold retains the exact local dependency and artifact', () => {
     fs.mkdirSync(path.join(source, path.dirname(artifactRelative)), { recursive: true });
     fs.copyFileSync(path.join(root, artifactRelative), path.join(source, artifactRelative));
     fs.copyFileSync(path.join(root, 'package-lock.json'), path.join(source, 'package-lock.json'));
+    fs.writeFileSync(path.join(source, 'CHANGELOG.md'), '# Changelog\n\n## v0.4.0\n');
     fs.writeFileSync(
       path.join(source, 'package.json'),
       `${JSON.stringify({

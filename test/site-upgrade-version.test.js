@@ -167,6 +167,7 @@ test('keeps a customized vite.config.js and the client changelog intact', () => 
     assert.ok(!plan.update.includes('vite.config.js'));
     applyFilePlan(plan, kitRoot, clientRoot);
     writeManifest(clientRoot, kitRoot, 'v0.3.0');
+    assert.equal(fs.readFileSync(path.join(clientRoot, '.atelier-kit-version'), 'utf8'), 'v0.3.0\n');
     assert.equal(fs.readFileSync(path.join(clientRoot, 'vite.config.js'), 'utf8'), custom);
     assert.equal(fs.readFileSync(path.join(clientRoot, 'CHANGELOG.md'), 'utf8'), changelog);
     assert.equal(
@@ -446,6 +447,7 @@ test('dry-run keeps customized Vite config and warns about manual resolver adopt
     assert.match(output, /Dry run only\. No files were changed\./);
     assert.equal(fs.readFileSync(path.join(clientRoot, 'vite.config.js'), 'utf8'), custom);
     assert.equal(fs.existsSync(path.join(clientRoot, '.atelier-kit-upgrade.json')), false);
+    assert.equal(fs.existsSync(path.join(clientRoot, '.atelier-kit-version')), false);
   } finally { cleanup(clientRoot); }
 });
 
@@ -650,6 +652,7 @@ test('complete upgrade transaction rolls back every affected byte for injected f
     { afterPackage: () => { throw new Error('after package failure'); } },
     { writePointer: () => { throw new Error('pointer failure'); } },
     { writeMetadata: () => { throw new Error('metadata failure'); } },
+    { afterVersionWritten: () => { throw new Error('version failure'); } },
     { afterProvenanceComputed: () => { throw new Error('provenance boundary failure'); } }
   ];
   for (const transactionHooks of cases) {
@@ -660,6 +663,31 @@ test('complete upgrade transaction rolls back every affected byte for injected f
       assert.deepEqual(snapshotTree(clientRoot), before);
     } finally { cleanup(clientRoot); }
   }
+});
+
+test('upgrade writes the tracked version and is idempotent when it is already correct', async () => {
+  const clientRoot = makeClient();
+  try {
+    await runMain(clientRoot);
+    const versionPath = path.join(clientRoot, '.atelier-kit-version');
+    assert.equal(fs.readFileSync(versionPath, 'utf8'), 'v0.4.0\n');
+    const before = snapshotTree(clientRoot);
+    const output = await runMain(clientRoot);
+    assert.match(output, /Already up to date\./);
+    assert.deepEqual(snapshotTree(clientRoot), before);
+  } finally { cleanup(clientRoot); }
+});
+
+test('tracked version is restored when a later transactional write fails', async () => {
+  const clientRoot = makeClient();
+  try {
+    fs.writeFileSync(path.join(clientRoot, '.atelier-kit-version'), 'v0.3.0\n');
+    const before = snapshotTree(clientRoot);
+    await assert.rejects(runMain(clientRoot, ['--yes'], { transactionHooks: {
+      afterVersionWritten: () => { throw new Error('failure after tracked version write'); }
+    } }), /failure after tracked version write/);
+    assert.deepEqual(snapshotTree(clientRoot), before);
+  } finally { cleanup(clientRoot); }
 });
 
 test('obsolete managed-test removal failure restores the entire client', async () => {
@@ -1036,6 +1064,7 @@ test('unsafe client namespaces fail preflight and dry-run without external or cl
     { rel: 'scripts', directory: true },
     { rel: 'vendor', directory: true },
     { rel: '.atelier-kit-upgrade.json', directory: false },
+    { rel: '.atelier-kit-version', directory: false },
     { rel: '.atelier-kit-source', directory: false },
     { rel: 'src/lib', directory: true },
     { rel: 'config/protected-parent', directory: true },

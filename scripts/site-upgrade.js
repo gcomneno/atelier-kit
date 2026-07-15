@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 import crypto from 'node:crypto';
-import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import readline from 'node:readline/promises';
 import { pathToFileURL } from 'node:url';
+import { detectKitVersion, normalizeKitVersion, readTrackedKitVersion } from './kit-version.js';
 
 const UPGRADE_DIRS = ['src', 'scripts'];
 const VITE_CONFIG = 'vite.config.js';
@@ -23,6 +23,7 @@ const LEGACY_VITE_CONFIG_HASHES = new Set([
 const SKIP_DIR_NAMES = new Set(['.git', 'node_modules', '.svelte-kit', '.vercel']);
 const SOURCE_POINTER = '.atelier-kit-source';
 const UPGRADE_MANIFEST = '.atelier-kit-upgrade.json';
+const VERSION_FILE = '.atelier-kit-version';
 const PRESERVE_MANIFEST = '.atelier-kit-preserve';
 const UI_COMPONENTS_PACKAGE = 'giadaware-ui-components';
 const UI_COMPONENTS_DEPENDENCY =
@@ -85,7 +86,7 @@ Notes:
   Never touches config/, content/ or static/images/items/.
   Skips paths listed in .atelier-kit-preserve (one relative path per line).
   Merges npm scripts from the kit package.json into the client package.json.
-  Writes ${SOURCE_POINTER} and ${UPGRADE_MANIFEST} in the client folder.`);
+  Writes ${SOURCE_POINTER}, ${VERSION_FILE} and ${UPGRADE_MANIFEST} in the client folder.`);
 }
 
 /**
@@ -467,7 +468,7 @@ function collectFiles(rootDir, prefix) {
 /** Preflight every client namespace the upgrader can inspect or mutate. @param {string} clientRoot @param {Set<string>} [preservePaths] */
 function validateUpgradePaths(clientRoot, preservePaths = new Set()) {
   const fixed = [
-    'config/site.yaml', 'package.json', VITE_CONFIG, SOURCE_POINTER, UPGRADE_MANIFEST,
+    'config/site.yaml', 'package.json', VITE_CONFIG, SOURCE_POINTER, VERSION_FILE, UPGRADE_MANIFEST,
     PRESERVE_MANIFEST, ...UI_COMPONENTS_INTEGRATION_FILES
   ];
   for (const rel of fixed) validateClientPath(clientRoot, rel, { allowMissing: true });
@@ -619,13 +620,14 @@ export function buildFilePlan(kitRoot, clientRoot, preservePaths) {
  * @param {string} clientRoot
  * @param {string} kitRoot
  * @param {string | null} kitVersion
- * @returns {{ changed: boolean, kitPath: string, previousVersion: string | null }}
+ * @returns {{ changed: boolean, kitPath: string, previousVersion: string | null, previousTrackedVersion: string | null }}
  */
 export function buildMetadataPlan(clientRoot, kitRoot, kitVersion, filePlan = buildFilePlan(kitRoot, clientRoot, new Set())) {
   const kitPath = path.relative(clientRoot, kitRoot) || '.';
   let previousVersion = null;
   let previousKitPath = null;
   let previousManagedTests = {};
+  let previousTrackedVersion = null;
 
   try {
     const manifest = JSON.parse(fs.readFileSync(path.join(clientRoot, UPGRADE_MANIFEST), 'utf8'));
@@ -639,14 +641,20 @@ export function buildMetadataPlan(clientRoot, kitRoot, kitVersion, filePlan = bu
   const pointer = fs.existsSync(path.join(clientRoot, SOURCE_POINTER))
     ? fs.readFileSync(path.join(clientRoot, SOURCE_POINTER), 'utf8').trim()
     : null;
+  try {
+    previousTrackedVersion = readTrackedKitVersion(fs.readFileSync(path.join(clientRoot, VERSION_FILE), 'utf8')) || null;
+  } catch {
+    // A missing or malformed tracked version file must be replaced by the next upgrade.
+  }
 
   const currentManagedTests = deriveManagedTestsFromClient(clientRoot, kitRoot);
   return {
-    changed: previousVersion !== kitVersion || previousKitPath !== kitPath || pointer !== kitPath ||
+    changed: previousVersion !== kitVersion || previousTrackedVersion !== kitVersion || previousKitPath !== kitPath || pointer !== kitPath ||
       JSON.stringify(previousManagedTests) !== JSON.stringify(currentManagedTests) ||
       [...filePlan.add, ...filePlan.update, ...filePlan.remove].some((rel) => rel.endsWith('.test.js')),
     kitPath,
-    previousVersion
+    previousVersion,
+    previousTrackedVersion
   };
 }
 
@@ -959,7 +967,7 @@ export function applyUiComponentsIntegrationPlan(
  * @param {{ add: string[], update: string[], remove: string[], preserve: string[], manualReview: string[] }} filePlan
  * @param {{ key: string, from?: string, to: string, preserve?: boolean }[]} scriptPlan
  * @param {{ changed: boolean, from?: string, to: string, artifactChanged: boolean, identityChanged: boolean }} dependencyPlan
- * @param {{ changed: boolean, kitPath: string, previousVersion: string | null }} metadataPlan
+ * @param {{ changed: boolean, kitPath: string, previousVersion: string | null, previousTrackedVersion: string | null }} metadataPlan
  * @param {string} kitRoot
  * @param {string} clientRoot
  * @param {string | null} kitVersion
@@ -1106,6 +1114,10 @@ export function printPlan(
     );
     console.log(`      kitPath: ${metadataPlan.kitPath}`);
     console.log(`  ~ ${SOURCE_POINTER}`);
+    console.log(`  ~ ${VERSION_FILE}`);
+    console.log(
+      `      version: ${metadataPlan.previousTrackedVersion ?? '(missing)'} -> ${kitVersion ?? '(unknown)'}`
+    );
   }
 
   return total > 0;
@@ -1140,13 +1152,19 @@ export function applyFilePlan(filePlan, kitRoot, clientRoot) {
  * @param {string} kitRoot
  * @param {string | null} kitVersion
  * @param {(() => Record<string, string>) | null} [deriveFinalProvenance]
- * @param {{ writePointer?: Function, beforeFinalProvenance?: Function, writeMetadata?: Function }} [hooks]
+ * @param {{ writePointer?: Function, beforeFinalProvenance?: Function, writeMetadata?: Function, afterVersionWritten?: Function }} [hooks]
  */
 export function writeManifest(clientRoot, kitRoot, kitVersion, deriveFinalProvenance = null, hooks = {}) {
   const relativeKit = path.relative(clientRoot, kitRoot) || '.';
   const pointer = validateClientPath(clientRoot, SOURCE_POINTER, { allowMissing: true });
   if (hooks.writePointer) hooks.writePointer(pointer, `${relativeKit}\n`);
   else fs.writeFileSync(pointer, `${relativeKit}\n`);
+
+  const trackedVersion = normalizeKitVersion(kitVersion);
+  if (trackedVersion) {
+    atomicWriteClientFile(clientRoot, VERSION_FILE, `${trackedVersion}\n`);
+    hooks.afterVersionWritten?.();
+  }
 
   validateClientPath(clientRoot, UPGRADE_MANIFEST, { allowMissing: true });
   // Historical name: this is a deterministic failure/mutation hook before the
@@ -1176,13 +1194,13 @@ export function writeManifest(clientRoot, kitRoot, kitVersion, deriveFinalProven
 /**
  * @param {{ integrationPlan: any, filePlan: { add: string[], update: string[], remove: string[] }, scriptPlan: { key: string, to: string, preserve?: boolean }[], metadataPlan: object }} plans
  * @param {string} kitRoot @param {string} clientRoot @param {string | null} kitVersion
- * @param {{ integration?: any, afterPackage?: Function, beforeCopy?: (rel: string) => void, beforeRemove?: (rel: string) => void, afterFilesApplied?: Function, afterProvenanceComputed?: Function, beforeRollbackRestore?: (rel: string) => void, writePointer?: Function, writeMetadata?: Function, provenanceHashHooks?: any }} [hooks] writeMetadata is a pre-final-boundary test hook despite its historical name.
+ * @param {{ integration?: any, afterPackage?: Function, beforeCopy?: (rel: string) => void, beforeRemove?: (rel: string) => void, afterFilesApplied?: Function, afterProvenanceComputed?: Function, afterVersionWritten?: Function, beforeRollbackRestore?: (rel: string) => void, writePointer?: Function, writeMetadata?: Function, provenanceHashHooks?: any }} [hooks] writeMetadata is a pre-final-boundary test hook despite its historical name.
  */
 export function applyUpgradeTransaction(plans, kitRoot, clientRoot, kitVersion, hooks = {}) {
   const { integrationPlan, filePlan, scriptPlan, metadataPlan } = plans;
   const affected = new Set([
     ...filePlan.add, ...filePlan.update, ...filePlan.remove,
-    SOURCE_POINTER, UPGRADE_MANIFEST,
+    SOURCE_POINTER, VERSION_FILE, UPGRADE_MANIFEST,
     ...(integrationPlan.artifactChanged ? [UI_COMPONENTS_ARTIFACT] : []),
     ...(integrationPlan.identityChanged ? [UI_COMPONENTS_IDENTITY] : []),
     ...(integrationPlan.dependency.changed || scriptPlan.some((entry) => !entry.preserve) ? ['package.json'] : [])
@@ -1280,6 +1298,7 @@ export function applyUpgradeTransaction(plans, kitRoot, clientRoot, kitVersion, 
     writeManifest(clientRoot, kitRoot, kitVersion, () => deriveManagedTestsFromClient(clientRoot, kitRoot, hooks.provenanceHashHooks), {
       writePointer: hooks.writePointer,
       writeMetadata: hooks.writeMetadata,
+      afterVersionWritten: hooks.afterVersionWritten,
       beforeFinalProvenance: hooks.afterProvenanceComputed
     });
     return integrationResult;
@@ -1295,82 +1314,6 @@ export function applyUpgradeTransaction(plans, kitRoot, clientRoot, kitVersion, 
  * @param {string} kitRoot
  * @returns {string | null}
  */
-function readLatestChangelogVersion(kitRoot) {
-  const changelogPath = path.join(kitRoot, 'CHANGELOG.md');
-
-  if (!fs.existsSync(changelogPath)) {
-    return null;
-  }
-
-  const content = fs.readFileSync(changelogPath, 'utf8');
-  const match = content.match(/^## (v[0-9]+\.[0-9]+\.[0-9]+)/m);
-
-  return match ? match[1] : null;
-}
-
-/**
- * @param {string} kitRoot
- * @returns {string | null}
- */
-function readKitPackageVersion(kitRoot) {
-  try {
-    const pkg = JSON.parse(fs.readFileSync(path.join(kitRoot, 'package.json'), 'utf8'));
-    return typeof pkg.version === 'string' && pkg.version.trim() !== '' ? pkg.version.trim() : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * @param {string} kitRoot
- * @returns {string | null}
- */
-function detectKitVersion(kitRoot) {
-  const exactTag = spawnSync('git', ['-C', kitRoot, 'describe', '--tags', '--exact-match'], {
-    encoding: 'utf8'
-  });
-
-  if (exactTag.status === 0) {
-    return exactTag.stdout.trim();
-  }
-
-  const changelogVersion = readLatestChangelogVersion(kitRoot);
-  const nearestTag = spawnSync('git', ['-C', kitRoot, 'describe', '--tags', '--abbrev=0'], {
-    encoding: 'utf8'
-  });
-
-  if (nearestTag.status === 0) {
-    const tag = nearestTag.stdout.trim();
-
-    if (changelogVersion && changelogVersion !== tag) {
-      return changelogVersion;
-    }
-
-    const ahead = spawnSync('git', ['-C', kitRoot, 'rev-list', `${tag}..HEAD`, '--count'], {
-      encoding: 'utf8'
-    });
-    const commitCount = Number.parseInt(String(ahead.stdout).trim(), 10);
-
-    if (Number.isFinite(commitCount) && commitCount > 0) {
-      return `${tag}+${commitCount}`;
-    }
-
-    return tag;
-  }
-
-  if (changelogVersion) {
-    return changelogVersion;
-  }
-
-  const packageVersion = readKitPackageVersion(kitRoot);
-
-  if (packageVersion) {
-    return `dev-${packageVersion}`;
-  }
-
-  return null;
-}
-
 /**
  * @param {string} message
  */
@@ -1425,7 +1368,7 @@ export async function main(integrationValidation = {}) {
     if (fs.existsSync(source)) validateTreeNoSymlinks(source, `Kit ${rel}`);
   }
 
-  const kitVersion = detectKitVersion(kitRoot);
+  const kitVersion = detectKitVersion(kitRoot) || null;
   const preservePaths = loadPreservePaths(clientRoot);
   validateUpgradePaths(clientRoot, preservePaths);
   const coreManagedPreserveEntries = findCoreManagedPreserveEntries(preservePaths);

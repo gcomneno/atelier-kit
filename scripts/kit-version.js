@@ -1,4 +1,6 @@
 import { readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import path from 'node:path';
 
 const VERSION_PATTERN = /^v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$/;
 
@@ -13,6 +15,12 @@ export function normalizeKitVersion(value) {
 
   const match = value.trim().match(VERSION_PATTERN);
   return match ? `v${match[1]}` : '';
+}
+
+/** @param {unknown} value */
+export function readTrackedKitVersion(value) {
+  const version = normalizeKitVersion(value);
+  return typeof value === 'string' && value === `${version}\n` ? version : '';
 }
 
 /**
@@ -52,13 +60,58 @@ export function readManifestKitVersion(manifest) {
 }
 
 /**
- * Resolve the applied Kit version from the upgrade manifest, falling back to the
- * latest changelog release for upstream checkouts and legacy clients.
+ * Detect the version represented by an Atelier-Kit source checkout.
+ *
+ * @param {string} kitRoot
+ * @returns {string}
+ */
+export function detectKitVersion(kitRoot) {
+  const exactTag = spawnSync('git', ['-C', kitRoot, 'describe', '--tags', '--exact-match'], { encoding: 'utf8' });
+  if (exactTag.status === 0) return normalizeKitVersion(exactTag.stdout);
+
+  let changelogVersion = '';
+  try {
+    const content = readFileSync(path.join(kitRoot, 'CHANGELOG.md'), 'utf8');
+    const match = content.match(/^##\s+(v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)/m);
+    changelogVersion = normalizeKitVersion(match?.[1]);
+  } catch {
+    // Missing or unreadable changelogs leave Git as the only version source.
+  }
+
+  const nearestTag = spawnSync('git', ['-C', kitRoot, 'describe', '--tags', '--abbrev=0'], { encoding: 'utf8' });
+  if (nearestTag.status === 0) {
+    const tag = normalizeKitVersion(nearestTag.stdout);
+    if (changelogVersion && changelogVersion !== tag) return changelogVersion;
+    const ahead = spawnSync('git', ['-C', kitRoot, 'rev-list', `${tag}..HEAD`, '--count'], { encoding: 'utf8' });
+    const commitCount = Number.parseInt(String(ahead.stdout).trim(), 10);
+    if (tag && Number.isFinite(commitCount) && commitCount > 0) return `${tag}+${commitCount}`;
+    if (tag) return tag;
+  }
+
+  if (changelogVersion) return changelogVersion;
+  return '';
+}
+
+/**
+ * Resolve the applied Kit version from the tracked version file, falling back to
+ * the upgrade manifest and changelog for legacy clients and upstream checkouts.
  *
  * @param {URL} rootUrl
  * @returns {string}
  */
 export function resolveKitVersion(rootUrl = new URL('../', import.meta.url)) {
+  try {
+    const version = readTrackedKitVersion(
+      readFileSync(new URL('.atelier-kit-version', rootUrl), 'utf8')
+    );
+
+    if (version) {
+      return version;
+    }
+  } catch {
+    // Missing and malformed tracked files intentionally use legacy fallbacks.
+  }
+
   try {
     const manifest = JSON.parse(readFileSync(new URL('.atelier-kit-upgrade.json', rootUrl), 'utf8'));
     const version = readManifestKitVersion(manifest);

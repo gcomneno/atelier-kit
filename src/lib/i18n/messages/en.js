@@ -255,7 +255,7 @@ export default {
           4: 'config/, content/ and static/images/items/ are never overwritten. List customized src/ paths in .atelier-kit-preserve.',
           5: 'Then npm install (if dependencies changed), npm run check, npm run build and publish or push to Vercel.'
         },
-        note: 'The applied version is recorded in .atelier-kit-upgrade.json. See docs/usage/client-scaffold.md for details.'
+        note: 'The deployable applied version is recorded in .atelier-kit-version. See docs/usage/client-scaffold.md for details.'
       },
       commands: {
         title: 'Terminal commands',

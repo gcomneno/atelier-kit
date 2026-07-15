@@ -6,8 +6,28 @@ export const SHUTDOWN_PHASE = Object.freeze({
 });
 
 /**
+ * @typedef {(typeof SHUTDOWN_PHASE)[keyof typeof SHUTDOWN_PHASE]} ShutdownPhase
+ * @typedef {{
+ *   confirmShutdown: () => boolean,
+ *   renderTerminal: () => unknown,
+ *   afterRender: () => Promise<unknown>,
+ *   closeWindow: () => unknown,
+ *   showFallback: () => unknown,
+ *   acknowledgeRendered: () => Promise<unknown>,
+ *   onPhaseChange?: (phase: ShutdownPhase) => unknown
+ * }} StudioShutdownFlowDependencies
+ * @typedef {{
+ *   open: () => unknown,
+ *   write: (html: string) => unknown,
+ *   close: () => unknown,
+ *   getElementById: (id: string) => ({ focus?: () => unknown, hidden?: boolean } | null)
+ * }} ShutdownDocument
+ */
+
+/**
  * Run the client-only shutdown sequence. Dependencies are injected so the
  * ordering can be verified without a browser.
+ * @param {StudioShutdownFlowDependencies} dependencies
  */
 export function createStudioShutdownFlow({
   confirmShutdown,
@@ -18,8 +38,10 @@ export function createStudioShutdownFlow({
   acknowledgeRendered,
   onPhaseChange = () => {}
 }) {
+  /** @type {ShutdownPhase} */
   let phase = SHUTDOWN_PHASE.IDLE;
 
+  /** @param {ShutdownPhase} nextPhase */
   function setPhase(nextPhase) {
     phase = nextPhase;
     onPhaseChange(nextPhase);
@@ -53,12 +75,14 @@ export function createStudioShutdownFlow({
   };
 }
 
+/** @param {Window} [windowObject] */
 export function afterBrowserRender(windowObject = window) {
   return new Promise((resolve) => {
     windowObject.requestAnimationFrame(() => windowObject.requestAnimationFrame(resolve));
   });
 }
 
+/** @param {unknown} value */
 function escapeHtml(value) {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -68,7 +92,11 @@ function escapeHtml(value) {
     .replaceAll("'", '&#039;');
 }
 
-/** Replace the live app with a server-independent terminal document. */
+/**
+ * Replace the live app with a server-independent terminal document.
+ * @param {ShutdownDocument} documentObject
+ * @param {{ lang: string, pageTitle: string, stopped: string, fallback: string }} copy
+ */
 export function renderStudioShutdownDocument(documentObject, { lang, pageTitle, stopped, fallback }) {
   documentObject.open();
   documentObject.write(`<!doctype html>
@@ -93,9 +121,10 @@ export function renderStudioShutdownDocument(documentObject, { lang, pageTitle, 
   </body>
 </html>`);
   documentObject.close();
-  documentObject.getElementById('studio-shutdown-title')?.focus();
+  documentObject.getElementById('studio-shutdown-title')?.focus?.();
 }
 
+/** @param {ShutdownDocument} documentObject */
 export function showStudioShutdownFallback(documentObject) {
   const message = documentObject.getElementById('studio-shutdown-message');
   if (message) message.hidden = false;

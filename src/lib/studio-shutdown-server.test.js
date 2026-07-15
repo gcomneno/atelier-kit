@@ -8,22 +8,26 @@ import {
 
 function createFakeTimers() {
   let nextId = 0;
+  /** @type {Map<number, { callback: () => void, delay: number }>} */
   const timers = new Map();
   return {
     timers,
+    /** @param {() => void} callback @param {number} delay */
     setTimer(callback, delay) {
       const id = ++nextId;
       timers.set(id, { callback, delay });
       return id;
     },
+    /** @param {ReturnType<typeof setTimeout> | number} id */
     clearTimer(id) {
-      timers.delete(id);
+      if (typeof id === 'number') timers.delete(id);
     }
   };
 }
 
 test('shutdown accepts one request and waits for a rendered acknowledgement', () => {
   const fake = createFakeTimers();
+  /** @type {number[]} */
   const exits = [];
   const coordinator = createStudioShutdownCoordinator({
     exit: (code) => exits.push(code),

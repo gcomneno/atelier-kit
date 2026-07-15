@@ -1,6 +1,22 @@
 const DEFAULT_FALLBACK_EXIT_DELAY_MS = 10_000;
 const DEFAULT_ACKNOWLEDGED_EXIT_DELAY_MS = 150;
 
+/**
+ * @typedef {ReturnType<typeof setTimeout> | number} ShutdownTimer
+ * @typedef {(code: number) => unknown} ExitProcess
+ * @typedef {(callback: () => void, delay: number) => ShutdownTimer} SetTimer
+ * @typedef {(timer: ShutdownTimer) => void} ClearTimer
+ */
+
+/**
+ * @param {{
+ *   exit?: ExitProcess,
+ *   setTimer?: SetTimer,
+ *   clearTimer?: ClearTimer,
+ *   fallbackExitDelayMs?: number,
+ *   acknowledgedExitDelayMs?: number
+ * }} [options]
+ */
 export function createStudioShutdownCoordinator({
   exit = (code) => process.exit(code),
   setTimer = setTimeout,
@@ -9,8 +25,10 @@ export function createStudioShutdownCoordinator({
   acknowledgedExitDelayMs = DEFAULT_ACKNOWLEDGED_EXIT_DELAY_MS
 } = {}) {
   let requested = false;
+  /** @type {ShutdownTimer | undefined} */
   let exitTimer;
 
+  /** @param {number} delay */
   function scheduleExit(delay) {
     if (exitTimer !== undefined) clearTimer(exitTimer);
     exitTimer = setTimer(() => exit(0), delay);
@@ -38,6 +56,7 @@ export function createStudioShutdownCoordinator({
 
 export const studioShutdownCoordinator = createStudioShutdownCoordinator();
 
+/** @param {boolean} devMode @param {Record<string, string | undefined>} [environment] */
 export function isStudioShutdownAllowed(devMode, environment = process.env) {
   return devMode || environment.ATELIER_STUDIO === '1';
 }

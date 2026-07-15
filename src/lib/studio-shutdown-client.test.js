@@ -8,8 +8,11 @@ import {
   showStudioShutdownFallback
 } from './studio-shutdown-client.js';
 
+/** @param {Partial<Parameters<typeof createStudioShutdownFlow>[0]>} [overrides] */
 function createFlow(overrides = {}) {
+  /** @type {string[]} */
   const calls = [];
+  /** @type {string[]} */
   const phases = [];
   const flow = createStudioShutdownFlow({
     confirmShutdown: () => (calls.push('confirm'), true),
@@ -70,8 +73,10 @@ test('terminal document is self-contained, accessible, focused, and reveals its 
     opened: false,
     closed: false,
     open() { this.opened = true; },
+    /** @param {string} value */
     write(value) { this.html += value; },
     close() { this.closed = true; },
+    /** @param {string} id */
     getElementById(id) {
       return id === 'studio-shutdown-title' ? title : id === 'studio-shutdown-message' ? message : null;
     }

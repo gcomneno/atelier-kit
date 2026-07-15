@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
   import { markedTextToPlainText } from '$lib/marked-text.js';
+  import { copyBriefAndOpenSocial } from '$lib/visitor-brief.js';
 
   /** @typedef {{ id: string, title: string }} BriefItem */
   /** @typedef {{ id: string, label: string }} SignalOption */
@@ -10,6 +11,7 @@
   /** @typedef {{ enabled: boolean, label: string, address: string, subject_prefix: string }} EmailContact */
   /** @typedef {{ enabled: boolean, label: string, phone: string }} WhatsAppContact */
   /** @typedef {{ email?: EmailContact, whatsapp?: WhatsAppContact }} ContactConfig */
+  /** @typedef {{ id: 'instagram' | 'facebook', url: string }} SocialProfile */
 
   /** @type {BriefItem} */
   export let item;
@@ -19,6 +21,9 @@
 
   /** @type {ContactConfig} */
   export let contact = {};
+
+  /** @type {SocialProfile[]} */
+  export let socialProfiles = [];
 
   const t = useVisitorI18n();
 
@@ -175,6 +180,27 @@
       copyStatus = t('visitorBrief.copyError');
     }
   }
+
+  /** @param {SocialProfile} profile */
+  async function copyAndOpenSocial(profile) {
+    if (!navigator.clipboard?.writeText) {
+      copyStatus = t('visitorBrief.copyError');
+      return;
+    }
+
+    const result = await copyBriefAndOpenSocial({
+      text: briefText,
+      url: profile.url,
+      writeText: (text) => navigator.clipboard.writeText(text),
+      openWindow: () => window.open('about:blank', '_blank')
+    });
+
+    copyStatus = result === 'opened'
+      ? t('visitorBrief.copyAndOpenSuccess')
+      : result === 'copy-failed'
+        ? t('visitorBrief.copyError')
+        : t('visitorBrief.popupError');
+  }
 </script>
 
 <section class="visitor-brief" aria-labelledby="visitor-brief-heading">
@@ -212,10 +238,18 @@
         )}
       </a>
     {/if}
+
+    {#each socialProfiles as profile (profile.id)}
+      <button type="button" on:click={() => copyAndOpenSocial(profile)}>
+        {profile.id === 'instagram'
+          ? t('visitorBrief.copyAndOpenInstagram')
+          : t('visitorBrief.copyAndOpenFacebook')}
+      </button>
+    {/each}
   </div>
 
   {#if copyStatus}
-    <p class="copy-status" aria-live="polite">{copyStatus}</p>
+    <p class="copy-status" role="status" aria-live="polite">{copyStatus}</p>
   {/if}
 </section>
 

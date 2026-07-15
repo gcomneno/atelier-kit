@@ -1,3 +1,4 @@
+// @ts-nocheck
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
@@ -6,8 +7,11 @@ import {
   assertValidMarkedText,
   markedTextFontPresets,
   markedTextToPlainText,
+  notifyMarkedTextEdit,
+  wrapMarkedTextSelection,
   validateMarkedTextValues
 } from './marked-text.js';
+import { studioFormDirty } from './studio-form-dirty.js';
 import { splitEditorialParagraphs } from './editorial-markup.js';
 
 test('canonical inventory distinguishes single-line and multiline marked fields', () => {
@@ -48,6 +52,67 @@ test('MarkedTextField exposes single-line, multiline and paragraph-aware preview
   assert.match(source, /\{#if multiline\}[\s\S]*<textarea/);
   assert.match(source, /\{:else\}[\s\S]*<input/);
   assert.match(source, /previewParagraphs[\s\S]*split\(\/\\n\\s\*\\n\//);
+});
+
+test('toolbar markup and font edits update the successful value before marking the form dirty', async () => {
+  const originalFormData = globalThis.FormData;
+  const form = new EventTarget();
+  const field = {
+    name: 'header_title',
+    value: 'Studio title',
+    dispatchEvent(event) {
+      return form.dispatchEvent(event);
+    }
+  };
+  const dirtyStates = [];
+  const serializedValues = [];
+  const dirtyControl = {};
+
+  globalThis.FormData = class {
+    constructor(node) {
+      assert.equal(node, form);
+    }
+
+    *entries() {
+      serializedValues.push(field.value);
+      yield [field.name, field.value];
+    }
+  };
+
+  try {
+    const action = studioFormDirty(form, {
+      setDirty: (dirty) => dirtyStates.push(dirty),
+      dirtyControl
+    });
+    await Promise.resolve();
+
+    const markupEdit = wrapMarkedTextSelection(field.value, 0, 6, 'accent');
+    assert.deepEqual(markupEdit, {
+      value: '{accent}Studio{/accent} title',
+      cursor: 23
+    });
+    notifyMarkedTextEdit(field, markupEdit.value);
+    assert.equal(dirtyStates.at(-1), true);
+    assert.equal(serializedValues.at(-1), markupEdit.value);
+
+    dirtyControl.resetBaseline();
+    assert.equal(dirtyStates.at(-1), false);
+
+    const fontEdit = wrapMarkedTextSelection(field.value, 0, field.value.length, 'font:lora');
+    assert.equal(fontEdit.value, '{font:lora}{accent}Studio{/accent} title{/font}');
+    notifyMarkedTextEdit(field, fontEdit.value);
+    assert.equal(dirtyStates.at(-1), true);
+    assert.equal(serializedValues.at(-1), fontEdit.value);
+
+    dirtyControl.resetBaseline();
+    field.value += '!';
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+    assert.equal(dirtyStates.at(-1), true);
+
+    action.destroy();
+  } finally {
+    globalThis.FormData = originalFormData;
+  }
 });
 
 test('catalog intro regression renders marked paragraphs on home and catalog routes', () => {

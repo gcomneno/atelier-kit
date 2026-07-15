@@ -83,3 +83,31 @@ export function assertValidMarkedText(values) {
 export function markedTextFontPresets(values) {
   return editorialFontPresets(...values.filter((value) => typeof value === 'string'));
 }
+
+/**
+ * Apply an Atelier Mark tag to the selected range.
+ * @param {string} value
+ * @param {number} start
+ * @param {number} end
+ * @param {string} tag
+ */
+export function wrapMarkedTextSelection(value, start, end, tag) {
+  const selected = value.slice(start, end);
+  const closeTag = tag.startsWith('font:') ? 'font' : tag;
+  const wrapped = `{${tag}}${selected}{/${closeTag}}`;
+
+  return {
+    value: `${value.slice(0, start)}${wrapped}${value.slice(end)}`,
+    cursor: start + wrapped.length
+  };
+}
+
+/**
+ * Keep the successful form value in sync before notifying form-level listeners.
+ * @param {HTMLInputElement | HTMLTextAreaElement} field
+ * @param {string} value
+ */
+export function notifyMarkedTextEdit(field, value) {
+  field.value = value;
+  field.dispatchEvent(new Event('input', { bubbles: true }));
+}

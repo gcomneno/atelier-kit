@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { applyScaffoldLocalePack } from './scaffold-locales/index.js';
+import { detectKitVersion } from './kit-version.js';
 
 const EXCLUDED_NAMES = new Set([
   '.git',
@@ -1066,6 +1067,10 @@ function main() {
     }
 
     copyTree(sourceRoot, targetRoot);
+
+    const kitVersion = detectKitVersion(sourceRoot);
+    if (!kitVersion) throw new Error(`Could not detect the Atelier-Kit version from ${sourceRoot}.`);
+    fs.writeFileSync(path.join(targetRoot, '.atelier-kit-version'), `${kitVersion}\n`);
 
     writeSourcePointer(targetRoot, sourceRoot);
 

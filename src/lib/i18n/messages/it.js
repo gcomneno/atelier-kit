@@ -257,7 +257,7 @@ export default {
           4: 'Restano intatti config/, content/ e static/images/items/. Per personalizzazioni in src/, elenca i path in .atelier-kit-preserve.',
           5: 'Poi npm install (se cambiano dipendenze), npm run check, npm run build e publish o push verso Vercel.'
         },
-        note: 'La versione applicata viene registrata in .atelier-kit-upgrade.json. Dettagli in docs/usage/client-scaffold.md.'
+        note: 'La versione applicata e distribuibile viene registrata in .atelier-kit-version. Dettagli in docs/usage/client-scaffold.md.'
       },
       commands: {
         title: 'Comandi da terminale',

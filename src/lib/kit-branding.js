@@ -1,7 +1,7 @@
 /** Framework kit credit — not client-editable via site config. */
 export const KIT_NAME = 'Atelier-Kit';
 export const KIT_PROJECT_URL = 'https://github.com/gcomneno/atelier-kit';
-/** Latest release from CHANGELOG.md, injected at build/dev time via Vite. */
+/** Applied Kit version, injected at build/dev time via Vite. */
 export const KIT_VERSION = import.meta.env.KIT_VERSION ?? '';
 
 /**

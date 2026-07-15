@@ -164,11 +164,28 @@ test('fresh scaffold has a runnable test setup without Kit-only root tests', () 
       name: 'atelier-kit',
       private: true,
       type: 'module',
+      version: '0.0.1',
       scripts: { test: 'node scripts/run-tests.js' }
     }));
+    fs.writeFileSync(path.join(source, '.atelier-kit-version'), 'v9.9.9\n');
     fs.copyFileSync(path.join(kitRoot, 'scripts/run-tests.js'), path.join(source, 'scripts/run-tests.js'));
     fs.writeFileSync(path.join(source, 'src/managed.test.js'), "import test from 'node:test'; test('managed', () => {});\n");
     fs.writeFileSync(path.join(source, 'test/kit-only.test.js'), "throw new Error('must not be copied');\n");
+
+    const unversionedOutputPath = path.join(parent, 'unversioned-output.txt');
+    const unversionedOutputFd = fs.openSync(unversionedOutputPath, 'w');
+    const unversioned = spawnSync(process.execPath, [path.join(kitRoot, 'scripts/scaffold-client.js'), target], {
+      cwd: source,
+      env: childEnv,
+      stdio: ['ignore', unversionedOutputFd, unversionedOutputFd]
+    });
+    fs.closeSync(unversionedOutputFd);
+    const unversionedOutput = fs.readFileSync(unversionedOutputPath, 'utf8');
+    assert.equal(unversioned.status, 1, unversionedOutput);
+    assert.match(unversionedOutput, /Could not detect the Atelier-Kit version/);
+
+    fs.rmSync(target, { recursive: true, force: true });
+    fs.writeFileSync(path.join(source, 'CHANGELOG.md'), '# Changelog\n\n## Unreleased\n\n## v0.4.1-rc.1+build.7\n');
     const scaffold = spawnSync(process.execPath, [path.join(kitRoot, 'scripts/scaffold-client.js'), target], {
       cwd: source,
       encoding: 'utf8',
@@ -179,6 +196,7 @@ test('fresh scaffold has a runnable test setup without Kit-only root tests', () 
     assert.equal(packageJson.scripts.test, 'node scripts/run-tests.js');
     assert.equal(fs.existsSync(path.join(target, 'scripts/run-tests.js')), true);
     assert.equal(fs.existsSync(path.join(target, 'test')), false);
+    assert.equal(fs.readFileSync(path.join(target, '.atelier-kit-version'), 'utf8'), 'v0.4.1-rc.1+build.7\n');
     assert.ok(discoverTests(target).some((file) => file.startsWith('src/') && file.endsWith('.test.js')));
     const clientTest = spawnSync(process.execPath, ['scripts/run-tests.js'], { cwd: target, encoding: 'utf8', env: childEnv });
     assert.equal(clientTest.status, 0, `${clientTest.stdout}\n${clientTest.stderr}`);

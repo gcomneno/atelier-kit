@@ -252,13 +252,15 @@
         </header>
 
         <div class="visitor-grid">
-          <div class="signal-list">
-            {#each signalClouds as cloud}
+          {#each signalClouds as cloud}
+            <div class="signal-item">
               <SignalCloud itemId={item.id} {cloud} />
-            {/each}
-          </div>
+            </div>
+          {/each}
 
-          <VisitorBrief {item} {signalClouds} contact={data.contact} />
+          <div class="visitor-brief-row">
+            <VisitorBrief {item} {signalClouds} contact={data.contact} />
+          </div>
         </div>
       </section>
     {/if}
@@ -579,15 +581,18 @@
 
   .visitor-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
     align-items: start;
   }
 
-  .signal-list {
-    display: grid;
-    gap: 1rem;
+  .signal-item,
+  .visitor-brief-row {
     min-width: 0;
+  }
+
+  .visitor-brief-row {
+    grid-column: 1 / -1;
   }
 
   @media (max-width: 900px) {

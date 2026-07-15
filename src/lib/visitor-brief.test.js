@@ -84,3 +84,44 @@ test('reports clipboard failure when both the placeholder and copying fail', asy
 
   assert.equal(result, 'copy-failed');
 });
+
+test('closes an invalid placeholder but still copies before reporting it blocked', async () => {
+  const profileWindow = popup();
+  let copied = false;
+  Object.defineProperty(profileWindow, 'opener', {
+    set() { throw new Error('cannot detach opener'); }
+  });
+
+  const result = await copyBriefAndOpenSocial({
+    text: 'visible brief',
+    url: 'https://facebook.com/example',
+    writeText: async () => { copied = true; },
+    openWindow: () => profileWindow
+  });
+
+  assert.equal(result, 'popup-blocked');
+  assert.equal(profileWindow.closed, true);
+  assert.equal(copied, true);
+});
+
+test('does not report a copy when placeholder preparation and copying both fail', async () => {
+  const profileWindow = popup();
+  let copyAttempts = 0;
+  Object.defineProperty(profileWindow, 'document', {
+    get() { throw new Error('document unavailable'); }
+  });
+
+  const result = await copyBriefAndOpenSocial({
+    text: 'visible brief',
+    url: 'https://facebook.com/example',
+    writeText: async () => {
+      copyAttempts += 1;
+      throw new Error('denied');
+    },
+    openWindow: () => profileWindow
+  });
+
+  assert.equal(result, 'copy-failed');
+  assert.equal(profileWindow.closed, true);
+  assert.equal(copyAttempts, 1);
+});

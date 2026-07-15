@@ -35,7 +35,12 @@ export async function copyBriefAndOpenSocial({ text, url, writeText, openWindow 
     profileWindow.document.head.append(referrerPolicy);
   } catch {
     profileWindow.close();
-    return 'popup-blocked';
+    try {
+      await writeText(text);
+      return 'popup-blocked';
+    } catch {
+      return 'copy-failed';
+    }
   }
 
   try {

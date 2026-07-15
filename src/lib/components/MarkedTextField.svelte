@@ -6,6 +6,7 @@
     parseEditorialMarkup
   } from '$lib/editorial-markup.js';
   import { FONT_PRESET_IDS } from '$lib/site-typography.js';
+  import { notifyMarkedTextEdit, wrapMarkedTextSelection } from '$lib/marked-text.js';
   import EditorialText from '$lib/components/EditorialText.svelte';
 
   /** @type {{ name: string, hint?: string, value?: string, rows?: number, multiline?: boolean, disabled?: boolean, required?: boolean, placeholder?: string, display?: { wrap?: string, quote_color?: string } | null, showEpigraphControls?: boolean, onvaluechange?: (name: string, value: string) => void }} */
@@ -67,19 +68,17 @@
 
     const start = field.selectionStart ?? draft.length;
     const end = field.selectionEnd ?? draft.length;
-    const selected = draft.slice(start, end);
-    const closeTag = tag.startsWith('font:') ? 'font' : tag;
-    const wrapped = `{${tag}}${selected}{/${closeTag}}`;
-    draft = `${draft.slice(0, start)}${wrapped}${draft.slice(end)}`;
+    const edit = wrapMarkedTextSelection(draft, start, end, tag);
+    draft = edit.value;
+    notifyMarkedTextEdit(field, edit.value);
 
     queueMicrotask(() => {
       if (!field) {
         return;
       }
 
-      const cursor = start + wrapped.length;
       field.focus();
-      field.setSelectionRange(cursor, cursor);
+      field.setSelectionRange(edit.cursor, edit.cursor);
     });
   }
 

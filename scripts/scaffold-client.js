@@ -116,12 +116,25 @@ function parseArgs(argv) {
   return { targetDir, template, force, language, help: false };
 }
 
+function isPathInside(parentRoot, candidateRoot) {
+  const relative = path.relative(parentRoot, candidateRoot);
+
+  return relative !== '' &&
+    relative !== '..' &&
+    !relative.startsWith(`..${path.sep}`) &&
+    !path.isAbsolute(relative);
+}
+
 function ensureInsideReasonableTarget(sourceRoot, targetRoot) {
   if (targetRoot === sourceRoot) {
     throw new Error('Target directory cannot be the Atelier-Kit source directory.');
   }
 
-  if (sourceRoot.startsWith(`${targetRoot}${path.sep}`)) {
+  if (isPathInside(sourceRoot, targetRoot)) {
+    throw new Error('Target directory cannot be inside the Atelier-Kit source directory.');
+  }
+
+  if (isPathInside(targetRoot, sourceRoot)) {
     throw new Error('Target directory cannot contain the Atelier-Kit source directory.');
   }
 }

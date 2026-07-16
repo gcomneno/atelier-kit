@@ -12,6 +12,9 @@ const EXCLUDED_NAMES = new Set([
   '.svelte-kit',
   '.vercel'
 ]);
+const EXCLUDED_RELATIVE_PATHS = new Set([
+  'desktop/src-tauri/target'
+]);
 const KIT_ONLY_ROOT_NAMES = new Set(['test']);
 
 const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork', 'handmade', 'jewelry', 'collector', 'furniture']);
@@ -144,8 +147,19 @@ function copyTree(source, target, sourceRoot = source) {
 
   if (stat.isDirectory()) {
     const name = path.basename(source);
+    const relativePath = path.relative(sourceRoot, source)
+      .split(path.sep)
+      .join('/');
 
-    if (EXCLUDED_NAMES.has(name) || (source !== sourceRoot && path.dirname(source) === sourceRoot && KIT_ONLY_ROOT_NAMES.has(name))) {
+    if (
+      EXCLUDED_NAMES.has(name) ||
+      EXCLUDED_RELATIVE_PATHS.has(relativePath) ||
+      (
+        source !== sourceRoot &&
+        path.dirname(source) === sourceRoot &&
+        KIT_ONLY_ROOT_NAMES.has(name)
+      )
+    ) {
       return;
     }
 

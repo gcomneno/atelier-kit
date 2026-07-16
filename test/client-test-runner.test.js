@@ -200,6 +200,15 @@ test('fresh scaffold has a runnable test setup without Kit-only root tests', () 
     fs.writeFileSync(path.join(source, 'src/managed.test.js'), "import test from 'node:test'; test('managed', () => {});\n");
     fs.writeFileSync(path.join(source, 'test/kit-only.test.js'), "throw new Error('must not be copied');\n");
 
+    fs.mkdirSync(path.join(source, 'desktop/src-tauri/target/debug'), { recursive: true });
+    fs.writeFileSync(
+      path.join(source, 'desktop/src-tauri/target/debug/generated-artifact'),
+      'must not be copied\n'
+    );
+
+    fs.mkdirSync(path.join(source, 'src/target'), { recursive: true });
+    fs.writeFileSync(path.join(source, 'src/target/keep.txt'), 'must be copied\n');
+
     const unversionedOutputPath = path.join(parent, 'unversioned-output.txt');
     const unversionedOutputFd = fs.openSync(unversionedOutputPath, 'w');
     const unversioned = spawnSync(process.execPath, [path.join(kitRoot, 'scripts/scaffold-client.js'), target], {
@@ -224,6 +233,11 @@ test('fresh scaffold has a runnable test setup without Kit-only root tests', () 
     assert.equal(packageJson.scripts.test, 'node scripts/run-tests.js');
     assert.equal(fs.existsSync(path.join(target, 'scripts/run-tests.js')), true);
     assert.equal(fs.existsSync(path.join(target, 'test')), false);
+    assert.equal(fs.existsSync(path.join(target, 'desktop/src-tauri/target')), false);
+    assert.equal(
+      fs.readFileSync(path.join(target, 'src/target/keep.txt'), 'utf8'),
+      'must be copied\n'
+    );
     assert.equal(fs.readFileSync(path.join(target, '.atelier-kit-version'), 'utf8'), 'v0.4.1-rc.1+build.7\n');
     assert.ok(discoverTests(target).some((file) => file.startsWith('src/') && file.endsWith('.test.js')));
     const clientTest = spawnSync(process.execPath, ['scripts/run-tests.js'], { cwd: target, encoding: 'utf8', env: childEnv });

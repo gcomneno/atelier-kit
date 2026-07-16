@@ -4,6 +4,13 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.4.3 - 2026-07-16
+
+### Fixed
+
+- Exclude generated Cargo/Tauri build artifacts from client scaffolds, preventing multi-gigabyte copies of `desktop/src-tauri/target` while preserving unrelated directories named `target` ([#189](https://github.com/gcomneno/atelier-kit/pull/189)).
+- Validate the Atelier-Kit source version before creating, replacing or copying into a scaffold target, preserving existing targets when an invalid source is used with `--force` ([#190](https://github.com/gcomneno/atelier-kit/pull/190)).
+
 ## v0.4.2 - 2026-07-16
 
 ### Fixed

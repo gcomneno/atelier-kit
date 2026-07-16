@@ -4,6 +4,12 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.4.2 - 2026-07-16
+
+### Fixed
+
+- Reject scaffold targets located inside the Atelier-Kit source tree, preventing recursive copies that can rapidly fill the filesystem ([#187](https://github.com/gcomneno/atelier-kit/pull/187)).
+
 ## v0.4.1 - 2026-07-15
 
 ### Fixed

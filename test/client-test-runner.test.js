@@ -220,6 +220,29 @@ test('fresh scaffold has a runnable test setup without Kit-only root tests', () 
     const unversionedOutput = fs.readFileSync(unversionedOutputPath, 'utf8');
     assert.equal(unversioned.status, 1, unversionedOutput);
     assert.match(unversionedOutput, /Could not detect the Atelier-Kit version/);
+    assert.equal(fs.existsSync(target), false);
+
+    fs.mkdirSync(target, { recursive: true });
+    fs.writeFileSync(path.join(target, 'client-owned.txt'), 'must survive\n');
+
+    const forcedUnversioned = spawnSync(
+      process.execPath,
+      [path.join(kitRoot, 'scripts/scaffold-client.js'), target, '--force'],
+      {
+        cwd: source,
+        encoding: 'utf8',
+        env: childEnv
+      }
+    );
+
+    const forcedUnversionedOutput = `${forcedUnversioned.stdout}\n${forcedUnversioned.stderr}`;
+
+    assert.equal(forcedUnversioned.status, 1, forcedUnversionedOutput);
+    assert.match(forcedUnversionedOutput, /Could not detect the Atelier-Kit version/);
+    assert.equal(
+      fs.readFileSync(path.join(target, 'client-owned.txt'), 'utf8'),
+      'must survive\n'
+    );
 
     fs.rmSync(target, { recursive: true, force: true });
     fs.writeFileSync(path.join(source, 'CHANGELOG.md'), '# Changelog\n\n## Unreleased\n\n## v0.4.1-rc.1+build.7\n');

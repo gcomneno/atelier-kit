@@ -1085,18 +1085,19 @@ function main() {
   try {
     ensureInsideReasonableTarget(sourceRoot, targetRoot);
 
-    if (fs.existsSync(targetRoot)) {
-      if (!options.force) {
-        throw new Error(`Target directory already exists: ${targetRoot}. Use --force to replace it.`);
-      }
+    if (fs.existsSync(targetRoot) && !options.force) {
+      throw new Error(`Target directory already exists: ${targetRoot}. Use --force to replace it.`);
+    }
 
+    const kitVersion = detectKitVersion(sourceRoot);
+    if (!kitVersion) throw new Error(`Could not detect the Atelier-Kit version from ${sourceRoot}.`);
+
+    if (fs.existsSync(targetRoot)) {
       removeIfExists(targetRoot);
     }
 
     copyTree(sourceRoot, targetRoot);
 
-    const kitVersion = detectKitVersion(sourceRoot);
-    if (!kitVersion) throw new Error(`Could not detect the Atelier-Kit version from ${sourceRoot}.`);
     fs.writeFileSync(path.join(targetRoot, '.atelier-kit-version'), `${kitVersion}\n`);
 
     writeSourcePointer(targetRoot, sourceRoot);

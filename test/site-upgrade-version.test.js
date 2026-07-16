@@ -6,6 +6,8 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
+import { detectKitVersion } from '../scripts/kit-version.js';
+
 import {
   HISTORICAL_TEST_COMMANDS,
   applyFilePlan,
@@ -22,6 +24,7 @@ import {
 } from '../scripts/site-upgrade.js';
 
 const kitRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const currentKitVersion = detectKitVersion(kitRoot);
 const childEnv = { ...process.env };
 delete childEnv.NODE_TEST_CONTEXT;
 const currentViteConfig = fs.readFileSync(path.join(kitRoot, 'vite.config.js'), 'utf8');
@@ -670,7 +673,8 @@ test('upgrade writes the tracked version and is idempotent when it is already co
   try {
     await runMain(clientRoot);
     const versionPath = path.join(clientRoot, '.atelier-kit-version');
-    assert.equal(fs.readFileSync(versionPath, 'utf8'), 'v0.4.0\n');
+    assert.ok(currentKitVersion, 'Expected the Atelier-Kit source version to be detectable.');
+    assert.equal(fs.readFileSync(versionPath, 'utf8'), `${currentKitVersion}\n`);
     const before = snapshotTree(clientRoot);
     const output = await runMain(clientRoot);
     assert.match(output, /Already up to date\./);

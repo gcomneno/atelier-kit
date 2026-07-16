@@ -152,6 +152,34 @@ test('symbolic links are not followed and separators normalize for reporting', (
   }
 });
 
+test('scaffold rejects a target inside the source directory without creating it', () => {
+  const source = fs.mkdtempSync(path.join(os.tmpdir(), 'atelier-scaffold-source-'));
+  const target = path.join(source, 'client');
+
+  try {
+    const result = spawnSync(
+      process.execPath,
+      [path.join(kitRoot, 'scripts/scaffold-client.js'), target, '--template', 'writing'],
+      {
+        cwd: source,
+        encoding: 'utf8',
+        env: childEnv
+      }
+    );
+
+    const output = `${result.stdout}\n${result.stderr}`;
+
+    assert.equal(result.status, 1, output);
+    assert.match(
+      output,
+      /Target directory cannot be inside the Atelier-Kit source directory/
+    );
+    assert.equal(fs.existsSync(target), false);
+  } finally {
+    fs.rmSync(source, { recursive: true, force: true });
+  }
+});
+
 test('fresh scaffold has a runnable test setup without Kit-only root tests', () => {
   const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'atelier-scaffold-test-'));
   const source = path.join(parent, 'kit');

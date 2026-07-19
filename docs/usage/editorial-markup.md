@@ -11,6 +11,7 @@ Studio → **Site identity**:
 - Tagline
 - Intro title
 - Home intro text (per paragraph)
+- Multiline hero signature (validated per paragraph and rendered in its existing single signature element)
 
 Plain text without `{` is unchanged.
 

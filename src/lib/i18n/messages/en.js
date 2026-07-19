@@ -173,7 +173,8 @@ export default {
         where: {
           1: 'Studio → Site → Identity → Tagline.',
           2: 'Studio → Site → Identity → Intro title (home hero heading).',
-          3: 'Studio → Site → Identity → Home intro text (per paragraph).'
+          3: 'Studio → Site → Identity → Home intro text (per paragraph).',
+          4: 'Studio → Site → Identity → Multiline signature (validated per paragraph).'
         },
         syntaxTitle: 'Syntax',
         syntax: {
@@ -185,7 +186,7 @@ export default {
         },
         studioTitle: 'In Studio',
         studio: {
-          1: 'Open Site → Identity and use the toolbar above tagline, intro title or home intro.',
+          1: 'Open Site → Identity and use the toolbar above tagline, intro title, home intro or signature.',
           2: 'Select text and choose a color role or one of the supported inline font presets.',
           3: 'Check the live preview under the field with your current appearance preset.'
         },

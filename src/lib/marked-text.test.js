@@ -104,6 +104,12 @@ test('Studio Help does not reference retired Atelier Mark epigraph copy', {
     assert.deepEqual(studioKeys, Object.keys(messages.studio.help.atelierMark.studio).map(Number));
     assert.equal(messages.studio.help.atelierMark.epigraphNote, undefined);
   }
+  const whereKeys = numberedHelpKeys(help, 'atelierMarkWhere');
+  assert.deepEqual(whereKeys, [1, 2, 3, 4]);
+  for (const messages of [en, it]) {
+    assert.deepEqual(whereKeys, Object.keys(messages.studio.help.atelierMark.where).map(Number));
+    assert.match(messages.studio.help.atelierMark.where[4], /signature|Firma/i);
+  }
 });
 
 test('toolbar markup and font edits update the successful value before marking the form dirty', async () => {
@@ -173,6 +179,34 @@ test('catalog intro regression renders marked paragraphs on home and catalog rou
     assert.match(source, /splitEditorialParagraphs/);
     assert.match(source, /<EditorialText[^>]+value=\{paragraph\}/);
   }
+});
+
+test('hero signature shares Studio validation, preview and safe visitor rendering', () => {
+  const validTokens = [
+    '{accent}Firma{/accent}',
+    '{intro}Firma{/intro}',
+    '{heading}Firma{/heading}',
+    '{muted}Firma{/muted}',
+    '{font:lora}Firma{/font}',
+    'Firma semplice',
+    ''
+  ];
+  for (const value of validTokens) {
+    assert.deepEqual(validateMarkedTextValues([
+      { path: 'site.hero_signature', value, mode: 'multiline' }
+    ]), []);
+  }
+  for (const value of ['{unknown}Firma{/unknown}', '{accent}Firma', '{accent}{muted}Firma{/muted}{/accent}', '<b>Firma</b> {bad}']) {
+    assert.ok(validateMarkedTextValues([
+      { path: 'site.hero_signature', value, mode: 'multiline' }
+    ]).length > 0);
+  }
+
+  const identity = readFileSync('src/routes/studio/site/identity/+page.svelte', 'utf8');
+  const home = readFileSync('src/routes/+page.svelte', 'utf8');
+  assert.match(identity, /name="hero_signature"[\s\S]*onvaluechange=\{updateEditorialDraft\}/);
+  assert.match(home, /<EditorialText tag="p" class="hero-signature" value=\{data\.site\.hero_signature\} \/>/);
+  assert.doesNotMatch(home, /class="hero-signature">\{data\.site\.hero_signature\}/);
 });
 
 test('plain consumer modules use the canonical projection', () => {

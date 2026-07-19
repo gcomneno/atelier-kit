@@ -174,7 +174,8 @@ export default {
         where: {
           1: 'Studio → Sito → Identità → Tagline.',
           2: 'Studio → Sito → Identità → Titolo intro (heading hero in home).',
-          3: 'Studio → Sito → Identità → Testo home intro (per paragrafo).'
+          3: 'Studio → Sito → Identità → Testo home intro (per paragrafo).',
+          4: 'Studio → Sito → Identità → Firma multilinea (validata per paragrafo).'
         },
         syntaxTitle: 'Sintassi',
         syntax: {
@@ -186,7 +187,7 @@ export default {
         },
         studioTitle: 'In Studio',
         studio: {
-          1: 'Apri Sito → Identità e usa la barra strumenti sopra tagline, titolo intro o testo home intro.',
+          1: 'Apri Sito → Identità e usa la barra strumenti sopra tagline, titolo intro, testo home intro o firma.',
           2: 'Seleziona il testo e scegli un ruolo colore o uno dei preset font inline supportati.',
           3: 'Controlla l’anteprima live sotto il campo con il preset aspetto corrente.'
         },

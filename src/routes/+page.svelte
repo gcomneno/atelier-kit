@@ -64,7 +64,7 @@
               {/each}
             {/if}
             {#if data.site.hero_signature}
-              <p class="hero-signature">{data.site.hero_signature}</p>
+              <EditorialText tag="p" class="hero-signature" value={data.site.hero_signature} />
             {/if}
           </div>
         {/if}
@@ -315,7 +315,7 @@
     margin-top: 0.85rem;
   }
 
-  .hero-signature {
+  .hero-intro-card :global(.hero-signature) {
     font-style: normal;
     margin: 0.85rem 0 0;
     text-align: right;
@@ -325,7 +325,7 @@
     white-space: pre-line;
   }
 
-  .hero-intro-card:not(:has(.hero-intro)) .hero-signature {
+  .hero-intro-card:not(:has(:global(.hero-intro))) :global(.hero-signature) {
     margin-top: 0;
   }
 

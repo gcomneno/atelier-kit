@@ -17,32 +17,39 @@
 </script>
 
 <main class="error-page">
-  <p class="eyebrow">{page.status}</p>
+  <div class="error-content">
+    <p class="eyebrow">{page.status}</p>
 
-  {#if isItemNotFound}
-    <h1>{t('error.itemNotFoundTitle')}</h1>
-    <p>{t('error.itemNotFoundBody')}</p>
-    <p class="requested-id">{t('error.itemNotFoundId', { id: missingItemId })}</p>
-  {:else if isNotFound}
-    <h1>{t('error.pageNotFoundTitle')}</h1>
-    <p>{t('error.pageNotFoundBody')}</p>
-  {:else}
-    <h1>{t('error.genericTitle')}</h1>
-    <p>{page.error?.message ?? t('error.unexpectedError')}</p>
-  {/if}
+    {#if isItemNotFound}
+      <h1>{t('error.itemNotFoundTitle')}</h1>
+      <p>{t('error.itemNotFoundBody')}</p>
+      <p class="requested-id">{t('error.itemNotFoundId', { id: missingItemId })}</p>
+    {:else if isNotFound}
+      <h1>{t('error.pageNotFoundTitle')}</h1>
+      <p>{t('error.pageNotFoundBody')}</p>
+    {:else}
+      <h1>{t('error.genericTitle')}</h1>
+      <p>{page.error?.message ?? t('error.unexpectedError')}</p>
+    {/if}
 
-  <a href={backHref}>{backLabel}</a>
+    <a href={backHref}>{backLabel}</a>
+  </div>
 </main>
 
 <style>
   main {
     display: grid;
-    justify-items: center;
-    place-content: center;
+    place-items: center;
     min-height: 100vh;
     width: min(760px, calc(100% - 2rem));
     margin: 0 auto;
     text-align: center;
+  }
+
+  .error-content {
+    display: grid;
+    justify-items: center;
+    width: min(100%, 36rem);
   }
 
   .eyebrow,

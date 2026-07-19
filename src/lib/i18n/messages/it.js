@@ -496,6 +496,8 @@ export default {
       livePhaseDeploy: '→ Aggiornamento sito live',
       liveDeployOk: 'Deploy di produzione completato.',
       outputDetails: 'Dettagli tecnici',
+      testOutputDetails: 'Dettagli tecnici del Test build',
+      liveOutputDetails: 'Dettagli tecnici della pubblicazione',
       liveIssues: {
         noRepo:
           'Questa cartella non è ancora collegata al backup online. L’operatore lo configura durante la consegna.',

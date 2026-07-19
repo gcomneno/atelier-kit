@@ -491,6 +491,8 @@ export default {
       livePhaseDeploy: '→ Refreshing the live site',
       liveDeployOk: 'Production deploy completed.',
       outputDetails: 'Technical details',
+      testOutputDetails: 'Build test technical details',
+      liveOutputDetails: 'Publishing technical details',
       liveIssues: {
         noRepo:
           'This project folder is not connected to online backup yet. Your operator sets this up during handoff.',

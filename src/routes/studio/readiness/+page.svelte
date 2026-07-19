@@ -1,16 +1,31 @@
 <script>
   import { enhance } from '$app/forms';
+  import { untrack } from 'svelte';
   import { useI18n } from '$lib/i18n/context.js';
+  import { createReadinessActionState } from '$lib/studio-readiness-action-state.js';
 
   const t = useI18n();
 
   let { data, form } = $props();
 
-  const livePreview = $derived(form?.livePreview ?? data.livePreview);
+  let actionState = $state(createReadinessActionState(untrack(() => form)));
+  const prepResult = $derived(actionState.results.prep);
+  const liveResult = $derived(actionState.results.live);
+  const livePreview = $derived(liveResult?.livePreview ?? data.livePreview);
   const pendingCount = $derived(livePreview.changes.length + livePreview.commitsAhead);
+  const prepRunning = $derived(actionState.pending.prep);
+  const liveRunning = $derived(actionState.pending.live);
 
-  let prepRunning = $state(false);
-  let liveRunning = $state(false);
+  /** @param {'prep' | 'live'} action */
+  function enhanceAction(action) {
+    /** @type {import('@sveltejs/kit').SubmitFunction} */
+    return () => {
+      return async ({ result, update }) => {
+        actionState.complete(action, result);
+        await update({ reset: false });
+      };
+    };
+  }
 
   function confirmLive() {
     if (pendingCount === 0) {
@@ -78,13 +93,9 @@
     <form
       method="POST"
       action="?/publishLive"
-      use:enhance={() => {
-        return async ({ update }) => {
-          liveRunning = false;
-          await update();
-        };
-      }}
+      use:enhance={enhanceAction('live')}
       class="action-form"
+      aria-busy={liveRunning}
       onsubmit={(event) => {
         if (liveRunning || prepRunning) {
           event.preventDefault();
@@ -96,7 +107,7 @@
           return;
         }
 
-        liveRunning = true;
+        actionState.start('live');
       }}
     >
       <button type="submit" class="primary" disabled={liveRunning || prepRunning}>
@@ -105,20 +116,20 @@
     </form>
   {/if}
 
-  {#if form?.live}
-    <p class={form.live.ok ? 'ok' : 'review'} role="status" aria-live="polite">{form.message}</p>
-    {#if form.live.ok && form.live.deployedUrl}
+  {#if liveResult?.live}
+    <p class={liveResult.live.ok ? 'ok' : 'review'} role="status">{liveResult.message}</p>
+    {#if liveResult.live.ok && liveResult.live.deployedUrl}
       <p class="live-url">
-        <a href={form.live.deployedUrl} target="_blank" rel="noopener noreferrer">{form.live.deployedUrl}</a>
+        <a href={liveResult.live.deployedUrl} target="_blank" rel="noopener noreferrer">{liveResult.live.deployedUrl}</a>
       </p>
-    {:else if form.live.ok && data.siteUrl}
+    {:else if liveResult.live.ok && data.siteUrl}
       <p class="live-url">
         <a href={data.siteUrl} target="_blank" rel="noopener noreferrer">{data.siteUrl}</a>
       </p>
     {/if}
     <details class="output-details">
-      <summary>{t('studio.readiness.outputDetails')}</summary>
-      <pre class="report">{form.live.output}</pre>
+      <summary>{t('studio.readiness.liveOutputDetails')}</summary>
+      <pre class="report">{liveResult.live.output}</pre>
     </details>
   {/if}
 </section>
@@ -132,20 +143,16 @@
   <form
     method="POST"
     action="?/runPublishPrep"
-    use:enhance={() => {
-      return async ({ update }) => {
-        prepRunning = false;
-        await update();
-      };
-    }}
+    use:enhance={enhanceAction('prep')}
     class="action-form"
+    aria-busy={prepRunning}
     onsubmit={(event) => {
       if (prepRunning || liveRunning) {
         event.preventDefault();
         return;
       }
 
-      prepRunning = true;
+      actionState.start('prep');
     }}
   >
     <button type="submit" class="secondary" disabled={prepRunning || liveRunning}>
@@ -153,11 +160,11 @@
     </button>
   </form>
 
-  {#if form?.prep}
-    <p class={form.prep.ok ? 'ok' : 'review'} role="status" aria-live="polite">{form.message}</p>
-    <details class="output-details" open={!form.prep.ok}>
-      <summary>{t('studio.readiness.outputDetails')}</summary>
-      <pre class="report">{form.prep.output}</pre>
+  {#if prepResult?.prep}
+    <p class={prepResult.prep.ok ? 'ok' : 'review'} role="status">{prepResult.message}</p>
+    <details class="output-details" open={!prepResult.prep.ok}>
+      <summary>{t('studio.readiness.testOutputDetails')}</summary>
+      <pre class="report">{prepResult.prep.output}</pre>
     </details>
   {/if}
 </section>

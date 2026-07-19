@@ -183,12 +183,17 @@ Remove the custom favicon to fall back to the default Atelier-Kit `/favicon.svg`
 | `{intro}…{/intro}` | Intro title |
 | `{heading}…{/heading}` | Heading |
 | `{muted}…{/muted}` | Muted text |
+| `{white}…{/white}` | Explicit white (check background contrast) |
+| `{black}…{/black}` | Explicit black (check background contrast) |
+| `{larger}…{/larger}` | One controlled size increase |
+| `{smaller}…{/smaller}` | One controlled size decrease |
 | `{font:fraunces}…{/font}` | Fraunces preset (or another Site appearance font ID) |
 
 - Literal braces: `{{` and `}}`
 - No nesting, including color + font
 - Font URLs, free-form names, CSS and unknown presets are invalid; `system` makes no external request
 - Invalid markup blocks Studio **Save**
+- Commands require a selection. Use **Remove formatting** to preserve text while stripping supported tokens.
 - `npm run content:doctor` warns before publish
 
 Full operator guide: [`editorial-markup.md`](editorial-markup.md). In Studio, open **Help** (`/studio/help`) for a short summary.

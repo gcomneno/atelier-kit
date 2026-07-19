@@ -106,7 +106,24 @@ export default {
         accent: 'Accento',
         intro: 'Intro',
         heading: 'Titolo',
-        muted: 'Tenue'
+        muted: 'Tenue',
+        white: 'Bianco',
+        black: 'Nero',
+        larger: 'Aumenta dimensione testo',
+        smaller: 'Riduci dimensione testo'
+      },
+      remove: 'Rimuovi formattazione',
+      feedback: {
+        selectionRequired: 'Seleziona del testo per abilitare i comandi di formattazione.',
+        empty: 'Seleziona del testo prima di applicare un comando.',
+        applied: 'Formattazione applicata.',
+        replaced: 'Formattazione esistente sostituita.',
+        removed: 'Formattazione rimossa.',
+        plain: 'La selezione non contiene formattazione Atelier Mark.',
+        'already-applied': 'Questa formattazione è già applicata.',
+        'invalid-markup': 'Correggi Atelier Mark non valido prima di cambiare la formattazione.',
+        'crosses-markup': 'Seleziona tutto il testo formattato oppure soltanto il testo interno.',
+        'invalid-command': 'Questo comando di formattazione non è supportato.'
       }
     },
     accessGuide: {
@@ -169,7 +186,7 @@ export default {
       atelierMark: {
         title: 'Atelier Mark — enfasi inline nei testi',
         intro:
-          'Atelier Mark colora parole o applica un preset font supportato nei testi brevi del sito — senza HTML, CSS personalizzato o URL font. Testo senza { resta invariato.',
+          'Atelier Mark applica preset controllati di colore, dimensione o font nei testi supportati — senza HTML, CSS personalizzato o URL font. Testo senza { resta invariato.',
         whereTitle: 'Dove funziona',
         where: {
           1: 'Studio → Sito → Identità → Tagline.',
@@ -183,13 +200,15 @@ export default {
           2: '{intro}…{/intro} — colore titolo intro',
           3: '{heading}…{/heading} — colore titoli',
           4: '{muted}…{/muted} — testo tenue',
-          5: '{font:fraunces}…{/font} — preset font supportato. Parentesi graffe letterali: {{ e }}. I tag non si annidano. Tag sconosciuti o non chiusi bloccano Salva.'
+          5: '{white}…{/white} / {black}…{/black} — colori espliciti; verifica il contrasto con lo sfondo.',
+          6: '{larger}…{/larger} / {smaller}…{/smaller} — un livello controllato di dimensione.',
+          7: '{font:fraunces}…{/font} — preset font supportato. Parentesi graffe letterali: {{ e }}. I tag non si annidano. Tag sconosciuti o non chiusi bloccano Salva.'
         },
         studioTitle: 'In Studio',
         studio: {
           1: 'Apri Sito → Identità e usa la barra strumenti sopra tagline, titolo intro, testo home intro o firma.',
-          2: 'Seleziona il testo e scegli un ruolo colore o uno dei preset font inline supportati.',
-          3: 'Controlla l’anteprima live sotto il campo con il preset aspetto corrente.'
+          2: 'Seleziona il testo e scegli un preset colore, dimensione o font inline. Una selezione vuota non modifica nulla.',
+          3: 'Usa Rimuovi formattazione per eliminare i token senza cancellare il testo, poi controlla l’anteprima.'
         },
         validationNote:
           'Markup non valido blocca Salva. Esegui npm run content:doctor prima del publish. Riferimento completo: docs/usage/editorial-markup.md nel repo del Kit.'

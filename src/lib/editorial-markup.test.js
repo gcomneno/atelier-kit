@@ -5,6 +5,7 @@ import {
   editorialFontPresets,
   parseTaglineDisplay,
   parseEditorialMarkup,
+  scanEditorialMarkup,
   splitEditorialParagraphs,
   stripEditorialMarkup,
   validateEditorialFields,
@@ -38,6 +39,25 @@ test('accent tag renders mark span', () => {
       '<span class="mark-accent">Narrativa breve</span>'
     );
   }
+});
+
+test('canonical color and size tokens render only fixed safe classes', () => {
+  const expected = {
+    accent: 'mark-accent', intro: 'mark-intro', heading: 'mark-heading', muted: 'mark-muted',
+    white: 'mark-white', black: 'mark-black', larger: 'mark-larger', smaller: 'mark-smaller'
+  };
+  for (const [tag, className] of Object.entries(expected)) {
+    const result = parseEditorialMarkup(`{${tag}}Testo{/${tag}}`);
+    assert.equal(result.ok, true);
+    if (result.ok) assert.equal(result.html, `<span class="${className}">Testo</span>`);
+  }
+});
+
+test('size and explicit color tokens reject values, nesting and broken closures', () => {
+  for (const value of [
+    '{larger:42}No{/larger}', '{white:#fff}No{/white}',
+    '{larger}{smaller}No{/smaller}{/larger}', '{black}No{/white}', '{smaller}No'
+  ]) assert.equal(parseEditorialMarkup(value).ok, false);
 });
 
 test('font tag renders a whitelisted preset family', () => {
@@ -135,6 +155,16 @@ test('rejects unknown tags', () => {
   assert.equal(result.ok, false);
   if (!result.ok) {
     assert.match(result.errors.join(' '), /Unknown tag/);
+    assert.equal(result.plainText, 'Hi');
+  }
+});
+
+test('invalid markup fallback preserves editorial text without exposing raw tag syntax', () => {
+  const result = parseEditorialMarkup('{accent}Testo incompleto');
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.plainText, 'Testo incompleto');
+    assert.doesNotMatch(result.plainText, /[{}]/);
   }
 });
 
@@ -164,6 +194,13 @@ test('stripEditorialMarkup removes inline font tags', () => {
   assert.equal(stripEditorialMarkup('{font:fraunces}Titolo{/font}'), 'Titolo');
 });
 
+test('stripEditorialMarkup removes every controlled token without losing text', () => {
+  assert.equal(
+    stripEditorialMarkup('{white}Bianco{/white} {black}nero{/black} {larger}più{/larger} {smaller}meno{/smaller}'),
+    'Bianco nero più meno'
+  );
+});
+
 test('stripEditorialMarkup preserves escaped tag syntax as literal text', () => {
   assert.equal(stripEditorialMarkup('{{font:lora}}'), '{font:lora}');
   assert.equal(stripEditorialMarkup('{{accent}}'), '{accent}');
@@ -181,6 +218,37 @@ test('stripEditorialMarkup preserves HTML characters and literal braces', () => 
     stripEditorialMarkup('A & B < C > D: {{accent}} e {{x}}'),
     'A & B < C > D: {accent} e {x}'
   );
+});
+
+test('scanner exposes canonical token ranges, escapes and both plain projections', () => {
+  const value = '{font:lora}Usa {{graffe}}{/font}';
+  const scan = scanEditorialMarkup(value);
+  assert.equal(scan.ok, true);
+  assert.deepEqual(scan.tokens, [{
+    type: 'token', command: 'font:lora', start: 0, end: value.length,
+    contentStart: 11, contentEnd: 25, openEnd: 11, closeStart: 25
+  }]);
+  assert.ok(scan.segments.some((part) => part.type === 'escape' && part.source === '{{'));
+  assert.ok(scan.segments.some((part) => part.type === 'escape' && part.source === '}}'));
+  assert.equal(scan.plainText, 'Usa {graffe}');
+  assert.equal(scan.sourceText, 'Usa {{graffe}}');
+});
+
+test('invalid markup always has a safe plain projection without raw control tags', () => {
+  const cases = new Map([
+    ['{{nota}} {accent}rotto', '{nota} rotto'],
+    ['{accent}rotto', 'rotto'],
+    ['{unknown}Testo{/unknown}', 'Testo'],
+    ['{font:non-esiste}Testo{/font}', 'Testo'],
+    ['{larger:42}Testo{/larger}', 'Testo']
+  ]);
+  for (const [value, expected] of cases) {
+    const parsed = parseEditorialMarkup(value);
+    assert.equal(parsed.ok, false, value);
+    assert.equal(parsed.plainText, expected, value);
+    assert.equal(stripEditorialMarkup(value), expected, value);
+    assert.doesNotMatch(parsed.plainText, /\{\/?(?:accent|unknown|font|larger)(?::[^}]*)?\}/, value);
+  }
 });
 
 test('validateEditorialParagraphs checks each paragraph', () => {

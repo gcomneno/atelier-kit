@@ -162,7 +162,7 @@ Test coverage is described conservatively: a test that reads component source is
 ### `MarkedTextField.svelte`
 
 - **Source:** `src/lib/components/MarkedTextField.svelte`.
-- **Responsibility:** Studio input/textarea, Atelier Mark toolbar and live parsed preview.
+- **Responsibility:** Studio input/textarea, accessible Atelier Mark apply/replace/remove toolbar, selection feedback and live parsed preview.
 - **Direct consumers:** Studio about, catalog, collection new/edit, item new/edit, news new/edit, signal clouds, contact, footer, hero, identity and layout routes.
 - **Public props:** `name`; optional `hint`, `value`, `rows`, `multiline`, `disabled`, `required`, `placeholder`; callback `onvaluechange?: (name, value) => void`.
 - **Events/callbacks/bindings/slots:** invokes `onvaluechange` reactively, including initial/synchronized draft changes; internal `bind:this` and `bind:value`; no slot or dispatched event.

@@ -10,7 +10,7 @@
 {#if parsed.ok}
   <svelte:element this={tag} class={className}>{@html parsed.html}</svelte:element>
 {:else}
-  <svelte:element this={tag} class={className}>{value}</svelte:element>
+  <svelte:element this={tag} class={className}>{parsed.plainText}</svelte:element>
 {/if}
 
 <style>
@@ -32,6 +32,22 @@
 
   :global(.mark-text) {
     color: var(--site-text-color, #2f281f);
+  }
+
+  :global(.mark-white) {
+    color: #fff;
+  }
+
+  :global(.mark-black) {
+    color: #000;
+  }
+
+  :global(.mark-larger) {
+    font-size: 1.2em;
+  }
+
+  :global(.mark-smaller) {
+    font-size: 0.85em;
   }
 
 </style>

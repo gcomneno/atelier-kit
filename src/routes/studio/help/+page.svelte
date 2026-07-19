@@ -41,7 +41,7 @@
   const workflowSteps = [1, 2, 3, 4, 5];
   const atelierMarkWhere = [1, 2, 3];
   const atelierMarkSyntax = [1, 2, 3, 4, 5];
-  const atelierMarkStudio = [1, 2, 3, 4];
+  const atelierMarkStudio = [1, 2, 3];
   const itemInStudio = [1, 2, 3, 4];
   const itemElsewhere = [1, 2, 3, 4, 5];
   const yamlOnly = [1, 2, 3];
@@ -118,7 +118,6 @@
     {/each}
   </ol>
 
-  <p class="help-note">{t('studio.help.atelierMark.epigraphNote')}</p>
   <p class="help-note">{t('studio.help.atelierMark.validationNote')}</p>
 </section>
 

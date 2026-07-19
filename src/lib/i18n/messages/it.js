@@ -107,15 +107,7 @@ export default {
         intro: 'Intro',
         heading: 'Titolo',
         muted: 'Tenue'
-      },
-      taglineWrap: 'Virgolette',
-      taglineWrapNone: 'Predefinito tema',
-      taglineWrapEpigraph: 'Epigrafe « »',
-      quoteColor: 'Colore virgolette',
-      quoteColorText: 'Testo',
-      quoteColorAccent: 'Accento',
-      quoteColorHeading: 'Titolo',
-      quoteColorIntro: 'Titolo intro'
+      }
     },
     accessGuide: {
       title: 'Accesso consigliato',
@@ -180,7 +172,7 @@ export default {
           'Atelier Mark colora parole o applica un preset font supportato nei testi brevi del sito — senza HTML, CSS personalizzato o URL font. Testo senza { resta invariato.',
         whereTitle: 'Dove funziona',
         where: {
-          1: 'Studio → Sito → Identità → Tagline (virgolette epigrafe « » opzionali).',
+          1: 'Studio → Sito → Identità → Tagline.',
           2: 'Studio → Sito → Identità → Titolo intro (heading hero in home).',
           3: 'Studio → Sito → Identità → Testo home intro (per paragrafo).'
         },
@@ -196,11 +188,8 @@ export default {
         studio: {
           1: 'Apri Sito → Identità e usa la barra strumenti sopra tagline, titolo intro o testo home intro.',
           2: 'Seleziona il testo e scegli un ruolo colore o uno dei preset font inline supportati.',
-          3: 'Controlla l’anteprima live sotto il campo con il preset aspetto corrente.',
-          4: 'Solo per la tagline: scegli Epigrafe « » per virgolette gestite dal componente con colore virgolette separato.'
+          3: 'Controlla l’anteprima live sotto il campo con il preset aspetto corrente.'
         },
-        epigraphNote:
-          'Epigrafe tagline: Predefinito tema mantiene le virgolette CSS legacy; Epigrafe « » usa virgolette dal componente con colore Testo, Accento, Titolo o Intro.',
         validationNote:
           'Markup non valido blocca Salva. Esegui npm run content:doctor prima del publish. Riferimento completo: docs/usage/editorial-markup.md nel repo del Kit.'
       },

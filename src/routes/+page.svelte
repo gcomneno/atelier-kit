@@ -51,9 +51,8 @@
         {#if data.site.tagline}
           <EditorialText
             tag="p"
-            class="tagline hero-epigraph"
+            class="tagline"
             value={data.site.tagline}
-            display={data.site.tagline_display}
           />
         {/if}
 
@@ -286,26 +285,6 @@
     color: color-mix(in srgb, var(--site-text-color, #4f4236) 88%, transparent);
     font-size: clamp(1.2rem, 4vw, 1.9rem);
     line-height: 1.35;
-  }
-
-  .hero-head :global(.hero-epigraph) {
-    max-width: 22ch;
-    margin: 0;
-    font-style: italic;
-    font-weight: 400;
-    font-size: clamp(2.4rem, 7.5vw, 4.5rem);
-    line-height: 1.45;
-    letter-spacing: 0.01em;
-    text-wrap: balance;
-    color: color-mix(in srgb, var(--site-text-color, #4f4236) 92%, transparent);
-  }
-
-  .hero-head :global(.hero-epigraph:not(.hero-epigraph--component-quotes))::before {
-    content: '«\202f';
-  }
-
-  .hero-head :global(.hero-epigraph:not(.hero-epigraph--component-quotes))::after {
-    content: '\202f»';
   }
 
   .hero-intro-card {

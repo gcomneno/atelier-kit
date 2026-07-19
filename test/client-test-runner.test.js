@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { parse } from 'yaml';
 
 import { batchTests, discoverTests, normalizeTestPath, runTests } from '../scripts/run-tests.js';
 
@@ -177,6 +178,26 @@ test('scaffold rejects a target inside the source directory without creating it'
     assert.equal(fs.existsSync(target), false);
   } finally {
     fs.rmSync(source, { recursive: true, force: true });
+  }
+});
+
+test('real writing scaffold omits retired tagline display configuration', () => {
+  const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'atelier-scaffold-tagline-'));
+  const target = path.join(parent, 'client');
+
+  try {
+    const result = spawnSync(
+      process.execPath,
+      [path.join(kitRoot, 'scripts/scaffold-client.js'), target, '--template', 'writing'],
+      { cwd: kitRoot, encoding: 'utf8', env: childEnv }
+    );
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+
+    const generated = parse(fs.readFileSync(path.join(target, 'config/site.yaml'), 'utf8'));
+    assert.ok(generated.site);
+    assert.doesNotMatch(JSON.stringify(generated.site), /"(?:tagline_display|wrap|quote_color)":/);
+  } finally {
+    fs.rmSync(parent, { recursive: true, force: true });
   }
 });
 

@@ -2,6 +2,12 @@
 
 `src/lib/marked-text.js` is the executable inventory for Studio-managed public text. Plain YAML strings remain valid: Atelier Mark is opt-in syntax and no client migration is required.
 
+The canonical token registry is `EDITORIAL_MARK_TOKENS` in `src/lib/editorial-markup.js`:
+theme colors `accent`, `intro`, `heading`, `muted`; explicit colors `white`, `black`;
+single-level sizes `larger`, `smaller`; plus allowlisted `font:<preset>`. Tokens never
+nest. `transformMarkedTextSelection` is the shared apply/replace/remove contract used by
+the local Studio toolbar; `EditorialText` is shared by Studio preview and the visitor.
+
 ## Marked editorial fields
 
 | Source / YAML path | Studio | Mode | Public visual consumers | Plain-text consumers |

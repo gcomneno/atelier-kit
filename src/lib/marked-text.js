@@ -1,9 +1,13 @@
 import {
+  EDITORIAL_MARK_TAGS,
   editorialFontPresets,
+  parseEditorialMarkup,
+  scanEditorialMarkup,
   stripEditorialMarkup,
   validateEditorialField,
   validateEditorialParagraphs
 } from './editorial-markup.js';
+import { isFontPreset } from './site-typography.js';
 
 /** @typedef {'single-line' | 'multiline'} MarkedTextMode */
 /** @typedef {{ family: string, path: string, mode: MarkedTextMode }} MarkedTextFieldDefinition */
@@ -92,13 +96,110 @@ export function markedTextFontPresets(values) {
  * @param {string} tag
  */
 export function wrapMarkedTextSelection(value, start, end, tag) {
-  const selected = value.slice(start, end);
-  const closeTag = tag.startsWith('font:') ? 'font' : tag;
-  const wrapped = `{${tag}}${selected}{/${closeTag}}`;
+  const edit = transformMarkedTextSelection(value, start, end, tag);
+  const cursor = edit.changed && tag !== 'remove'
+    ? edit.selectionEnd + `{/${closingTag(tag)}}`.length
+    : edit.selectionEnd;
+  return { value: edit.value, cursor };
+}
 
+/** @param {string} tag */
+function isSupportedCommand(tag) {
+  if (EDITORIAL_MARK_TAGS.includes(tag)) return true;
+  if (!tag.startsWith('font:')) return false;
+  return isFontPreset(tag.slice('font:'.length));
+}
+
+/** @param {string} tag */
+function closingTag(tag) {
+  return tag.startsWith('font:') ? 'font' : tag;
+}
+
+/**
+ * Apply, replace or remove controlled markup without creating invalid syntax.
+ * A selection that crosses only part of markup is rejected. A complete marked
+ * selection is normalized through the parser before applying another token.
+ * @param {string} value
+ * @param {number} start
+ * @param {number} end
+ * @param {string | 'remove'} command
+ */
+export function transformMarkedTextSelection(value, start, end, command) {
+  const first = Math.max(0, Math.min(Number.isFinite(start) ? start : 0, value.length));
+  const second = Math.max(0, Math.min(Number.isFinite(end) ? end : 0, value.length));
+  const safeStart = Math.min(first, second);
+  const safeEnd = Math.max(first, second);
+  if (safeStart === safeEnd) {
+    return { value, selectionStart: safeStart, selectionEnd: safeEnd, changed: false, status: 'empty' };
+  }
+  if (command !== 'remove' && !isSupportedCommand(command)) {
+    return { value, selectionStart: safeStart, selectionEnd: safeEnd, changed: false, status: 'invalid-command' };
+  }
+  const scanned = scanEditorialMarkup(value);
+  if (!scanned.ok) {
+    return { value, selectionStart: safeStart, selectionEnd: safeEnd, changed: false, status: 'invalid-markup' };
+  }
+
+  for (const part of scanned.segments) {
+    if ((part.type === 'delimiter' || part.type === 'escape') &&
+        ((safeStart > part.start && safeStart < part.end) || (safeEnd > part.start && safeEnd < part.end))) {
+      return { value, selectionStart: safeStart, selectionEnd: safeEnd, changed: false, status: 'crosses-markup' };
+    }
+  }
+
+  let rangeStart = safeStart;
+  let rangeEnd = safeEnd;
+  const exactToken = scanned.tokens.find((token) =>
+    (safeStart === token.start && safeEnd === token.end) ||
+    (safeStart === token.contentStart && safeEnd === token.contentEnd)
+  );
+  if (exactToken) {
+    rangeStart = exactToken.start;
+    rangeEnd = exactToken.end;
+  }
+
+  for (const token of scanned.tokens) {
+    const overlaps = safeStart < token.end && safeEnd > token.start;
+    const containsWhole = safeStart <= token.start && safeEnd >= token.end;
+    const isExact = token === exactToken;
+    if (overlaps && !containsWhole && !isExact) {
+      return { value, selectionStart: safeStart, selectionEnd: safeEnd, changed: false, status: 'crosses-markup' };
+    }
+  }
+
+  const includedTokens = scanned.tokens.filter((token) => rangeStart <= token.start && rangeEnd >= token.end);
+  const selected = scanned.segments
+    .filter((part) => part.end > rangeStart && part.start < rangeEnd && part.type !== 'delimiter')
+    .map((part) => part.source.slice(Math.max(0, rangeStart - part.start), part.source.length - Math.max(0, part.end - rangeEnd)))
+    .join('');
+
+  if (command === 'remove') {
+    if (includedTokens.length === 0) {
+      return { value, selectionStart: safeStart, selectionEnd: safeEnd, changed: false, status: 'plain' };
+    }
+    const next = `${value.slice(0, rangeStart)}${selected}${value.slice(rangeEnd)}`;
+    return {
+      value: next,
+      selectionStart: rangeStart,
+      selectionEnd: rangeStart + selected.length,
+      changed: next !== value,
+      status: 'removed'
+    };
+  }
+
+  if (exactToken?.command === command) {
+    return { value, selectionStart: safeStart, selectionEnd: safeEnd, changed: false, status: 'already-applied' };
+  }
+  const close = closingTag(command);
+  const wrapped = `{${command}}${selected}{/${close}}`;
+  const next = `${value.slice(0, rangeStart)}${wrapped}${value.slice(rangeEnd)}`;
+  const contentStart = rangeStart + command.length + 2;
   return {
-    value: `${value.slice(0, start)}${wrapped}${value.slice(end)}`,
-    cursor: start + wrapped.length
+    value: next,
+    selectionStart: contentStart,
+    selectionEnd: contentStart + selected.length,
+    changed: next !== value,
+    status: includedTokens.length > 0 ? 'replaced' : 'applied'
   };
 }
 

@@ -173,9 +173,9 @@ Remove the custom favicon to fall back to the default Atelier-Kit `/favicon.svg`
 
 **Atelier Mark** is inline text emphasis for short site identity fields. Operators wrap words with theme-color tokens or registered font presets instead of HTML or custom CSS.
 
-**Studio:** open **Site → Identity**. Use the toolbar above **Tagline**, **Intro title** and **Home intro** to wrap a selection. A live preview shows the result with the current appearance preset. Tagline can use **Epigraph quotes** (`« »`) with a separate quote color.
+**Studio:** open **Site → Identity**. Use the toolbar above **Tagline**, **Intro title**, **Home intro** and **Signature** to wrap a selection. A live preview shows the result with the current appearance preset.
 
-**YAML fields:** `tagline`, `intro_title`, `hero_intro` in `config/site.yaml`. Optional `tagline_display` controls epigraph guillemets.
+**YAML fields:** `tagline`, `intro_title`, `hero_intro`, `hero_signature` in `config/site.yaml`.
 
 | Token | Visitor color |
 |-------|----------------|
@@ -183,12 +183,17 @@ Remove the custom favicon to fall back to the default Atelier-Kit `/favicon.svg`
 | `{intro}…{/intro}` | Intro title |
 | `{heading}…{/heading}` | Heading |
 | `{muted}…{/muted}` | Muted text |
+| `{white}…{/white}` | Explicit white (check background contrast) |
+| `{black}…{/black}` | Explicit black (check background contrast) |
+| `{larger}…{/larger}` | One controlled size increase |
+| `{smaller}…{/smaller}` | One controlled size decrease |
 | `{font:fraunces}…{/font}` | Fraunces preset (or another Site appearance font ID) |
 
 - Literal braces: `{{` and `}}`
 - No nesting, including color + font
 - Font URLs, free-form names, CSS and unknown presets are invalid; `system` makes no external request
 - Invalid markup blocks Studio **Save**
+- Commands require a selection. Use **Remove formatting** to preserve text while stripping supported tokens.
 - `npm run content:doctor` warns before publish
 
 Full operator guide: [`editorial-markup.md`](editorial-markup.md). In Studio, open **Help** (`/studio/help`) for a short summary.

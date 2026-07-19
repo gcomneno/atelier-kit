@@ -1225,7 +1225,7 @@ export default {
       socialLinks: 'Link social',
       siteNav: 'Menù sito',
       viewAllCollections: 'Vedi tutte le collezioni',
-      viewAllItems: 'Vedi tutte le {itemPlural}',
+      viewAllItems: 'Vedi tutti',
       readMore: 'Leggi tutto',
       allNews: 'Tutte le notizie'
     },

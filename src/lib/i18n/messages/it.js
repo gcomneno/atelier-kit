@@ -444,21 +444,21 @@ export default {
     readiness: {
       pageTitle: 'Studio · Stato pubblicazione',
       intro:
-        'Leggi le note del Content Doctor, poi metti il sito online con un pulsante. I controlli partono in automatico e i messaggi restano in linguaggio semplice — niente comandi da terminale.',
+        'Leggi le note del Content Doctor, prova prima il sito con Test build e poi, quando sei pronto, mettilo online. I messaggi restano in linguaggio semplice — niente comandi da terminale.',
       doctorTitle: 'Content Doctor',
       doctorOk: 'Niente di evidente da rivedere.',
       doctorReview: 'Rivedi le note qui sotto prima di pubblicare.',
-      publishTitle: 'Solo test build (opzionale)',
+      publishTitle: '1. Test build (consigliato)',
       publishIntro:
-        'Esegue validazione e build di produzione senza aggiornare il sito live. Utile per verificare errori prima di mettere online.',
+        'Verifica che il sito possa essere costruito correttamente senza pubblicarlo. È un controllo facoltativo ma consigliato prima di mettere online.',
       publishRun: 'Test build',
       publishRunning: 'Test build in corso…',
       publishOk: 'Test build riuscito. Puoi mettere online quando sei pronto.',
       publishFailed:
         'Test build non riuscito. Leggi i dettagli qui sotto e correggi prima di pubblicare.',
-      liveTitle: 'Metti online',
+      liveTitle: '2. Metti online',
       liveIntro:
-        'Controlla i contenuti, salva le modifiche e aggiorna il sito live. Resti nello studio — Git e deploy girano in background.',
+        'Esegue la pubblicazione reale: controlla i contenuti, salva le modifiche e aggiorna il sito visibile ai visitatori.',
       liveBlocked: 'La pubblicazione non è ancora configurata su questo computer.',
       livePendingSummary: '{count} aggiornamento/i pronti da pubblicare.',
       livePendingDetails: 'Mostra file modificati',

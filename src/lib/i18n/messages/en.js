@@ -441,20 +441,20 @@ export default {
     readiness: {
       pageTitle: 'Studio · Publish readiness',
       intro:
-        'Review Content Doctor notes, then put your site online with one button. Checks run automatically and feedback stays in plain language — no terminal commands.',
+        'Review Content Doctor notes, try the site with Build test first, then put it online when you are ready. Feedback stays in plain language — no terminal commands.',
       doctorTitle: 'Content Doctor',
       doctorOk: 'Nothing obvious to review.',
       doctorReview: 'Review the notes below before publishing.',
-      publishTitle: 'Test build only (optional)',
+      publishTitle: '1. Build test (recommended)',
       publishIntro:
-        'Run validation and a production build without updating the live site. Use this if you want to check for errors before putting the site online.',
+        'Checks that the site can be built correctly without publishing it. This step is optional but recommended before going online.',
       publishRun: 'Test build',
       publishRunning: 'Testing build…',
       publishOk: 'Build test passed. You can put the site online when ready.',
       publishFailed: 'Build test failed. Read the details below and fix the issues before publishing.',
-      liveTitle: 'Put site online',
+      liveTitle: '2. Put site online',
       liveIntro:
-        'Checks your content, saves your changes, and updates the live website. You stay in the studio — Git and deploy run in the background.',
+        'Performs the real publication: checks your content, saves your changes, and updates the website visitors can see.',
       liveBlocked: 'Publishing is not set up on this computer yet.',
       livePendingSummary: '{count} update(s) ready to publish.',
       livePendingDetails: 'Show changed files',

@@ -55,7 +55,42 @@
   <pre class="report">{data.report.output}</pre>
 </section>
 
-<section class="studio-panel primary-panel">
+<section class="studio-panel test-panel">
+  <div class="panel-heading">
+    <h2>{t('studio.readiness.publishTitle')}</h2>
+    <p>{t('studio.readiness.publishIntro')}</p>
+  </div>
+
+  <form
+    method="POST"
+    action="?/runPublishPrep"
+    use:enhance={enhanceAction('prep')}
+    class="action-form"
+    aria-busy={prepRunning}
+    onsubmit={(event) => {
+      if (prepRunning || liveRunning) {
+        event.preventDefault();
+        return;
+      }
+
+      actionState.start('prep');
+    }}
+  >
+    <button type="submit" class="secondary" disabled={prepRunning || liveRunning}>
+      {prepRunning ? t('studio.readiness.publishRunning') : t('studio.readiness.publishRun')}
+    </button>
+  </form>
+
+  {#if prepResult?.prep}
+    <p class={prepResult.prep.ok ? 'ok' : 'review'} role="status">{prepResult.message}</p>
+    <details class="output-details" open={!prepResult.prep.ok}>
+      <summary>{t('studio.readiness.testOutputDetails')}</summary>
+      <pre class="report">{prepResult.prep.output}</pre>
+    </details>
+  {/if}
+</section>
+
+<section class="studio-panel live-panel">
   <div class="panel-heading">
     <h2>{t('studio.readiness.liveTitle')}</h2>
     <p>{t('studio.readiness.liveIntro')}</p>
@@ -134,41 +169,6 @@
   {/if}
 </section>
 
-<section class="studio-panel secondary-panel">
-  <div class="panel-heading">
-    <h2>{t('studio.readiness.publishTitle')}</h2>
-    <p>{t('studio.readiness.publishIntro')}</p>
-  </div>
-
-  <form
-    method="POST"
-    action="?/runPublishPrep"
-    use:enhance={enhanceAction('prep')}
-    class="action-form"
-    aria-busy={prepRunning}
-    onsubmit={(event) => {
-      if (prepRunning || liveRunning) {
-        event.preventDefault();
-        return;
-      }
-
-      actionState.start('prep');
-    }}
-  >
-    <button type="submit" class="secondary" disabled={prepRunning || liveRunning}>
-      {prepRunning ? t('studio.readiness.publishRunning') : t('studio.readiness.publishRun')}
-    </button>
-  </form>
-
-  {#if prepResult?.prep}
-    <p class={prepResult.prep.ok ? 'ok' : 'review'} role="status">{prepResult.message}</p>
-    <details class="output-details" open={!prepResult.prep.ok}>
-      <summary>{t('studio.readiness.testOutputDetails')}</summary>
-      <pre class="report">{prepResult.prep.output}</pre>
-    </details>
-  {/if}
-</section>
-
 <style>
   .panel-heading h2 {
     margin: 0 0 0.35rem;
@@ -180,12 +180,12 @@
     color: var(--studio-muted);
   }
 
-  .primary-panel {
+  .live-panel {
     border-color: rgb(47 79 53 / 0.25);
   }
 
-  .secondary-panel h2 {
-    font-size: 1.05rem;
+  .test-panel {
+    border-color: rgb(106 74 27 / 0.22);
   }
 
   .pending p {

@@ -179,7 +179,13 @@
         optional
         hint={t('studio.site.identity.heroSignatureHint')}
       />
-      <MarkedTextField name="hero_signature" value={siteForm.hero_signature} multiline rows={3} />
+      <MarkedTextField
+        name="hero_signature"
+        value={siteForm.hero_signature}
+        multiline
+        rows={3}
+        onvaluechange={updateEditorialDraft}
+      />
     </label>
 
     <label>

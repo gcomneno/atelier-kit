@@ -67,7 +67,10 @@ BBCode-style delimiters. Tag names are **English API** (not translated in Studio
 
 **Nesting (v1):** disallowed — at most one tag level; parser errors on nested tags.
 
-**Multiline fields (`hero_intro`):** markup applies **within each paragraph** (split on blank lines); tags must not span paragraphs.
+**Multiline fields (`hero_intro`, `hero_signature`):** markup is validated **within each
+paragraph** (split on blank lines); tags must not span paragraphs. This validation boundary
+does not require separate DOM elements: `hero_signature` keeps its existing single `p` with
+`white-space: pre-line`.
 
 ### Retired tagline display option
 
@@ -85,23 +88,24 @@ generate them, and no separate display wrapper is part of the active contract.
 | `tagline` | yes | no |
 | `intro_title` | yes | no |
 | `hero_intro` | yes (per paragraph) | no |
-| `hero_signature` | no (fixed layout) | no |
+| `hero_signature` | yes (multiline; validated per paragraph) | no |
 | Item/news bodies | **out of scope v1** | — |
 
 ### Studio UX
 
-New shared control **`EditorialField`** (textarea + toolbar):
+The shared **`MarkedTextField`** control (input/textarea + toolbar) is available for the
+supported Studio fields, including the multiline `hero_signature`:
 
 - Buttons insert tags around selection: Accent, Intro, Heading, Muted.
 - Live preview using current appearance tokens.
 - Short help panel with 3–4 examples (not technical docs).
-- For tagline: optional toggles **Epigraph wrap** + **Quote color** (dropdown of tokens).
 
 Save path: `validateEditorialMarkup()` before `writeProjectYaml`.
 
 ### Visitor rendering
 
-New component **`EditorialText`**:
+The **`EditorialText`** component renders controlled markup. The home signature uses it in
+the existing signature paragraph; no separate display wrapper is supported.
 
 ```svelte
 <EditorialText value={text} class="tagline" />
@@ -117,7 +121,7 @@ New component **`EditorialText`**:
 src/lib/editorial-markup.js           # parser, token registry, escape rules
 src/lib/editorial-markup.test.js      # unit tests (edge cases, nesting, escape)
 src/lib/components/EditorialText.svelte
-src/lib/components/EditorialField.svelte   # Studio only
+src/lib/components/MarkedTextField.svelte  # Studio only
 src/lib/server/validate-editorial.js  # used by studio-site-server + content-doctor
 ```
 
@@ -154,16 +158,16 @@ src/lib/server/validate-editorial.js  # used by studio-site-server + content-doc
 **Neutral:**
 
 - Likely ships as **v0.2.0** (visible feature), not a patch release.
-- Implementation split into two milestones: **v1a** (markup + toolbar) and **v1b** (epigraph wrap).
+- The original epigraph-wrapper milestone was superseded by amendment #192.
 
 ## Implementation phases
 
 | Phase | Deliverable |
 |-------|-------------|
-| **1a** | Parser + tests + `EditorialText` on `tagline` and `intro_title` |
-| **1b** | `tagline_display` epigraph wrap + quote color |
-| **2** | `hero_intro` + `EditorialField` in Studio Identity |
-| **3** | Content Doctor rules + operator docs / recipe |
+| **1a** | Complete: parser, tests and `EditorialText` on supported identity fields |
+| **1b** | Superseded by amendment #192: no epigraph display wrapper |
+| **2** | Complete: multiline `hero_intro` and `hero_signature` with `MarkedTextField` in Studio Identity |
+| **3** | Complete: Content Doctor rules and operator documentation |
 
 ## Related
 

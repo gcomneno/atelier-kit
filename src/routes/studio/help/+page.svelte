@@ -39,7 +39,7 @@
   ];
 
   const workflowSteps = [1, 2, 3, 4, 5];
-  const atelierMarkWhere = [1, 2, 3];
+  const atelierMarkWhere = [1, 2, 3, 4];
   const atelierMarkSyntax = [1, 2, 3, 4, 5];
   const atelierMarkStudio = [1, 2, 3];
   const itemInStudio = [1, 2, 3, 4];

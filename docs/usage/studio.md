@@ -173,9 +173,9 @@ Remove the custom favicon to fall back to the default Atelier-Kit `/favicon.svg`
 
 **Atelier Mark** is inline text emphasis for short site identity fields. Operators wrap words with theme-color tokens or registered font presets instead of HTML or custom CSS.
 
-**Studio:** open **Site → Identity**. Use the toolbar above **Tagline**, **Intro title** and **Home intro** to wrap a selection. A live preview shows the result with the current appearance preset.
+**Studio:** open **Site → Identity**. Use the toolbar above **Tagline**, **Intro title**, **Home intro** and **Signature** to wrap a selection. A live preview shows the result with the current appearance preset.
 
-**YAML fields:** `tagline`, `intro_title`, `hero_intro` in `config/site.yaml`.
+**YAML fields:** `tagline`, `intro_title`, `hero_intro`, `hero_signature` in `config/site.yaml`.
 
 | Token | Visitor color |
 |-------|----------------|

@@ -1,5 +1,5 @@
 <script>
-  import { tick } from 'svelte';
+  import { onDestroy, tick } from 'svelte';
   import MetaInfo from '$lib/components/MetaInfo.svelte';
   import ImageLightbox from '$lib/components/ImageLightbox.svelte';
   import PageSocialMeta from '$lib/components/PageSocialMeta.svelte';
@@ -10,6 +10,7 @@
   import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
   import { getItemCoverImage, getItemCoverIndex, normalizeItemImages } from '$lib/item-images.js';
   import { resolveItemCoverFallbackSrc } from '$lib/item-cover.js';
+  import { createOverflowDisclosure, getOverflowDisclosureView } from '$lib/element-overflow.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   /** @type {import('./$types').PageData} */
@@ -29,18 +30,26 @@
   /** @type {HTMLParagraphElement | undefined} */
   let descriptionEl;
   let descriptionCanToggle = false;
+  /** @type {ReturnType<typeof createOverflowDisclosure> | undefined} */
+  let descriptionDisclosure;
   let lightboxOpen = false;
   let lightboxIndex = 0;
+  let descriptionActive = true;
 
-  $: item.id, resetDescription();
-  $: item.description, descriptionEl, queueDescriptionMeasure();
+  $: descriptionView = getOverflowDisclosureView(descriptionCanToggle, descriptionExpanded, {
+    readMore: t('item.synopsisReadMore'),
+    showLess: t('item.synopsisShowLess')
+  });
 
-  function queueDescriptionMeasure() {
-    tick().then(() => measureDescription());
-  }
+  onDestroy(() => {
+    descriptionActive = false;
+  });
+
+  $: item.id, item.description, descriptionEl, resetDescription();
 
   async function resetDescription() {
     descriptionExpanded = false;
+    descriptionDisclosure?.collapse();
     await tick();
     await measureDescription();
   }
@@ -48,21 +57,22 @@
   async function measureDescription() {
     await tick();
 
-    if (!descriptionEl) {
+    if (!descriptionActive || !descriptionEl) {
       descriptionCanToggle = false;
       return;
     }
 
-    const wasExpanded = descriptionExpanded;
-    descriptionExpanded = false;
-    await tick();
+    if (descriptionExpanded) return;
 
-    descriptionCanToggle = descriptionEl.scrollHeight > descriptionEl.clientHeight + 2;
-    descriptionExpanded = wasExpanded;
+    descriptionDisclosure?.measure();
   }
 
   async function toggleDescription() {
-    descriptionExpanded = !descriptionExpanded;
+    descriptionDisclosure?.toggle();
+
+    if (!descriptionExpanded) {
+      await measureDescription();
+    }
   }
 
   function openImageLightbox(index = coverIndex) {
@@ -77,23 +87,23 @@
     descriptionEl = node;
     measureDescription();
 
-    const observer = new ResizeObserver(() => {
-      if (!descriptionExpanded) {
-        measureDescription();
-      }
+    const disclosure = createOverflowDisclosure(node, (state) => {
+      descriptionCanToggle = state.canToggle;
+      descriptionExpanded = state.expanded;
     });
-
-    observer.observe(node);
+    descriptionDisclosure = disclosure;
+    disclosure.measure();
 
     return {
       update() {
         measureDescription();
       },
       destroy() {
-        observer.disconnect();
+        disclosure.destroy();
 
-        if (descriptionEl === node) {
+        if (descriptionEl === node && descriptionDisclosure === disclosure) {
           descriptionEl = undefined;
+          descriptionDisclosure = undefined;
         }
       }
     };
@@ -201,22 +211,26 @@
         </header>
 
         <div class="description-block">
-          <div class="description-shell" class:expanded={descriptionExpanded}>
+          <div
+            class="description-shell"
+            class:expanded={descriptionExpanded}
+            class:truncated={descriptionView.truncated}
+          >
             <div class="description" use:trackDescription>
               {#each splitEditorialParagraphs(item.description) as paragraph}
                 <EditorialText tag="p" value={paragraph} />
               {/each}
             </div>
 
-            {#if descriptionCanToggle}
+            {#if descriptionView.showToggle}
               <div class="description-actions">
                 <button
                   type="button"
                   class="description-toggle"
-                  aria-expanded={descriptionExpanded}
+                  aria-expanded={descriptionView.ariaExpanded}
                   on:click={toggleDescription}
                 >
-                  {descriptionExpanded ? t('item.synopsisShowLess') : t('item.synopsisReadMore')}
+                  {descriptionView.label}
                 </button>
               </div>
             {/if}
@@ -437,7 +451,7 @@
     padding-bottom: 0.15rem;
   }
 
-  .description-shell:not(.expanded)::after {
+  .description-shell.truncated::after {
     content: '';
     position: absolute;
     inset: auto 0 1.85rem;

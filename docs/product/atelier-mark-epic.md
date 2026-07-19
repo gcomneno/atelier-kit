@@ -1,5 +1,8 @@
 # Atelier Mark — epic and issues
 
+> Historical planning document. The decorative `tagline_display` epigraph/quote-color
+> feature described below was retired by #192; it is no longer an active product capability.
+
 Editorial **inline token markup** for showcase text fields (Level 2 product direction).
 
 - **ADR:** [`docs/adr/0008-atelier-mark-editorial-inline-tokens.md`](../adr/0008-atelier-mark-editorial-inline-tokens.md)

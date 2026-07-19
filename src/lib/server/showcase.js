@@ -32,7 +32,6 @@ import {
 } from '$lib/layout-block-labels.js';
 import { normalizeMetaHierarchy } from '$lib/item-meta.js';
 import { getItemCoverImage, normalizeItemImages } from '$lib/item-images.js';
-import { parseTaglineDisplay } from '$lib/editorial-markup.js';
 import { projectFaqEntries } from '$lib/signal-cloud-faq.js';
 import { parseAboutPortrait } from '$lib/about-config.js';
 
@@ -340,8 +339,7 @@ export function getSiteConfig() {
     url: optionalString(site, 'url'),
     og_image: optionalString(site, 'og_image'),
     appearance: resolveSiteAppearance(isRecord(site.appearance) ? site.appearance : undefined),
-    hero_banner: parseHeroBanner(site),
-    tagline_display: parseTaglineDisplay(site.tagline_display)
+    hero_banner: parseHeroBanner(site)
   };
 }
 

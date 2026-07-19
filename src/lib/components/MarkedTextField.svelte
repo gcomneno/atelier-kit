@@ -9,7 +9,7 @@
   import { notifyMarkedTextEdit, wrapMarkedTextSelection } from '$lib/marked-text.js';
   import EditorialText from '$lib/components/EditorialText.svelte';
 
-  /** @type {{ name: string, hint?: string, value?: string, rows?: number, multiline?: boolean, disabled?: boolean, required?: boolean, placeholder?: string, display?: { wrap?: string, quote_color?: string } | null, showEpigraphControls?: boolean, onvaluechange?: (name: string, value: string) => void }} */
+  /** @type {{ name: string, hint?: string, value?: string, rows?: number, multiline?: boolean, disabled?: boolean, required?: boolean, placeholder?: string, onvaluechange?: (name: string, value: string) => void }} */
   let {
     name,
     hint = '',
@@ -19,8 +19,6 @@
     disabled = false,
     required = false,
     placeholder = '',
-    display = null,
-    showEpigraphControls = false,
     onvaluechange
   } = $props();
 
@@ -30,27 +28,13 @@
   /** @type {HTMLTextAreaElement | HTMLInputElement | null} */
   let field = $state(null);
 
-  let wrapDraft = $state(untrack(() => display?.wrap ?? 'none'));
-  let quoteColorDraft = $state(untrack(() => display?.quote_color ?? 'text'));
-
   $effect(() => {
     draft = value;
-    wrapDraft = display?.wrap ?? 'none';
-    quoteColorDraft = display?.quote_color ?? 'text';
   });
 
   $effect(() => {
     onvaluechange?.(name, draft);
   });
-
-  const previewDisplay = $derived(
-    showEpigraphControls
-      ? {
-          wrap: wrapDraft,
-          quote_color: quoteColorDraft
-        }
-      : display
-  );
 
   const preview = $derived(parseEditorialMarkup(draft));
   const previewParagraphs = $derived(
@@ -58,7 +42,6 @@
       ? draft.trim().split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean)
       : [draft]
   );
-  const previewClass = $derived(showEpigraphControls ? 'tagline hero-epigraph' : 'editorial-preview');
 
   /** @param {string} tag */
   function wrapSelection(tag) {
@@ -112,28 +95,6 @@
     <input {name} bind:this={field} bind:value={draft} {disabled} {required} {placeholder} />
   {/if}
 
-  {#if showEpigraphControls}
-    <div class="epigraph-controls">
-      <label>
-        {t('studio.editorial.taglineWrap')}
-        <select name="tagline_display_wrap" bind:value={wrapDraft}>
-          <option value="none">{t('studio.editorial.taglineWrapNone')}</option>
-          <option value="epigraph">{t('studio.editorial.taglineWrapEpigraph')}</option>
-        </select>
-      </label>
-
-      <label>
-        {t('studio.editorial.quoteColor')}
-        <select name="tagline_display_quote_color" bind:value={quoteColorDraft}>
-          <option value="text">{t('studio.editorial.quoteColorText')}</option>
-          <option value="accent">{t('studio.editorial.quoteColorAccent')}</option>
-          <option value="heading">{t('studio.editorial.quoteColorHeading')}</option>
-          <option value="intro">{t('studio.editorial.quoteColorIntro')}</option>
-        </select>
-      </label>
-    </div>
-  {/if}
-
   {#if hint}
     <span class="hint">{hint}</span>
   {/if}
@@ -143,7 +104,7 @@
       <p class="preview-label">{t('studio.editorial.preview')}</p>
       {#if preview.ok}
         {#each previewParagraphs as paragraph}
-          <EditorialText value={paragraph} display={previewDisplay} tag="p" class={previewClass} />
+          <EditorialText value={paragraph} tag="p" class="editorial-preview" />
         {/each}
       {:else}
         <p class="preview-error">{preview.errors.join(' ')}</p>
@@ -188,11 +149,6 @@
     color: var(--studio-text, #1f2937);
     font: inherit;
     font-size: 0.82rem;
-  }
-
-  .epigraph-controls {
-    display: grid;
-    gap: 0.65rem;
   }
 
   .preview-panel {

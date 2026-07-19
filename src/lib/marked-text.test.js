@@ -1,7 +1,7 @@
 // @ts-nocheck
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import {
   MARKED_TEXT_FIELDS,
   assertValidMarkedText,
@@ -13,6 +13,14 @@ import {
 } from './marked-text.js';
 import { studioFormDirty } from './studio-form-dirty.js';
 import { splitEditorialParagraphs } from './editorial-markup.js';
+import en from './i18n/messages/en.js';
+import it from './i18n/messages/it.js';
+
+function numberedHelpKeys(source, name) {
+  const match = source.match(new RegExp(`const ${name} = \\[([^\\]]*)\\]`));
+  assert.ok(match, `Missing ${name} Help inventory`);
+  return match[1].split(',').map((value) => Number(value.trim()));
+}
 
 test('canonical inventory distinguishes single-line and multiline marked fields', () => {
   assert.ok(MARKED_TEXT_FIELDS.some((field) => field.path === 'items.{id}.title' && field.mode === 'single-line'));
@@ -52,6 +60,50 @@ test('MarkedTextField exposes single-line, multiline and paragraph-aware preview
   assert.match(source, /\{#if multiline\}[\s\S]*<textarea/);
   assert.match(source, /\{:else\}[\s\S]*<input/);
   assert.match(source, /previewParagraphs[\s\S]*split\(\/\\n\\s\*\\n\//);
+});
+
+test('decorative quote controls and rendering are absent while plain tagline text remains', () => {
+  const field = readFileSync('src/lib/components/MarkedTextField.svelte', 'utf8');
+  const renderer = readFileSync('src/lib/components/EditorialText.svelte', 'utf8');
+  const home = readFileSync('src/routes/+page.svelte', 'utf8');
+  const studio = readFileSync('src/routes/studio/site/identity/+page.svelte', 'utf8');
+
+  for (const source of [field, renderer, home, studio]) {
+    assert.doesNotMatch(source, /tagline_display_(?:wrap|quote_color)|epigraph-quote|component-quotes/);
+  }
+  assert.doesNotMatch(home, /hero-epigraph|content:\s*['"](?:«|\\202f)/);
+  assert.match(home, /<EditorialText[\s\S]*value=\{data\.site\.tagline\}/);
+});
+
+test('new scaffolds and active operator copy do not advertise retired quote configuration', () => {
+  const scaffold = readFileSync('scripts/scaffold-client.js', 'utf8');
+  assert.doesNotMatch(scaffold, /tagline_display|quote_color/);
+
+  for (const path of [
+    'docs/usage/editorial-markup.md',
+    'docs/usage/configuration.md',
+    'docs/usage/studio.md',
+    'src/lib/i18n/messages/en.js',
+    'src/lib/i18n/messages/it.js'
+  ]) {
+    if (!existsSync(path)) continue;
+    const source = readFileSync(path, 'utf8');
+    assert.doesNotMatch(source, /Epigraph quotes|Colore virgolette|Quote color|taglineWrap|quoteColor/);
+  }
+
+});
+
+test('Studio Help does not reference retired Atelier Mark epigraph copy', {
+  skip: !existsSync('src/routes/studio/help/+page.svelte')
+}, () => {
+  const help = readFileSync('src/routes/studio/help/+page.svelte', 'utf8');
+  assert.doesNotMatch(help, /atelierMark\.epigraphNote|taglineWrap|quoteColor/);
+  const studioKeys = numberedHelpKeys(help, 'atelierMarkStudio');
+  assert.deepEqual(studioKeys, [1, 2, 3]);
+  for (const messages of [en, it]) {
+    assert.deepEqual(studioKeys, Object.keys(messages.studio.help.atelierMark.studio).map(Number));
+    assert.equal(messages.studio.help.atelierMark.epigraphNote, undefined);
+  }
 });
 
 test('toolbar markup and font edits update the successful value before marking the form dirty', async () => {

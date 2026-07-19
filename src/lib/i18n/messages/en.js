@@ -106,15 +106,7 @@ export default {
         intro: 'Intro',
         heading: 'Heading',
         muted: 'Muted'
-      },
-      taglineWrap: 'Guillemets',
-      taglineWrapNone: 'Theme default',
-      taglineWrapEpigraph: 'Epigraph quotes',
-      quoteColor: 'Quote color',
-      quoteColorText: 'Text',
-      quoteColorAccent: 'Accent',
-      quoteColorHeading: 'Heading',
-      quoteColorIntro: 'Intro title'
+      }
     },
     accessGuide: {
       title: 'Recommended access',
@@ -179,7 +171,7 @@ export default {
           'Atelier Mark lets you color words or apply a supported font preset in short site texts — no HTML, custom CSS or font URLs. Plain text without { stays unchanged.',
         whereTitle: 'Where it works',
         where: {
-          1: 'Studio → Site → Identity → Tagline (optional epigraph guillemets « »).',
+          1: 'Studio → Site → Identity → Tagline.',
           2: 'Studio → Site → Identity → Intro title (home hero heading).',
           3: 'Studio → Site → Identity → Home intro text (per paragraph).'
         },
@@ -195,11 +187,8 @@ export default {
         studio: {
           1: 'Open Site → Identity and use the toolbar above tagline, intro title or home intro.',
           2: 'Select text and choose a color role or one of the supported inline font presets.',
-          3: 'Check the live preview under the field with your current appearance preset.',
-          4: 'For tagline only: choose Epigraph quotes to render « » with a separate quote color.'
+          3: 'Check the live preview under the field with your current appearance preset.'
         },
-        epigraphNote:
-          'Tagline epigraph: Theme default keeps legacy CSS guillemets; Epigraph quotes uses component-managed « » with quote color Text, Accent, Heading or Intro.',
         validationNote:
           'Invalid markup blocks Save. Run npm run content:doctor before publish. Full reference: docs/usage/editorial-markup.md in the kit repo.'
       },

@@ -3,17 +3,7 @@ import { FONT_PRESET_IDS, fontFamilyCss, isFontPreset } from './site-typography.
 /** @typedef {import('./site-typography.js').FontPreset} FontPreset */
 /** @typedef {'accent' | 'intro' | 'heading' | 'muted' | 'text'} EditorialMarkToken */
 
-/** @typedef {'none' | 'epigraph'} TaglineWrap */
-
-/** @typedef {'text' | 'accent' | 'heading' | 'intro'} TaglineQuoteColor */
-
-/** @typedef {{ wrap?: TaglineWrap, quote_color?: TaglineQuoteColor }} TaglineDisplay */
-
 export const EDITORIAL_MARK_TAGS = /** @type {const} */ (['accent', 'intro', 'heading', 'muted']);
-
-export const TAGLINE_WRAP_IDS = /** @type {const} */ (['none', 'epigraph']);
-
-export const TAGLINE_QUOTE_COLOR_IDS = /** @type {const} */ (['text', 'accent', 'heading', 'intro']);
 
 /** @type {Record<EditorialMarkToken, string>} */
 export const EDITORIAL_MARK_CLASSES = {
@@ -33,42 +23,14 @@ export function isEditorialMarkTag(value) {
 }
 
 /**
- * @param {unknown} value
- * @returns {TaglineWrap}
+ * Legacy `tagline_display` is deliberately tolerated but has no active contract.
+ * Existing YAML therefore loads safely while visitor and Studio ignore it.
+ * Studio saves preserve the unknown legacy object; operators may remove it at any time.
+ * @param {unknown} _record
+ * @returns {null}
  */
-export function resolveTaglineWrap(value) {
-  return value === 'epigraph' ? 'epigraph' : 'none';
-}
-
-/**
- * @param {unknown} value
- * @returns {TaglineQuoteColor}
- */
-export function resolveTaglineQuoteColor(value) {
-  return TAGLINE_QUOTE_COLOR_IDS.includes(/** @type {TaglineQuoteColor} */ (value))
-    ? /** @type {TaglineQuoteColor} */ (value)
-    : 'text';
-}
-
-/**
- * @param {unknown} record
- * @returns {TaglineDisplay | null}
- */
-export function parseTaglineDisplay(record) {
-  if (!record || typeof record !== 'object' || Array.isArray(record)) {
-    return null;
-  }
-
-  const wrap = resolveTaglineWrap(/** @type {Record<string, unknown>} */ (record).wrap);
-  const quote_color = resolveTaglineQuoteColor(
-    /** @type {Record<string, unknown>} */ (record).quote_color
-  );
-
-  if (wrap === 'none' && quote_color === 'text') {
-    return null;
-  }
-
-  return { wrap, quote_color };
+export function parseTaglineDisplay(_record) {
+  return null;
 }
 
 /**

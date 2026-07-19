@@ -8,7 +8,7 @@ ADR: [`docs/adr/0008-atelier-mark-editorial-inline-tokens.md`](../adr/0008-ateli
 
 Studio → **Site identity**:
 
-- Tagline (with optional epigraph guillemets)
+- Tagline
 - Intro title
 - Home intro text (per paragraph)
 
@@ -30,28 +30,18 @@ Font IDs are exactly the presets from Site appearance: `system`, `inter`, `sourc
 - **No nesting**, including between color and font tags
 - Unknown or unclosed tags are rejected on save
 
-### Example (Club-style tagline)
+### Example
 
 ```yaml
 site:
   tagline: "{accent}Narrativa breve e seriale tra la satira ed il surreale.{/accent}"
-  tagline_display:
-    wrap: epigraph
-    quote_color: text
 ```
-
-Visitor: dark `« »`, accent-colored body, no duplicate guillemets.
 
 ## Studio
 
 Use the toolbar buttons and font selector above tagline / intro fields to wrap the selection. Preview shows the result with your current appearance preset and loads only the Google Fonts used in its markup.
 
 Open **Studio → Help** (`/studio/help`) for a short operator summary in the studio UI.
-
-**Guillemets** (tagline only):
-
-- *Theme default* — legacy CSS guillemets on `.hero-epigraph`
-- *Epigraph quotes* — component-managed `« »` with separate quote color
 
 ## Validation
 
@@ -64,3 +54,10 @@ Open **Studio → Help** (`/studio/help`) for a short operator summary in the st
 - Custom hex colors or HTML
 - Custom font names, URLs or CSS
 - Nested tags
+
+## Legacy tagline display configuration
+
+`tagline_display.wrap` and `tagline_display.quote_color` are retired. Existing YAML files
+that still contain them continue to load: the visitor and Studio ignore the object, and a
+normal Studio save leaves it untouched instead of rewriting client-owned legacy data. New
+scaffolds do not generate it. It can be removed manually whenever that file is next reviewed.

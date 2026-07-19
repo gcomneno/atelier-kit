@@ -95,13 +95,13 @@ Test coverage is described conservatively: a test that reads component source is
 ### `EditorialText.svelte`
 
 - **Source:** `src/lib/components/EditorialText.svelte`.
-- **Responsibility:** parses and renders Atelier Mark inline tokens, optional epigraph wrapping and a dynamic outer HTML element.
+- **Responsibility:** parses and renders Atelier Mark inline tokens with a dynamic outer HTML element.
 - **Direct consumers:** `BookReading`, `CatalogSidebar`, `ItemCard`, `MarkedTextField`, `SignalCloud`, `SiteFooter`, `SiteHeader`; visitor routes `+page`, about, catalog, collections list/detail, FAQ, item detail, news list/detail; Studio about page.
-- **Public props:** `value?: string = ''`, `display?: { wrap?, quote_color? } | null`, `tag?: string = 'span'`, and `class?: string = ''`.
+- **Public props:** `value?: string = ''`, `tag?: string = 'span'`, and `class?: string = ''`.
 - **Events/callbacks/bindings/slots:** none.
 - **Imported components:** none. **Modules:** `$lib/editorial-markup.js` parser/resolvers/classes. No `$app/*` or i18n dependency.
 - **Domain/i18n/marked text:** directly owns Atelier Mark rendering semantics and class mapping; no item model or i18n context.
-- **CSS assumptions/tokens:** emits global Atelier Mark classes and uses `:global(...)` rules, including interaction with global `.tagline`/`.hero-epigraph` conventions. Uses `--site-accent-color`, `--site-heading-color`, `--site-intro-title-color`, `--site-text-color`.
+- **CSS assumptions/tokens:** emits global Atelier Mark classes through `:global(...)` rules. Uses `--site-accent-color`, `--site-heading-color`, `--site-intro-title-color`, `--site-text-color`.
 - **Browser/lifecycle:** none explicit.
 - **Tests:** no direct test importing/rendering the component; `marked-text.test.js` statically asserts that `MarkedTextField` uses it, and editorial parser tests indirectly cover its core module.
 - **Assessment:** `medium`; `reusable-giadaware-component`. It is reusable across Giadaware products only if Atelier Mark and its CSS contract intentionally cross the package boundary; otherwise accept a renderer/parser injection or move the format with the component.
@@ -162,16 +162,16 @@ Test coverage is described conservatively: a test that reads component source is
 ### `MarkedTextField.svelte`
 
 - **Source:** `src/lib/components/MarkedTextField.svelte`.
-- **Responsibility:** Studio input/textarea, Atelier Mark toolbar, live parsed preview and optional epigraph display controls.
+- **Responsibility:** Studio input/textarea, Atelier Mark toolbar and live parsed preview.
 - **Direct consumers:** Studio about, catalog, collection new/edit, item new/edit, news new/edit, signal clouds, contact, footer, hero, identity and layout routes.
-- **Public props:** `name`; optional `hint`, `value`, `rows`, `multiline`, `disabled`, `required`, `placeholder`, `display`, `showEpigraphControls`; callback `onvaluechange?: (name, value) => void`.
+- **Public props:** `name`; optional `hint`, `value`, `rows`, `multiline`, `disabled`, `required`, `placeholder`; callback `onvaluechange?: (name, value) => void`.
 - **Events/callbacks/bindings/slots:** invokes `onvaluechange` reactively, including initial/synchronized draft changes; internal `bind:this` and `bind:value`; no slot or dispatched event.
 - **Imported components:** `EditorialText`. **Modules:** Svelte `untrack`, operator `useI18n`, Atelier Mark tags/parser, site typography `FONT_PRESET_IDS`; no `$app/*`.
-- **Domain/i18n/marked text:** directly couples Studio labels, Atelier Mark syntax/parser, hero display schema and Atelier-Kit font preset ids.
+- **Domain/i18n/marked text:** directly couples Studio labels, Atelier Mark syntax/parser and Atelier-Kit font preset ids.
 - **CSS assumptions/tokens:** assumes Studio form/control styling and preview classes; uses `--studio-accent`, `--studio-border`, `--studio-muted`, `--studio-panel-bg`, `--studio-text`; child preview also brings visitor site tokens through `EditorialText`.
 - **Browser/lifecycle:** input selection/focus APIs and `queueMicrotask`; Svelte effects synchronize public and draft state.
 - **Tests:** direct static-source assertions in `src/lib/marked-text.test.js`; parser tests are indirect. No runtime interaction/rendering test identified.
-- **Assessment:** `high`; `studio-only-component`. It should remain with Studio unless a separate marked-text editor product is designed. Extraction needs injected toolbar schema/labels, renderer, typography choices and a clearer controlled-value callback contract.
+- **Assessment:** `high`; `studio-only-component`. It is a general Atelier Mark field within Studio, with no hero-specific display contract. It should remain with Studio unless a separate marked-text editor product is designed. Extraction needs injected toolbar schema/labels, renderer, typography choices and a clearer controlled-value callback contract.
 
 ### `MetaInfo.svelte`
 

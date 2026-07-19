@@ -160,8 +160,6 @@
       <MarkedTextField
         name="tagline"
         value={siteForm.tagline}
-        display={siteForm.tagline_display}
-        showEpigraphControls
         onvaluechange={updateEditorialDraft}
       />
     </label>

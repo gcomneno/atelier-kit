@@ -1,5 +1,9 @@
 # ADR 0008: Atelier Mark — editorial inline tokens
 
+> Amendment (#192): the optional decorative tagline epigraph wrapping and quote-color
+> contract recorded here has been retired. Existing keys are tolerated but ignored; the
+> remaining token/parser decision stays in force.
+
 ## Status
 
 **Proposed** — epic [#103](https://github.com/gcomneno/atelier-kit/issues/103); see [`docs/product/atelier-mark-epic.md`](../product/atelier-mark-epic.md).
@@ -65,31 +69,20 @@ BBCode-style delimiters. Tag names are **English API** (not translated in Studio
 
 **Multiline fields (`hero_intro`):** markup applies **within each paragraph** (split on blank lines); tags must not span paragraphs.
 
-### Display options (epigraph wrap)
+### Retired tagline display option
 
-Guillemets are a **layout** concern, not inline markup. Separate optional metadata:
+The original v1 design included an optional `tagline_display` epigraph wrapper and
+separate quote color. Amendment #192 retired that product capability.
 
-```yaml
-site:
-  tagline: "{accent}Narrativa breve e seriale tra la satira ed il surreale.{/accent}"
-  tagline_display:
-    wrap: epigraph          # none | epigraph
-    quote_color: text       # text | accent | heading | intro
-```
-
-When `wrap: epigraph`:
-
-- Component renders opening/closing quote marks as styled spans (not CSS `::before`/`::after` on the whole line).
-- Avoids duplicate guillemets when operators also type them in text.
-- `quote_color` selects which theme token colors the guillemets.
-
-`tagline_display` is optional; default `wrap: none` preserves current sites.
+Existing `tagline_display.wrap` and `tagline_display.quote_color` keys are tolerated
+for compatibility but ignored by Studio and visitor rendering. New scaffolds do not
+generate them, and no separate display wrapper is part of the active contract.
 
 ### Fields in scope (v1)
 
-| Field | Inline markup | `*_display` wrap |
-|-------|---------------|------------------|
-| `tagline` | yes | yes (`epigraph`) |
+| Field | Inline markup | Separate display wrapper |
+|-------|---------------|--------------------------|
+| `tagline` | yes | no |
 | `intro_title` | yes | no |
 | `hero_intro` | yes (per paragraph) | no |
 | `hero_signature` | no (fixed layout) | no |
@@ -111,12 +104,12 @@ Save path: `validateEditorialMarkup()` before `writeProjectYaml`.
 New component **`EditorialText`**:
 
 ```svelte
-<EditorialText value={text} display={taglineDisplay} class="tagline hero-epigraph" />
+<EditorialText value={text} class="tagline" />
 ```
 
-- Calls `parseEditorialMarkup(text)` → `{ ok, fragments }` or safe HTML string.
-- Replaces plain `{text}` in `+page.svelte` for opted-in fields.
-- When `wrap: epigraph`, deprecate `.hero-epigraph::before/after` for that field (component owns quotes).
+- Calls `parseEditorialMarkup(text)` and emits only controlled Atelier Mark output.
+- Replaces plain text interpolation in visitor fields that support Atelier Mark.
+- No display wrapper is supported; legacy `tagline_display` data is tolerated but ignored as specified by amendment #192.
 
 ### Code layout
 

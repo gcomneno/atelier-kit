@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   editorialFontPresets,
+  parseTaglineDisplay,
   parseEditorialMarkup,
   splitEditorialParagraphs,
   stripEditorialMarkup,
@@ -19,6 +20,12 @@ test('plain text passes through escaped', () => {
   if (result.ok) {
     assert.equal(result.html, 'Narrativa breve &amp; seriale');
   }
+});
+
+test('legacy tagline display configuration is tolerated and normalized to no display effect', () => {
+  assert.equal(parseTaglineDisplay({ wrap: 'epigraph', quote_color: 'accent' }), null);
+  assert.equal(parseTaglineDisplay({ wrap: 'unknown', quote_color: '#fff' }), null);
+  assert.equal(parseTaglineDisplay(null), null);
 });
 
 test('accent tag renders mark span', () => {

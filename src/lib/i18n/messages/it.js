@@ -126,6 +126,11 @@ export default {
         'invalid-command': 'Questo comando di formattazione non è supportato.'
       }
     },
+    imageMutation: {
+      add: 'La nuova immagine verrà aggiunta al salvataggio.',
+      replace: 'L’immagine attuale verrà sostituita al salvataggio.',
+      remove: 'L’immagine attuale verrà rimossa al salvataggio.'
+    },
     accessGuide: {
       title: 'Accesso consigliato',
       intro: 'Come usare lo studio in sicurezza e pubblicare le modifiche online.',
@@ -903,6 +908,7 @@ export default {
     imageType: 'Usa un’immagine JPG, PNG o WebP.',
     imageRequired: 'Scegli un file immagine da caricare.',
     imageSize: 'L’immagine deve essere di 5 MB o meno.',
+    imageUploadRemoveConflict: 'Scegli se caricare una nuova immagine oppure rimuoverla, non entrambe le opzioni.',
     missingCatalog: 'config/catalog.yaml non contiene un oggetto catalog.',
     missingAbout: 'config/about.yaml non contiene un oggetto about.',
     missingSignalClouds: 'config/signal-clouds.yaml non contiene signal_clouds.',

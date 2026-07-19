@@ -31,9 +31,11 @@ import {
   saveHeaderLogoUpload,
   saveSiteFaviconUpload,
   saveHeroBannerUpload,
+  validateImageUpload,
   validationMessage,
   writeProjectYaml
 } from '$lib/server/studio-io.js';
+import { readImageMutation } from '$lib/server/studio-image-mutation.js';
 import {
   socialFormToLinks,
   socialLinksToForm,
@@ -313,6 +315,10 @@ export async function saveSiteAction({ request }) {
   const formData = await request.formData();
 
   try {
+    const logoMutation = readImageMutation(formData, 'header_logo_upload', 'remove_header_logo', locale);
+    const faviconMutation = readImageMutation(formData, 'favicon_upload', 'remove_favicon', locale);
+    if (logoMutation.upload) validateImageUpload(logoMutation.upload, locale);
+    if (faviconMutation.upload) validateImageUpload(faviconMutation.upload, locale);
     const data = readProjectYaml('config/site.yaml');
 
     if (!isRecord(data.site)) {
@@ -361,15 +367,8 @@ export async function saveSiteAction({ request }) {
 
     let headerLogo = String(formData.get('header_logo') ?? readString(site, 'header_logo')).trim();
 
-    if (checkboxEnabled(formData.get('remove_header_logo'))) {
-      headerLogo = '';
-    } else {
-      const logoUpload = formData.get('header_logo_upload');
-
-      if (logoUpload instanceof File && logoUpload.size > 0) {
-        headerLogo = await saveHeaderLogoUpload(logoUpload, locale);
-      }
-    }
+    if (logoMutation.remove) headerLogo = '';
+    else if (logoMutation.upload) headerLogo = await saveHeaderLogoUpload(logoMutation.upload, locale);
 
     if (headerLogo) {
       site.header_logo = headerLogo;
@@ -381,15 +380,8 @@ export async function saveSiteAction({ request }) {
 
     let favicon = String(formData.get('favicon') ?? readString(site, 'favicon')).trim();
 
-    if (checkboxEnabled(formData.get('remove_favicon'))) {
-      favicon = '';
-    } else {
-      const faviconUpload = formData.get('favicon_upload');
-
-      if (faviconUpload instanceof File && faviconUpload.size > 0) {
-        favicon = await saveSiteFaviconUpload(faviconUpload, locale);
-      }
-    }
+    if (faviconMutation.remove) favicon = '';
+    else if (faviconMutation.upload) favicon = await saveSiteFaviconUpload(faviconMutation.upload, locale);
 
     if (favicon) {
       site.favicon = favicon;
@@ -723,6 +715,7 @@ export async function saveAppearanceAction({ request }) {
   const formData = await request.formData();
 
   try {
+    const backgroundMutation = readImageMutation(formData, 'background_upload', 'remove_background', locale);
     const appearance = appearanceFromForm(
       formData.get('preset'),
       formData.get('base_color'),
@@ -746,15 +739,8 @@ export async function saveAppearanceAction({ request }) {
     let backgroundImage =
       typeof existingAppearance.background_image === 'string' ? existingAppearance.background_image : '';
 
-    if (checkboxEnabled(formData.get('remove_background'))) {
-      backgroundImage = '';
-    } else {
-      const backgroundUpload = formData.get('background_upload');
-
-      if (backgroundUpload instanceof File && backgroundUpload.size > 0) {
-        backgroundImage = await saveSiteBackgroundUpload(backgroundUpload, locale);
-      }
-    }
+    if (backgroundMutation.remove) backgroundImage = '';
+    else if (backgroundMutation.upload) backgroundImage = await saveSiteBackgroundUpload(backgroundMutation.upload, locale);
 
     site.appearance = buildAppearanceYaml(appearance, backgroundImage);
 
@@ -784,6 +770,7 @@ export async function saveHeroBannerAction({ request }) {
   const formData = await request.formData();
 
   try {
+    const bannerMutation = readImageMutation(formData, 'banner_upload', 'remove_hero_image', locale);
     const data = readProjectYaml('config/site.yaml');
 
     if (!isRecord(data.site)) {
@@ -792,9 +779,8 @@ export async function saveHeroBannerAction({ request }) {
 
     const site = { ...data.site };
     const existingBanner = isRecord(site.hero_banner) ? site.hero_banner : {};
-    const upload = formData.get('banner_upload');
     let imageFile = String(formData.get('banner_image_file') ?? '').trim();
-    const show = checkboxEnabled(formData.get('show_banner'));
+    const show = !bannerMutation.remove && checkboxEnabled(formData.get('show_banner'));
     const caption = show
       ? optionalField(formData.get('banner_caption'))
       : optionalField(existingBanner.caption);
@@ -807,11 +793,8 @@ export async function saveHeroBannerAction({ request }) {
       { path: 'site.hero_banner.caption', value: caption }
     ]);
 
-    if (checkboxEnabled(formData.get('remove_hero_image'))) {
-      imageFile = '';
-    } else if (upload instanceof File && upload.size > 0) {
-      imageFile = await saveHeroBannerUpload(upload, locale);
-    }
+    if (bannerMutation.remove) imageFile = '';
+    else if (bannerMutation.upload) imageFile = await saveHeroBannerUpload(bannerMutation.upload, locale);
 
     const href = show ? optionalField(formData.get('banner_href')) : optionalField(existingBanner.href);
 

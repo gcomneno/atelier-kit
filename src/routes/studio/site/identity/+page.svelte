@@ -5,6 +5,7 @@
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
+  import StudioImageMutationFields from '$lib/components/StudioImageMutationFields.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { editorialFontPresets } from '$lib/editorial-markup.js';
   import { fontStylesheetHrefs } from '$lib/site-typography.js';
@@ -38,6 +39,11 @@
       )
     )
   );
+  const imageMutationMessages = {
+    add: t('studio.imageMutation.add'),
+    replace: t('studio.imageMutation.replace'),
+    remove: t('studio.imageMutation.remove')
+  };
 
   /** @param {string} name @param {string} value */
   function updateEditorialDraft(name, value) {
@@ -101,55 +107,56 @@
       <MarkedTextField name="intro_title" value={siteForm.intro_title} onvaluechange={updateEditorialDraft} />
     </label>
 
-    <label>
-      <StudioFieldLabel
-        label={t('studio.site.identity.headerLogo')}
-        optional
-        hint={t('studio.site.identity.headerLogoHint')}
-      />
+    <div>
       {#if siteForm.header_logo}
         <span class="hint current-logo">
           {t('studio.site.identity.currentHeaderLogo', { path: siteForm.header_logo })}
         </span>
         <img class="logo-preview" src={siteForm.header_logo} alt={siteForm.header_logo_alt || siteForm.header_title || siteForm.name} />
       {/if}
-      <input type="file" name="header_logo_upload" accept="image/jpeg,image/png,image/webp" disabled={removeHeaderLogo} />
       <input type="hidden" name="header_logo" value={removeHeaderLogo ? '' : siteForm.header_logo} />
-    </label>
+    </div>
+
+    <StudioImageMutationFields
+      uploadName="header_logo_upload"
+      removeName="remove_header_logo"
+      uploadLabel={t('studio.site.identity.headerLogo')}
+      uploadHint={t('studio.site.identity.headerLogoHint')}
+      removeLabel={t('studio.site.identity.removeHeaderLogo')}
+      hasExisting={Boolean(siteForm.header_logo)}
+      resetKey={siteForm}
+      stateMessages={imageMutationMessages}
+      onmutation={(mutation) => (removeHeaderLogo = mutation.remove)}
+    />
 
     {#if siteForm.header_logo}
       <label>
         <StudioFieldLabel label={t('studio.site.identity.headerLogoAlt')} optional />
         <input name="header_logo_alt" value={siteForm.header_logo_alt} disabled={removeHeaderLogo} />
       </label>
-      <label class="checkbox">
-        <input type="checkbox" name="remove_header_logo" bind:checked={removeHeaderLogo} />
-        {t('studio.site.identity.removeHeaderLogo')}
-      </label>
     {/if}
 
-    <label>
-      <StudioFieldLabel
-        label={t('studio.site.identity.favicon')}
-        optional
-        hint={t('studio.site.identity.faviconHint')}
-      />
+    <div>
       {#if siteForm.favicon}
         <span class="hint current-logo">
           {t('studio.site.identity.currentFavicon', { path: siteForm.favicon })}
         </span>
         <img class="favicon-preview" src={siteForm.favicon} alt="" aria-hidden="true" />
       {/if}
-      <input type="file" name="favicon_upload" accept="image/jpeg,image/png,image/webp" disabled={removeFavicon} />
       <input type="hidden" name="favicon" value={removeFavicon ? '' : siteForm.favicon} />
-    </label>
+    </div>
 
-    {#if siteForm.favicon}
-      <label class="checkbox">
-        <input type="checkbox" name="remove_favicon" bind:checked={removeFavicon} />
-        {t('studio.site.identity.removeFavicon')}
-      </label>
-    {/if}
+    <StudioImageMutationFields
+      uploadName="favicon_upload"
+      removeName="remove_favicon"
+      uploadLabel={t('studio.site.identity.favicon')}
+      uploadHint={t('studio.site.identity.faviconHint')}
+      removeLabel={t('studio.site.identity.removeFavicon')}
+      hasExisting={Boolean(siteForm.favicon)}
+      resetKey={siteForm}
+      stateMessages={imageMutationMessages}
+      onmutation={(mutation) => (removeFavicon = mutation.remove)}
+    />
 
     <label>
       <StudioFieldLabel

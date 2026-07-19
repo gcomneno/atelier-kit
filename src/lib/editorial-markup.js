@@ -1,19 +1,24 @@
 import { FONT_PRESET_IDS, fontFamilyCss, isFontPreset } from './site-typography.js';
 
 /** @typedef {import('./site-typography.js').FontPreset} FontPreset */
-/** @typedef {'accent' | 'intro' | 'heading' | 'muted' | 'text'} EditorialMarkToken */
+/** @typedef {'accent' | 'intro' | 'heading' | 'muted' | 'white' | 'black' | 'larger' | 'smaller' | 'text'} EditorialMarkToken */
 
-/** @typedef {'none' | 'epigraph'} TaglineWrap */
+/**
+ * Canonical Atelier Mark contract. Tokens are single-level semantic presets:
+ * they cannot nest, accept no values, and map only to fixed classes.
+ */
+export const EDITORIAL_MARK_TOKENS = Object.freeze([
+  { id: 'accent', className: 'mark-accent', kind: 'theme-color' },
+  { id: 'intro', className: 'mark-intro', kind: 'theme-color' },
+  { id: 'heading', className: 'mark-heading', kind: 'theme-color' },
+  { id: 'muted', className: 'mark-muted', kind: 'theme-color' },
+  { id: 'white', className: 'mark-white', kind: 'explicit-color' },
+  { id: 'black', className: 'mark-black', kind: 'explicit-color' },
+  { id: 'larger', className: 'mark-larger', kind: 'size' },
+  { id: 'smaller', className: 'mark-smaller', kind: 'size' }
+]);
 
-/** @typedef {'text' | 'accent' | 'heading' | 'intro'} TaglineQuoteColor */
-
-/** @typedef {{ wrap?: TaglineWrap, quote_color?: TaglineQuoteColor }} TaglineDisplay */
-
-export const EDITORIAL_MARK_TAGS = /** @type {const} */ (['accent', 'intro', 'heading', 'muted']);
-
-export const TAGLINE_WRAP_IDS = /** @type {const} */ (['none', 'epigraph']);
-
-export const TAGLINE_QUOTE_COLOR_IDS = /** @type {const} */ (['text', 'accent', 'heading', 'intro']);
+export const EDITORIAL_MARK_TAGS = Object.freeze(EDITORIAL_MARK_TOKENS.map(({ id }) => id));
 
 /** @type {Record<EditorialMarkToken, string>} */
 export const EDITORIAL_MARK_CLASSES = {
@@ -21,6 +26,10 @@ export const EDITORIAL_MARK_CLASSES = {
   intro: 'mark-intro',
   heading: 'mark-heading',
   muted: 'mark-muted',
+  white: 'mark-white',
+  black: 'mark-black',
+  larger: 'mark-larger',
+  smaller: 'mark-smaller',
   text: 'mark-text'
 };
 
@@ -29,46 +38,18 @@ export const EDITORIAL_MARK_CLASSES = {
  * @returns {value is EditorialMarkToken}
  */
 export function isEditorialMarkTag(value) {
-  return value === 'accent' || value === 'intro' || value === 'heading' || value === 'muted';
+  return EDITORIAL_MARK_TAGS.includes(/** @type {string} */ (value));
 }
 
 /**
- * @param {unknown} value
- * @returns {TaglineWrap}
+ * Legacy `tagline_display` is deliberately tolerated but has no active contract.
+ * Existing YAML therefore loads safely while visitor and Studio ignore it.
+ * Studio saves preserve the unknown legacy object; operators may remove it at any time.
+ * @param {unknown} _record
+ * @returns {null}
  */
-export function resolveTaglineWrap(value) {
-  return value === 'epigraph' ? 'epigraph' : 'none';
-}
-
-/**
- * @param {unknown} value
- * @returns {TaglineQuoteColor}
- */
-export function resolveTaglineQuoteColor(value) {
-  return TAGLINE_QUOTE_COLOR_IDS.includes(/** @type {TaglineQuoteColor} */ (value))
-    ? /** @type {TaglineQuoteColor} */ (value)
-    : 'text';
-}
-
-/**
- * @param {unknown} record
- * @returns {TaglineDisplay | null}
- */
-export function parseTaglineDisplay(record) {
-  if (!record || typeof record !== 'object' || Array.isArray(record)) {
-    return null;
-  }
-
-  const wrap = resolveTaglineWrap(/** @type {Record<string, unknown>} */ (record).wrap);
-  const quote_color = resolveTaglineQuoteColor(
-    /** @type {Record<string, unknown>} */ (record).quote_color
-  );
-
-  if (wrap === 'none' && quote_color === 'text') {
-    return null;
-  }
-
-  return { wrap, quote_color };
+export function parseTaglineDisplay(_record) {
+  return null;
 }
 
 /**
@@ -93,6 +74,116 @@ export function hasEditorialMarkup(text) {
   return /\{(?:\/?[a-z]+(?::[a-z-]+)?\}|{)/.test(text);
 }
 
+/**
+ * Scan Atelier Mark once and retain source coordinates for every syntactic unit.
+ * `plainText` is the rendered projection (escaped braces are decoded), while
+ * `sourceText` removes controlled delimiters but preserves `{{` and `}}`.
+ * Complete tokens expose both their whole and inner source ranges.
+ *
+ * @param {string} text
+ * @returns {{ ok: boolean, errors: string[], segments: Array<Record<string, any>>, tokens: Array<{ type: 'token', command: string, start: number, end: number, contentStart: number, contentEnd: number, openEnd: number, closeStart: number }>, plainText: string, sourceText: string, html: string, fontPresets: FontPreset[] }}
+ */
+export function scanEditorialMarkup(text) {
+  /** @type {string[]} */
+  const errors = [];
+  /** @type {Array<Record<string, any>>} */
+  const segments = [];
+  /** @type {Array<{ type: 'token', command: string, start: number, end: number, contentStart: number, contentEnd: number, openEnd: number, closeStart: number }>} */
+  const tokens = [];
+  /** @type {Set<FontPreset>} */
+  const fonts = new Set();
+  /** @type {{ command: string, close: string, start: number, openEnd: number, contentStart: number } | null} */
+  let open = null;
+  let index = 0;
+
+  while (index < text.length) {
+    if (text.startsWith('{{', index) || text.startsWith('}}', index)) {
+      const source = text.slice(index, index + 2);
+      segments.push({ type: 'escape', start: index, end: index + 2, source, rendered: source[0] });
+      index += 2;
+      continue;
+    }
+
+    if (text[index] !== '{') {
+      const offset = text.slice(index).search(/\{|}}/);
+      const end = offset === -1 ? text.length : index + offset;
+      segments.push({ type: 'text', start: index, end, source: text.slice(index, end) });
+      index = end;
+      continue;
+    }
+
+    const closeBrace = text.indexOf('}', index + 1);
+    if (closeBrace === -1) {
+      errors.push(`Invalid markup near position ${index + 1}.`);
+      segments.push({ type: 'delimiter', kind: 'invalid', start: index, end: index + 1, source: '{' });
+      index += 1;
+      continue;
+    }
+
+    const end = closeBrace + 1;
+    const source = text.slice(index, end);
+    const closing = source.match(/^\{\/([a-z]+)\}$/);
+    const font = source.match(/^\{font:([a-z-]+)\}$/);
+    const simple = source.match(/^\{([a-z]+)\}$/);
+    segments.push({ type: 'delimiter', kind: closing ? 'close' : 'open', start: index, end, source });
+
+    if (closing) {
+      const close = closing[1];
+      if (!open || open.close !== close) {
+        errors.push(`Closing tag {/${close}} does not match open tag {${open?.command ?? 'none'}}.`);
+      } else {
+        tokens.push({
+          type: 'token', command: open.command, start: open.start, end,
+          contentStart: open.contentStart, contentEnd: index,
+          openEnd: open.openEnd, closeStart: index
+        });
+        open = null;
+      }
+    } else if (font) {
+      const preset = font[1];
+      if (!isFontPreset(preset)) errors.push(`Unknown font preset "${preset}".`);
+      else if (open) errors.push(`Nested tag {font:${preset}} is not allowed.`);
+      else {
+        open = { command: `font:${preset}`, close: 'font', start: index, openEnd: end, contentStart: end };
+        fonts.add(preset);
+      }
+    } else if (simple) {
+      const tag = simple[1];
+      if (!isEditorialMarkTag(tag)) errors.push(`Unknown tag {${tag}}.`);
+      else if (open) errors.push(`Nested tag {${tag}} is not allowed.`);
+      else open = { command: tag, close: tag, start: index, openEnd: end, contentStart: end };
+    } else {
+      errors.push(`Invalid markup near position ${index + 1}.`);
+    }
+    index = end;
+  }
+
+  if (open) errors.push(`Unclosed tag {${open.command}}.`);
+
+  const plainText = segments.map((part) => part.type === 'text' ? part.source : part.type === 'escape' ? part.rendered : '').join('');
+  const sourceText = segments.map((part) => part.type === 'text' || part.type === 'escape' ? part.source : '').join('');
+  let html = '';
+  if (errors.length === 0) {
+    for (const part of segments) {
+      if (part.type === 'text') html += escapeHtml(part.source);
+      else if (part.type === 'escape') html += escapeHtml(part.rendered);
+      else if (part.kind === 'open') {
+        const command = part.source.slice(1, -1);
+        if (command.startsWith('font:')) {
+          const preset = command.slice(5);
+          html += `<span class="mark-font mark-font-${preset}" style="font-family: ${escapeHtml(fontFamilyCss(preset))}">`;
+        } else html += `<span class="${EDITORIAL_MARK_CLASSES[/** @type {EditorialMarkToken} */ (command)]}">`;
+      } else if (part.kind === 'close') html += '</span>';
+    }
+  }
+
+  return {
+    ok: errors.length === 0, errors, segments, tokens: tokens.sort((a, b) => a.start - b.start),
+    plainText, sourceText, html,
+    fontPresets: FONT_PRESET_IDS.filter((preset) => fonts.has(preset))
+  };
+}
+
 /** @param {...(string | undefined | null)} texts @returns {FontPreset[]} */
 export function editorialFontPresets(...texts) {
   const used = new Set();
@@ -108,147 +199,12 @@ export function editorialFontPresets(...texts) {
 
 /**
  * @param {string} text
- * @returns {{ ok: true, html: string, plainText: string, fontPresets: FontPreset[] } | { ok: false, errors: string[] }}
+ * @returns {{ ok: true, html: string, plainText: string, sourceText: string, fontPresets: FontPreset[] } | { ok: false, errors: string[], plainText: string, sourceText: string }}
  */
 export function parseEditorialMarkup(text) {
-  if (!text) {
-    return { ok: true, html: '', plainText: '', fontPresets: [] };
-  }
-
-  if (!hasEditorialMarkup(text)) {
-    return { ok: true, html: escapeHtml(text), plainText: text, fontPresets: [] };
-  }
-
-  /** @type {string[]} */
-  const errors = [];
-  /** @type {string[]} */
-  const output = [];
-  /** @type {string[]} */
-  const plainOutput = [];
-  /** @type {Set<FontPreset>} */
-  const fontPresets = new Set();
-  /** @type {{ close: string, label: string } | null} */
-  let openTag = null;
-  let index = 0;
-
-  while (index < text.length) {
-    if (text.startsWith('{{', index)) {
-      output.push(escapeHtml('{'));
-      plainOutput.push('{');
-      index += 2;
-      continue;
-    }
-
-    if (text.startsWith('}}', index)) {
-      output.push(escapeHtml('}'));
-      plainOutput.push('}');
-      index += 2;
-      continue;
-    }
-
-    if (text[index] === '{') {
-      const closeMatch = text.slice(index).match(/^\{\/([a-z]+)\}/);
-
-      if (closeMatch) {
-        const tag = closeMatch[1];
-
-        if (tag === 'font') {
-          if (openTag?.close !== 'font') {
-            errors.push(`Closing tag {/font} does not match open tag {${openTag?.label ?? 'none'}}.`);
-          } else {
-            output.push('</span>');
-            openTag = null;
-          }
-        } else if (!isEditorialMarkTag(tag)) {
-          errors.push(`Unknown closing tag {/${tag}}.`);
-        } else if (openTag?.close !== tag) {
-          errors.push(`Closing tag {/${tag}} does not match open tag {${openTag?.label ?? 'none'}}.`);
-        } else {
-          output.push('</span>');
-          openTag = null;
-        }
-
-        index += closeMatch[0].length;
-        continue;
-      }
-
-      const fontMatch = text.slice(index).match(/^\{font:([a-z-]+)\}/);
-      if (fontMatch) {
-        const preset = fontMatch[1];
-        if (!isFontPreset(preset)) {
-          errors.push(`Unknown font preset "${preset}".`);
-        } else if (openTag) {
-          errors.push(`Nested tag {font:${preset}} is not allowed.`);
-        } else {
-          openTag = { close: 'font', label: `font:${preset}` };
-          fontPresets.add(preset);
-          output.push(
-            `<span class="mark-font mark-font-${preset}" style="font-family: ${escapeHtml(fontFamilyCss(preset))}">`
-          );
-        }
-        index += fontMatch[0].length;
-        continue;
-      }
-
-      const openMatch = text.slice(index).match(/^\{([a-z]+)\}/);
-
-      if (openMatch) {
-        const tag = openMatch[1];
-
-        if (!isEditorialMarkTag(tag)) {
-          errors.push(`Unknown tag {${tag}}.`);
-        } else if (openTag) {
-          errors.push(`Nested tag {${tag}} is not allowed.`);
-        } else {
-          openTag = { close: tag, label: tag };
-          output.push(`<span class="${EDITORIAL_MARK_CLASSES[tag]}">`);
-        }
-
-        index += openMatch[0].length;
-        continue;
-      }
-
-      errors.push(`Invalid markup near position ${index + 1}.`);
-      output.push(escapeHtml('{'));
-      plainOutput.push('{');
-      index += 1;
-      continue;
-    }
-
-    const nextSpecial = text.slice(index).search(/[{}]/);
-
-    if (nextSpecial === -1) {
-      output.push(escapeHtml(text.slice(index)));
-      plainOutput.push(text.slice(index));
-      break;
-    }
-
-    if (nextSpecial > 0) {
-      output.push(escapeHtml(text.slice(index, index + nextSpecial)));
-      plainOutput.push(text.slice(index, index + nextSpecial));
-      index += nextSpecial;
-      continue;
-    }
-
-    output.push(escapeHtml(text[index]));
-    plainOutput.push(text[index]);
-    index += 1;
-  }
-
-  if (openTag) {
-    errors.push(`Unclosed tag {${openTag.label}}.`);
-  }
-
-  if (errors.length > 0) {
-    return { ok: false, errors };
-  }
-
-  return {
-    ok: true,
-    html: output.join(''),
-    plainText: plainOutput.join(''),
-    fontPresets: FONT_PRESET_IDS.filter((preset) => fontPresets.has(preset))
-  };
+  const scanned = scanEditorialMarkup(text ?? '');
+  if (!scanned.ok) return { ok: false, errors: scanned.errors, plainText: scanned.plainText, sourceText: scanned.sourceText };
+  return { ok: true, html: scanned.html, plainText: scanned.plainText, sourceText: scanned.sourceText, fontPresets: scanned.fontPresets };
 }
 
 /**
@@ -260,7 +216,7 @@ export function stripEditorialMarkup(text) {
   }
 
   const parsed = parseEditorialMarkup(text);
-  return parsed.ok ? parsed.plainText : text;
+  return parsed.plainText;
 }
 
 /**

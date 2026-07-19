@@ -41,11 +41,7 @@ import {
 } from '$lib/social-networks.js';
 import { isValidFooterHref } from '$lib/footer-links.js';
 import { assertValidMarkedText } from '$lib/marked-text.js';
-import {
-  parseTaglineDisplay,
-  resolveTaglineQuoteColor,
-  validateEditorialFields
-} from '$lib/editorial-markup.js';
+import { validateEditorialFields } from '$lib/editorial-markup.js';
 
 const MAX_FOOTER_COLUMNS = 4;
 const MAX_FOOTER_LINKS = 4;
@@ -134,7 +130,6 @@ export function loadSiteForm() {
     header_logo_alt: readString(site, 'header_logo_alt'),
     favicon: readString(site, 'favicon'),
     tagline: readString(site, 'tagline'),
-    tagline_display: parseTaglineDisplay(isRecord(site.tagline_display) ? site.tagline_display : null),
     hero_intro: readString(site, 'hero_intro'),
     hero_signature: readString(site, 'hero_signature'),
     language: readString(site, 'language', 'en'),
@@ -363,17 +358,6 @@ export async function saveSiteAction({ request }) {
     ]);
     site.hero_signature = heroSignature;
     site.footer_note = footerNote;
-
-    const taglineWrap = String(formData.get('tagline_display_wrap') ?? 'none');
-
-    if (taglineWrap === 'epigraph') {
-      site.tagline_display = {
-        wrap: 'epigraph',
-        quote_color: resolveTaglineQuoteColor(formData.get('tagline_display_quote_color'))
-      };
-    } else {
-      delete site.tagline_display;
-    }
 
     let headerLogo = String(formData.get('header_logo') ?? readString(site, 'header_logo')).trim();
 

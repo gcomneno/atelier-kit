@@ -39,26 +39,21 @@ site:
   footer_note: ""
 ```
 
-Example with Atelier Mark on the tagline (epigraph style):
+Example with Atelier Mark on the tagline:
 
 ```yaml
 site:
   tagline: "{accent}Short serial fiction between satire and the surreal.{/accent}"
-  tagline_display:
-    wrap: epigraph
-    quote_color: text
 ```
 
 Fields:
 
 - `name` is a legacy site label kept in sync when you save **Site identity** in Studio (`intro_title` or `header_title`). Optional — omit or leave empty for hero-first layouts.
 - `tagline` appears near the home hero heading when set. Optional. Supports **Atelier Mark** inline emphasis with theme tokens (`{accent}`, `{intro}`, `{heading}`, `{muted}`). See [`editorial-markup.md`](editorial-markup.md).
-- `tagline_display` (optional) controls tagline guillemets on the home hero:
-  - `wrap: none` (default) — legacy CSS guillemets when the theme styles `.hero-epigraph`
-  - `wrap: epigraph` — component-managed `« »` with separate quote color
-  - `quote_color`: `text`, `accent`, `heading`, or `intro`
+- Legacy `tagline_display.wrap` and `tagline_display.quote_color` values are tolerated but ignored. Studio preserves them on a normal save; new scaffolds omit them. See [`editorial-markup.md`](editorial-markup.md#legacy-tagline-display-configuration).
 - `header_title` and `intro_title` (Studio → Site identity) control the visitor nav title and home hero heading respectively; both are optional. `intro_title` supports Atelier Mark.
 - `hero_intro` (Studio → Site identity) is the home intro paragraph(s). Supports Atelier Mark per paragraph.
+- `hero_signature` (Studio → Site identity) is the optional multiline signature below the home intro. It supports Atelier Mark and is validated per paragraph, while the visitor keeps the lines in one signature element.
 - `language` sets `<html lang="…">`, the studio / CLI operator UI locale, **and** visitor-facing UI labels (`en`, `it`, `it-IT`, etc.). YAML content (item titles, about text, news bodies) is not auto-translated.
 - `notice` can be used for demo warnings or short publishing notes.
 - `footer_note` is optional client text on the home page when no multi-column footer is configured (`config/footer.yaml`). The **Atelier-Kit credit** (`Built with Atelier-Kit` / `Realizzato con Atelier-Kit`) is added automatically by the framework in the site footer and is not editable in YAML.

@@ -51,9 +51,8 @@
         {#if data.site.tagline}
           <EditorialText
             tag="p"
-            class="tagline hero-epigraph"
+            class="tagline"
             value={data.site.tagline}
-            display={data.site.tagline_display}
           />
         {/if}
 
@@ -65,7 +64,7 @@
               {/each}
             {/if}
             {#if data.site.hero_signature}
-              <p class="hero-signature">{data.site.hero_signature}</p>
+              <EditorialText tag="p" class="hero-signature" value={data.site.hero_signature} />
             {/if}
           </div>
         {/if}
@@ -288,26 +287,6 @@
     line-height: 1.35;
   }
 
-  .hero-head :global(.hero-epigraph) {
-    max-width: 22ch;
-    margin: 0;
-    font-style: italic;
-    font-weight: 400;
-    font-size: clamp(2.4rem, 7.5vw, 4.5rem);
-    line-height: 1.45;
-    letter-spacing: 0.01em;
-    text-wrap: balance;
-    color: color-mix(in srgb, var(--site-text-color, #4f4236) 92%, transparent);
-  }
-
-  .hero-head :global(.hero-epigraph:not(.hero-epigraph--component-quotes))::before {
-    content: '«\202f';
-  }
-
-  .hero-head :global(.hero-epigraph:not(.hero-epigraph--component-quotes))::after {
-    content: '\202f»';
-  }
-
   .hero-intro-card {
     width: fit-content;
     max-width: 46rem;
@@ -336,7 +315,7 @@
     margin-top: 0.85rem;
   }
 
-  .hero-signature {
+  .hero-intro-card :global(.hero-signature) {
     font-style: normal;
     margin: 0.85rem 0 0;
     text-align: right;
@@ -346,7 +325,7 @@
     white-space: pre-line;
   }
 
-  .hero-intro-card:not(:has(.hero-intro)) .hero-signature {
+  .hero-intro-card:not(:has(:global(.hero-intro))) :global(.hero-signature) {
     margin-top: 0;
   }
 

@@ -1,33 +1,16 @@
 <script>
-  import {
-    EDITORIAL_MARK_CLASSES,
-    parseEditorialMarkup,
-    resolveTaglineQuoteColor,
-    resolveTaglineWrap
-  } from '$lib/editorial-markup.js';
+  import { parseEditorialMarkup } from '$lib/editorial-markup.js';
 
-  /** @type {{ value?: string, display?: { wrap?: string, quote_color?: string } | null, tag?: string, class?: string }} */
-  let { value = '', display = null, tag = 'span', class: className = '' } = $props();
+  /** @type {{ value?: string, tag?: string, class?: string }} */
+  let { value = '', tag = 'span', class: className = '' } = $props();
 
   const parsed = $derived(parseEditorialMarkup(value));
-  const wrap = $derived(resolveTaglineWrap(display?.wrap));
-  const quoteColor = $derived(resolveTaglineQuoteColor(display?.quote_color));
-  const quoteClass = $derived(EDITORIAL_MARK_CLASSES[quoteColor]);
-  const useComponentQuotes = $derived(wrap === 'epigraph');
 </script>
 
 {#if parsed.ok}
-  <svelte:element this={tag} class={className} class:hero-epigraph--component-quotes={useComponentQuotes}>
-    {#if useComponentQuotes}
-      <span class="epigraph-quote {quoteClass}" aria-hidden="true">«</span>
-    {/if}
-    {@html parsed.html}
-    {#if useComponentQuotes}
-      <span class="epigraph-quote {quoteClass}" aria-hidden="true">»</span>
-    {/if}
-  </svelte:element>
+  <svelte:element this={tag} class={className}>{@html parsed.html}</svelte:element>
 {:else}
-  <svelte:element this={tag} class={className}>{value}</svelte:element>
+  <svelte:element this={tag} class={className}>{parsed.plainText}</svelte:element>
 {/if}
 
 <style>
@@ -51,13 +34,20 @@
     color: var(--site-text-color, #2f281f);
   }
 
-  :global(.hero-epigraph--component-quotes)::before,
-  :global(.hero-epigraph--component-quotes)::after {
-    content: none;
+  :global(.mark-white) {
+    color: #fff;
   }
 
-  :global(.epigraph-quote) {
-    font-style: inherit;
-    font-weight: inherit;
+  :global(.mark-black) {
+    color: #000;
   }
+
+  :global(.mark-larger) {
+    font-size: 1.2em;
+  }
+
+  :global(.mark-smaller) {
+    font-size: 0.85em;
+  }
+
 </style>

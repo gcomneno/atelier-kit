@@ -465,17 +465,21 @@ export default {
       liveOk: 'Live site updated successfully.',
       liveOkUrl: 'Live site updated: {url}',
       liveFailed: 'Could not update the live site.',
+      liveFailedPreflight:
+        'Vercel is not ready: no changes were saved or sent. Ask your operator to link the project and verify Vercel access.',
       liveFailedPrep:
         'Content checks or build failed. Nothing was sent online. Read the details below and fix the issues first.',
       liveFailedCommit:
         'Could not save your changes locally. Ask your operator to check Git setup on this computer.',
       liveFailedPush:
         'Could not send changes to the online repository. Ask your operator to check Git access.',
-      liveFailedDeploy:
-        'The live site may not have refreshed. Your changes might still be saved — ask your operator to check the hosting dashboard.',
+      liveFailedDeployAfterPush:
+        'Content was published to GitHub, but the site was NOT put online. Ask your operator to check Vercel.',
       liveConfirm: 'Put {count} update(s) online now? This checks your content and updates the live site.',
       liveConfirmRedeploy: 'Refresh the live site from your latest saved version?',
       liveCommitMessage: 'Studio update',
+      livePhasePreflight: '→ Checking Vercel link and access',
+      livePreflightOk: 'Vercel is ready for a non-interactive deploy.',
       livePhasePrep: '→ Checking content and building the site',
       livePrepOk: 'Checks and build OK.',
       livePhaseCommit: '→ Saving your changes',
@@ -485,12 +489,29 @@ export default {
       livePhasePush: '→ Sending updates online',
       livePushOk: 'Updates sent.',
       livePhaseDeploy: '→ Refreshing the live site',
+      liveDeployOk: 'Production deploy completed.',
       outputDetails: 'Technical details',
       liveIssues: {
         noRepo:
           'This project folder is not connected to online backup yet. Your operator sets this up during handoff.',
         noRemote:
-          'Online publishing is not linked yet. Contact your operator — they connect GitHub and hosting during setup.'
+          'Online publishing is not linked yet. Contact your operator — they connect GitHub and hosting during setup.',
+        vercelLinkMissing:
+          'The Vercel link is missing. Your operator must run “vercel link” from the project folder before retrying.',
+        vercelLinkUnreadable:
+          'The Vercel link cannot be read. Your operator must check permissions on .vercel/project.json.',
+        vercelLinkInvalid:
+          'The Vercel link is invalid. Your operator must recreate it safely with “vercel link”.',
+        vercelProjectMissing: 'The Vercel link does not contain a project identifier.',
+        vercelScopeMissing: 'The Vercel link does not contain a scope identifier.',
+        vercelCliMissing:
+          'The Vercel CLI is not installed. Your operator must install it before retrying.',
+        vercelCliUnusable:
+          'The Vercel CLI is installed but cannot be used or is incompatible. Your operator must repair or update it before retrying.',
+        vercelAuthMissing:
+          'The Vercel CLI is installed, but authentication is missing or invalid. Your operator must sign in again.',
+        vercelProjectUnresolved:
+          'The linked project is not accessible in the configured Vercel scope. Your operator must check the project, team, and permissions.'
       }
     },
     collections: {

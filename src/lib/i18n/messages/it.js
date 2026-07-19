@@ -470,17 +470,21 @@ export default {
       liveOk: 'Sito live aggiornato.',
       liveOkUrl: 'Sito live aggiornato: {url}',
       liveFailed: 'Impossibile aggiornare il sito live.',
+      liveFailedPreflight:
+        'Vercel non è pronto: nessuna modifica è stata salvata o inviata. Chiedi all’operatore di collegare il progetto e verificare l’accesso Vercel.',
       liveFailedPrep:
         'Controlli contenuto o build non riusciti. Nulla è stato inviato online. Leggi i dettagli e correggi prima di riprovare.',
       liveFailedCommit:
         'Impossibile salvare le modifiche in locale. Chiedi all’operatore di verificare Git su questo computer.',
       liveFailedPush:
         'Impossibile inviare le modifiche al repository online. Chiedi all’operatore di verificare l’accesso Git.',
-      liveFailedDeploy:
-        'Il sito live potrebbe non essersi aggiornato. Le modifiche potrebbero essere salvate — chiedi all’operatore di controllare l’hosting.',
+      liveFailedDeployAfterPush:
+        'Contenuti pubblicati su GitHub, ma sito NON messo online. Chiedi all’operatore di controllare Vercel.',
       liveConfirm: 'Mettere online {count} aggiornamento/i adesso? Verranno controllati i contenuti e aggiornato il sito live.',
       liveConfirmRedeploy: 'Aggiornare il sito live dall’ultima versione salvata?',
       liveCommitMessage: 'Aggiornamento da studio',
+      livePhasePreflight: '→ Verifica collegamento e accesso Vercel',
+      livePreflightOk: 'Vercel pronto per il deploy non interattivo.',
       livePhasePrep: '→ Controllo contenuti e build del sito',
       livePrepOk: 'Controlli e build OK.',
       livePhaseCommit: '→ Salvataggio modifiche',
@@ -490,12 +494,29 @@ export default {
       livePhasePush: '→ Invio aggiornamenti online',
       livePushOk: 'Aggiornamenti inviati.',
       livePhaseDeploy: '→ Aggiornamento sito live',
+      liveDeployOk: 'Deploy di produzione completato.',
       outputDetails: 'Dettagli tecnici',
       liveIssues: {
         noRepo:
           'Questa cartella non è ancora collegata al backup online. L’operatore lo configura durante la consegna.',
         noRemote:
-          'La pubblicazione online non è ancora collegata. Contatta l’operatore — collega GitHub e hosting in fase di setup.'
+          'La pubblicazione online non è ancora collegata. Contatta l’operatore — collega GitHub e hosting in fase di setup.',
+        vercelLinkMissing:
+          'Collegamento Vercel assente. L’operatore deve eseguire “vercel link” dalla cartella del progetto prima di riprovare.',
+        vercelLinkUnreadable:
+          'Il collegamento Vercel non è leggibile. L’operatore deve controllare i permessi di .vercel/project.json.',
+        vercelLinkInvalid:
+          'Il collegamento Vercel non è valido. L’operatore deve ricrearlo in modo sicuro con “vercel link”.',
+        vercelProjectMissing: 'Nel collegamento Vercel manca l’identificatore del progetto.',
+        vercelScopeMissing: 'Nel collegamento Vercel manca l’identificatore dello scope.',
+        vercelCliMissing:
+          'La CLI Vercel non è installata. L’operatore deve installarla prima di riprovare.',
+        vercelCliUnusable:
+          'La CLI Vercel è presente ma non è utilizzabile o è incompatibile. L’operatore deve ripararla o aggiornarla prima di riprovare.',
+        vercelAuthMissing:
+          'La CLI Vercel è installata, ma l’autenticazione è assente o non valida. L’operatore deve autenticarsi di nuovo.',
+        vercelProjectUnresolved:
+          'Il progetto collegato non è accessibile nello scope Vercel configurato. L’operatore deve verificare progetto, team e permessi.'
       }
     },
     collections: {

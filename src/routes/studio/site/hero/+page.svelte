@@ -5,8 +5,10 @@
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
+  import StudioImageMutationFields from '$lib/components/StudioImageMutationFields.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
+  import { createHeroBannerRemoval } from '$lib/studio-image-mutation.js';
 
   const t = useI18n();
 
@@ -17,19 +19,18 @@
   const heroBannerForm = $derived(form?.heroBannerForm ?? data.heroBannerForm);
   let showBanner = $state(false);
   let removeHeroImage = $state(false);
+  const heroRemoval = createHeroBannerRemoval();
   let isDirty = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};
-  /** @type {HTMLInputElement | null} */
-  let bannerUploadInput = $state(null);
+  const imageMutationMessages = {
+    add: t('studio.imageMutation.add'),
+    replace: t('studio.imageMutation.replace'),
+    remove: t('studio.imageMutation.remove')
+  };
 
   $effect(() => {
-    showBanner = heroBannerForm.show;
-    removeHeroImage = false;
-
-    if (bannerUploadInput) {
-      bannerUploadInput.value = '';
-    }
+    ({ show: showBanner, remove: removeHeroImage } = heroRemoval.reset(heroBannerForm.show));
 
     dirtyControl.resetBaseline?.();
   });
@@ -65,7 +66,7 @@
     <StudioFormLegend />
 
     <label class="checkbox">
-      <input type="checkbox" name="show_banner" bind:checked={showBanner} />
+      <input type="checkbox" name="show_banner" bind:checked={showBanner} disabled={removeHeroImage} />
       {t('studio.site.heroBanner.show')}
     </label>
 
@@ -75,28 +76,21 @@
       </div>
     {/if}
 
-    <label>
-      <StudioFieldLabel
-        label={t('studio.site.heroBanner.upload')}
-        required={bannerFieldsEnabled}
-        hint={t('studio.site.heroBanner.uploadHint')}
-      />
-      <input
-        bind:this={bannerUploadInput}
-        type="file"
-        name="banner_upload"
-        accept="image/jpeg,image/png,image/webp"
-        disabled={!bannerFieldsEnabled}
-        required={uploadRequired}
-      />
-    </label>
-
-    {#if heroBannerForm.image_file}
-      <label class="checkbox">
-        <input type="checkbox" name="remove_hero_image" bind:checked={removeHeroImage} />
-        {t('studio.site.heroBanner.removeHeroImage')}
-      </label>
-    {/if}
+    <StudioImageMutationFields
+      uploadName="banner_upload"
+      removeName="remove_hero_image"
+      uploadLabel={t('studio.site.heroBanner.upload')}
+      uploadHint={t('studio.site.heroBanner.uploadHint')}
+      removeLabel={t('studio.site.heroBanner.removeHeroImage')}
+      hasExisting={Boolean(heroBannerForm.image_file)}
+      disabled={!bannerFieldsEnabled && !removeHeroImage}
+      required={uploadRequired}
+      resetKey={heroBannerForm}
+      stateMessages={imageMutationMessages}
+      onmutation={(mutation) => {
+        ({ show: showBanner, remove: removeHeroImage } = heroRemoval.update(mutation.remove, showBanner));
+      }}
+    />
 
     <input
       type="hidden"

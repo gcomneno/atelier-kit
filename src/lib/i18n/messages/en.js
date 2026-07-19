@@ -125,6 +125,11 @@ export default {
         'invalid-command': 'That formatting command is not supported.'
       }
     },
+    imageMutation: {
+      add: 'A new image will be added when you save.',
+      replace: 'The current image will be replaced when you save.',
+      remove: 'The current image will be removed when you save.'
+    },
     accessGuide: {
       title: 'Recommended access',
       intro: 'How to use the studio safely and publish changes online.',
@@ -896,6 +901,7 @@ export default {
     imageType: 'Use a JPG, PNG or WebP image.',
     imageRequired: 'Choose an image file to upload.',
     imageSize: 'Image must be 5 MB or smaller.',
+    imageUploadRemoveConflict: 'Choose either a new image or removal, not both.',
     missingCatalog: 'config/catalog.yaml is missing a catalog object.',
     missingAbout: 'config/about.yaml is missing an about object.',
     missingSignalClouds: 'config/signal-clouds.yaml is missing signal_clouds.',

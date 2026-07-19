@@ -22,6 +22,7 @@ import {
 import { translate } from '$lib/i18n/index.js';
 import { MAX_CATALOG_HOME_LIMIT } from '$lib/layout-presets.js';
 import { buildAboutData, loadAboutFormData } from '$lib/about-config.js';
+export { checkboxEnabled } from './studio-form-values.js';
 
 const ROOT = process.cwd();
 const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -90,13 +91,6 @@ export function optionalField(value, fallback = '') {
   }
 
   return value.trim();
-}
-
-/**
- * @param {FormDataEntryValue | null} value
- */
-export function checkboxEnabled(value) {
-  return value === 'on' || value === 'true' || value === '1';
 }
 
 /** @param {{ ok: boolean, output: string }} validation @param {string} [locale] */
@@ -573,6 +567,24 @@ function imageExtensionFromName(filename, locale = 'en') {
 }
 
 /**
+ * Validate an image upload without writing to the filesystem.
+ * @param {File} file
+ * @param {string} [locale]
+ * @returns {string} normalized filename extension
+ */
+export function validateImageUpload(file, locale = 'en') {
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error(translate('errors.imageRequired', locale));
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error(translate('errors.imageSize', locale));
+  }
+
+  return imageExtensionFromName(file.name, locale);
+}
+
+/**
  * @param {string} id
  * @param {File} file
  * @param {string} [locale]
@@ -683,15 +695,7 @@ export async function saveAboutPortraitUpload(file, locale = 'en') {
  * @param {string} [locale]
  */
 export async function saveHeroBannerUpload(file, locale = 'en') {
-  if (!(file instanceof File) || file.size === 0) {
-    throw new Error(translate('errors.imageRequired', locale));
-  }
-
-  if (file.size > MAX_IMAGE_BYTES) {
-    throw new Error(translate('errors.imageSize', locale));
-  }
-
-  const extension = imageExtensionFromName(file.name, locale);
+  const extension = validateImageUpload(file, locale);
   const siteImagesDir = path.join(ROOT, 'static/images/site');
   mkdirSync(siteImagesDir, { recursive: true });
 
@@ -708,15 +712,7 @@ export async function saveHeroBannerUpload(file, locale = 'en') {
  * @param {string} [locale]
  */
 export async function saveSiteBackgroundUpload(file, locale = 'en') {
-  if (!(file instanceof File) || file.size === 0) {
-    throw new Error(translate('errors.imageRequired', locale));
-  }
-
-  if (file.size > MAX_IMAGE_BYTES) {
-    throw new Error(translate('errors.imageSize', locale));
-  }
-
-  const extension = imageExtensionFromName(file.name, locale);
+  const extension = validateImageUpload(file, locale);
   const siteImagesDir = path.join(ROOT, 'static/images/site');
   mkdirSync(siteImagesDir, { recursive: true });
 
@@ -733,15 +729,7 @@ export async function saveSiteBackgroundUpload(file, locale = 'en') {
  * @param {string} [locale]
  */
 export async function saveHeaderLogoUpload(file, locale = 'en') {
-  if (!(file instanceof File) || file.size === 0) {
-    throw new Error(translate('errors.imageRequired', locale));
-  }
-
-  if (file.size > MAX_IMAGE_BYTES) {
-    throw new Error(translate('errors.imageSize', locale));
-  }
-
-  const extension = imageExtensionFromName(file.name, locale);
+  const extension = validateImageUpload(file, locale);
   const siteImagesDir = path.join(ROOT, 'static/images/site');
   mkdirSync(siteImagesDir, { recursive: true });
 
@@ -759,15 +747,7 @@ export async function saveHeaderLogoUpload(file, locale = 'en') {
  * @param {string} [locale]
  */
 export async function saveSiteFaviconUpload(file, locale = 'en') {
-  if (!(file instanceof File) || file.size === 0) {
-    throw new Error(translate('errors.imageRequired', locale));
-  }
-
-  if (file.size > MAX_IMAGE_BYTES) {
-    throw new Error(translate('errors.imageSize', locale));
-  }
-
-  const extension = imageExtensionFromName(file.name, locale);
+  const extension = validateImageUpload(file, locale);
   const siteImagesDir = path.join(ROOT, 'static/images/site');
   mkdirSync(siteImagesDir, { recursive: true });
 

@@ -4,6 +4,7 @@
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
+  import StudioImageMutationFields from '$lib/components/StudioImageMutationFields.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormEnhance } from '$lib/studio-form-enhance.js';
   import { APPEARANCE_PRESETS, isAppearancePreset } from '$lib/site-appearance.js';
@@ -29,8 +30,11 @@
   let backgroundFitDraft = $state(initialAppearance.background_fit ?? 'top');
   let removeBackground = $state(false);
   let hasNewBackground = $state(false);
-  /** @type {HTMLInputElement | null} */
-  let backgroundUploadInput = $state(null);
+  const imageMutationMessages = {
+    add: t('studio.imageMutation.add'),
+    replace: t('studio.imageMutation.replace'),
+    remove: t('studio.imageMutation.remove')
+  };
 
   $effect(() => {
     const next = appearanceForm;
@@ -47,16 +51,6 @@
     removeBackground = false;
     hasNewBackground = false;
 
-    if (backgroundUploadInput) {
-      backgroundUploadInput.value = '';
-    }
-  });
-
-  $effect(() => {
-    if (removeBackground && backgroundUploadInput) {
-      backgroundUploadInput.value = '';
-      hasNewBackground = false;
-    }
   });
 
   const previewColors = $derived({
@@ -99,10 +93,6 @@
     }
   }
 
-  /** @param {Event & { currentTarget: HTMLInputElement }} event */
-  function onBackgroundSelected(event) {
-    hasNewBackground = Boolean(event.currentTarget.files?.length);
-  }
 </script>
 
 <svelte:head>
@@ -237,26 +227,28 @@
       <span>{t('studio.site.appearance.preview')}</span>
     </div>
 
-    <label>
-      <StudioFieldLabel
-        label={t('studio.site.appearance.backgroundImage')}
-        optional
-        hint={t('studio.site.appearance.backgroundHint')}
-      />
+    <div>
       {#if appearanceForm.background_image}
         <span class="hint current-background">
           {t('studio.site.appearance.currentBackground', { path: appearanceForm.background_image })}
         </span>
       {/if}
-      <input
-        bind:this={backgroundUploadInput}
-        type="file"
-        name="background_upload"
-        accept="image/jpeg,image/png,image/webp"
-        disabled={removeBackground}
-        onchange={onBackgroundSelected}
-      />
-    </label>
+    </div>
+
+    <StudioImageMutationFields
+      uploadName="background_upload"
+      removeName="remove_background"
+      uploadLabel={t('studio.site.appearance.backgroundImage')}
+      uploadHint={t('studio.site.appearance.backgroundHint')}
+      removeLabel={t('studio.site.appearance.removeBackground')}
+      hasExisting={Boolean(appearanceForm.background_image)}
+      resetKey={appearanceForm}
+      stateMessages={imageMutationMessages}
+      onmutation={(mutation) => {
+        removeBackground = mutation.remove;
+        hasNewBackground = mutation.hasUpload;
+      }}
+    />
 
     <label>
       <StudioFieldLabel
@@ -273,10 +265,6 @@
 
     {#if appearanceForm.background_image}
       <p class="hint background-vs-banner">{t('studio.site.appearance.backgroundVsBanner')}</p>
-      <label class="checkbox">
-        <input type="checkbox" name="remove_background" bind:checked={removeBackground} />
-        {t('studio.site.appearance.removeBackground')}
-      </label>
     {/if}
 
     <div class="actions">

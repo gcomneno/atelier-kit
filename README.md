@@ -155,6 +155,23 @@ npm run item:validate
 
 This keeps the template simple and avoids database, login and admin-dashboard complexity.
 
+## Item relationships
+
+Item YAML can optionally describe ordered, typed relationships to other item ids:
+
+```yaml
+relations:
+  - type: "inspired-by"
+    target: "earlier-work"
+    label: "Earlier study"
+  - type: "part-of"
+    target: "summer-project"
+```
+
+`type` and `target` are required non-empty strings; `label` is an optional display label. Values are trimmed while loading, and a blank label is omitted. Item records without `relations` remain compatible and load with `relations: []`.
+
+Relationship types are open and domain-neutral, not a fixed vocabulary. Validation checks only this structure: missing targets, self-references, duplicates and one-way relationships are accepted. Target resolution and other referential rules are intentionally outside this structural contract.
+
 ## Nested meta information
 
 Item detail pages can render configurable meta information from each item YAML file.

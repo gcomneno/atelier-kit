@@ -156,6 +156,10 @@ export const actions = {
           meta: parseItemMetaFromForm(formData, locale)
         };
 
+        if (Object.hasOwn(original, 'relations')) {
+          item.relations = original.relations;
+        }
+
         writeItemRecord(params.id, item);
       } catch (writeError) {
         if (uploadedGalleryImage) {

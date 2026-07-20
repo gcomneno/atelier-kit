@@ -17,6 +17,7 @@ import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.
 import { isFontPreset } from '../src/lib/site-typography.js';
 import { isAppearancePreset } from '../src/lib/site-appearance.js';
 import { getSignalCloudFaqIssues } from '../src/lib/signal-cloud-faq-validation.js';
+import { getItemRelationIssues } from '../src/lib/item-relations.js';
 
 const ROOT = process.cwd();
 const t = createTranslator(loadOperatorLocale());
@@ -877,6 +878,10 @@ function validateItems() {
     requireString(item, 'description', source);
     validateMetaEntries(item.meta, source);
 
+    for (const issue of getItemRelationIssues(item.relations, source)) {
+      fail(issue);
+    }
+
     validateItemImages(item, source);
   }
 
@@ -1032,8 +1037,6 @@ const itemIds = validateItems();
 validateCollections(itemIds);
 validateNews();
 
-if (process.exitCode) {
-  process.exit();
+if (!process.exitCode) {
+  console.log(t('validate.ok'));
 }
-
-console.log(t('validate.ok'));

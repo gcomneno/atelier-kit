@@ -32,6 +32,7 @@ import {
 } from '$lib/layout-block-labels.js';
 import { normalizeMetaHierarchy } from '$lib/item-meta.js';
 import { getItemCoverImage, normalizeItemImages } from '$lib/item-images.js';
+import { normalizeItemRelations } from '$lib/item-relations.js';
 import { projectFaqEntries } from '$lib/signal-cloud-faq.js';
 import { parseAboutPortrait } from '$lib/about-config.js';
 
@@ -763,6 +764,7 @@ export function getItems() {
       const item = parseYaml(source, raw);
       const meta = normalizeMetaEntries(item.meta, source);
       const images = normalizeItemImages(item);
+      const relations = normalizeItemRelations(item.relations, source);
       const coverImage = getItemCoverImage({ ...item, images });
 
       return {
@@ -774,6 +776,7 @@ export function getItems() {
         image_file: coverImage.file,
         image_alt: coverImage.alt,
         images,
+        relations,
         description: requiredString(item, 'description', source),
         notice: optionalString(item, 'notice'),
         preview: normalizeItemPreview(item.preview),

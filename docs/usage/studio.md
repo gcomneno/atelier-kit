@@ -141,6 +141,19 @@ static/images/items/anello-onda.jpg
 image_file: /images/items/anello-onda.jpg
 ```
 
+## Item relationships
+
+The new-item and item-edit forms share the same relationship editor in Studio and Atelier Desktop. Add any free-form relationship type, search the catalog by item title or id, and optionally add a display label. Studio shows titles to the operator but saves stable target ids:
+
+```yaml
+relations:
+  - type: related-to
+    target: matching-necklace
+    label: Matching piece
+```
+
+Studio rejects incomplete rows, self-references, missing (including deleted or renamed) targets, and duplicate type/target pairs before writing. Removing the final relationship removes `relations` from the YAML rather than writing an empty field.
+
 ## Site appearance
 
 From `/studio`, choose a color preset or set custom base, accent and text colors. Values are saved under `config/site.yaml`:

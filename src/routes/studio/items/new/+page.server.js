@@ -4,11 +4,14 @@ import { fail, isRedirect, redirect } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
 import {
   createItemRecord,
+  getItemRelationAuthoringData,
+  listItemSummaries,
   runStructuralValidation,
   saveItemImageUpload,
   validationMessage,
   writeItemRecord
 } from '$lib/server/studio-io.js';
+import { getStudioItemRelationRows, parseAndValidateStudioItemRelations } from '$lib/studio-item-relations.js';
 import { localizedItemPresets } from '$lib/i18n/index.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 import { titleFromItemId } from '$lib/item-presets.js';
@@ -19,7 +22,8 @@ export function load() {
 
   return {
     presets: localizedItemPresets(locale),
-    defaultPreset: 'default'
+    defaultPreset: 'default',
+    relationAuthoring: getItemRelationAuthoringData()
   };
 }
 
@@ -36,15 +40,18 @@ export const actions = {
     const title = titleInput || titleFromItemId(id);
     const preset = String(formData.get('preset') ?? 'default');
     const description = String(formData.get('description') ?? '');
-    const form = { id, title, preset, description };
+    const relationRows = getStudioItemRelationRows(parseRelationRowsSafely(formData));
+    const form = { id, title, preset, description, relationRows };
 
     try {
+      const relations = parseAndValidateStudioItemRelations(formData, id, listItemSummaries(), locale);
       const item = createItemRecord(
         {
           id,
           title,
           preset,
-          description
+          description,
+          relations
         },
         locale
       );
@@ -83,3 +90,10 @@ export const actions = {
     }
   }
 };
+
+function parseRelationRowsSafely(formData) {
+  const types = formData.getAll('relation_types');
+  const targets = formData.getAll('relation_targets');
+  const labels = formData.getAll('relation_labels');
+  return types.map((type, index) => ({ type: String(type), target: String(targets[index] ?? ''), label: String(labels[index] ?? '') }));
+}

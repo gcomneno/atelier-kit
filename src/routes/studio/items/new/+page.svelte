@@ -4,6 +4,7 @@
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
+  import StudioItemRelationFields from '$lib/components/StudioItemRelationFields.svelte';
   import { useI18n } from '$lib/i18n/context.js';
 
   const t = useI18n();
@@ -16,9 +17,18 @@
       id: '',
       title: '',
       preset: data.defaultPreset,
-      description: ''
+      description: '',
+      relationRows: []
     }
   );
+  /** @type {Array<{ type: string, target: string, label: string }>} */
+  let relationRows = $state([]);
+  let currentItemId = $state('');
+
+  $effect(() => {
+    relationRows = (itemForm.relationRows ?? []).map((row) => ({ ...row }));
+    currentItemId = itemForm.id;
+  });
 </script>
 
 <svelte:head>
@@ -42,7 +52,7 @@
       <StudioFieldLabel label={t('studio.itemsNew.id')} required hint={t('studio.itemsNew.idHint')} />
       <input
         name="id"
-        value={itemForm.id}
+        bind:value={currentItemId}
         required
         pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
         title={t('studio.itemsNew.idPattern')}
@@ -76,6 +86,13 @@
       />
       <input type="file" name="image_upload" accept="image/jpeg,image/png,image/webp" />
     </label>
+
+    <StudioItemRelationFields
+      bind:rows={relationRows}
+      targets={data.relationAuthoring.targets}
+      typeSuggestions={data.relationAuthoring.typeSuggestions}
+      currentId={currentItemId}
+    />
 
     <div class="actions">
       <button type="submit">{t('studio.itemsNew.create')}</button>

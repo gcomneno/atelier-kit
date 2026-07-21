@@ -661,6 +661,19 @@ export default {
       deleteConfirm:
         'Delete item “{title}” ({id})? This removes the YAML file and any uploaded photo. You cannot undo this from Studio.'
     },
+    itemRelations: {
+      title: 'Item relationships',
+      hint: 'Connect this item to another catalog item. Search by title or id; the stable item id is saved.',
+      empty: 'No relationships yet.',
+      type: 'Relationship type',
+      target: 'Target item',
+      search: 'Search items by title or id',
+      label: 'Display label',
+      add: '+ Add relationship',
+      remove: 'Remove',
+      selfTarget: 'An item cannot target itself.',
+      missingTarget: 'This target is missing; it may have been deleted or renamed.'
+    },
     news: {
       pageTitle: 'Studio · News',
       intro: 'Choose a post to edit, reorder how posts appear on the site, or create a new one.',
@@ -895,6 +908,11 @@ export default {
     galleryRowMismatch: 'Gallery image row count mismatch.',
     galleryImageFileRequired: 'Each gallery image row needs an image path.',
     galleryImagesRequired: 'Add at least one gallery image.',
+    relationRowMismatch: 'Relationship row count mismatch.',
+    relationFieldsRequired: 'Each relationship needs a non-empty type and target item.',
+    relationSelfTarget: 'An item cannot target itself.',
+    relationMissingTarget: 'Target item “{target}” is missing; it may have been deleted or renamed.',
+    relationDuplicate: 'Duplicate relationship: this type already targets “{target}”.',
     collectionNeedsItems: 'Choose at least one item for this collection.',
     newsExists: 'A news post with id "{id}" already exists.',
     newsDateInvalid: 'Publication date must use YYYY-MM-DD format.',

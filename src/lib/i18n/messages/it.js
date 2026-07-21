@@ -666,6 +666,19 @@ export default {
       deleteConfirm:
         'Eliminare l\'oggetto «{title}» ({id})? Verranno rimossi il file YAML e l\'eventuale foto caricata. L\'operazione non si può annullare da qui.'
     },
+    itemRelations: {
+      title: 'Relazioni oggetto',
+      hint: 'Collega questo oggetto a un altro oggetto del catalogo. Cerca per titolo o id; viene salvato l’id stabile.',
+      empty: 'Nessuna relazione.',
+      type: 'Tipo di relazione',
+      target: 'Oggetto destinazione',
+      search: 'Cerca oggetti per titolo o id',
+      label: 'Etichetta visualizzata',
+      add: '+ Aggiungi relazione',
+      remove: 'Rimuovi',
+      selfTarget: 'Un oggetto non può riferirsi a sé stesso.',
+      missingTarget: 'La destinazione non esiste; potrebbe essere stata eliminata o rinominata.'
+    },
     news: {
       pageTitle: 'Studio · News',
       intro: 'Scegli un post da modificare, riordina l\'elenco sul sito o creane uno nuovo.',
@@ -902,6 +915,11 @@ export default {
     galleryRowMismatch: 'Il numero di campi della galleria non corrisponde.',
     galleryImageFileRequired: 'Ogni riga galleria deve avere un percorso immagine.',
     galleryImagesRequired: 'Aggiungi almeno un’immagine alla galleria.',
+    relationRowMismatch: 'Il numero di campi delle relazioni non corrisponde.',
+    relationFieldsRequired: 'Ogni relazione richiede un tipo non vuoto e un oggetto destinazione.',
+    relationSelfTarget: 'Un oggetto non può riferirsi a sé stesso.',
+    relationMissingTarget: 'L’oggetto destinazione «{target}» non esiste; potrebbe essere stato eliminato o rinominato.',
+    relationDuplicate: 'Relazione duplicata: questo tipo punta già a «{target}».',
     collectionNeedsItems: 'Scegli almeno un oggetto per questa collezione.',
     newsExists: 'Esiste già un post news con id "{id}".',
     newsDateInvalid: 'La data di pubblicazione deve usare il formato YYYY-MM-DD.',

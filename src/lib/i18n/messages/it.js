@@ -1068,6 +1068,25 @@ export default {
         problem: 'Questo oggetto non ha ancora campi dettaglio aggiuntivi.',
         action: 'Aggiungi dettagli utili come materiale, dimensioni, disponibilità o tecnica nel file dell’oggetto.'
       },
+      itemRelation: {
+        action: 'Apri {source} e correggi o rimuovi questa relazione.',
+        structure: {
+          title: 'Formato relazione oggetto',
+          problem: 'Una relazione dell’oggetto è incompleta o contiene un valore in un formato non supportato.'
+        },
+        'missing-target': {
+          title: 'Destinazione relazione oggetto',
+          problem: 'L’oggetto «{item}» usa «{type}» per indicare «{target}», ma quell’oggetto non esiste.'
+        },
+        'self-reference': {
+          title: 'Relazione dell’oggetto verso sé stesso',
+          problem: 'L’oggetto «{item}» usa «{type}» per indicare sé stesso.'
+        },
+        duplicate: {
+          title: 'Relazione oggetto duplicata',
+          problem: 'L’oggetto «{item}» ripete la relazione «{type}» verso «{target}», dichiarata la prima volta in relations[{firstIndex}].'
+        }
+      },
       newsFieldStarter: {
         title: '{fieldTitle} per "{postTitle}"',
         problem: '{fieldTitle} sembra ancora testo starter o segnaposto.',

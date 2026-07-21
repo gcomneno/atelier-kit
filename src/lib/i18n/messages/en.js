@@ -1061,6 +1061,25 @@ export default {
         problem: 'This item has no extra detail fields yet.',
         action: 'Add helpful details such as material, dimensions, availability or technique in the item file.'
       },
+      itemRelation: {
+        action: 'Open {source} and correct or remove this relationship.',
+        structure: {
+          title: 'Item relationship format',
+          problem: 'An item relationship is incomplete or has an unsupported value format.'
+        },
+        'missing-target': {
+          title: 'Item relationship target',
+          problem: 'Item “{item}” uses “{type}” to point to “{target}”, but that item does not exist.'
+        },
+        'self-reference': {
+          title: 'Item relationship points to itself',
+          problem: 'Item “{item}” uses “{type}” to point back to itself.'
+        },
+        duplicate: {
+          title: 'Duplicate item relationship',
+          problem: 'Item “{item}” repeats the “{type}” relationship to “{target}” first declared at relations[{firstIndex}].'
+        }
+      },
       newsFieldStarter: {
         title: '{fieldTitle} for "{postTitle}"',
         problem: '{fieldTitle} still looks like starter or placeholder text.',

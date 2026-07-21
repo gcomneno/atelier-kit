@@ -43,12 +43,28 @@ test('relations flow through loading, validation and Studio preservation', async
       description: `${title} description`
     });
     fs.writeFileSync(path.join(root, 'content/items/legacy-item.yaml'), stringify(fixture('legacy-item', 'Legacy')));
+    const malformedIdFixtures = [
+      { filename: 'missing-id', id: undefined },
+      { filename: 'non-string-id', id: 42 },
+      { filename: 'blank-id', id: '   ' }
+    ];
+    for (const { filename, id } of malformedIdFixtures) {
+      /** @type {Record<string, unknown>} */
+      const malformed = {
+        ...fixture(filename, filename),
+        relations: [{ type: 'same-as', target: filename }]
+      };
+      if (id === undefined) delete malformed.id;
+      else malformed.id = id;
+      fs.writeFileSync(path.join(root, `content/items/${filename}.yaml`), stringify(malformed));
+    }
     fs.writeFileSync(path.join(root, 'content/items/related-item.yaml'), stringify({
       ...fixture('related-item', 'Related'),
       relations: [
         { type: '  inspired-by ', target: ' missing-work ', label: ' Inspiration ' },
         { type: 'part-of', target: 'related-item' },
-        { type: 'part-of', target: 'related-item' }
+        { type: 'part-of', target: 'related-item' },
+        ...malformedIdFixtures.map(({ filename }) => ({ type: 'related-to', target: filename }))
       ]
     }));
     const invalidPath = path.join(root, 'content/items/invalid-item.yaml');
@@ -70,7 +86,15 @@ test('relations flow through loading, validation and Studio preservation', async
     const invalidOutput = diagnostics.join('\n');
     assert.equal(process.exitCode, 1);
     process.exitCode = undefined;
-    assert.doesNotMatch(invalidOutput, /related-item\.yaml/);
+    assert.match(invalidOutput, /related-item\.yaml:relations\[0\].*targets missing item "missing-work"/);
+    assert.match(invalidOutput, /related-item\.yaml:relations\[1\].*cannot target itself/);
+    assert.match(invalidOutput, /related-item\.yaml:relations\[2\].*cannot target itself/);
+    assert.match(invalidOutput, /related-item\.yaml:relations\[2\].*duplicates target "related-item" from relations\[1\]/);
+    malformedIdFixtures.forEach(({ filename }, offset) => {
+      assert.match(invalidOutput, new RegExp(`related-item\\.yaml:relations\\[${offset + 3}\\].*targets missing item "${filename}"`));
+      assert.match(invalidOutput, new RegExp(`${filename}\\.yaml:relations\\[0\\].*targets missing item "${filename}"`));
+      assert.doesNotMatch(invalidOutput, new RegExp(`${filename}\\.yaml:relations\\[0\\].*cannot target itself`));
+    });
     for (const index of [0, 1, 2, 3, 4, 5, 6, 7]) {
       assert.match(invalidOutput, new RegExp(`content/items/invalid-item\\.yaml:relations\\[${index}\\]`));
     }
@@ -78,6 +102,24 @@ test('relations flow through loading, validation and Studio preservation', async
     assert.match(invalidOutput, /type must be a non-empty string/);
     assert.match(invalidOutput, /target must be a non-empty string/);
     assert.match(invalidOutput, /label must be a string/);
+
+    /** @type {string[]} */
+    const doctorOutput = [];
+    const originalConsoleLog = console.log;
+    console.log = (.../** @type {unknown[]} */ values) => doctorOutput.push(values.map(String).join(' '));
+    try {
+      await import(`${pathToFileURL(path.join(root, 'scripts/content-doctor.js')).href}?relations=${Date.now()}`);
+    } finally {
+      console.log = originalConsoleLog;
+    }
+    const renderedDoctorOutput = doctorOutput.join('\n');
+    assert.match(renderedDoctorOutput, /Item relationship target/);
+    assert.match(renderedDoctorOutput, /Duplicate item relationship/);
+    malformedIdFixtures.forEach(({ filename }) => {
+      assert.match(renderedDoctorOutput, new RegExp(`Item relationship target[\\s\\S]*?${filename}\\.yaml:relations\\[0\\]`));
+      assert.doesNotMatch(renderedDoctorOutput, new RegExp(`Item relationship points to itself\\n[^\\n]*${filename}\\.yaml:relations\\[0\\]`));
+      fs.unlinkSync(path.join(root, `content/items/${filename}.yaml`));
+    });
     fs.unlinkSync(invalidPath);
 
     process.env.ATELIER_STUDIO = '1';
@@ -100,7 +142,10 @@ test('relations flow through loading, validation and Studio preservation', async
     assert.deepEqual(relatedItem.relations, [
       { type: 'inspired-by', target: 'missing-work', label: 'Inspiration' },
       { type: 'part-of', target: 'related-item' },
-      { type: 'part-of', target: 'related-item' }
+      { type: 'part-of', target: 'related-item' },
+      { type: 'related-to', target: 'missing-id' },
+      { type: 'related-to', target: 'non-string-id' },
+      { type: 'related-to', target: 'blank-id' }
     ]);
 
     fs.writeFileSync(invalidPath, stringify({ ...fixture('invalid-item', 'Invalid'), relations: null }));
@@ -129,7 +174,10 @@ test('relations flow through loading, validation and Studio preservation', async
     assert.deepEqual(saved.relations, [
       { type: '  inspired-by ', target: ' missing-work ', label: ' Inspiration ' },
       { type: 'part-of', target: 'related-item' },
-      { type: 'part-of', target: 'related-item' }
+      { type: 'part-of', target: 'related-item' },
+      { type: 'related-to', target: 'missing-id' },
+      { type: 'related-to', target: 'non-string-id' },
+      { type: 'related-to', target: 'blank-id' }
     ]);
     assert.equal(saved.title, 'Related saved');
   } finally {

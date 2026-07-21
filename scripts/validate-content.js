@@ -17,7 +17,7 @@ import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.
 import { isFontPreset } from '../src/lib/site-typography.js';
 import { isAppearancePreset } from '../src/lib/site-appearance.js';
 import { getSignalCloudFaqIssues } from '../src/lib/signal-cloud-faq-validation.js';
-import { getItemRelationIssues } from '../src/lib/item-relations.js';
+import { analyzeCatalogItemRelations, normalizeCatalogItemId } from '../src/lib/item-relations.js';
 
 const ROOT = process.cwd();
 const t = createTranslator(loadOperatorLocale());
@@ -858,7 +858,7 @@ function validateItems() {
     return new Set();
   }
 
-  const files = readdirSync(itemsDir).filter((file) => file.endsWith('.yaml'));
+  const files = readdirSync(itemsDir).filter((file) => file.endsWith('.yaml')).sort();
 
   if (files.length === 0) {
     failKey('itemsDirEmpty');
@@ -866,23 +866,26 @@ function validateItems() {
   }
 
   const ids = [];
+  const relationRecords = [];
 
   for (const file of files) {
     const source = `content/items/${file}`;
     const item = readYaml(source);
+    const declaredId = item.id;
     const id = requireString(item, 'id', source);
 
     ids.push(id);
+    relationRecords.push({ id: normalizeCatalogItemId(declaredId), source, relations: item.relations });
 
     requireString(item, 'title', source);
     requireString(item, 'description', source);
     validateMetaEntries(item.meta, source);
 
-    for (const issue of getItemRelationIssues(item.relations, source)) {
-      fail(issue);
-    }
-
     validateItemImages(item, source);
+  }
+
+  for (const diagnostic of analyzeCatalogItemRelations(relationRecords)) {
+    fail(diagnostic.message);
   }
 
   assertUnique(ids, 'item id');

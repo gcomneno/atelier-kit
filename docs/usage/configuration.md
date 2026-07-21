@@ -282,6 +282,25 @@ Each relation requires a non-empty string `type` and `target`. `label` is option
 
 Types such as `inspired-by` between works and `part-of` between a component and a collection or project are examples only. There is no enum or domain-specific vocabulary. Content validation requires every trimmed target to identify an existing item, rejects self-references by default, and reports every repeated trimmed `type` + `target` edge after its first occurrence (the label is not part of edge identity). Cycles between different items and one-way relationships are valid; inverse relationships are not required.
 
+### Relationship graph projection
+
+Application code can project loaded items into a UI-neutral graph with
+`projectItemRelationshipGraph(items, options?)` from
+`src/lib/item-relationship-graph.js`. The result is `{ nodes, edges }`: nodes
+contain `id`, `label`, the canonical `/items/<id>` `href`, and an optional
+resolved `image`; edges contain `source`, `target`, `type`, and an optional
+`label`.
+
+Omitting `options.itemIds` projects every item. Supplying an array of item ids
+projects the induced subgraph: every selected item remains a node even when it
+is disconnected, while relationships are included only when both endpoints are
+selected. Targets outside the subset are omitted. Unknown configured ids throw
+instead of creating placeholder nodes.
+
+Output order is deterministic for equivalent content regardless of input order.
+Nodes sort by `id`; edges sort by `source`, `target`, `type`, then `label`, all
+with code-unit string comparison.
+
 
 ## Nested meta information
 

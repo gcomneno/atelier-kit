@@ -7,6 +7,8 @@ import {
   deleteItemImageUpload,
   deleteItemRecord,
   itemRecordExists,
+  getItemRelationAuthoringData,
+  listItemSummaries,
   listItemMetaSuggestions,
   optionalField,
   parseItemMetaFromForm,
@@ -28,6 +30,7 @@ import {
 } from '$lib/studio-item-gallery.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 import { assertValidMarkedText } from '$lib/marked-text.js';
+import { getStudioItemRelationRows, parseAndValidateStudioItemRelations, withStudioItemRelations } from '$lib/studio-item-relations.js';
 
 function readString(record, key, fallback = '') {
   const value = record[key];
@@ -50,7 +53,8 @@ function loadItemForm(id) {
     galleryRows: getStudioItemGalleryRows(item),
     description: readString(item, 'description'),
     notice: readString(item, 'notice'),
-    metaRows: flattenMetaForEdit(meta)
+    metaRows: flattenMetaForEdit(meta),
+    relationRows: getStudioItemRelationRows(item.relations)
   };
 }
 
@@ -76,7 +80,8 @@ export function load({ params }) {
   try {
     return {
       itemForm: loadItemForm(params.id),
-      metaSuggestions: listItemMetaSuggestions()
+      metaSuggestions: listItemMetaSuggestions(),
+      relationAuthoring: getItemRelationAuthoringData()
     };
   } catch (loadError) {
     if (isRedirect(loadError)) {
@@ -94,11 +99,14 @@ export const actions = {
 
     const locale = getOperatorLocale();
     const t = getOperatorTranslator();
+    let submittedRelationRows = null;
 
     try {
       assertContentId(params.id, t('fields.itemId'), locale);
       const original = readItemRecord(params.id);
       const formData = await request.formData();
+      submittedRelationRows = getStudioItemRelationRows(readSubmittedRelationRows(formData));
+      const relations = parseAndValidateStudioItemRelations(formData, params.id, listItemSummaries(), locale);
       assertValidMarkedText([
         { path: `items.${params.id}.title`, value: String(formData.get('title') ?? '') },
         { path: `items.${params.id}.subtitle`, value: String(formData.get('subtitle') ?? '') },
@@ -142,7 +150,7 @@ export const actions = {
           imageAlt = coverFields.image_alt;
         }
 
-        const item = {
+        const item = withStudioItemRelations({
           id: readString(original, 'id', params.id),
           title: requiredField(formData.get('title'), t('fields.itemTitle'), locale),
           subtitle: optionalField(formData.get('subtitle')),
@@ -154,11 +162,7 @@ export const actions = {
           description: requiredField(formData.get('description'), t('fields.description'), locale),
           notice: optionalField(formData.get('notice')),
           meta: parseItemMetaFromForm(formData, locale)
-        };
-
-        if (Object.hasOwn(original, 'relations')) {
-          item.relations = original.relations;
-        }
+        }, relations);
 
         writeItemRecord(params.id, item);
       } catch (writeError) {
@@ -175,7 +179,8 @@ export const actions = {
         itemStatus: validation.ok ? 'success' : 'warning',
         itemMessage: validationMessage(validation, locale),
         itemForm: loadItemForm(params.id),
-        metaSuggestions: listItemMetaSuggestions()
+        metaSuggestions: listItemMetaSuggestions(),
+        relationAuthoring: getItemRelationAuthoringData()
       };
     } catch (saveError) {
       const message = saveError instanceof Error ? saveError.message : t('server.saveItemError');
@@ -184,8 +189,12 @@ export const actions = {
         return fail(400, {
           itemStatus: 'error',
           itemMessage: message,
-          itemForm: loadItemForm(params.id),
-          metaSuggestions: listItemMetaSuggestions()
+          itemForm: {
+            ...loadItemForm(params.id),
+            ...(submittedRelationRows ? { relationRows: submittedRelationRows } : {})
+          },
+          metaSuggestions: listItemMetaSuggestions(),
+          relationAuthoring: getItemRelationAuthoringData()
         });
       } catch {
         return fail(400, {
@@ -233,3 +242,14 @@ export const actions = {
     }
   }
 };
+
+function readSubmittedRelationRows(formData) {
+  const types = formData.getAll('relation_types');
+  const targets = formData.getAll('relation_targets');
+  const labels = formData.getAll('relation_labels');
+  return types.map((type, index) => ({
+    type: String(type),
+    target: String(targets[index] ?? ''),
+    label: String(labels[index] ?? '')
+  }));
+}

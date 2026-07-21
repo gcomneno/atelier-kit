@@ -6,6 +6,7 @@
   import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
   import StudioItemGalleryFields from '$lib/components/StudioItemGalleryFields.svelte';
   import StudioItemMetaFields from '$lib/components/StudioItemMetaFields.svelte';
+  import StudioItemRelationFields from '$lib/components/StudioItemRelationFields.svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
 
@@ -23,6 +24,8 @@
   let galleryRows = $state([]);
   /** @type {MetaEditRow[]} */
   let metaRows = $state([]);
+  /** @type {Array<{ type: string, target: string, label: string }>} */
+  let relationRows = $state([]);
   let isDirty = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};
@@ -32,6 +35,7 @@
   $effect(() => {
     galleryRows = itemForm.galleryRows.map((/** @type {GalleryEditRow} */ row) => ({ ...row }));
     metaRows = itemForm.metaRows.map((/** @type {MetaEditRow} */ row) => ({ ...row }));
+    relationRows = itemForm.relationRows.map((row) => ({ ...row }));
     dirtyControl.resetBaseline?.();
   });
 
@@ -158,6 +162,14 @@
       bind:rows={metaRows}
       labels={metaSuggestions.labels}
       values={metaSuggestions.values}
+      {dirtyControl}
+    />
+
+    <StudioItemRelationFields
+      bind:rows={relationRows}
+      targets={data.relationAuthoring.targets}
+      typeSuggestions={data.relationAuthoring.typeSuggestions}
+      currentId={itemForm.id}
       {dirtyControl}
     />
 

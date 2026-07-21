@@ -21,6 +21,7 @@ import {
 } from '$lib/item-meta.js';
 import { translate } from '$lib/i18n/index.js';
 import { MAX_CATALOG_HOME_LIMIT } from '$lib/layout-presets.js';
+import { collectItemRelationTypeSuggestions, withStudioItemRelations } from '$lib/studio-item-relations.js';
 import { buildAboutData, loadAboutFormData } from '$lib/about-config.js';
 export { checkboxEnabled } from './studio-form-values.js';
 
@@ -156,6 +157,12 @@ export function listItemSummaries() {
     });
 }
 
+export function getItemRelationAuthoringData() {
+  const targets = listItemSummaries().map(({ id, title }) => ({ id, title }));
+  const items = targets.map(({ id }) => readItemRecord(id));
+  return { targets, typeSuggestions: collectItemRelationTypeSuggestions(items) };
+}
+
 /**
  * @param {string[]} orderedIds
  * @param {string} [locale]
@@ -212,7 +219,7 @@ export function itemRecordExists(id) {
 }
 
 /**
- * @param {{ id: string, title: string, preset?: string, description?: string, notice?: string }} input
+ * @param {{ id: string, title: string, preset?: string, description?: string, notice?: string, relations?: Array<{ type: string, target: string, label?: string }> }} input
  * @param {string} [locale]
  */
 export function createItemRecord(input, locale = 'en') {
@@ -226,13 +233,15 @@ export function createItemRecord(input, locale = 'en') {
 
   mkdirSync(path.join(ROOT, 'content/items'), { recursive: true });
 
-  const item = buildNewItemRecord(id, title, preset, {
+  let item = buildNewItemRecord(id, title, preset, {
     description:
       typeof input.description === 'string' && input.description.trim() !== ''
         ? input.description.trim()
         : undefined,
     notice: typeof input.notice === 'string' ? input.notice.trim() : undefined
   });
+
+  item = withStudioItemRelations(item, Array.isArray(input.relations) ? input.relations : []);
 
   writeItemRecord(id, item);
 

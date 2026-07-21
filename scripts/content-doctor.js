@@ -6,6 +6,7 @@ import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
 import { validateEditorialFields } from '../src/lib/editorial-markup.js';
 import { validateAboutPortraitContent } from '../src/lib/about-config.js';
 import { validateMarkedTextValues } from '../src/lib/marked-text.js';
+import { analyzeCatalogItemRelations, normalizeCatalogItemId } from '../src/lib/item-relations.js';
 
 const ROOT = process.cwd();
 const STRICT_MODE = process.argv.includes('--strict');
@@ -487,6 +488,8 @@ function inspectItems() {
     return;
   }
 
+  const relationRecords = [];
+
   for (const file of files) {
     const source = `content/items/${file}`;
     const item = readYaml(source);
@@ -495,7 +498,8 @@ function inspectItems() {
       continue;
     }
 
-    const id = typeof item.id === 'string' ? item.id : file.replace(/\.yaml$/, '');
+    const id = normalizeCatalogItemId(item.id);
+    relationRecords.push({ id, source, relations: item.relations });
     const itemTitle = typeof item.title === 'string' && item.title.trim() !== '' ? item.title.trim() : id;
     const imageFile = typeof item.image_file === 'string' ? item.image_file : '';
     const description = typeof item.description === 'string' ? item.description.trim() : '';
@@ -582,6 +586,24 @@ function inspectItems() {
         technical: 'Item has no meta information.'
       });
     }
+  }
+
+  for (const diagnostic of analyzeCatalogItemRelations(relationRecords)) {
+    const key = ['missing-target', 'self-reference', 'duplicate'].includes(diagnostic.code)
+      ? diagnostic.code
+      : 'structure';
+    addWarning({
+      source: `${diagnostic.source}${Number.isInteger(diagnostic.index) ? `:relations[${diagnostic.index}]` : ''}`,
+      title: t(`doctor.warnings.itemRelation.${key}.title`),
+      problem: t(`doctor.warnings.itemRelation.${key}.problem`, {
+        item: diagnostic.itemId || '?',
+        type: diagnostic.type || '?',
+        target: diagnostic.target || '?',
+        firstIndex: diagnostic.firstIndex ?? '?'
+      }),
+      action: t('doctor.warnings.itemRelation.action', { source: diagnostic.source }),
+      technical: diagnostic.message
+    });
   }
 }
 

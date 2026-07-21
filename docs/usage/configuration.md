@@ -280,7 +280,7 @@ relations:
 
 Each relation requires a non-empty string `type` and `target`. `label` is optional and, when present, must be a string. The loader trims all three values, omits a label that becomes empty, preserves relation order, and exposes only `type`, `target` and the optional `label`. An omitted `relations` field is normalized to `[]`, so legacy items remain compatible.
 
-Types such as `inspired-by` between works and `part-of` between a component and a collection or project are examples only. There is no enum or domain-specific vocabulary. Content validation is structural, not referential: a target need not currently exist, a relation may target its source item, duplicates and one-way relations are valid. Target resolution, inverse relationships, duplicate detection and graph rules belong to a separate validation layer.
+Types such as `inspired-by` between works and `part-of` between a component and a collection or project are examples only. There is no enum or domain-specific vocabulary. Content validation requires every trimmed target to identify an existing item, rejects self-references by default, and reports every repeated trimmed `type` + `target` edge after its first occurrence (the label is not part of edge identity). Cycles between different items and one-way relationships are valid; inverse relationships are not required.
 
 
 ## Nested meta information

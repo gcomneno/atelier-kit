@@ -170,7 +170,7 @@ relations:
 
 `type` and `target` are required non-empty strings; `label` is an optional display label. Values are trimmed while loading, and a blank label is omitted. Item records without `relations` remain compatible and load with `relations: []`.
 
-Relationship types are open and domain-neutral, not a fixed vocabulary. Validation checks only this structure: missing targets, self-references, duplicates and one-way relationships are accepted. Target resolution and other referential rules are intentionally outside this structural contract.
+Relationship types are open and domain-neutral, not a fixed vocabulary. Validation requires targets to exist, rejects self-references by default, and rejects repeated edges with the same trimmed `type` and `target` (labels do not make an edge unique). Cycles between different items and one-way relationships remain valid.
 
 ## Nested meta information
 

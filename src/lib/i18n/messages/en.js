@@ -1277,7 +1277,8 @@ export default {
       handmade: 'Handmade / craft showcase',
       jewelry: 'Jewelry showcase',
       collector: 'Collector showcase',
-      furniture: 'Furniture / object design showcase'
+      furniture: 'Furniture / object design showcase',
+      genealogy: 'Genealogy / family archive showcase'
     }
   },
   visitor: {
@@ -1347,6 +1348,16 @@ export default {
       title: 'News',
       empty: 'No news posts yet.'
     },
+    relationships: {
+      navLabel: 'Relationships',
+      pageTitle: 'Relationship overview',
+      metaDescription: 'Directed relationships between catalog items from {siteName}.',
+      eyebrow: 'Connections',
+      title: 'Relationship overview',
+      intro: 'Explore the directed connections declared by the catalog. Select any node to open its detail page.',
+      ariaLabel: 'Catalog relationship graph',
+      empty: 'No catalog relationships are available yet.'
+    },
     search: {
       label: 'Search',
       placeholder: 'Search items and news…',
@@ -1368,6 +1379,7 @@ export default {
       previousItemAria: 'Go to {title}',
       nextItem: 'Next →',
       nextItemAria: 'Go to {title}',
+      relatedTitle: 'Related {itemPlural}',
       material: 'Material',
       dimensions: 'Dimensions',
       availability: 'Availability'

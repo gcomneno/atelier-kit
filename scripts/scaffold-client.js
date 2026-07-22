@@ -17,7 +17,15 @@ const EXCLUDED_RELATIVE_PATHS = new Set([
 ]);
 const KIT_ONLY_ROOT_NAMES = new Set(['test']);
 
-const SUPPORTED_TEMPLATES = new Set(['writing', 'artwork', 'handmade', 'jewelry', 'collector', 'furniture']);
+const SUPPORTED_TEMPLATES = new Set([
+  'writing',
+  'artwork',
+  'handmade',
+  'jewelry',
+  'collector',
+  'furniture',
+  'genealogy'
+]);
 
 const TEMPLATE_APPLIERS = {
   writing: applyWritingTemplate,
@@ -25,7 +33,8 @@ const TEMPLATE_APPLIERS = {
   handmade: applyHandmadeTemplate,
   jewelry: applyJewelryTemplate,
   collector: applyCollectorTemplate,
-  furniture: applyFurnitureTemplate
+  furniture: applyFurnitureTemplate,
+  genealogy: applyGenealogyTemplate
 };
 
 function usage() {
@@ -39,6 +48,7 @@ Examples:
   npm run site:scaffold -- ../tiny-silver --template jewelry
   npm run site:scaffold -- ../my-shelf --template collector
   npm run site:scaffold -- ../quiet-room --template furniture
+  npm run site:scaffold -- ../family-archive --template genealogy
   npm run site:scaffold -- ../client-site --template writing --force
 
 Options:
@@ -1005,6 +1015,310 @@ title: "Room selection"
 description: "A first curated group of furniture pieces, available works or custom interior objects."
 items:
   - furniture-piece
+`);
+}
+
+function applyGenealogyTemplate(targetRoot) {
+  resetScaffoldContent(targetRoot);
+
+  writeFile(targetRoot, 'config/site.yaml', `
+site:
+  name: "The Conti–Serra Family Archive"
+  tagline: "People, places and stories across three generations"
+  language: "en"
+  notice: "Demo records are fictional. Before publishing a living person, obtain informed consent and remove private dates, addresses, contact details and sensitive documents."
+  footer_note: "Family relationships are editorial links between ordinary catalog items."
+  hero_intro: "Follow the people, places and documents that connect this fictional family archive."
+  appearance:
+    preset: "intimate"
+    font_preset: "lora"
+`);
+
+  writeFile(targetRoot, 'config/catalog.yaml', `
+catalog:
+  item_name_singular: "person"
+  item_name_plural: "people"
+  sort: manual
+  eyebrow: "Family archive"
+  intro: "Browse each person as an ordinary Atelier-Kit catalog record, then use the relationship overview to follow the directed connections."
+`);
+
+  writeFile(targetRoot, 'config/layout.yaml', `
+layout:
+  preset: single-column
+  blocks:
+    about:
+      enabled: true
+      placements:
+        - menu
+    news:
+      enabled: false
+      placements:
+        - sidebar
+      count: 3
+    collections:
+      enabled: true
+      placements:
+        - main
+        - menu
+    catalog:
+      enabled: true
+      placements:
+        - main
+        - menu
+      label: "People"
+`);
+
+  writeFile(targetRoot, 'config/about.yaml', `
+about:
+  enabled: true
+  title: "About this family archive"
+  intro: |
+    This fictional archive demonstrates a genealogy-oriented presentation built entirely from Atelier-Kit's generic item, image, metadata, document-link and relationship capabilities.
+  sections:
+    - heading: "A public starting point"
+      body: |
+        Replace every demo record and source note before publishing. Atelier-Kit does not provide authentication or a private family portal, so treat every generated visitor page as public.
+    - heading: "Relationships are editorial"
+      body: |
+        Parent, spouse and other meanings are template vocabulary, not genealogy rules. Directed links, lateral links, cycles and incomplete research remain valid.
+`);
+
+  writeFile(targetRoot, 'config/signal-clouds.yaml', `
+signal_clouds: []
+`);
+
+  writeScaffoldContact(targetRoot);
+  writeScaffoldSocial(targetRoot);
+
+  writeFile(targetRoot, 'config/footer.yaml', `
+footer:
+  columns:
+    - title: "Explore"
+      links:
+        - label: "People"
+          href: "/catalog"
+        - label: "Relationship overview"
+          href: "/relationships"
+    - title: "Information"
+      links:
+        - label: "About"
+          href: "/about"
+        - label: "Privacy guidance"
+          href: "/legal/privacy"
+  copyright: ""
+  legal_line: ""
+  show_social: false
+`);
+
+  writeFile(targetRoot, 'config/legal.yaml', `
+legal:
+  pages:
+    privacy:
+      title: "Privacy guidance for family archives"
+      body: |
+        This generated site is public and has no private-member access control.
+
+        Obtain informed consent before publishing a living person. Minimize exact dates and places, and do not publish home addresses, contact details, identity numbers, medical information or sensitive source documents without explicit permission.
+
+        The included people and archive note are fictional demonstration content. Replace or remove them before publication.
+`);
+
+  writeFile(targetRoot, 'static/documents/genealogy/sample-archive-note.txt', `
+Fictional demo archive note
+
+This text file demonstrates the ordinary item preview/document link used by the
+genealogy scaffold. Replace it with a reviewed public document, or remove each
+item's preview field before publishing.
+`);
+
+  const sharedPersonFields = `
+status: "historical record"
+price_mode: "hidden"
+images:
+  - file: "/images/items/placeholder.svg"
+    alt: "Placeholder portrait to replace before publishing"
+    role: "cover"
+preview:
+  href: "/documents/genealogy/sample-archive-note.txt"
+  label: "Open the fictional archive note"
+notice: "Fictional demonstration record. Replace the biography, portrait and source document before publishing."
+`;
+
+  writeFile(targetRoot, 'content/items/alma-conti.yaml', `
+id: "alma-conti"
+title: "Alma Conti"
+subtitle: "1908–1987 · Parma and Bologna, Italy"
+sort_order: 10
+${sharedPersonFields}
+description: |
+  Alma Conti grew up near Parma and later kept a small stationery shop in Bologna. Her notebooks, letters and carefully captioned photographs became the starting point for this fictional family archive.
+
+  This biography is demo copy. Replace it with a sourced, consent-aware account written for public readers.
+meta:
+  - label: "Dates"
+    children:
+      - label: "Born"
+        value: "12 May 1908"
+      - label: "Died"
+        value: "3 November 1987"
+  - label: "Places"
+    children:
+      - label: "Birthplace"
+        value: "Parma, Italy"
+      - label: "Later home"
+        value: "Bologna, Italy"
+  - label: "Occupation"
+    value: "Stationer"
+relations:
+  - type: "spouse"
+    target: "matteo-serra"
+    label: "Husband"
+`);
+
+  writeFile(targetRoot, 'content/items/matteo-serra.yaml', `
+id: "matteo-serra"
+title: "Matteo Serra"
+subtitle: "1905–1979 · Modena and Bologna, Italy"
+sort_order: 20
+${sharedPersonFields}
+description: |
+  Matteo Serra trained as a cabinetmaker in Modena and moved to Bologna in the late 1920s. The fictional workshop records linked from this demo are placeholders for reviewed family documents.
+
+  Record uncertainty in the prose instead of inventing facts, and cite only sources that are safe to publish.
+meta:
+  - label: "Dates"
+    children:
+      - label: "Born"
+        value: "21 January 1905"
+      - label: "Died"
+        value: "18 August 1979"
+  - label: "Places"
+    children:
+      - label: "Birthplace"
+        value: "Modena, Italy"
+      - label: "Later home"
+        value: "Bologna, Italy"
+  - label: "Occupation"
+    value: "Cabinetmaker"
+relations:
+  - type: "spouse"
+    target: "alma-conti"
+    label: "Wife"
+`);
+
+  writeFile(targetRoot, 'content/items/lucia-serra.yaml', `
+id: "lucia-serra"
+title: "Lucia Serra"
+subtitle: "1934–2012 · Bologna and Florence, Italy"
+sort_order: 30
+${sharedPersonFields}
+description: |
+  Lucia Serra studied languages before settling in Florence, where she translated correspondence for local exporters. Her recollections connect the first and third generations represented in this fictional archive.
+
+  The two parent links and lateral spouse link below are ordinary directed item relationships.
+meta:
+  - label: "Dates"
+    children:
+      - label: "Born"
+        value: "7 September 1934"
+      - label: "Died"
+        value: "26 February 2012"
+  - label: "Places"
+    children:
+      - label: "Birthplace"
+        value: "Bologna, Italy"
+      - label: "Later home"
+        value: "Florence, Italy"
+  - label: "Occupation"
+    value: "Translator"
+relations:
+  - type: "parent"
+    target: "alma-conti"
+    label: "Mother"
+  - type: "parent"
+    target: "matteo-serra"
+    label: "Father"
+  - type: "spouse"
+    target: "renato-galli"
+    label: "Husband"
+`);
+
+  writeFile(targetRoot, 'content/items/renato-galli.yaml', `
+id: "renato-galli"
+title: "Renato Galli"
+subtitle: "1931–2001 · Florence, Italy"
+sort_order: 40
+${sharedPersonFields}
+description: |
+  Renato Galli worked as a railway clerk and photographed neighborhood celebrations. This fictional record shows how a spouse can sit beside a generation rather than inside a strict tree.
+
+  Use the image gallery and document link only for material cleared for public access.
+meta:
+  - label: "Dates"
+    children:
+      - label: "Born"
+        value: "16 March 1931"
+      - label: "Died"
+        value: "9 December 2001"
+  - label: "Places"
+    children:
+      - label: "Birthplace"
+        value: "Florence, Italy"
+      - label: "Later home"
+        value: "Florence, Italy"
+  - label: "Occupation"
+    value: "Railway clerk"
+relations:
+  - type: "spouse"
+    target: "lucia-serra"
+    label: "Wife"
+`);
+
+  writeFile(targetRoot, 'content/items/nina-galli.yaml', `
+id: "nina-galli"
+title: "Nina Galli"
+subtitle: "1962–2021 · Florence and Turin, Italy"
+sort_order: 50
+${sharedPersonFields}
+description: |
+  Nina Galli catalogued family photographs and added dates and place names from notes on their reverse. In this fictional example she forms the third generation and points to both parents.
+
+  For a living person, publish a reduced biography only after informed consent and omit exact private details.
+meta:
+  - label: "Dates"
+    children:
+      - label: "Born"
+        value: "4 July 1962"
+      - label: "Died"
+        value: "11 October 2021"
+  - label: "Places"
+    children:
+      - label: "Birthplace"
+        value: "Florence, Italy"
+      - label: "Later home"
+        value: "Turin, Italy"
+  - label: "Occupation"
+    value: "Photo archivist"
+relations:
+  - type: "parent"
+    target: "lucia-serra"
+    label: "Mother"
+  - type: "parent"
+    target: "renato-galli"
+    label: "Father"
+`);
+
+  writeFile(targetRoot, 'content/collections/family-archive.yaml', `
+id: "family-archive"
+title: "Three generations"
+description: "Five fictional people demonstrating two-parent, spouse, cyclic and multi-generation relationships without imposing a family-tree schema."
+items:
+  - alma-conti
+  - matteo-serra
+  - lucia-serra
+  - renato-galli
+  - nina-galli
 `);
 }
 

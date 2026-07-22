@@ -12,7 +12,7 @@ import { getScaffoldLocalePack } from './scaffold-locales/index.js';
 
 const t = createTranslator(loadOperatorLocale());
 
-const TEMPLATE_IDS = ['writing', 'artwork', 'handmade', 'jewelry', 'collector', 'furniture'];
+const TEMPLATE_IDS = ['writing', 'artwork', 'handmade', 'jewelry', 'collector', 'furniture', 'genealogy'];
 
 const TEMPLATE_STARTER = {
   writing: { itemId: 'first-draft', collectionId: 'writing-desk' },
@@ -20,7 +20,8 @@ const TEMPLATE_STARTER = {
   handmade: { itemId: 'maker-piece', collectionId: 'curated-selection' },
   jewelry: { itemId: 'jewelry-piece', collectionId: 'available-pieces' },
   collector: { itemId: 'collector-piece', collectionId: 'my-collection' },
-  furniture: { itemId: 'furniture-piece', collectionId: 'room-selection' }
+  furniture: { itemId: 'furniture-piece', collectionId: 'room-selection' },
+  genealogy: { itemId: 'lucia-serra', collectionId: 'family-archive' }
 };
 
 function usage() {

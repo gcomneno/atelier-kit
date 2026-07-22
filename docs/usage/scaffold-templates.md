@@ -45,6 +45,7 @@ npm run site:scaffold -- ../quiet-clay --template handmade
 npm run site:scaffold -- ../tiny-silver --template jewelry
 npm run site:scaffold -- ../my-shelf --template collector
 npm run site:scaffold -- ../quiet-room --template furniture
+npm run site:scaffold -- ../family-archive --template genealogy
 ```
 
 A scaffold template configures:
@@ -53,7 +54,7 @@ A scaffold template configures:
 - catalog vocabulary;
 - Signal Clouds;
 - contact actions;
-- one starter item;
+- one or more representative starter items;
 - one starter collection.
 
 Use scaffold templates when you want a separate client site with a use-case-specific starting point.
@@ -70,6 +71,7 @@ See [`client-scaffold.md`](client-scaffold.md).
 | `jewelry` | Small jewelry collections | jewelry piece | collection, available pieces, custom pieces |
 | `collector` | Personal collections and swap showcases | collectible | personal shelf, set group, trade list |
 | `furniture` | Furniture and object design showcases | furniture piece or object | room, material group, available pieces, custom work |
+| `genealogy` | Public family histories and reviewed archives | person record | generation, family branch, research group |
 
 ### `writing`
 
@@ -129,6 +131,16 @@ Signal Clouds focus on material, room, use case and visitor interest.
 
 Visitor Brief selections are meant to support requests about a piece, dimensions, availability or commission.
 
+### `genealogy`
+
+```bash
+npm run site:scaffold -- ../family-archive --template genealogy
+```
+
+Creates fictional people across three generations, with two-parent links, lateral spouse links, biographies, dates, places, placeholder portraits and a sample document link. It also configures the generic `/relationships` overview built with Atelier-Kit's relationship projector and the shared visitor `RelationshipGraph` component.
+
+`parent`, `spouse`, `Mother` and similar terms are conventions in the generated item YAML. Atelier-Kit core still accepts any non-empty relationship `type`; it does not infer inverses, enforce a tree, or apply genealogy validation. See [`genealogy-scaffold.md`](genealogy-scaffold.md) before replacing the demo records or publishing.
+
 ## Use cases without a scaffold template
 
 Some showcase types do not have a dedicated scaffold template yet.
@@ -161,6 +173,7 @@ Examples:
 - a jeweler with rings and pendants → `jewelry`
 - a kid or hobby collector with cards or figurines → `collector`
 - a furniture maker with chairs and tables → `furniture`
+- a reviewed public family history → `genealogy`
 - a photographer selling prints → manual setup with `--preset print`
 
 ## When not to use a scaffold template

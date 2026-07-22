@@ -264,6 +264,33 @@ test('package root exposes both trial components and adapters consume no third c
   assert.doesNotMatch(consumers[0][1] + consumers[1][1], /giadaware-ui-components\/(visitor|studio)/);
 });
 
+test('relationship overview uses the narrow visitor entry point and forwards canonical item links', async () => {
+  const consumer = read('src/routes/relationships/+page.svelte');
+  assert.match(
+    consumer,
+    /import \{ RelationshipGraph \} from 'giadaware-ui-components\/visitor'/
+  );
+  assert.doesNotMatch(consumer, /from 'giadaware-ui-components'/);
+
+  const harness = `<script>
+    import { RelationshipGraph } from 'giadaware-ui-components/visitor';
+    let { nodes, edges } = $props();
+  </script>
+  <RelationshipGraph {nodes} {edges} ariaLabel="Demo relationships" />`;
+  const { body } = await renderHarness(harness, {
+    nodes: [
+      { id: 'person-a', label: 'Person A', href: '/items/person-a' },
+      { id: 'person-b', label: 'Person B', href: '/items/person-b' }
+    ],
+    edges: [{ source: 'person-a', target: 'person-b', type: 'free-form' }]
+  });
+
+  assert.match(body, /aria-label="Demo relationships"/);
+  assert.match(body, /href="\/items\/person-a"/);
+  assert.match(body, /href="\/items\/person-b"/);
+  assert.match(body, /1 directed relationship/);
+});
+
 test('social adapter SSR renders admitted decorative icons inside consumer-owned labels', async () => {
   const harness = `<script>
     import AtelierSocialIcon from '$atelier-social';

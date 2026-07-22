@@ -1287,7 +1287,8 @@ export default {
       handmade: 'Artigianato / craft',
       jewelry: 'Gioielli',
       collector: 'Collezionismo / vetrina scambi',
-      furniture: 'Mobili / design oggetti'
+      furniture: 'Mobili / design oggetti',
+      genealogy: 'Genealogia / archivio di famiglia'
     }
   },
   visitor: {
@@ -1357,6 +1358,16 @@ export default {
       title: 'Notizie',
       empty: 'Nessun articolo per ora.'
     },
+    relationships: {
+      navLabel: 'Relazioni',
+      pageTitle: 'Panoramica relazioni',
+      metaDescription: 'Relazioni dirette tra gli oggetti del catalogo di {siteName}.',
+      eyebrow: 'Connessioni',
+      title: 'Panoramica relazioni',
+      intro: 'Esplora le connessioni dirette dichiarate nel catalogo. Seleziona un nodo per aprire la relativa pagina dettaglio.',
+      ariaLabel: 'Grafo delle relazioni del catalogo',
+      empty: 'Non sono ancora disponibili relazioni nel catalogo.'
+    },
     search: {
       label: 'Cerca',
       placeholder: 'Cerca oggetti e notizie…',
@@ -1378,6 +1389,7 @@ export default {
       previousItemAria: 'Vai a {title}',
       nextItem: 'Successiva →',
       nextItemAria: 'Vai a {title}',
+      relatedTitle: 'Relazioni: {itemPlural}',
       material: 'Materiale',
       dimensions: 'Dimensioni',
       availability: 'Disponibilità'

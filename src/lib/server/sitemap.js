@@ -36,9 +36,14 @@ export function buildSitemapUrls(origin) {
 
   /** @type {SitemapUrl[]} */
   const urls = [{ loc: absolute('/') }];
+  const items = getItems();
 
-  for (const item of getItems()) {
+  for (const item of items) {
     urls.push({ loc: absolute(`/items/${item.id}`) });
+  }
+
+  if (items.some((item) => item.relations.length > 0)) {
+    urls.push({ loc: absolute('/relationships') });
   }
 
   const collections = getCollections();

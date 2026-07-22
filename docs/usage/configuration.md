@@ -301,6 +301,14 @@ Output order is deterministic for equivalent content regardless of input order.
 Nodes sort by `id`; edges sort by `source`, `target`, `type`, then `label`, all
 with code-unit string comparison.
 
+The generic visitor page at `/relationships` passes this projection to
+`RelationshipGraph` from the narrow `giadaware-ui-components/visitor` entry
+point. Its node links use the projector's canonical `/items/<id>` hrefs. The
+site menu and sitemap include the overview when at least one item relation is
+declared; an empty or disconnected catalog still renders safely when the route
+is opened directly. These behaviors do not interpret relation types or require
+a tree.
+
 
 ## Nested meta information
 

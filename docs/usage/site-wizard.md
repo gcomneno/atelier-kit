@@ -12,6 +12,14 @@ npm run site:wizard -- --yes --template handmade --target ../quiet-clay \
   --email studio@example.com
 ```
 
+For a public family archive, select the genealogy scaffold in the same workflow:
+
+```bash
+npm run site:wizard -- --yes --template genealogy --target ../family-archive \
+  --site-title "Reviewed Family Archive" --tagline "People, places and sources" \
+  --email archive@example.com
+```
+
 Update the current folder only:
 
 ```bash

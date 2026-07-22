@@ -304,7 +304,7 @@ For a separate client site folder, use the scaffold workflow:
 - [`docs/usage/scaffold-templates.md`](scaffold-templates.md)
 - [`docs/usage/manual-client-setup.md`](manual-client-setup.md)
 
-The scaffold currently supports `writing`, `artwork`, `handmade`, `jewelry`, `collector` and `furniture` starters and keeps generated sites file-based.
+The scaffold currently supports `writing`, `artwork`, `handmade`, `jewelry`, `collector`, `furniture` and `genealogy` starters and keeps generated sites file-based.
 
 ## Custom home layouts and `site:upgrade`
 

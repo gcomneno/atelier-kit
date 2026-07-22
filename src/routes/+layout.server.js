@@ -7,6 +7,7 @@ import {
   getFaqEntries,
   getAboutConfig,
   getFooterConfig,
+  getItems,
   getLayoutConfig,
   getLayoutMenuNav,
   getSiteConfig,
@@ -26,10 +27,14 @@ export function load({ url }) {
   const layout = getLayoutConfig();
   const layoutMenuNav = getLayoutMenuNav(layout, locale);
   const faqEntries = getFaqEntries();
-  const menuNav =
-    faqEntries.length > 0
-      ? [...layoutMenuNav, { href: '/faq', label: t('visitor.faq.navLabel') }]
-      : layoutMenuNav;
+  const hasItemRelationships = getItems().some((item) => item.relations.length > 0);
+  const menuNav = [
+    ...layoutMenuNav,
+    ...(hasItemRelationships
+      ? [{ href: '/relationships', label: t('visitor.relationships.navLabel') }]
+      : []),
+    ...(faqEntries.length > 0 ? [{ href: '/faq', label: t('visitor.faq.navLabel') }] : [])
+  ];
   const documentTitle = resolveDocumentTitle(site);
   const aboutPortrait = getAboutConfig()?.portrait ?? null;
 

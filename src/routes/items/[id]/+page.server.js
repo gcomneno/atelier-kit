@@ -8,10 +8,14 @@ import {
   getContactConfig,
   getItemById,
   getItemNeighbors,
+  getItems,
   getSignalClouds,
   getSocialConfig,
   getSiteConfig
 } from '$lib/server/showcase.js';
+
+/** @typedef {ReturnType<typeof getItems>[number]} ShowcaseItem */
+/** @typedef {{ type: string, target: string, label?: string }} ItemRelation */
 
 /** @type {import('./$types').PageServerLoad} */
 export function load({ params, url }) {
@@ -22,9 +26,17 @@ export function load({ params, url }) {
   }
 
   const site = getSiteConfig();
+  /** @type {Map<string, ShowcaseItem>} */
+  const itemsById = new Map(getItems().map((candidate) => [candidate.id, candidate]));
+  const relatedItems = item.relations.flatMap((/** @type {ItemRelation} */ relation) => {
+    const relatedItem = itemsById.get(relation.target);
+
+    return relatedItem ? [{ relation, item: relatedItem }] : [];
+  });
 
   return {
     item,
+    relatedItems,
     catalog: getCatalogConfig(),
     neighbors: getItemNeighbors(params.id),
     signalClouds: getSignalClouds(),

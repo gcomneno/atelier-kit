@@ -255,6 +255,27 @@
       </div>
     </section>
 
+    {#if data.relatedItems.length > 0}
+      <section class="related-items" aria-labelledby="related-items-title">
+        <h2 id="related-items-title">
+          {t('item.relatedTitle', { itemPlural: data.catalog.item_name_plural })}
+        </h2>
+        <ul>
+          {#each data.relatedItems as related (`${related.relation.type}-${related.item.id}`)}
+            <li>
+              <a href={`/items/${related.item.id}`}>
+                <span class="relation-label">{related.relation.label || related.relation.type}</span>
+                <EditorialText tag="strong" value={related.item.title} />
+                {#if related.item.subtitle}
+                  <EditorialText tag="span" class="related-subtitle" value={related.item.subtitle} />
+                {/if}
+              </a>
+            </li>
+          {/each}
+        </ul>
+      </section>
+    {/if}
+
     {#if signalClouds.length > 0}
       <section class="visitor-zone" aria-labelledby="visitor-zone-title">
         <header class="visitor-header">
@@ -562,6 +583,56 @@
   .preview-link a:hover {
     background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 82%, black);
     border-color: color-mix(in srgb, var(--site-accent-color, #8c3a44) 82%, black);
+  }
+
+  .related-items {
+    display: grid;
+    gap: 1rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1px solid var(--site-border-color, color-mix(in srgb, var(--site-text-color, #2f281f) 12%, transparent));
+    border-radius: 1.35rem;
+    background: var(--site-card-color, rgb(255 250 242 / 0.88));
+  }
+
+  .related-items h2 {
+    margin: 0;
+    font-size: clamp(1.35rem, 3vw, 1.85rem);
+  }
+
+  .related-items ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .related-items a {
+    display: grid;
+    gap: 0.25rem;
+    min-height: 100%;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--site-text-color, #2f281f) 14%, transparent);
+    border-radius: 0.9rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .related-items a:hover {
+    border-color: var(--site-accent-color, #8c3a44);
+  }
+
+  .relation-label,
+  :global(.related-subtitle) {
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 65%, transparent);
+  }
+
+  .relation-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .visitor-zone {

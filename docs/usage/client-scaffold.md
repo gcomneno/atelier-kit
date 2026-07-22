@@ -13,6 +13,7 @@ npm run site:scaffold -- ../quiet-clay --template handmade
 npm run site:scaffold -- ../tiny-silver --template jewelry
 npm run site:scaffold -- ../my-shelf --template collector
 npm run site:scaffold -- ../quiet-room --template furniture
+npm run site:scaffold -- ../family-archive --template genealogy
 ```
 
 The target path is relative to the Atelier-Kit repository.
@@ -93,6 +94,20 @@ It maps Atelier-Kit concepts like this:
 - Visitor Brief = request information about a piece, dimensions, availability or commission.
 - Contact actions = configured email and optional WhatsApp.
 
+### `genealogy`
+
+Creates a public family-history showcase from ordinary Atelier-Kit items.
+
+It maps Atelier-Kit concepts like this:
+
+- Item = person record with biography, dates, places, images and an optional document link.
+- Collection = generation, family branch or reviewed research group.
+- Item relationship = a directed editorial connection; the demo uses free-form `parent` and `spouse` types.
+- `/relationships` = generic relationship overview rendered by the shared visitor graph component.
+- Contact and Signal Clouds = disabled by default because this is an archive, not an enquiry catalog.
+
+The generated relationships are not a genealogy schema. Cycles, lateral connections, one-way links and other free-form meanings remain valid. Read [`genealogy-scaffold.md`](genealogy-scaffold.md) for safe demo replacement, privacy and publication steps.
+
 ## What the scaffold does
 
 The scaffold command:
@@ -101,6 +116,7 @@ The scaffold command:
 - excludes `.git`, `node_modules`, `.svelte-kit` and `.vercel`;
 - replaces starter item and collection content for the chosen template;
 - configures starter Signal Clouds for the chosen use case;
+- exposes the generic relationship overview in navigation when item relations exist;
 - keeps the generated site file-based and editable.
 
 ## What it does not do

@@ -10,9 +10,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const artifactRelative =
-  'vendor/giadaware-ui-components/fcdb869/giadaware-ui-components-0.0.0.tgz';
+  'vendor/giadaware-ui-components/93a7d0c/giadaware-ui-components-0.0.0.tgz';
 const dependency = `file:${artifactRelative}`;
-const expectedSha256 = 'c53b5399520db687f7aef43c15b8b4b6a999a6a80f1bda71e26ff22a35acb7bd';
+const expectedSha256 = '92628cefe39c80b72416edbc9cd7d9d29a87dc8817d52488cd0a8f8a563f1714';
 const npmCache = path.join(os.tmpdir(), 'atelier-kit-npm-cache');
 /** @type {string} */
 let fixtureRoot = '';
@@ -29,7 +29,7 @@ test.before(async () => {
   fs.copyFileSync(path.join(root, 'package-lock.json'), path.join(fixtureRoot, 'package-lock.json'));
   for (const relativePath of [
     artifactRelative,
-    'vendor/giadaware-ui-components/fcdb869/integration.json',
+    'vendor/giadaware-ui-components/93a7d0c/integration.json',
     'src/lib/components/AtelierSocialIcon.svelte',
     'src/lib/components/AtelierFormStatus.svelte',
     'src/lib/social-icon-adapter.js',
@@ -158,11 +158,11 @@ function collectFiles(directory) {
 }
 
 test('records and installs the exact immutable package artifact', () => {
-  const manifest = JSON.parse(read('vendor/giadaware-ui-components/fcdb869/integration.json'));
+  const manifest = JSON.parse(read('vendor/giadaware-ui-components/93a7d0c/integration.json'));
   assert.deepEqual(manifest, {
     package: 'giadaware-ui-components',
     version: '0.0.0',
-    sourceCommit: 'fcdb8693fc69ab37223de76bba714eabaf3a3457',
+    sourceCommit: '93a7d0c370b757f5a4a37436e0722bb4522e6837',
     filename: 'giadaware-ui-components-0.0.0.tgz',
     sha256: expectedSha256
   });

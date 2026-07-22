@@ -28,8 +28,8 @@ const currentKitVersion = detectKitVersion(kitRoot);
 const childEnv = { ...process.env };
 delete childEnv.NODE_TEST_CONTEXT;
 const currentViteConfig = fs.readFileSync(path.join(kitRoot, 'vite.config.js'), 'utf8');
-const artifact = 'vendor/giadaware-ui-components/fcdb869/giadaware-ui-components-0.0.0.tgz';
-const identity = 'vendor/giadaware-ui-components/fcdb869/integration.json';
+const artifact = 'vendor/giadaware-ui-components/93a7d0c/giadaware-ui-components-0.0.0.tgz';
+const identity = 'vendor/giadaware-ui-components/93a7d0c/integration.json';
 const legacyViteConfig = `import adapter from '@sveltejs/adapter-vercel';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { readFileSync } from 'node:fs';
@@ -223,7 +223,7 @@ for (const [label, value] of [['missing', undefined], ['wrong', 'file:vendor/wro
       const before = snapshotTree(clientRoot);
       await assert.rejects(
         runMain(clientRoot),
-        /preserves package\.json.*Expected "file:vendor\/giadaware-ui-components\/fcdb869\/giadaware-ui-components-0\.0\.0\.tgz".*Remove the package\.json preserve rule/
+        /preserves package\.json.*Expected "file:vendor\/giadaware-ui-components\/93a7d0c\/giadaware-ui-components-0\.0\.0\.tgz".*Remove the package\.json preserve rule/
       );
       assert.deepEqual(snapshotTree(clientRoot), before);
     } finally { cleanup(clientRoot); }
@@ -270,7 +270,7 @@ for (const { label, relativePath, prepare } of preservedIntegrationCases) {
       fs.writeFileSync(path.join(clientRoot, '.atelier-kit-preserve'), `${relativePath}\n`);
       const before = snapshotTree(clientRoot);
       const expectedDetail = relativePath === artifact
-        ? 'required SHA-256: c53b5399520db687f7aef43c15b8b4b6a999a6a80f1bda71e26ff22a35acb7bd'
+        ? 'required SHA-256: 92628cefe39c80b72416edbc9cd7d9d29a87dc8817d52488cd0a8f8a563f1714'
         : 'exact integration identity/content';
       await assert.rejects(
         runMain(clientRoot),
@@ -366,7 +366,7 @@ test('repairs a missing artifact before an unrelated normal copy can fail', asyn
     applyUiComponentsIntegrationPlan(integrationPlan, kitRoot, clientRoot);
     const failingNormalPlan = { add: ['src/injected-missing-file.svelte'], update: [], remove: [] };
     assert.throws(() => applyFilePlan(failingNormalPlan, kitRoot, clientRoot), /ENOENT/);
-    assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(clientRoot, artifact))).digest('hex'), 'c53b5399520db687f7aef43c15b8b4b6a999a6a80f1bda71e26ff22a35acb7bd');
+    assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(clientRoot, artifact))).digest('hex'), '92628cefe39c80b72416edbc9cd7d9d29a87dc8817d52488cd0a8f8a563f1714');
     assert.equal(JSON.parse(fs.readFileSync(path.join(clientRoot, 'package.json'), 'utf8')).dependencies['giadaware-ui-components'], `file:${artifact}`);
   } finally { cleanup(clientRoot); }
 });

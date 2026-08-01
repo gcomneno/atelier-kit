@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -113,7 +114,7 @@
     </fieldset>
 
     <div class="actions">
-      <button type="submit" disabled={!itemNamesDirty}>{t('studio.items.saveNames')}</button>
+      <Button type="submit" disabled={!itemNamesDirty}>{t('studio.items.saveNames')}</Button>
     </div>
 
     <StudioFormStatus message={form?.itemNamesMessage} status={form?.itemNamesStatus} />
@@ -170,7 +171,7 @@
       </fieldset>
 
       <div class="actions">
-        <button type="submit" disabled={!orderDirty}>{t('studio.items.saveOrder')}</button>
+        <Button type="submit" disabled={!orderDirty}>{t('studio.items.saveOrder')}</Button>
       </div>
 
       <StudioFormStatus message={form?.itemOrderMessage} status={form?.itemOrderStatus} />

@@ -20,7 +20,7 @@ export const SHUTDOWN_PHASE = Object.freeze({
  *   open: () => unknown,
  *   write: (html: string) => unknown,
  *   close: () => unknown,
- *   getElementById: (id: string) => ({ focus?: () => unknown, hidden?: boolean } | null)
+ *   getElementById: (id: string) => ({ focus?: () => unknown, hidden?: boolean | 'until-found' } | null)
  * }} ShutdownDocument
  */
 

@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -91,7 +92,7 @@
     </fieldset>
 
     <div class="actions">
-      <button type="submit" disabled={items.length === 0}>{t('studio.collectionsNew.create')}</button>
+      <Button type="submit" disabled={items.length === 0}>{t('studio.collectionsNew.create')}</Button>
       <a class="secondary-link" href="/studio/collections">{t('studio.collectionsNew.cancel')}</a>
     </div>
 

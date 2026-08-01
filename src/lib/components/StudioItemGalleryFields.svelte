@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import { tick } from 'svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import { useI18n } from '$lib/i18n/context.js';
@@ -120,14 +121,14 @@
             >
               ↓
             </button>
-            <button
+            <Button variant="danger" size="compact"
               type="button"
               class="remove"
               onclick={() => removeRow(index)}
               disabled={rows.length === 1}
             >
               {t('studio.itemsEdit.galleryRemove')}
-            </button>
+            </Button>
           </div>
         </li>
       {/each}
@@ -135,9 +136,9 @@
   {/if}
 
   <p class="add-row">
-    <button type="button" class="add-button" onclick={() => addRow()}>
+    <Button variant="secondary" size="compact" type="button" class="add-button" onclick={() => addRow()}>
       {t('studio.itemsEdit.galleryAdd')}
-    </button>
+    </Button>
   </p>
 </fieldset>
 
@@ -214,29 +215,12 @@
     cursor: not-allowed;
   }
 
-  .order-actions .remove {
-    color: #7f2222;
-    border-color: rgb(191 56 56 / 0.35);
-  }
 
   .add-row {
     margin: 0.85rem 0 0;
   }
 
-  .add-button {
-    border: 1px solid var(--studio-border);
-    border-radius: 999px;
-    padding: 0.45rem 0.85rem;
-    background: #fff;
-    color: var(--studio-accent);
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-  }
 
-  .add-button:hover {
-    border-color: color-mix(in srgb, var(--studio-accent) 35%, var(--studio-border));
-  }
 
   @media (max-width: 720px) {
     .ordered-list li {

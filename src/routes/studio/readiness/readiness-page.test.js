@@ -57,7 +57,15 @@ test('each action block has its own heading, submit button, status, and technica
 
   for (const section of actionSections) {
     assert.equal(descendants(section, (node) => node.type === 'Element' && node.name === 'h2').length, 1);
-    assert.equal(descendants(section, (node) => node.type === 'Element' && node.name === 'button').length, 1);
+    assert.equal(
+      descendants(
+        section,
+        (node) =>
+          (node.type === 'InlineComponent' || node.type === 'Component') &&
+          node.name === 'Button'
+      ).length,
+      1
+    );
     assert.equal(descendants(section, (node) => node.type === 'Attribute' && node.name === 'role' && node.value?.[0]?.data === 'status').length, 1);
     assert.equal(descendants(section, (node) => node.type === 'Element' && node.name === 'details').length >= 1, true);
   }

@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -129,7 +130,7 @@
       </fieldset>
 
       <div class="actions">
-        <button type="submit" disabled={!isDirty}>{t('studio.collections.saveOrder')}</button>
+        <Button type="submit" disabled={!isDirty}>{t('studio.collections.saveOrder')}</Button>
       </div>
 
       <StudioFormStatus message={form?.collectionOrderMessage} status={form?.collectionOrderStatus} />

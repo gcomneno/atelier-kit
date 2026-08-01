@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -98,7 +99,7 @@
     </label>
 
     <div class="actions">
-      <button type="submit" disabled={!isDirty}>{t('studio.newsEdit.save')}</button>
+      <Button type="submit" disabled={!isDirty}>{t('studio.newsEdit.save')}</Button>
       <a class="secondary-link" href="/studio/news">{t('studio.newsEdit.back')}</a>
     </div>
 
@@ -106,7 +107,7 @@
   </form>
 
   <form method="POST" action="?/deleteNews" class="danger-zone" use:enhance>
-    <button
+    <Button variant="danger"
       type="submit"
       class="remove-button"
       onclick={(event) => {
@@ -116,7 +117,7 @@
       }}
     >
       {t('studio.newsEdit.delete')}
-    </button>
+    </Button>
   </form>
 </section>
 
@@ -157,13 +158,4 @@
     border-top: 1px solid var(--studio-border);
   }
 
-  .remove-button {
-    border: 1px solid rgb(132 46 46 / 0.35);
-    border-radius: 999px;
-    padding: 0.45rem 0.9rem;
-    background: rgb(132 46 46 / 0.08);
-    color: #6d2a2a;
-    font: inherit;
-    cursor: pointer;
-  }
 </style>

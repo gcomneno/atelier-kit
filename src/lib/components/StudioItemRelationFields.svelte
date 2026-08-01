@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import { tick } from 'svelte';
   import StudioFieldLabel from './StudioFieldLabel.svelte';
   import { useI18n } from '$lib/i18n/context.js';
@@ -128,13 +129,13 @@
               <input name="relation_labels" bind:value={row.label} oninput={notifyDirty} />
             </label>
           </div>
-          <button type="button" class="remove" onclick={() => removeRow(index)}>{t('studio.itemRelations.remove')}</button>
+          <Button variant="danger" size="compact" type="button" class="remove" onclick={() => removeRow(index)}>{t('studio.itemRelations.remove')}</Button>
         </li>
       {/each}
     </ol>
   {/if}
 
-  <button type="button" class="add" onclick={addRow}>{t('studio.itemRelations.add')}</button>
+  <Button variant="secondary" size="compact" type="button" class="add" onclick={addRow}>{t('studio.itemRelations.add')}</Button>
 </fieldset>
 
 <style>
@@ -150,8 +151,5 @@
   .target-results button:hover, .target-results button:focus { background: var(--studio-panel-bg); }
   .target-results span { color: var(--studio-muted); }
   .error { margin: 0; color: #8b2020; font-size: .9rem; }
-  .remove, .add { border: 1px solid var(--studio-border); border-radius: .5rem; padding: .4rem .7rem; background: #fff; font: inherit; cursor: pointer; }
-  .remove { color: #7f2222; border-color: rgb(191 56 56 / .35); }
-  .add { margin-top: .85rem; border-radius: 999px; color: var(--studio-accent); font-weight: 600; }
-  @media (max-width: 720px) { ol > li { grid-template-columns: 1fr; } .remove { justify-self: start; } }
+  @media (max-width: 720px) { ol > li { grid-template-columns: 1fr; } }
 </style>

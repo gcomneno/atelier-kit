@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   // @ts-nocheck
   import { enhance } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
@@ -48,6 +49,9 @@
     onPhaseChange: (phase) => (shutdownPending = phase !== 'idle')
   });
 
+  /**
+   * @returns {NonNullable<Exclude<Awaited<ReturnType<import('@sveltejs/kit').SubmitFunction>>, void>>}
+   */
   function handleShutdownResult() {
     return async ({ result, update }) => {
       await update({ reset: false });
@@ -94,7 +98,7 @@
       </label>
 
       <div class="actions">
-        <button type="submit" disabled={!isDirty}>{t('studio.system.language.save')}</button>
+        <Button type="submit" disabled={!isDirty}>{t('studio.system.language.save')}</Button>
       </div>
 
       <StudioFormStatus message={form?.languageMessage} status={form?.languageStatus} />
@@ -121,11 +125,11 @@
       <p class="hint">{t('studio.system.shutdown.hint')}</p>
 
       <div class="actions">
-        <button type="submit" class="danger" disabled={shutdownPending}>
+        <Button variant="danger" type="submit" class="danger" disabled={shutdownPending}>
           {shutdownPending
             ? t('studio.system.shutdown.stopping')
             : t('studio.system.shutdown.action')}
-        </button>
+        </Button>
       </div>
 
       <StudioFormStatus message={form?.shutdownMessage} status={form?.shutdownStatus} />

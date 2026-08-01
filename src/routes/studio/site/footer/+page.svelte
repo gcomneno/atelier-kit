@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -97,7 +98,7 @@
     {/each}
 
     <div class="actions">
-      <button type="submit" disabled={!isDirty}>{t('studio.site.footer.save')}</button>
+      <Button type="submit" disabled={!isDirty}>{t('studio.site.footer.save')}</Button>
     </div>
 
     <StudioFormStatus message={form?.footerMessage} status={form?.footerStatus} />

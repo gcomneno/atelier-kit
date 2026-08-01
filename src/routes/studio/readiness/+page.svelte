@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
   import { useI18n } from '$lib/i18n/context.js';
@@ -76,9 +77,9 @@
       actionState.start('prep');
     }}
   >
-    <button type="submit" class="secondary" disabled={prepRunning || liveRunning}>
+    <Button type="submit" class="secondary" disabled={prepRunning || liveRunning}>
       {prepRunning ? t('studio.readiness.publishRunning') : t('studio.readiness.publishRun')}
-    </button>
+    </Button>
   </form>
 
   {#if prepResult?.prep}
@@ -145,9 +146,9 @@
         actionState.start('live');
       }}
     >
-      <button type="submit" class="primary" disabled={liveRunning || prepRunning}>
+      <Button type="submit" class="primary" disabled={liveRunning || prepRunning}>
         {liveRunning ? t('studio.readiness.liveRunning') : t('studio.readiness.liveRun')}
-      </button>
+      </Button>
     </form>
   {/if}
 
@@ -251,28 +252,7 @@
     margin-bottom: 1rem;
   }
 
-  .action-form button {
-    padding: 0.65rem 1.1rem;
-    border: 1px solid rgb(47 40 31 / 0.2);
-    border-radius: 0.65rem;
-    cursor: pointer;
-    font-size: 1rem;
-  }
 
-  .action-form button.secondary {
-    background: #f8f0e4;
-    color: #2f281f;
-  }
 
-  .action-form button.primary {
-    background: #2f4f35;
-    color: #f8f0e4;
-    border-color: #2f4f35;
-    font-weight: 600;
-  }
 
-  .action-form button:disabled {
-    opacity: 0.65;
-    cursor: wait;
-  }
 </style>

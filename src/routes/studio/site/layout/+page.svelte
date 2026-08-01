@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -131,7 +132,7 @@
     </fieldset>
 
     <div class="actions">
-      <button type="submit" disabled={!isDirty}>{t('studio.site.layout.save')}</button>
+      <Button type="submit" disabled={!isDirty}>{t('studio.site.layout.save')}</Button>
     </div>
 
     <StudioFormStatus message={form?.layoutMessage} status={form?.layoutStatus} />

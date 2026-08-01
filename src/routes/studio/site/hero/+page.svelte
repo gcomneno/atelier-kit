@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   // @ts-nocheck
   import { enhance } from '$app/forms';
@@ -128,7 +129,7 @@
     </fieldset>
 
     <div class="actions">
-      <button type="submit" disabled={!isDirty}>{t('studio.site.heroBanner.save')}</button>
+      <Button type="submit" disabled={!isDirty}>{t('studio.site.heroBanner.save')}</Button>
     </div>
 
     <StudioFormStatus message={form?.heroBannerMessage} status={form?.heroBannerStatus} />

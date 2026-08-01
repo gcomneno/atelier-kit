@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
@@ -148,7 +149,7 @@
                   onclick={() => moveDown(index)}
                   disabled={index === orderedIds.length - 1}>↓</button
                 >
-                <button type="button" class="remove" onclick={() => removeItem(itemId)}>{t('studio.collectionsEdit.remove')}</button>
+                <Button variant="danger" type="button" class="remove" onclick={() => removeItem(itemId)}>{t('studio.collectionsEdit.remove')}</Button>
               </div>
             </li>
           {/each}
@@ -163,7 +164,7 @@
           {#each availableItems as item}
             <li>
               <span>{item.title} <span class="order-id">({item.id})</span></span>
-              <button type="button" onclick={() => addItem(item.id)}>{t('studio.collectionsEdit.add')}</button>
+              <Button type="button" onclick={() => addItem(item.id)}>{t('studio.collectionsEdit.add')}</Button>
             </li>
           {/each}
         </ul>
@@ -171,7 +172,7 @@
     {/if}
 
     <div class="actions">
-      <button type="submit" disabled={!isDirty}>{t('studio.collectionsEdit.save')}</button>
+      <Button type="submit" disabled={!isDirty}>{t('studio.collectionsEdit.save')}</Button>
       <a class="secondary-link" href="/studio/collections">{t('studio.collectionsEdit.back')}</a>
     </div>
 
@@ -179,7 +180,7 @@
   </form>
 
   <form method="POST" action="?/deleteCollection" class="danger-zone" use:enhance>
-    <button
+    <Button variant="danger"
       type="submit"
       class="remove-button"
       onclick={(event) => {
@@ -189,7 +190,7 @@
       }}
     >
       {t('studio.collectionsEdit.delete')}
-    </button>
+    </Button>
   </form>
 </section>
 
@@ -251,21 +252,7 @@
     border: 1px solid var(--studio-border);
   }
 
-  .available-list button {
-    border: 1px solid var(--studio-border);
-    border-radius: 999px;
-    padding: 0.35rem 0.75rem;
-    background: #fff;
-    color: var(--studio-text);
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-  }
 
-  .available-list button:hover {
-    border-color: color-mix(in srgb, var(--studio-accent) 35%, var(--studio-border));
-    color: var(--studio-accent);
-  }
 
   .order-actions button {
     border: 1px solid var(--studio-border);
@@ -277,9 +264,6 @@
     cursor: pointer;
   }
 
-  .order-actions button.remove {
-    font-size: 0.85rem;
-  }
 
   .order-actions button:disabled {
     opacity: 0.4;
@@ -308,15 +292,6 @@
     border-top: 1px solid var(--studio-border);
   }
 
-  .remove-button {
-    border: 1px solid rgb(132 46 46 / 0.35);
-    border-radius: 999px;
-    padding: 0.45rem 0.9rem;
-    background: rgb(132 46 46 / 0.08);
-    color: #6d2a2a;
-    font: inherit;
-    cursor: pointer;
-  }
 
   @media (max-width: 640px) {
     .ordered-list li {

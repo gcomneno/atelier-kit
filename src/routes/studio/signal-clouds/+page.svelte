@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -147,7 +148,7 @@
           </label>
         </fieldset>
 
-        <button
+        <Button variant="danger"
           type="submit"
           class="remove-button"
           name="cloud_id"
@@ -160,12 +161,12 @@
           }}
         >
           {t('studio.signals.remove')}
-        </button>
+        </Button>
       </fieldset>
     {/each}
 
     <div class="actions">
-      <button type="submit" disabled={!isDirty}>{t('studio.signals.save')}</button>
+      <Button type="submit" disabled={!isDirty}>{t('studio.signals.save')}</Button>
     </div>
 
     <StudioFormStatus message={form?.cloudMessage} status={form?.cloudStatus} />
@@ -207,13 +208,4 @@
     line-height: 1.5;
   }
 
-  .remove-button {
-    border: 1px solid rgb(132 46 46 / 0.35);
-    border-radius: 999px;
-    padding: 0.45rem 0.9rem;
-    background: rgb(132 46 46 / 0.08);
-    color: #6d2a2a;
-    font: inherit;
-    cursor: pointer;
-  }
 </style>

@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -54,7 +55,7 @@
     {/each}
 
     <div class="actions">
-      <button type="submit" disabled={!isDirty}>{t('studio.site.social.save')}</button>
+      <Button type="submit" disabled={!isDirty}>{t('studio.site.social.save')}</Button>
     </div>
 
     <StudioFormStatus message={form?.socialMessage} status={form?.socialStatus} />

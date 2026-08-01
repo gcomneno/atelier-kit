@@ -1,4 +1,5 @@
 <script>
+  import { Button } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -85,7 +86,7 @@
     </label>
 
     <div class="actions">
-      <button type="submit">{t('studio.newsNew.create')}</button>
+      <Button type="submit">{t('studio.newsNew.create')}</Button>
       <a class="secondary-link" href="/studio/news">{t('studio.newsNew.cancel')}</a>
     </div>
 

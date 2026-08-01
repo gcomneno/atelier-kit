@@ -24,6 +24,15 @@
 
 <style>
   .studio-shell {
+    --giu-button-background: var(--studio-accent);
+    --giu-button-hover-background: color-mix(in srgb, var(--studio-accent) 82%, #000);
+    --giu-button-active-background: color-mix(in srgb, var(--studio-accent) 68%, #000);
+    --giu-button-border-color: transparent;
+    --giu-button-border-radius: 999px;
+    --giu-button-padding: 0.7rem 1.15rem;
+    --giu-button-focus-color: var(--studio-accent);
+    --giu-button-disabled-opacity: 0.45;
+
     width: min(1100px, calc(100% - 2rem));
     margin: 0 auto;
     padding: 2rem 0 3rem;
@@ -288,22 +297,6 @@
   :global(.studio-panel .actions) {
     display: flex;
     justify-content: flex-start;
-  }
-
-  :global(.studio-panel button) {
-    border: 0;
-    border-radius: 999px;
-    padding: 0.7rem 1.15rem;
-    background: var(--studio-accent);
-    color: #fff;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  :global(.studio-panel button:disabled) {
-    opacity: 0.45;
-    cursor: not-allowed;
   }
 
   :global(.studio-panel .status) {

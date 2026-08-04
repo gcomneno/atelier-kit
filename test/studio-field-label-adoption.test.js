@@ -47,8 +47,12 @@ function read(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), 'utf8');
 }
 
-/** @param {string} directory */
+/**
+ * @param {string} directory
+ * @returns {string[]}
+ */
 function collectSvelteFiles(directory) {
+  /** @type {string[]} */
   const files = [];
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     const absolute = path.join(directory, entry.name);
@@ -138,7 +142,7 @@ function installDomGlobals(window) {
   return () => {
     for (const [name, descriptor] of descriptors) {
       if (descriptor) Object.defineProperty(globalThis, name, descriptor);
-      else delete globalThis[name];
+      else Reflect.deleteProperty(globalThis, name);
     }
   };
 }

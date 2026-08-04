@@ -7,8 +7,8 @@ on:
   pull_request:
 
 jobs:
-  characterize:
-    name: Verify Meta identity
+  validate:
+    name: Validate Atelier-Kit
     runs-on: ubuntu-latest
 
     steps:
@@ -24,8 +24,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Meta reorder identity and FormData
-        run: timeout --kill-after=3s 15s node --test --test-reporter=spec --test-name-pattern="Meta object keys" test/studio-item-editable-fields.test.js
+      - name: Run focused Gallery and Meta characterization
+        run: timeout --kill-after=5s 30s node --test --test-reporter=spec test/studio-item-editable-fields.test.js
 
-      - name: Application boundaries and Relation exclusion
-        run: timeout --kill-after=3s 15s node --test --test-reporter=spec --test-name-pattern="Gallery, Meta and Relation" test/studio-item-editable-fields.test.js
+      - name: Run complete tests
+        run: npm test
+
+      - name: Run SvelteKit checks
+        run: npm run check
+
+      - name: Validate YAML content
+        run: npm run content:validate
+
+      - name: Build project
+        run: npm run build

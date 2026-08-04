@@ -1,6 +1,6 @@
 <script>
   import { untrack } from 'svelte';
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Surface } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -42,7 +42,7 @@
   {t('studio.signals.intro')}
 </PageIntro>
 
-<section class="studio-panel">
+<Surface class="atelier-studio-surface">
   <form
     method="POST"
     action="?/saveSignalClouds"
@@ -167,7 +167,7 @@
 
     <StudioFormStatus message={form?.cloudMessage} status={form?.cloudStatus} />
   </form>
-</section>
+</Surface>
 
 <style>
   fieldset {

@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Surface } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -32,7 +32,7 @@
   {t('studio.catalog.intro')}
 </PageIntro>
 
-<section class="studio-panel">
+<Surface class="atelier-studio-surface">
   <form
     method="POST"
     action="?/saveCatalog"
@@ -99,4 +99,4 @@
 
     <StudioFormStatus message={form?.catalogMessage} status={form?.catalogStatus} />
   </form>
-</section>
+</Surface>

@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   // @ts-nocheck
   import { enhance } from '$app/forms';
@@ -47,9 +47,9 @@
 
 <PageIntro>{t('studio.site.intro')}</PageIntro>
 
-<section class="studio-panel" aria-labelledby="hero-banner-settings-title">
-  <div class="panel-heading">
-    <h2 id="hero-banner-settings-title">{t('studio.site.heroBanner.title')}</h2>
+<Panel title={t('studio.site.heroBanner.title')} id="hero-banner-settings" class="atelier-studio-panel">
+
+  <div class="panel-summary">
     <p>{t('studio.site.heroBanner.intro')}</p>
     {#if appearanceForm.background_image}
       <p class="hint">{t('studio.site.heroBanner.backgroundImageActive')}</p>
@@ -134,7 +134,7 @@
 
     <StudioFormStatus message={form?.heroBannerMessage} status={form?.heroBannerStatus} />
   </form>
-</section>
+</Panel>
 
 <style>
   .banner-preview {

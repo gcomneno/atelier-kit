@@ -1,5 +1,5 @@
 <script>
-  import { AsyncOperationPanel, Button, PageIntro } from 'giadaware-ui-components/studio';
+  import { AsyncOperationPanel, Button, PageIntro, Panel } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
   import { useI18n } from '$lib/i18n/context.js';
@@ -67,16 +67,16 @@
   {t('studio.readiness.intro')}
 </PageIntro>
 
-<section class="studio-panel">
-  <div class="panel-heading">
-    <h2>{t('studio.readiness.doctorTitle')}</h2>
+<Panel title={t('studio.readiness.doctorTitle')} id="content-doctor" class="atelier-studio-panel">
+
+  <div class="panel-summary">
     <p class={data.report.ok ? 'ok' : 'review'}>
       {data.report.ok ? t('studio.readiness.doctorOk') : t('studio.readiness.doctorReview')}
     </p>
   </div>
 
   <pre class="report">{data.report.output}</pre>
-</section>
+</Panel>
 
 {#snippet prepDescription()}
   <p>{t('studio.readiness.publishIntro')}</p>

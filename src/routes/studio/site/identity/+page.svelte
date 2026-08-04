@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
@@ -75,9 +75,9 @@
 
 <PageIntro>{t('studio.site.intro')}</PageIntro>
 
-<section class="studio-panel" aria-labelledby="site-settings-title">
-  <div class="panel-heading">
-    <h2 id="site-settings-title">{t('studio.site.identity.title')}</h2>
+<Panel title={t('studio.site.identity.title')} id="site-settings" class="atelier-studio-panel">
+
+  <div class="panel-summary">
     <p>{t('studio.site.identity.intro')}</p>
   </div>
 
@@ -211,7 +211,7 @@
 
     <StudioFormStatus message={form?.siteMessage} status={form?.siteStatus} />
   </form>
-</section>
+</Panel>
 
 <style>
   .current-logo {

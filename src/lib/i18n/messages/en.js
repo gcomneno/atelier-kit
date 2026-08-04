@@ -655,6 +655,8 @@ export default {
       detailValue: 'Value',
       detailAdd: '+ Add row',
       detailRemove: 'Remove',
+      detailMoveUp: 'Move detail row {position} up',
+      detailMoveDown: 'Move detail row {position} down',
       save: 'Save item',
       back: 'Back to items',
       delete: 'Delete item',

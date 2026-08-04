@@ -170,7 +170,7 @@ test('all existing consumers retain the stable local adapter import', () => {
       /import\s*\{[^}]*\bFieldLabel\b[^}]*\}\s*from\s*['"]giadaware-ui-components\/studio['"]/.test(source);
   });
 
-  assert.equal(consumers.length, 20);
+  assert.equal(consumers.length, 21);
   assert.deepEqual(directPackageConsumers, []);
 });
 
@@ -313,9 +313,6 @@ test('adapter hydration reuses the server-rendered label, hint and native contro
           entry: path.join(harnessRoot, 'entry.js'),
           formats: ['es'],
           fileName: () => 'bundle.js'
-        },
-        rollupOptions: {
-          output: { inlineDynamicImports: true }
         }
       }
     });

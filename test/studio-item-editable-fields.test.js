@@ -104,9 +104,10 @@ function installDomGlobals(window) {
 
 async function settle() {
   await Promise.resolve();
-  await bundle.tick();
+  bundle.flushSync();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  bundle.flushSync();
   await Promise.resolve();
-  await bundle.tick();
 }
 
 async function waitFor(predicate, message) {
@@ -129,7 +130,11 @@ async function mountHarness(props) {
     window,
     target,
     async close() {
-      await bundle.unmount(instance);
+      const completion = bundle.unmount(instance);
+      await Promise.race([
+        completion,
+        new Promise((resolve) => setTimeout(resolve, 50))
+      ]);
       restore();
       window.close();
     }
@@ -161,11 +166,12 @@ function formValues(window, target, name) {
 }
 
 before(async () => {
+  console.error('[issue225] build:start');
   harnessRoot = fs.mkdtempSync(path.join(root, '.tmp-editable-fields-client-'));
   fs.writeFileSync(path.join(harnessRoot, 'Harness.svelte'), harnessSource);
   fs.writeFileSync(
     path.join(harnessRoot, 'entry.js'),
-    "export { default as Harness } from './Harness.svelte';\nexport { mount, unmount, tick } from 'svelte';\n"
+    "export { default as Harness } from './Harness.svelte';\nexport { flushSync, mount, unmount } from 'svelte';\n"
   );
 
   await build({
@@ -193,9 +199,11 @@ before(async () => {
     }
   });
 
+  console.error('[issue225] build:done');
   bundle = await import(
     `${pathToFileURL(path.join(harnessRoot, 'dist/bundle.js')).href}?${Date.now()}`
   );
+  console.error('[issue225] import:done');
 });
 
 after(() => {

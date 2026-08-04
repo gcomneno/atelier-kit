@@ -16,3 +16,9 @@ source = source.replace(
     "if any(\n            token == 'studio-panel'\n            for match in re.finditer(r'class=\"([^\"]*)\"', text)\n            for token in match.group(1).split()\n        ):\n            structural.append(str(path.relative_to(ROOT)))",
 )
 exec(compile(source, __file__, 'exec'))
+
+for path in Path.cwd().joinpath('src').rglob('*.svelte'):
+    text = path.read_text(encoding='utf-8')
+    cleaned = re.sub(r'[ \t]+(?=\r?$)', '', text, flags=re.MULTILINE)
+    if cleaned != text:
+        path.write_text(cleaned, encoding='utf-8')

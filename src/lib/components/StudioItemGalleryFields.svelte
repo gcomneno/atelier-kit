@@ -11,9 +11,19 @@
 
   const t = useI18n();
 
+  /** @type {HTMLFieldSetElement | undefined} */
+  let fieldset;
+
   async function notifyDirty() {
     await tick();
     dirtyControl.checkDirty?.();
+  }
+
+  /**
+   * @param {number} index
+   */
+  function focusRow(index) {
+    fieldset?.querySelectorAll('input[name="gallery_files"]')[index]?.focus();
   }
 
   /**
@@ -52,17 +62,21 @@
       return;
     }
 
+    const focusIndex = Math.min(index, rows.length - 2);
     rows = rows.filter((_, rowIndex) => rowIndex !== index);
     await notifyDirty();
+    focusRow(focusIndex);
   }
 
   async function addRow() {
+    const focusIndex = rows.length;
     rows = [...rows, { file: '', alt: '', role: '' }];
     await notifyDirty();
+    focusRow(focusIndex);
   }
 </script>
 
-<fieldset class="gallery-fieldset">
+<fieldset class="gallery-fieldset" bind:this={fieldset}>
   <legend>{t('studio.itemsEdit.gallery')}</legend>
   <p class="hint">{t('studio.itemsEdit.galleryHint')}</p>
 
@@ -121,7 +135,9 @@
             >
               ↓
             </button>
-            <Button variant="danger" size="compact"
+            <Button
+              variant="danger"
+              size="compact"
               type="button"
               class="remove"
               onclick={() => removeRow(index)}
@@ -136,7 +152,13 @@
   {/if}
 
   <p class="add-row">
-    <Button variant="secondary" size="compact" type="button" class="add-button" onclick={() => addRow()}>
+    <Button
+      variant="secondary"
+      size="compact"
+      type="button"
+      class="add-button"
+      onclick={() => addRow()}
+    >
       {t('studio.itemsEdit.galleryAdd')}
     </Button>
   </p>
@@ -215,12 +237,9 @@
     cursor: not-allowed;
   }
 
-
   .add-row {
     margin: 0.85rem 0 0;
   }
-
-
 
   @media (max-width: 720px) {
     .ordered-list li {

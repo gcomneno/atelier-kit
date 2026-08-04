@@ -23,7 +23,10 @@
    * @param {number} index
    */
   function focusRow(index) {
-    fieldset?.querySelectorAll('input[name="gallery_files"]')[index]?.focus();
+    const input = /** @type {HTMLInputElement | undefined} */ (
+      fieldset?.querySelectorAll('input[name="gallery_files"]')[index]
+    );
+    input?.focus();
   }
 
   /**

@@ -26,11 +26,17 @@
    * @param {number} index
    */
   function focusRow(index) {
-    fieldset?.querySelectorAll('input[name="meta_labels"]')[index]?.focus();
+    const input = /** @type {HTMLInputElement | undefined} */ (
+      fieldset?.querySelectorAll('input[name="meta_labels"]')[index]
+    );
+    input?.focus();
   }
 
   function focusAddButton() {
-    fieldset?.querySelector('button.add-button')?.focus();
+    const button = /** @type {HTMLButtonElement | null | undefined} */ (
+      fieldset?.querySelector('button.add-button')
+    );
+    button?.focus();
   }
 
   /**

@@ -150,20 +150,20 @@
     line-height: 1.5;
   }
 
-  .shutdown-panel {
-    border-color: #e8c5c5;
-    background: linear-gradient(160deg, #fdf3f3 0%, #fff 58%);
+  :global(.shutdown-panel) {
+    --giu-panel-border-color: #e8c5c5;
+    --giu-panel-background: linear-gradient(160deg, #fdf3f3 0%, #fff 58%);
   }
 
-  .shutdown-panel :global(button.danger) {
+  :global(.shutdown-panel button.danger) {
     background: #b42318;
   }
 
-  .shutdown-panel :global(button.danger:hover) {
+  :global(.shutdown-panel button.danger:hover) {
     background: #912018;
   }
 
-  .shutdown-panel :global(button.danger:disabled) {
+  :global(.shutdown-panel button.danger:disabled) {
     opacity: 0.65;
     cursor: wait;
   }

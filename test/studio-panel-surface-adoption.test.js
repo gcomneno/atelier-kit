@@ -320,7 +320,10 @@ test('representative installed Panel and Surface composition has no axe violatio
     window.document.title = 'Studio component adoption';
     window.document.body.innerHTML = `<main>${body}</main>`;
     const axe = (await import('axe-core')).default;
-    const result = await axe.run(window.document, {
+    const context = /** @type {import('axe-core').ContextSpec} */ (
+      /** @type {unknown} */ (window.document)
+    );
+    const result = await axe.run(context, {
       runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
       rules: { 'color-contrast': { enabled: false } }
     });

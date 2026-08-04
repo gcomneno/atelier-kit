@@ -247,8 +247,8 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
     scroll-margin-top: 1rem;
   }
 
-  .help-section + .help-section,
-  .help-toc + .help-section {
+  :global(.help-section + .help-section),
+  :global(.help-toc + .help-section) {
     margin-top: 1rem;
   }
 
@@ -285,13 +285,13 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
     line-height: 1.5;
   }
 
-  .help-section h3 {
+  :global(.help-section h3) {
     margin: 1.1rem 0 0.45rem;
     font-size: 0.95rem;
     font-weight: 700;
   }
 
-  .help-section h3:first-of-type {
+  :global(.help-section h3:first-of-type) {
     margin-top: 0.35rem;
   }
 

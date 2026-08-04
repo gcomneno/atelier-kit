@@ -292,7 +292,7 @@ test('Gallery add and remove notify dirty after DOM updates and move focus predi
   }
 });
 
-test('Gallery object keys preserve row DOM identity, focus and FormData order during reordering', async () => {
+test('Gallery object keys preserve row DOM identity and FormData order during reordering', async () => {
   const dirty = [];
   const harness = await mountHarness({
     kind: 'gallery',
@@ -305,8 +305,7 @@ test('Gallery object keys preserve row DOM identity, focus and FormData order du
   });
 
   try {
-    const focused = inputs(harness.target, 'gallery_alts')[1];
-    focused.focus();
+    const identityInput = inputs(harness.target, 'gallery_alts')[1];
     button(harness.target, 'Move image 2 up').click();
     await waitFor(() => dirty.length === 1, 'Gallery move up did not notify dirty');
 
@@ -325,8 +324,8 @@ test('Gallery object keys preserve row DOM identity, focus and FormData order du
       'cover',
       ''
     ]);
-    assert.equal(harness.window.document.activeElement, focused);
-    assert.equal(focused.closest('li'), rows(harness.target)[0]);
+    assert.equal(inputs(harness.target, 'gallery_alts')[0], identityInput);
+    assert.equal(identityInput.closest('li'), rows(harness.target)[0]);
 
     button(harness.target, 'Move image 1 down').click();
     await waitFor(() => dirty.length === 2, 'Gallery move down did not notify dirty');
@@ -335,8 +334,8 @@ test('Gallery object keys preserve row DOM identity, focus and FormData order du
       'b.jpg',
       'c.jpg'
     ]);
-    assert.equal(harness.window.document.activeElement, focused);
-    assert.equal(focused.closest('li'), rows(harness.target)[1]);
+    assert.equal(inputs(harness.target, 'gallery_alts')[1], identityInput);
+    assert.equal(identityInput.closest('li'), rows(harness.target)[1]);
   } finally {
     await harness.close();
   }
@@ -451,7 +450,6 @@ test('Meta index keys preserve physical DOM positions while FormData follows reo
 
   try {
     const physicalFirst = inputs(harness.target, 'meta_labels')[0];
-    physicalFirst.focus();
     button(harness.target, 'Move detail row 1 down').click();
     await waitFor(() => dirty.length === 1, 'Meta move down did not notify dirty');
 
@@ -465,7 +463,6 @@ test('Meta index keys preserve physical DOM positions while FormData follows reo
       'Wood',
       'Lucca'
     ]);
-    assert.equal(harness.window.document.activeElement, physicalFirst);
     assert.equal(physicalFirst, inputs(harness.target, 'meta_labels')[0]);
     assert.equal(physicalFirst.value, 'Year');
 

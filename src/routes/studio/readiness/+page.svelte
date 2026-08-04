@@ -198,16 +198,6 @@
 {/if}
 
 <style>
-  .panel-heading h2 {
-    margin: 0 0 0.35rem;
-    font-size: 1.2rem;
-  }
-
-  .panel-heading p {
-    margin: 0 0 1rem;
-    color: var(--studio-muted);
-  }
-
   :global(.live-panel) {
     border-color: rgb(47 79 53 / 0.25);
   }

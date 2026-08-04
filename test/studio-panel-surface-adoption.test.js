@@ -296,7 +296,10 @@ test('real installed primitives preserve heading association and neutral surroun
     body,
     /<section id="settings"[^>]*class="[^"]*atelier-studio-panel[^"]*"[^>]*aria-labelledby="settings-title"/
   );
-  assert.match(body, /<h2 id="settings-title"[^>]*>Studio settings<\/h2>/);
+  assert.match(
+    body,
+    /<h2 id="settings-title"[^>]*>Studio settings(?:<!---->)?<\/h2>/
+  );
   assert.match(body, /<form aria-label="Settings form">/);
   assert.equal((body.match(/<section\b/g) ?? []).length, 1);
 

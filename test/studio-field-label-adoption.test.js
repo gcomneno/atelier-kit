@@ -202,7 +202,10 @@ test('Atelier-owned tokens replace the obsolete global field-label classes', () 
   assert.doesNotMatch(layout, /:global\(\.field-label-row\)/);
   assert.doesNotMatch(layout, /:global\(\.field-label\)/);
   assert.doesNotMatch(layout, /:global\(\.field-badge\.(?:required|optional)\)/);
-  assert.match(layout, /:global\(\.studio-panel \.hint\)/);
+  assert.match(
+    layout,
+    /:global\(:is\(\.atelier-studio-panel, \.atelier-studio-surface\) \.hint\)/
+  );
 });
 
 test('Contact keeps conditional markers, native required attributes and server rules aligned', () => {

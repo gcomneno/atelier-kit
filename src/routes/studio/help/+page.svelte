@@ -1,5 +1,5 @@
 <script>
-    import { PageIntro } from 'giadaware-ui-components/studio';
+    import { PageIntro, Panel, Surface } from 'giadaware-ui-components/studio';
 import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
   import { useI18n } from '$lib/i18n/context.js';
 
@@ -56,18 +56,20 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
 
 <PageIntro>{t('studio.help.intro')}</PageIntro>
 
-<nav class="help-toc studio-panel" aria-label={t('studio.help.tocTitle')}>
+<nav class="help-toc" aria-label={t('studio.help.tocTitle')}>
+  <Surface class="atelier-studio-surface help-toc-surface">
   <h2>{t('studio.help.tocTitle')}</h2>
   <ol>
     {#each toc as entry (entry.id)}
       <li><a href={`#${entry.id}`}>{t(entry.labelKey)}</a></li>
     {/each}
   </ol>
+  </Surface>
 </nav>
 
-<section id="workflow" class="studio-panel help-section">
-  <div class="panel-heading">
-    <h2>{t('studio.help.workflow.title')}</h2>
+<Panel title={t('studio.help.workflow.title')} id="workflow" class="atelier-studio-panel help-section">
+
+  <div class="panel-summary">
     <p>{t('studio.help.workflow.intro')}</p>
   </div>
   <ol class="help-steps">
@@ -75,11 +77,11 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
       <li>{t(`studio.help.workflow.steps.${step}`)}</li>
     {/each}
   </ol>
-</section>
+</Panel>
 
-<section id="site" class="studio-panel help-section">
-  <div class="panel-heading">
-    <h2>{t('studio.help.site.title')}</h2>
+<Panel title={t('studio.help.site.title')} id="site" class="atelier-studio-panel help-section">
+
+  <div class="panel-summary">
     <p>{t('studio.help.site.intro')}</p>
   </div>
   <ul class="help-links">
@@ -90,11 +92,11 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
       </li>
     {/each}
   </ul>
-</section>
+</Panel>
 
-<section id="atelier-mark" class="studio-panel help-section">
-  <div class="panel-heading">
-    <h2>{t('studio.help.atelierMark.title')}</h2>
+<Panel title={t('studio.help.atelierMark.title')} id="atelier-mark" class="atelier-studio-panel help-section">
+
+  <div class="panel-summary">
     <p>{t('studio.help.atelierMark.intro')}</p>
   </div>
 
@@ -120,11 +122,11 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
   </ol>
 
   <p class="help-note">{t('studio.help.atelierMark.validationNote')}</p>
-</section>
+</Panel>
 
-<section id="content" class="studio-panel help-section">
-  <div class="panel-heading">
-    <h2>{t('studio.help.content.title')}</h2>
+<Panel title={t('studio.help.content.title')} id="content" class="atelier-studio-panel help-section">
+
+  <div class="panel-summary">
     <p>{t('studio.help.content.intro')}</p>
   </div>
   <ul class="help-links">
@@ -136,11 +138,11 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
     {/each}
   </ul>
   <p class="help-note">{t('studio.help.content.orderNote')}</p>
-</section>
+</Panel>
 
-<section id="item-page" class="studio-panel help-section">
-  <div class="panel-heading">
-    <h2>{t('studio.help.itemPage.title')}</h2>
+<Panel title={t('studio.help.itemPage.title')} id="item-page" class="atelier-studio-panel help-section">
+
+  <div class="panel-summary">
     <p>{t('studio.help.itemPage.intro')}</p>
   </div>
 
@@ -159,11 +161,11 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
   </ul>
 
   <p class="help-note">{t('studio.help.itemPage.previewNote')}</p>
-</section>
+</Panel>
 
-<section id="publish" class="studio-panel help-section">
-  <div class="panel-heading">
-    <h2>{t('studio.help.publish.title')}</h2>
+<Panel title={t('studio.help.publish.title')} id="publish" class="atelier-studio-panel help-section">
+
+  <div class="panel-summary">
     <p>{t('studio.help.publish.intro')}</p>
   </div>
   <ul class="help-bullets">
@@ -186,11 +188,11 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
       </li>
     {/each}
   </ul>
-</section>
+</Panel>
 
-<section id="upgrade" class="studio-panel help-section">
-  <div class="panel-heading">
-    <h2>{t('studio.help.upgrade.title')}</h2>
+<Panel title={t('studio.help.upgrade.title')} id="upgrade" class="atelier-studio-panel help-section">
+
+  <div class="panel-summary">
     <p>{t('studio.help.upgrade.intro')}</p>
   </div>
   <ol class="help-steps">
@@ -199,11 +201,11 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
     {/each}
   </ol>
   <p class="help-note">{t('studio.help.upgrade.note')}</p>
-</section>
+</Panel>
 
-<section id="limits" class="studio-panel help-section">
-  <div class="panel-heading">
-    <h2>{t('studio.help.limits.title')}</h2>
+<Panel title={t('studio.help.limits.title')} id="limits" class="atelier-studio-panel help-section">
+
+  <div class="panel-summary">
     <p>{t('studio.help.limits.intro')}</p>
   </div>
   <ul class="help-bullets">
@@ -211,7 +213,7 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
       <li>{t(`studio.help.limits.items.${index}`)}</li>
     {/each}
   </ul>
-</section>
+</Panel>
 
 <section id="safety" class="help-section">
   <StudioAccessGuide />
@@ -245,8 +247,8 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
     scroll-margin-top: 1rem;
   }
 
-  .help-section + .help-section,
-  .help-toc + .help-section {
+  :global(.help-section + .help-section),
+  :global(.help-toc + .help-section) {
     margin-top: 1rem;
   }
 
@@ -283,13 +285,13 @@ import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
     line-height: 1.5;
   }
 
-  .help-section h3 {
+  :global(.help-section h3) {
     margin: 1.1rem 0 0.45rem;
     font-size: 0.95rem;
     font-weight: 700;
   }
 
-  .help-section h3:first-of-type {
+  :global(.help-section h3:first-of-type) {
     margin-top: 0.35rem;
   }
 

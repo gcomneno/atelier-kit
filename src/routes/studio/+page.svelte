@@ -23,7 +23,7 @@ import { useI18n } from '$lib/i18n/context.js';
 
 <section class="zones" aria-label={t('studio.dashboard.zonesLegend')}>
   {#each zones as zone (zone.id)}
-    <a class="zone studio-panel tone-{zone.tone}" href={zone.href}>
+    <a class="zone tone-{zone.tone}" href={zone.href}>
       <p class="zone-eyebrow">{t(`studio.dashboard.zones.${zone.id}.eyebrow`)}</p>
       <h2>{t(`studio.dashboard.zones.${zone.id}.title`)}</h2>
       <p class="zone-description">{t(`studio.dashboard.zones.${zone.id}.description`)}</p>
@@ -40,6 +40,11 @@ import { useI18n } from '$lib/i18n/context.js';
   }
 
   .zone {
+    padding: 1.35rem;
+    border: 1px solid var(--studio-border);
+    border-radius: 0.9rem;
+    background: var(--studio-surface);
+    box-shadow: var(--studio-shadow);
     display: flex;
     flex-direction: column;
     gap: 0.55rem;

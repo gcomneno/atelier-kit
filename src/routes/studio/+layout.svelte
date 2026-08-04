@@ -75,6 +75,24 @@
   }
 
   .studio-content {
+    --giu-panel-gap: 1rem;
+    --giu-panel-padding: 1.35rem;
+    --giu-panel-border-width: 1px;
+    --giu-panel-border-color: var(--studio-border);
+    --giu-panel-border-radius: 0.9rem;
+    --giu-panel-color: var(--studio-text);
+    --giu-panel-background: var(--studio-surface);
+    --giu-panel-header-gap: 0.75rem;
+    --giu-panel-title-size: 1.2rem;
+    --giu-panel-description-gap: 0.35rem;
+    --giu-panel-description-color: var(--studio-muted);
+    --giu-surface-padding: 1.35rem;
+    --giu-surface-border-width: 1px;
+    --giu-surface-border-color: var(--studio-border);
+    --giu-surface-border-radius: 0.9rem;
+    --giu-surface-color: var(--studio-text);
+    --giu-surface-background: var(--studio-surface);
+
     min-width: 0;
     flex: 1;
     display: grid;
@@ -95,53 +113,49 @@
     }
   }
 
-  :global(.studio-panel) {
-    padding: 1.35rem;
-    border: 1px solid var(--studio-border);
-    border-radius: 0.9rem;
-    background: var(--studio-surface);
+
+  :global(.atelier-studio-panel),
+  :global(.atelier-studio-surface) {
     box-shadow: var(--studio-shadow);
   }
 
-  :global(.studio-content > .studio-panel + .studio-panel) {
-    margin-top: 1rem;
-  }
-
-  :global(.studio-panel h2) {
-    margin: 0 0 0.4rem;
-    font-size: 1.15rem;
-  }
-
-  :global(.studio-panel .panel-heading p) {
-    margin: 0 0 0.25rem;
+  :global(.atelier-studio-panel .panel-summary) {
+    display: grid;
+    gap: 0.25rem;
     color: var(--studio-muted);
   }
 
-  :global(.studio-panel .panel-heading h2) {
-    margin: 0 0 0.35rem;
-    font-size: 1.2rem;
-  }
-
-  :global(.studio-panel .create-link) {
+  :global(.atelier-studio-panel .panel-summary > *) {
     margin: 0;
   }
 
-  :global(.studio-panel .create-link a) {
+  :global(.studio-content > :is(.atelier-studio-panel, .atelier-studio-surface) + :is(.atelier-studio-panel, .atelier-studio-surface)) {
+    margin-top: 1rem;
+  }
+
+
+
+
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .create-link) {
+    margin: 0;
+  }
+
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .create-link a) {
     color: var(--studio-accent);
     font-weight: 600;
     text-decoration: none;
   }
 
-  :global(.studio-panel .create-link a:hover) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .create-link a:hover) {
     text-decoration: underline;
   }
 
-  :global(.studio-panel .empty) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .empty) {
     margin: 0;
     color: var(--studio-muted);
   }
 
-  :global(.studio-panel .record-list) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .record-list) {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -149,7 +163,7 @@
     gap: 0.75rem;
   }
 
-  :global(.studio-panel .record-list a) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .record-list a) {
     display: grid;
     gap: 0.2rem;
     padding: 0.9rem 1rem;
@@ -160,16 +174,16 @@
     text-decoration: none;
   }
 
-  :global(.studio-panel .record-list a:hover) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .record-list a:hover) {
     border-color: color-mix(in srgb, var(--studio-accent) 35%, var(--studio-border));
   }
 
-  :global(.studio-panel .record-list span) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .record-list span) {
     color: var(--studio-muted);
     font-size: 0.9rem;
   }
 
-  :global(.studio-panel .badge) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .badge) {
     display: inline-block;
     width: fit-content;
     margin-top: 0.25rem;
@@ -181,14 +195,14 @@
     font-weight: 600;
   }
 
-  :global(.studio-panel form),
-  :global(.studio-panel .studio-form),
-  :global(.studio-panel .appearance-form) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) form),
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .studio-form),
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .appearance-form) {
     display: grid;
     gap: 0.95rem;
   }
 
-  :global(.studio-panel fieldset) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) fieldset) {
     margin: 0;
     padding: 0;
     border: 0;
@@ -196,30 +210,30 @@
     gap: 0.95rem;
   }
 
-  :global(.studio-panel legend) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) legend) {
     margin-bottom: 0.25rem;
     font-weight: 600;
   }
 
-  :global(.studio-panel label) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) label) {
     display: grid;
     gap: 0.4rem;
     font-size: 0.95rem;
     color: var(--studio-text);
   }
 
-  :global(.studio-panel .checkbox) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .checkbox) {
     grid-template-columns: auto 1fr;
     align-items: center;
     gap: 0.65rem;
   }
 
-  :global(.studio-panel .hint) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .hint) {
     color: var(--studio-muted);
     font-size: 0.85rem;
   }
 
-  :global(.studio-panel .form-legend),
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .form-legend),
   :global(.studio-form .form-legend),
   :global(.panel .form-legend) {
     margin: 0.15rem 0 0;
@@ -240,9 +254,9 @@
     font-weight: 500;
   }
 
-  :global(.studio-panel input),
-  :global(.studio-panel textarea),
-  :global(.studio-panel select) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) input),
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) textarea),
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) select) {
     width: 100%;
     border: 1px solid var(--studio-border);
     border-radius: 0.65rem;
@@ -252,25 +266,25 @@
     font: inherit;
   }
 
-  :global(.studio-panel input:disabled:not([type='checkbox'])),
-  :global(.studio-panel textarea:disabled),
-  :global(.studio-panel select:disabled) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) input:disabled:not([type='checkbox'])),
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) textarea:disabled),
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) select:disabled) {
     background: #eef1f4;
     color: #6b7280;
     cursor: not-allowed;
   }
 
-  :global(.studio-panel label:has(> input:disabled:not([type='checkbox']))),
-  :global(.studio-panel label:has(> textarea:disabled)) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) label:has(> input:disabled:not([type='checkbox']))),
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) label:has(> textarea:disabled)) {
     opacity: 0.72;
   }
 
-  :global(.studio-panel textarea) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) textarea) {
     resize: vertical;
   }
 
 
-  :global(.studio-panel .status) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .status) {
     margin: 0;
     padding: 0.85rem 1rem;
     border-radius: 0.75rem;
@@ -278,22 +292,22 @@
     line-height: 1.5;
   }
 
-  :global(.studio-panel .status.success) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .status.success) {
     background: rgb(32 142 88 / 0.12);
     color: #176742;
   }
 
-  :global(.studio-panel .status.warning) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .status.warning) {
     background: rgb(214 155 35 / 0.15);
     color: #6b4b0a;
   }
 
-  :global(.studio-panel .status.error) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .status.error) {
     background: rgb(191 56 56 / 0.12);
     color: #7f2222;
   }
 
-  :global(.studio-panel .status.info) {
+  :global(:is(.atelier-studio-panel, .atelier-studio-surface) .status.info) {
     background: rgb(45 108 223 / 0.1);
     color: #143870;
   }

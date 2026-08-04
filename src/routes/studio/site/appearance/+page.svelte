@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -107,9 +107,9 @@
 
 <PageIntro>{t('studio.site.intro')}</PageIntro>
 
-<section class="studio-panel" aria-labelledby="appearance-settings-title">
-  <div class="panel-heading">
-    <h2 id="appearance-settings-title">{t('studio.site.appearance.title')}</h2>
+<Panel title={t('studio.site.appearance.title')} id="appearance-settings" class="atelier-studio-panel">
+
+  <div class="panel-summary">
     <p>{t('studio.site.appearance.intro')}</p>
   </div>
 
@@ -274,7 +274,7 @@
 
     <StudioFormStatus message={form?.appearanceMessage} status={form?.appearanceStatus} />
   </form>
-</section>
+</Panel>
 
 <style>
   .font-preview {
@@ -356,7 +356,7 @@
     box-shadow: 0 12px 32px rgb(0 0 0 / 0.12);
   }
 
-  :global(.studio-panel input[type='color']) {
+  :global(.atelier-studio-panel input[type='color']) {
     width: 100%;
     height: 2.75rem;
     padding: 0.2rem;

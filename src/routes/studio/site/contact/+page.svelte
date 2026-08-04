@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -32,9 +32,9 @@
 
 <PageIntro>{t('studio.site.intro')}</PageIntro>
 
-<section class="studio-panel" aria-labelledby="contact-settings-title">
-  <div class="panel-heading">
-    <h2 id="contact-settings-title">{t('studio.site.contact.title')}</h2>
+<Panel title={t('studio.site.contact.title')} id="contact-settings" class="atelier-studio-panel">
+
+  <div class="panel-summary">
     <p>{t('studio.site.contact.intro')}</p>
   </div>
 
@@ -118,4 +118,4 @@
 
     <StudioFormStatus message={form?.contactMessage} status={form?.contactStatus} />
   </form>
-</section>
+</Panel>

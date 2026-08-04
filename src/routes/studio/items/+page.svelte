@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Surface, Panel } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -88,7 +88,7 @@
   />
 {/if}
 
-<section class="studio-panel">
+<Surface class="atelier-studio-surface">
   <form
     method="POST"
     action="?/saveItemNames"
@@ -119,11 +119,11 @@
 
     <StudioFormStatus message={form?.itemNamesMessage} status={form?.itemNamesStatus} />
   </form>
-</section>
+</Surface>
 
-<section class="studio-panel">
-  <div class="panel-heading">
-    <h2>{t('studio.items.title')}</h2>
+<Panel title={t('studio.items.title')} id="items" class="atelier-studio-panel">
+
+  <div class="panel-summary">
     <p>{t('studio.items.count', { count: items.length })}</p>
     <p class="create-link"><a href="/studio/items/new">{t('studio.items.createLink')}</a></p>
   </div>
@@ -177,7 +177,7 @@
       <StudioFormStatus message={form?.itemOrderMessage} status={form?.itemOrderStatus} />
     </form>
   {/if}
-</section>
+</Panel>
 
 <style>
   .hint {

@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
   // @ts-nocheck
   import { enhance } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
@@ -71,9 +71,9 @@
 <PageIntro>{t('studio.system.intro')}</PageIntro>
 
 <div class="system-sections">
-  <section class="studio-panel" aria-labelledby="language-settings-title">
-    <div class="panel-heading">
-      <h2 id="language-settings-title">{t('studio.system.language.title')}</h2>
+  <Panel title={t('studio.system.language.title')} id="language-settings" class="atelier-studio-panel">
+
+    <div class="panel-summary">
       <p>{t('studio.system.language.description')}</p>
     </div>
 
@@ -103,11 +103,11 @@
 
       <StudioFormStatus message={form?.languageMessage} status={form?.languageStatus} />
     </form>
-  </section>
+    </Panel>
 
-  <section class="studio-panel shutdown-panel" aria-labelledby="shutdown-title">
-    <div class="panel-heading">
-      <h2 id="shutdown-title">{t('studio.system.shutdown.title')}</h2>
+  <Panel title={t('studio.system.shutdown.title')} id="shutdown" class="atelier-studio-panel shutdown-panel">
+
+    <div class="panel-summary">
       <p>{t('studio.system.shutdown.description')}</p>
     </div>
 
@@ -134,7 +134,7 @@
 
       <StudioFormStatus message={form?.shutdownMessage} status={form?.shutdownStatus} />
     </form>
-  </section>
+    </Panel>
 </div>
 
 <style>
@@ -150,20 +150,20 @@
     line-height: 1.5;
   }
 
-  .shutdown-panel {
-    border-color: #e8c5c5;
-    background: linear-gradient(160deg, #fdf3f3 0%, #fff 58%);
+  :global(.shutdown-panel) {
+    --giu-panel-border-color: #e8c5c5;
+    --giu-panel-background: linear-gradient(160deg, #fdf3f3 0%, #fff 58%);
   }
 
-  .shutdown-panel :global(button.danger) {
+  :global(.shutdown-panel button.danger) {
     background: #b42318;
   }
 
-  .shutdown-panel :global(button.danger:hover) {
+  :global(.shutdown-panel button.danger:hover) {
     background: #912018;
   }
 
-  .shutdown-panel :global(button.danger:disabled) {
+  :global(.shutdown-panel button.danger:disabled) {
     opacity: 0.65;
     cursor: wait;
   }

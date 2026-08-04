@@ -660,6 +660,8 @@ export default {
       detailValue: 'Valore',
       detailAdd: '+ Aggiungi voce',
       detailRemove: 'Rimuovi',
+      detailMoveUp: 'Sposta la riga dettaglio {position} in alto',
+      detailMoveDown: 'Sposta la riga dettaglio {position} in basso',
       save: 'Salva oggetto',
       back: 'Torna agli oggetti',
       delete: 'Elimina oggetto',

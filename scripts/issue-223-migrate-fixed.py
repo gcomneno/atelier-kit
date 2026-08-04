@@ -11,4 +11,8 @@ source = source.replace(
     "if 'studio-panel' in source:\n        raise RuntimeError('obsolete studio-panel remains in layout')",
     "if re.search(r'(?<!atelier-)studio-panel', source):\n        raise RuntimeError('obsolete studio-panel remains in layout')",
 )
+source = source.replace(
+    "if re.search(r'class=\"[^\"]*\\bstudio-panel\\b', text):\n            structural.append(str(path.relative_to(ROOT)))",
+    "if any(\n            token == 'studio-panel'\n            for match in re.finditer(r'class=\"([^\"]*)\"', text)\n            for token in match.group(1).split()\n        ):\n            structural.append(str(path.relative_to(ROOT)))",
+)
 exec(compile(source, __file__, 'exec'))

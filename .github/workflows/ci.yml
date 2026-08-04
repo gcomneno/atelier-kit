@@ -29,28 +29,32 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Repair focused characterization expectations
+      - name: Repair forwarded style and axe typing boundaries
         run: |
           python3 - <<'PY'
           from pathlib import Path
 
           replacements = {
-              'src/routes/studio/readiness/+page.svelte': [
+              'src/routes/studio/help/+page.svelte': [
                   (
-                      "  .panel-heading h2 {\n    margin: 0 0 0.35rem;\n    font-size: 1.2rem;\n  }\n\n  .panel-heading p {\n    margin: 0 0 1rem;\n    color: var(--studio-muted);\n  }\n\n",
-                      "",
+                      "  .help-section + .help-section,\n  .help-toc + .help-section {\n    margin-top: 1rem;\n  }",
+                      "  :global(.help-section + .help-section),\n  :global(.help-toc + .help-section) {\n    margin-top: 1rem;\n  }",
+                  ),
+                  (
+                      "  .help-section h3 {\n    margin: 1.1rem 0 0.45rem;\n    font-size: 0.95rem;\n    font-weight: 700;\n  }\n\n  .help-section h3:first-of-type {\n    margin-top: 0.35rem;\n  }",
+                      "  :global(.help-section h3) {\n    margin: 1.1rem 0 0.45rem;\n    font-size: 0.95rem;\n    font-weight: 700;\n  }\n\n  :global(.help-section h3:first-of-type) {\n    margin-top: 0.35rem;\n  }",
                   ),
               ],
-              'test/studio-field-label-adoption.test.js': [
+              'src/routes/studio/system/+page.svelte': [
                   (
-                      "  assert.match(layout, /:global\\(\\.studio-panel \\.hint\\)/);",
-                      "  assert.match(\n    layout,\n    /:global\\(:is\\(\\.atelier-studio-panel, \\.atelier-studio-surface\\) \\.hint\\)/\n  );",
+                      "  .shutdown-panel {\n    border-color: #e8c5c5;\n    background: linear-gradient(160deg, #fdf3f3 0%, #fff 58%);\n  }\n\n  .shutdown-panel :global(button.danger) {\n    background: #b42318;\n  }\n\n  .shutdown-panel :global(button.danger:hover) {\n    background: #912018;\n  }\n\n  .shutdown-panel :global(button.danger:disabled) {\n    opacity: 0.65;\n    cursor: wait;\n  }",
+                      "  :global(.shutdown-panel) {\n    --giu-panel-border-color: #e8c5c5;\n    --giu-panel-background: linear-gradient(160deg, #fdf3f3 0%, #fff 58%);\n  }\n\n  :global(.shutdown-panel button.danger) {\n    background: #b42318;\n  }\n\n  :global(.shutdown-panel button.danger:hover) {\n    background: #912018;\n  }\n\n  :global(.shutdown-panel button.danger:disabled) {\n    opacity: 0.65;\n    cursor: wait;\n  }",
                   ),
               ],
               'test/studio-panel-surface-adoption.test.js': [
                   (
-                      "  assert.match(body, /<h2 id=\"settings-title\"[^>]*>Studio settings<\\/h2>/);",
-                      "  assert.match(\n    body,\n    /<h2 id=\"settings-title\"[^>]*>Studio settings(?:<!---->)?<\\/h2>/\n  );",
+                      "    const axe = (await import('axe-core')).default;\n    const result = await axe.run(window.document, {",
+                      "    const axe = (await import('axe-core')).default;\n    const context = /** @type {import('axe-core').ContextSpec} */ (\n      /** @type {unknown} */ (window.document)\n    );\n    const result = await axe.run(context, {",
                   ),
               ],
           }
@@ -69,10 +73,10 @@ jobs:
           git diff --check
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/routes/studio/readiness/+page.svelte \
-            test/studio-field-label-adoption.test.js \
+          git add src/routes/studio/help/+page.svelte \
+            src/routes/studio/system/+page.svelte \
             test/studio-panel-surface-adoption.test.js
-          git commit -m "test(studio): align adoption characterizations"
+          git commit -m "fix(studio): align forwarded component style boundaries"
           git push origin HEAD:feat/issue-223-panel-surface-adoption
 
       - name: Run tests

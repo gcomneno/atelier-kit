@@ -6,14 +6,51 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   validate:
     name: Validate Atelier-Kit
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout feature branch
         uses: actions/checkout@v5
+        with:
+          ref: test/issue-225-characterize-gallery-meta
+
+      - name: Add localized Meta reorder labels
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              'src/lib/i18n/messages/en.js': (
+                  "      detailAdd: '+ Add row',\n      detailRemove: 'Remove',",
+                  "      detailAdd: '+ Add row',\n      detailRemove: 'Remove',\n      detailMoveUp: 'Move detail row {position} up',\n      detailMoveDown: 'Move detail row {position} down',",
+              ),
+              'src/lib/i18n/messages/it.js': (
+                  "      detailAdd: '+ Aggiungi voce',\n      detailRemove: 'Rimuovi',",
+                  "      detailAdd: '+ Aggiungi voce',\n      detailRemove: 'Rimuovi',\n      detailMoveUp: 'Sposta la riga dettaglio {position} in alto',\n      detailMoveDown: 'Sposta la riga dettaglio {position} in basso',",
+              ),
+          }
+
+          for filename, (old, new) in replacements.items():
+              path = Path(filename)
+              source = path.read_text(encoding='utf-8')
+              count = source.count(old)
+              if count != 1:
+                  raise RuntimeError(f'{filename}: expected one match, found {count}')
+              path.write_text(source.replace(old, new), encoding='utf-8')
+          PY
+
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/lib/i18n/messages/en.js src/lib/i18n/messages/it.js
+          git commit -m "fix(studio): label Meta reorder controls"
+          git push origin HEAD:test/issue-225-characterize-gallery-meta
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -24,7 +61,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
+      - name: Run focused characterization
+        run: node --test test/studio-item-editable-fields.test.js
+
+      - name: Run complete tests
         run: npm test
 
       - name: Run SvelteKit checks

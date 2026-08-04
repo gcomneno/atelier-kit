@@ -1,9 +1,13 @@
 <script>
-  import { Button } from 'giadaware-ui-components/studio';
+  import { AsyncOperationPanel, Button } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
   import { useI18n } from '$lib/i18n/context.js';
   import { createReadinessActionState } from '$lib/studio-readiness-action-state.js';
+  import {
+    createLiveOperationPanelModel,
+    createPrepOperationPanelModel
+  } from '$lib/studio-readiness-operation-panel.js';
 
   const t = useI18n();
 
@@ -16,6 +20,24 @@
   const pendingCount = $derived(livePreview.changes.length + livePreview.commitsAhead);
   const prepRunning = $derived(actionState.pending.prep);
   const liveRunning = $derived(actionState.pending.live);
+
+  const prepPanelModel = $derived(
+    createPrepOperationPanelModel({
+      running: prepRunning,
+      result: prepResult,
+      busyLabel: t('studio.readiness.publishRunning'),
+      detailsLabel: t('studio.readiness.testOutputDetails')
+    })
+  );
+
+  const livePanelModel = $derived(
+    createLiveOperationPanelModel({
+      running: liveRunning,
+      result: liveResult,
+      busyLabel: t('studio.readiness.liveRunning'),
+      detailsLabel: t('studio.readiness.liveOutputDetails')
+    })
+  );
 
   /** @param {'prep' | 'live'} action */
   function enhanceAction(action) {
@@ -56,18 +78,16 @@
   <pre class="report">{data.report.output}</pre>
 </section>
 
-<section class="studio-panel test-panel">
-  <div class="panel-heading">
-    <h2>{t('studio.readiness.publishTitle')}</h2>
-    <p>{t('studio.readiness.publishIntro')}</p>
-  </div>
+{#snippet prepDescription()}
+  <p>{t('studio.readiness.publishIntro')}</p>
+{/snippet}
 
+{#snippet prepAction()}
   <form
     method="POST"
     action="?/runPublishPrep"
     use:enhance={enhanceAction('prep')}
     class="action-form"
-    aria-busy={prepRunning}
     onsubmit={(event) => {
       if (prepRunning || liveRunning) {
         event.preventDefault();
@@ -77,25 +97,23 @@
       actionState.start('prep');
     }}
   >
-    <Button type="submit" class="secondary" disabled={prepRunning || liveRunning}>
+    <Button type="submit" variant="secondary" disabled={prepRunning || liveRunning}>
       {prepRunning ? t('studio.readiness.publishRunning') : t('studio.readiness.publishRun')}
     </Button>
   </form>
+{/snippet}
 
-  {#if prepResult?.prep}
-    <p class={prepResult.prep.ok ? 'ok' : 'review'} role="status">{prepResult.message}</p>
-    <details class="output-details" open={!prepResult.prep.ok}>
-      <summary>{t('studio.readiness.testOutputDetails')}</summary>
-      <pre class="report">{prepResult.prep.output}</pre>
-    </details>
-  {/if}
-</section>
+<AsyncOperationPanel
+  {...prepPanelModel}
+  title={t('studio.readiness.publishTitle')}
+  description={prepDescription}
+  action={prepAction}
+  headingLevel={2}
+  class="test-panel"
+/>
 
-<section class="studio-panel live-panel">
-  <div class="panel-heading">
-    <h2>{t('studio.readiness.liveTitle')}</h2>
-    <p>{t('studio.readiness.liveIntro')}</p>
-  </div>
+{#snippet liveDescription()}
+  <p>{t('studio.readiness.liveIntro')}</p>
 
   {#if !livePreview.canPublish}
     <p class="review">{t('studio.readiness.liveBlocked')}</p>
@@ -110,6 +128,7 @@
         <p>{t('studio.readiness.livePendingEmpty')}</p>
       {:else}
         <p>{t('studio.readiness.livePendingSummary', { count: pendingCount })}</p>
+
         {#if livePreview.changes.length > 0}
           <details class="pending-details">
             <summary>{t('studio.readiness.livePendingDetails')}</summary>
@@ -120,18 +139,22 @@
             </ul>
           </details>
         {/if}
+
         {#if livePreview.commitsAhead > 0}
           <p>{t('studio.readiness.liveCommitsAhead', { count: livePreview.commitsAhead })}</p>
         {/if}
       {/if}
     </div>
+  {/if}
+{/snippet}
 
+{#snippet liveAction()}
+  {#if livePreview.canPublish}
     <form
       method="POST"
       action="?/publishLive"
       use:enhance={enhanceAction('live')}
       class="action-form"
-      aria-busy={liveRunning}
       onsubmit={(event) => {
         if (liveRunning || prepRunning) {
           event.preventDefault();
@@ -146,29 +169,33 @@
         actionState.start('live');
       }}
     >
-      <Button type="submit" class="primary" disabled={liveRunning || prepRunning}>
+      <Button type="submit" variant="primary" disabled={liveRunning || prepRunning}>
         {liveRunning ? t('studio.readiness.liveRunning') : t('studio.readiness.liveRun')}
       </Button>
     </form>
   {/if}
+{/snippet}
 
-  {#if liveResult?.live}
-    <p class={liveResult.live.ok ? 'ok' : 'review'} role="status">{liveResult.message}</p>
-    {#if liveResult.live.ok && liveResult.live.deployedUrl}
-      <p class="live-url">
-        <a href={liveResult.live.deployedUrl} target="_blank" rel="noopener noreferrer">{liveResult.live.deployedUrl}</a>
-      </p>
-    {:else if liveResult.live.ok && data.siteUrl}
-      <p class="live-url">
-        <a href={data.siteUrl} target="_blank" rel="noopener noreferrer">{data.siteUrl}</a>
-      </p>
-    {/if}
-    <details class="output-details">
-      <summary>{t('studio.readiness.liveOutputDetails')}</summary>
-      <pre class="report">{liveResult.live.output}</pre>
-    </details>
-  {/if}
-</section>
+<AsyncOperationPanel
+  {...livePanelModel}
+  title={t('studio.readiness.liveTitle')}
+  description={liveDescription}
+  action={liveAction}
+  headingLevel={2}
+  class="live-panel"
+/>
+
+{#if liveResult?.live?.ok}
+  <p class="live-url">
+    <a
+      href={liveResult.live.deployedUrl ?? data.siteUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {liveResult.live.deployedUrl ?? data.siteUrl}
+    </a>
+  </p>
+{/if}
 
 <style>
   .panel-heading h2 {
@@ -181,11 +208,11 @@
     color: var(--studio-muted);
   }
 
-  .live-panel {
+  :global(.live-panel) {
     border-color: rgb(47 79 53 / 0.25);
   }
 
-  .test-panel {
+  :global(.test-panel) {
     border-color: rgb(106 74 27 / 0.22);
   }
 
@@ -227,16 +254,6 @@
     color: #2f4f35;
   }
 
-  .output-details {
-    margin-top: 0.75rem;
-  }
-
-  .output-details summary {
-    cursor: pointer;
-    color: var(--studio-muted);
-    font-size: 0.92rem;
-  }
-
   .report {
     margin: 0.75rem 0 0;
     padding: 1rem;
@@ -249,10 +266,6 @@
   }
 
   .action-form {
-    margin-bottom: 1rem;
+    margin: 0;
   }
-
-
-
-
 </style>

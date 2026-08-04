@@ -37,16 +37,35 @@ function identifiers(section) {
 }
 
 test('build test and its result precede real publishing in DOM and tab order', { skip: !compiler }, () => {
-  const ast = compiler.parse(source);
-  const sections = ast.html.children.filter((node) => node.type === 'Element' && node.name === 'section');
-  const actionSections = sections.filter((section) => descendants(section, (node) => node.type === 'Element' && node.name === 'form').length);
-  assert.deepEqual(actionSections.map(formAction), ['?/runPublishPrep', '?/publishLive']);
+  const prepSnippet = source.indexOf('{#snippet prepAction()}');
+  const prepAction = source.indexOf('action="?/runPublishPrep"');
+  const prepPanel = source.indexOf('{...prepPanelModel}');
 
-  const [testSection, liveSection] = actionSections;
-  assert.equal(identifiers(testSection).has('prepResult'), true);
-  assert.equal(identifiers(testSection).has('liveResult'), false);
-  assert.equal(identifiers(liveSection).has('liveResult'), true);
-  assert.equal(identifiers(liveSection).has('prepResult'), false);
+  const liveSnippet = source.indexOf('{#snippet liveAction()}');
+  const liveAction = source.indexOf('action="?/publishLive"');
+  const livePanel = source.indexOf('{...livePanelModel}');
+
+  for (const position of [
+    prepSnippet,
+    prepAction,
+    prepPanel,
+    liveSnippet,
+    liveAction,
+    livePanel
+  ]) {
+    assert.notEqual(position, -1);
+  }
+
+  assert.equal(prepSnippet < prepAction, true);
+  assert.equal(prepAction < prepPanel, true);
+  assert.equal(prepPanel < liveSnippet, true);
+  assert.equal(liveSnippet < liveAction, true);
+  assert.equal(liveAction < livePanel, true);
+
+  assert.equal(source.slice(prepSnippet, prepPanel).includes('prepResult'), false);
+  assert.equal(source.slice(prepSnippet, prepPanel).includes('liveResult'), false);
+  assert.equal(source.slice(liveSnippet, livePanel).includes('prepResult'), false);
+  assert.equal(source.slice(liveSnippet, livePanel).includes('liveResult'), false);
 });
 
 test('each action block has its own heading, submit button, status, and technical output', { skip: !compiler }, () => {

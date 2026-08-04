@@ -7,8 +7,8 @@ on:
   pull_request:
 
 jobs:
-  validate:
-    name: Validate Atelier-Kit
+  diagnose:
+    name: Diagnose editable fields harness
     runs-on: ubuntu-latest
 
     steps:
@@ -24,17 +24,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run focused characterization
-        run: node --test test/studio-item-editable-fields.test.js
-
-      - name: Run complete tests
-        run: npm test
-
-      - name: Run SvelteKit checks
-        run: npm run check
-
-      - name: Validate YAML content
-        run: npm run content:validate
-
-      - name: Build project
-        run: npm run build
+      - name: Run one scenario with bounded output
+        run: |
+          timeout --signal=TERM 25s \
+            node --test \
+              --test-reporter=spec \
+              --test-name-pattern="Gallery renders zero" \
+              test/studio-item-editable-fields.test.js

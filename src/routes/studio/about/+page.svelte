@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Surface } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -33,7 +33,7 @@
   {t('studio.about.intro')}
 </PageIntro>
 
-<section class="studio-panel">
+<Surface class="atelier-studio-surface">
   <form
     method="POST"
     action="?/saveAbout"
@@ -127,7 +127,7 @@
 
     <StudioFormStatus message={form?.aboutMessage} status={form?.aboutStatus} />
   </form>
-</section>
+</Surface>
 
 <style>
   .portrait-preview {

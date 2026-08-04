@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -40,9 +40,9 @@
   {t('studio.itemsNew.intro')}
 </PageIntro>
 
-<section class="studio-panel">
-  <div class="panel-heading">
-    <h2>{t('studio.itemsNew.title')}</h2>
+<Panel title={t('studio.itemsNew.title')} id="item-create" class="atelier-studio-panel">
+
+  <div class="panel-summary">
     <p>{t('studio.itemsNew.introPanel')}</p>
   </div>
 
@@ -102,7 +102,7 @@
 
     <StudioFormStatus message={form?.createMessage} status={form?.createStatus} />
   </form>
-</section>
+</Panel>
 
 <style>
 

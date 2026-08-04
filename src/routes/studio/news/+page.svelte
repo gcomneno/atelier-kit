@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -99,9 +99,9 @@
   />
 {/if}
 
-<section class="studio-panel">
-  <div class="panel-heading">
-    <h2>{t('studio.news.title')}</h2>
+<Panel title={t('studio.news.title')} id="news" class="atelier-studio-panel">
+
+  <div class="panel-summary">
     <p>{t('studio.news.count', { count: posts.length })}</p>
     <p class="create-link"><a href="/studio/news/new">{t('studio.news.createLink')}</a></p>
   </div>
@@ -155,7 +155,7 @@
       <StudioFormStatus message={form?.newsOrderMessage} status={form?.newsOrderStatus} />
     </form>
   {/if}
-</section>
+</Panel>
 
 <style>
   .hint {

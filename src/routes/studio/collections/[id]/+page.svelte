@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
@@ -100,9 +100,9 @@
   {t('studio.collectionsEdit.intro')}
 </PageIntro>
 
-<section class="studio-panel">
-  <div class="panel-heading">
-    <h2>{collectionForm.title}</h2>
+<Panel title={collectionForm.title} id="collection-editor" class="atelier-studio-panel">
+
+  <div class="panel-summary">
     <p>{t('studio.collectionsEdit.collectionId', { id: collectionForm.id })}</p>
   </div>
 
@@ -192,7 +192,7 @@
       {t('studio.collectionsEdit.delete')}
     </Button>
   </form>
-</section>
+</Panel>
 
 <style>
   .hint {

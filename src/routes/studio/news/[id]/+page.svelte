@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -37,9 +37,9 @@
   <a href={`/news/${newsForm.id}`} target="_blank" rel="noreferrer">{t('studio.newsEdit.preview')}</a>
 </PageIntro>
 
-<section class="studio-panel">
-  <div class="panel-heading">
-    <h2>{newsForm.title}</h2>
+<Panel title={newsForm.title} id="news-editor" class="atelier-studio-panel">
+
+  <div class="panel-summary">
     <p>{t('studio.newsEdit.postId', { id: newsForm.id })}</p>
   </div>
 
@@ -119,7 +119,7 @@
       {t('studio.newsEdit.delete')}
     </Button>
   </form>
-</section>
+</Panel>
 
 <style>
   .image-preview {

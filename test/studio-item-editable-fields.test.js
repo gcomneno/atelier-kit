@@ -167,7 +167,6 @@ function formValues(window, target, name) {
 }
 
 before(async () => {
-  console.error('[issue225] build:start');
   harnessRoot = fs.mkdtempSync(path.join(root, '.tmp-editable-fields-client-'));
   fs.writeFileSync(path.join(harnessRoot, 'Harness.svelte'), harnessSource);
   fs.writeFileSync(
@@ -200,11 +199,9 @@ before(async () => {
     }
   });
 
-  console.error('[issue225] build:done');
   bundle = await import(
     `${pathToFileURL(path.join(harnessRoot, 'dist/bundle.js')).href}?${Date.now()}`
   );
-  console.error('[issue225] import:done');
 });
 
 after(() => {

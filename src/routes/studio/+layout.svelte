@@ -240,30 +240,6 @@
     font-weight: 500;
   }
 
-  :global(.field-label-row) {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.35rem;
-  }
-
-  :global(.field-label) {
-    font-weight: 500;
-  }
-
-  :global(.field-badge.required) {
-    color: #b42318;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: help;
-  }
-
-  :global(.field-badge.optional) {
-    color: var(--studio-muted);
-    font-size: 0.85em;
-    font-weight: 400;
-  }
-
   :global(.studio-panel input),
   :global(.studio-panel textarea),
   :global(.studio-panel select) {

@@ -6,57 +6,26 @@ on:
       - main
   pull_request:
 
-permissions:
-  contents: write
-
 jobs:
-  repair:
-    name: Repair Meta reorder harness
+  characterize:
+    name: Verify Meta reorder
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout feature branch
+      - name: Checkout repository
         uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          ref: test/issue-225-characterize-gallery-meta
+          node-version: 24
+          cache: npm
 
-      - name: Let Meta reorder settle through its internal tick
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
+      - name: Install dependencies
+        run: npm ci
 
-          path = Path('test/studio-item-editable-fields.test.js')
-          source = path.read_text(encoding='utf-8')
+      - name: Meta reorder identity and FormData
+        run: timeout --kill-after=3s 15s node --test --test-reporter=spec --test-name-pattern="Meta index keys" test/studio-item-editable-fields.test.js
 
-          helper_anchor = "async function waitFor(predicate, message) {\n  for (let attempt = 0; attempt < 20; attempt += 1) {\n    await settle();\n    if (predicate()) return;\n  }\n  assert.fail(message);\n}\n"
-          helper_replacement = helper_anchor + "\nasync function waitForPassive(predicate, message) {\n  for (let attempt = 0; attempt < 20; attempt += 1) {\n    await Promise.resolve();\n    await new Promise((resolve) => setTimeout(resolve, 0));\n    if (predicate()) return;\n  }\n  assert.fail(message);\n}\n"
-
-          if source.count(helper_anchor) != 1:
-              raise RuntimeError('waitFor helper anchor not found exactly once')
-          source = source.replace(helper_anchor, helper_replacement)
-
-          replacements = [
-              (
-                  "    await waitFor(() => dirty.length === 1, 'Meta move down did not notify dirty');",
-                  "    await waitForPassive(() => dirty.length === 1, 'Meta move down did not notify dirty');",
-              ),
-              (
-                  "    await waitFor(() => dirty.length === 2, 'Meta move up did not notify dirty');",
-                  "    await waitForPassive(() => dirty.length === 2, 'Meta move up did not notify dirty');",
-              ),
-          ]
-
-          for old, new in replacements:
-              if source.count(old) != 1:
-                  raise RuntimeError(f'expected one match: {old}')
-              source = source.replace(old, new)
-
-          path.write_text(source, encoding='utf-8')
-          PY
-
-          git diff --check
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add test/studio-item-editable-fields.test.js
-          git commit -m "test(studio): observe Meta reorder through internal tick"
-          git push origin HEAD:test/issue-225-characterize-gallery-meta
+      - name: Application boundaries and Relation exclusion
+        run: timeout --kill-after=3s 15s node --test --test-reporter=spec --test-name-pattern="Gallery, Meta and Relation" test/studio-item-editable-fields.test.js

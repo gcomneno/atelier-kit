@@ -7,8 +7,8 @@ on:
   pull_request:
 
 jobs:
-  diagnose:
-    name: Diagnose editable fields harness
+  characterize:
+    name: Characterize editable fields
     runs-on: ubuntu-latest
 
     steps:
@@ -24,10 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run one scenario with bounded output
+      - name: Run all Gallery and Meta scenarios
         run: |
-          timeout --signal=TERM 25s \
+          timeout --signal=TERM 45s \
             node --test \
               --test-reporter=spec \
-              --test-name-pattern="Gallery renders zero" \
               test/studio-item-editable-fields.test.js

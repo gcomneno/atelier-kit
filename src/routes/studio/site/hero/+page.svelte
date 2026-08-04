@@ -1,5 +1,5 @@
 <script>
-  import { Button } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   // @ts-nocheck
   import { enhance } from '$app/forms';
@@ -45,7 +45,7 @@
   <title>{t('studio.site.pageTitle')}</title>
 </svelte:head>
 
-<p class="studio-intro">{t('studio.site.intro')}</p>
+<PageIntro>{t('studio.site.intro')}</PageIntro>
 
 <section class="studio-panel" aria-labelledby="hero-banner-settings-title">
   <div class="panel-heading">
@@ -128,9 +128,9 @@
       </label>
     </fieldset>
 
-    <div class="actions">
+    <FormActions>
       <Button type="submit" disabled={!isDirty}>{t('studio.site.heroBanner.save')}</Button>
-    </div>
+    </FormActions>
 
     <StudioFormStatus message={form?.heroBannerMessage} status={form?.heroBannerStatus} />
   </form>

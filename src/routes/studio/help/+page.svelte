@@ -1,5 +1,6 @@
 <script>
-  import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
+    import { PageIntro } from 'giadaware-ui-components/studio';
+import StudioAccessGuide from '$lib/components/StudioAccessGuide.svelte';
   import { useI18n } from '$lib/i18n/context.js';
 
   const t = useI18n();
@@ -53,7 +54,7 @@
   <title>{t('studio.help.pageTitle')}</title>
 </svelte:head>
 
-<p class="studio-intro">{t('studio.help.intro')}</p>
+<PageIntro>{t('studio.help.intro')}</PageIntro>
 
 <nav class="help-toc studio-panel" aria-label={t('studio.help.tocTitle')}>
   <h2>{t('studio.help.tocTitle')}</h2>

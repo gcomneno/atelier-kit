@@ -1,4 +1,5 @@
 <script>
+  import { untrack } from 'svelte';
   import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -13,7 +14,9 @@
   let { data, form } = $props();
 
   const clouds = $derived(form?.clouds ?? data.clouds);
-  let faqVisibility = $state((form?.clouds ?? data.clouds).map((cloud) => cloud.faq.visible));
+  let faqVisibility = $state(
+    untrack(() => (form?.clouds ?? data.clouds).map((cloud) => cloud.faq.visible))
+  );
   let isDirty = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};

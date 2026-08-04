@@ -1,5 +1,5 @@
 <script>
-  import { AsyncOperationPanel, Button } from 'giadaware-ui-components/studio';
+  import { AsyncOperationPanel, Button, PageIntro } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
   import { useI18n } from '$lib/i18n/context.js';
@@ -63,9 +63,9 @@
   <title>{t('studio.readiness.pageTitle')}</title>
 </svelte:head>
 
-<p class="studio-intro">
+<PageIntro>
   {t('studio.readiness.intro')}
-</p>
+</PageIntro>
 
 <section class="studio-panel">
   <div class="panel-heading">

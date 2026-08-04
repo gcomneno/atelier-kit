@@ -32,6 +32,11 @@
     --giu-button-padding: 0.7rem 1.15rem;
     --giu-button-focus-color: var(--studio-accent);
     --giu-button-disabled-opacity: 0.45;
+    --giu-page-intro-margin: 0 0 1.25rem;
+    --giu-page-intro-color: var(--studio-muted);
+    --giu-page-intro-line-height: 1.65;
+    --giu-page-intro-link-color: var(--studio-accent);
+    --giu-form-actions-gap: 1rem;
 
     width: min(1100px, calc(100% - 2rem));
     margin: 0 auto;
@@ -88,12 +93,6 @@
       width: 100%;
       flex-basis: auto;
     }
-  }
-
-  :global(.studio-intro) {
-    margin: 0 0 1.25rem;
-    color: var(--studio-muted);
-    line-height: 1.65;
   }
 
   :global(.studio-panel) {
@@ -294,10 +293,6 @@
     resize: vertical;
   }
 
-  :global(.studio-panel .actions) {
-    display: flex;
-    justify-content: flex-start;
-  }
 
   :global(.studio-panel .status) {
     margin: 0;

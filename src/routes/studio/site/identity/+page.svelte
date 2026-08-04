@@ -1,5 +1,5 @@
 <script>
-  import { Button } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
@@ -73,7 +73,7 @@
   {/each}
 </svelte:head>
 
-<p class="studio-intro">{t('studio.site.intro')}</p>
+<PageIntro>{t('studio.site.intro')}</PageIntro>
 
 <section class="studio-panel" aria-labelledby="site-settings-title">
   <div class="panel-heading">
@@ -205,9 +205,9 @@
       <MarkedTextField name="footer_note" value={siteForm.footer_note} />
     </label>
 
-    <div class="actions">
+    <FormActions>
       <Button type="submit" disabled={!isDirty}>{t('studio.site.identity.save')}</Button>
-    </div>
+    </FormActions>
 
     <StudioFormStatus message={form?.siteMessage} status={form?.siteStatus} />
   </form>

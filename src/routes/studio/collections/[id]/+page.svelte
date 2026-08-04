@@ -1,5 +1,5 @@
 <script>
-  import { Button } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
@@ -96,9 +96,9 @@
   <title>Studio · {collectionForm.title}</title>
 </svelte:head>
 
-<p class="studio-intro">
+<PageIntro>
   {t('studio.collectionsEdit.intro')}
-</p>
+</PageIntro>
 
 <section class="studio-panel">
   <div class="panel-heading">
@@ -171,10 +171,10 @@
       </fieldset>
     {/if}
 
-    <div class="actions">
+    <FormActions>
       <Button type="submit" disabled={!isDirty}>{t('studio.collectionsEdit.save')}</Button>
       <a class="secondary-link" href="/studio/collections">{t('studio.collectionsEdit.back')}</a>
-    </div>
+    </FormActions>
 
     <StudioFormStatus message={form?.collectionMessage} status={form?.collectionStatus} />
   </form>
@@ -270,11 +270,6 @@
     cursor: not-allowed;
   }
 
-  .actions {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-  }
 
   .secondary-link {
     color: var(--studio-accent);

@@ -1,5 +1,6 @@
 <script>
-  import { useI18n } from '$lib/i18n/context.js';
+    import { PageIntro } from 'giadaware-ui-components/studio';
+import { useI18n } from '$lib/i18n/context.js';
 
   const t = useI18n();
 
@@ -18,7 +19,7 @@
   <title>{t('studio.dashboard.pageTitle')}</title>
 </svelte:head>
 
-<p class="studio-intro">{t('studio.dashboard.intro')}</p>
+<PageIntro>{t('studio.dashboard.intro')}</PageIntro>
 
 <section class="zones" aria-label={t('studio.dashboard.zonesLegend')}>
   {#each zones as zone (zone.id)}

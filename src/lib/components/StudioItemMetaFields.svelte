@@ -14,9 +14,29 @@
   const labelListId = 'item-meta-label-suggestions';
   const valueListId = 'item-meta-value-suggestions';
 
+  /** @type {HTMLFieldSetElement | undefined} */
+  let fieldset;
+
   async function notifyDirty() {
     await tick();
     dirtyControl.checkDirty?.();
+  }
+
+  /**
+   * @param {number} index
+   */
+  function focusRow(index) {
+    const input = /** @type {HTMLInputElement | undefined} */ (
+      fieldset?.querySelectorAll('input[name="meta_labels"]')[index]
+    );
+    input?.focus();
+  }
+
+  function focusAddButton() {
+    const button = /** @type {HTMLButtonElement | null | undefined} */ (
+      fieldset?.querySelector('button.add-button')
+    );
+    button?.focus();
   }
 
   /**
@@ -51,17 +71,27 @@
    * @param {number} index
    */
   async function removeRow(index) {
+    const focusIndex = Math.min(index, rows.length - 2);
     rows = rows.filter((_, rowIndex) => rowIndex !== index);
     await notifyDirty();
+
+    if (rows.length === 0) {
+      focusAddButton();
+      return;
+    }
+
+    focusRow(focusIndex);
   }
 
   async function addRow() {
+    const focusIndex = rows.length;
     rows = [...rows, { label: '', value: '' }];
     await notifyDirty();
+    focusRow(focusIndex);
   }
 </script>
 
-<fieldset class="meta-fieldset">
+<fieldset class="meta-fieldset" bind:this={fieldset}>
   <legend>{t('studio.itemsEdit.details')}</legend>
   <p class="hint">{t('studio.itemsEdit.detailsHint')}</p>
 
@@ -81,7 +111,7 @@
     <p class="empty">{t('studio.itemsEdit.detailsEmpty')}</p>
   {:else}
     <ol class="ordered-list">
-      {#each rows as row, index (index)}
+      {#each rows as row, index (row)}
         <li>
           <span class="order-label">{index + 1}.</span>
 
@@ -110,13 +140,31 @@
           </div>
 
           <div class="order-actions">
-            <button type="button" onclick={() => moveUp(index)} disabled={index === 0}>↑</button>
+            <button
+              type="button"
+              onclick={() => moveUp(index)}
+              disabled={index === 0}
+              aria-label={t('studio.itemsEdit.detailMoveUp', { position: index + 1 })}
+              title={t('studio.itemsEdit.detailMoveUp', { position: index + 1 })}
+            >
+              ↑
+            </button>
             <button
               type="button"
               onclick={() => moveDown(index)}
-              disabled={index === rows.length - 1}>↓</button
+              disabled={index === rows.length - 1}
+              aria-label={t('studio.itemsEdit.detailMoveDown', { position: index + 1 })}
+              title={t('studio.itemsEdit.detailMoveDown', { position: index + 1 })}
             >
-            <Button variant="danger" size="compact" type="button" class="remove" onclick={() => removeRow(index)}>
+              ↓
+            </button>
+            <Button
+              variant="danger"
+              size="compact"
+              type="button"
+              class="remove"
+              onclick={() => removeRow(index)}
+            >
               {t('studio.itemsEdit.detailRemove')}
             </Button>
           </div>
@@ -126,7 +174,15 @@
   {/if}
 
   <p class="add-row">
-    <Button variant="secondary" size="compact" type="button" class="add-button" onclick={() => addRow()}>{t('studio.itemsEdit.detailAdd')}</Button>
+    <Button
+      variant="secondary"
+      size="compact"
+      type="button"
+      class="add-button"
+      onclick={() => addRow()}
+    >
+      {t('studio.itemsEdit.detailAdd')}
+    </Button>
   </p>
 </fieldset>
 
@@ -203,12 +259,9 @@
     cursor: not-allowed;
   }
 
-
   .add-row {
     margin: 0.85rem 0 0;
   }
-
-
 
   @media (max-width: 720px) {
     .ordered-list li {

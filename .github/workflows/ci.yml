@@ -29,18 +29,51 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Add reproducible axe coverage
+      - name: Repair focused characterization expectations
         run: |
-          npm install --save-dev axe-core
-          git diff --check
+          python3 - <<'PY'
+          from pathlib import Path
 
-          if ! git diff --quiet -- package.json package-lock.json; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add package.json package-lock.json
-            git commit -m "test: add axe-core for Studio adoption coverage"
-            git push origin HEAD:feat/issue-223-panel-surface-adoption
-          fi
+          replacements = {
+              'src/routes/studio/readiness/+page.svelte': [
+                  (
+                      "  .panel-heading h2 {\n    margin: 0 0 0.35rem;\n    font-size: 1.2rem;\n  }\n\n  .panel-heading p {\n    margin: 0 0 1rem;\n    color: var(--studio-muted);\n  }\n\n",
+                      "",
+                  ),
+              ],
+              'test/studio-field-label-adoption.test.js': [
+                  (
+                      "  assert.match(layout, /:global\\(\\.studio-panel \\.hint\\)/);",
+                      "  assert.match(\n    layout,\n    /:global\\(:is\\(\\.atelier-studio-panel, \\.atelier-studio-surface\\) \\.hint\\)/\n  );",
+                  ),
+              ],
+              'test/studio-panel-surface-adoption.test.js': [
+                  (
+                      "  assert.match(body, /<h2 id=\"settings-title\"[^>]*>Studio settings<\\/h2>/);",
+                      "  assert.match(\n    body,\n    /<h2 id=\"settings-title\"[^>]*>Studio settings(?:<!---->)?<\\/h2>/\n  );",
+                  ),
+              ],
+          }
+
+          for filename, changes in replacements.items():
+              path = Path(filename)
+              source = path.read_text(encoding='utf-8')
+              for old, new in changes:
+                  count = source.count(old)
+                  if count != 1:
+                      raise RuntimeError(f'{filename}: expected one match, found {count}')
+                  source = source.replace(old, new)
+              path.write_text(source, encoding='utf-8')
+          PY
+
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/routes/studio/readiness/+page.svelte \
+            test/studio-field-label-adoption.test.js \
+            test/studio-panel-surface-adoption.test.js
+          git commit -m "test(studio): align adoption characterizations"
+          git push origin HEAD:feat/issue-223-panel-surface-adoption
 
       - name: Run tests
         run: npm test

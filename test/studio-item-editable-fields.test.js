@@ -118,6 +118,15 @@ async function waitFor(predicate, message) {
   assert.fail(message);
 }
 
+async function waitForPassive(predicate, message) {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    await Promise.resolve();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    if (predicate()) return;
+  }
+  assert.fail(message);
+}
+
 async function mountHarness(props) {
   const window = new Window({ url: 'http://localhost/' });
   const restore = installDomGlobals(window);
@@ -451,7 +460,7 @@ test('Meta index keys preserve physical DOM positions while FormData follows reo
   try {
     const physicalFirst = inputs(harness.target, 'meta_labels')[0];
     button(harness.target, 'Move detail row 1 down').click();
-    await waitFor(() => dirty.length === 1, 'Meta move down did not notify dirty');
+    await waitForPassive(() => dirty.length === 1, 'Meta move down did not notify dirty');
 
     assert.deepEqual(formValues(harness.window, harness.target, 'meta_labels'), [
       'Year',
@@ -467,7 +476,7 @@ test('Meta index keys preserve physical DOM positions while FormData follows reo
     assert.equal(physicalFirst.value, 'Year');
 
     button(harness.target, 'Move detail row 2 up').click();
-    await waitFor(() => dirty.length === 2, 'Meta move up did not notify dirty');
+    await waitForPassive(() => dirty.length === 2, 'Meta move up did not notify dirty');
     assert.deepEqual(formValues(harness.window, harness.target, 'meta_labels'), [
       'Material',
       'Year',

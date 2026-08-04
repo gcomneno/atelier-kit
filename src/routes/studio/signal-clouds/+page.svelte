@@ -13,12 +13,13 @@
   let { data, form } = $props();
 
   const clouds = $derived(form?.clouds ?? data.clouds);
+  let faqVisibility = $state((form?.clouds ?? data.clouds).map((cloud) => cloud.faq.visible));
   let isDirty = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};
 
   $effect(() => {
-    clouds;
+    faqVisibility = clouds.map((cloud) => cloud.faq.visible);
     dirtyControl.resetBaseline?.();
   });
 
@@ -92,16 +93,7 @@
             <input
               type="checkbox"
               name={`cloud_${cloudIndex}_faq_visible`}
-              checked={cloud.faq.visible}
-              onchange={(event) => {
-                const answer = event.currentTarget.form?.elements.namedItem(
-                  `cloud_${cloudIndex}_faq_answer`
-                );
-
-                if (answer instanceof HTMLTextAreaElement) {
-                  answer.required = event.currentTarget.checked;
-                }
-              }}
+              bind:checked={faqVisibility[cloudIndex]}
             />
             {t('studio.signals.faqVisible')}
           </label>
@@ -109,6 +101,7 @@
           <label>
             <StudioFieldLabel
               label={t('studio.signals.faqAnswer')}
+              required={faqVisibility[cloudIndex]}
               hint={t('studio.signals.faqAnswerHint')}
             />
             <MarkedTextField
@@ -116,7 +109,7 @@
               value={cloud.faq.answer}
               multiline
               rows={4}
-              required={cloud.faq.visible}
+              required={faqVisibility[cloudIndex]}
             />
           </label>
 

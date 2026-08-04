@@ -1,5 +1,5 @@
 <script>
-  import { Button } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -105,7 +105,7 @@
   {/if}
 </svelte:head>
 
-<p class="studio-intro">{t('studio.site.intro')}</p>
+<PageIntro>{t('studio.site.intro')}</PageIntro>
 
 <section class="studio-panel" aria-labelledby="appearance-settings-title">
   <div class="panel-heading">
@@ -268,9 +268,9 @@
       <p class="hint background-vs-banner">{t('studio.site.appearance.backgroundVsBanner')}</p>
     {/if}
 
-    <div class="actions">
+    <FormActions>
       <Button type="submit" disabled={!isDirty}>{t('studio.site.appearance.save')}</Button>
-    </div>
+    </FormActions>
 
     <StudioFormStatus message={form?.appearanceMessage} status={form?.appearanceStatus} />
   </form>

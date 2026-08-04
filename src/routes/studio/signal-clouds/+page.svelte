@@ -1,5 +1,5 @@
 <script>
-  import { Button } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -34,9 +34,9 @@
   <title>{t('studio.signals.pageTitle')}</title>
 </svelte:head>
 
-<p class="studio-intro">
+<PageIntro>
   {t('studio.signals.intro')}
-</p>
+</PageIntro>
 
 <section class="studio-panel">
   <form
@@ -165,9 +165,9 @@
       </fieldset>
     {/each}
 
-    <div class="actions">
+    <FormActions>
       <Button type="submit" disabled={!isDirty}>{t('studio.signals.save')}</Button>
-    </div>
+    </FormActions>
 
     <StudioFormStatus message={form?.cloudMessage} status={form?.cloudStatus} />
   </form>

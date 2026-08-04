@@ -1,5 +1,5 @@
 <script>
-  import { Button } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -36,9 +36,9 @@
   <title>{t('studio.itemsNew.pageTitle')}</title>
 </svelte:head>
 
-<p class="studio-intro">
+<PageIntro>
   {t('studio.itemsNew.intro')}
-</p>
+</PageIntro>
 
 <section class="studio-panel">
   <div class="panel-heading">
@@ -95,21 +95,16 @@
       currentId={currentItemId}
     />
 
-    <div class="actions">
+    <FormActions>
       <Button type="submit">{t('studio.itemsNew.create')}</Button>
       <a class="secondary-link" href="/studio/items">{t('studio.itemsNew.cancel')}</a>
-    </div>
+    </FormActions>
 
     <StudioFormStatus message={form?.createMessage} status={form?.createStatus} />
   </form>
 </section>
 
 <style>
-  .actions {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-  }
 
   .secondary-link {
     color: var(--studio-accent);

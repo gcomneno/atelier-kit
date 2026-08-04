@@ -1,5 +1,5 @@
 <script>
-  import { Button } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -66,10 +66,10 @@
   <title>Studio · {itemForm.title}</title>
 </svelte:head>
 
-<p class="studio-intro">
+<PageIntro>
   {t('studio.itemsEdit.intro')}
   <a href={`/items/${itemForm.id}`} target="_blank" rel="noreferrer">{t('studio.itemsEdit.preview')}</a>
-</p>
+</PageIntro>
 
 <section class="studio-panel">
   <div class="panel-heading">
@@ -174,10 +174,10 @@
       {dirtyControl}
     />
 
-    <div class="actions">
+    <FormActions>
       <Button type="submit" disabled={!isDirty}>{t('studio.itemsEdit.save')}</Button>
       <a class="secondary-link" href="/studio/items">{t('studio.itemsEdit.back')}</a>
-    </div>
+    </FormActions>
 
     <StudioFormStatus message={form?.itemMessage} status={form?.itemStatus} />
   </form>
@@ -218,11 +218,6 @@
     gap: 0.85rem;
   }
 
-  .actions {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-  }
 
   .secondary-link {
     color: var(--studio-accent);

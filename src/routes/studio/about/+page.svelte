@@ -1,5 +1,5 @@
 <script>
-  import { Button } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -29,9 +29,9 @@
   <title>{t('studio.about.pageTitle')}</title>
 </svelte:head>
 
-<p class="studio-intro">
+<PageIntro>
   {t('studio.about.intro')}
-</p>
+</PageIntro>
 
 <section class="studio-panel">
   <form
@@ -121,9 +121,9 @@
       </label>
     </fieldset>
 
-    <div class="actions">
+    <FormActions>
       <Button type="submit" disabled={!isDirty}>{t('studio.about.save')}</Button>
-    </div>
+    </FormActions>
 
     <StudioFormStatus message={form?.aboutMessage} status={form?.aboutStatus} />
   </form>

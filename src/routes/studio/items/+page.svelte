@@ -1,5 +1,5 @@
 <script>
-  import { Button } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
@@ -72,9 +72,9 @@
   <title>{t('studio.items.pageTitle')}</title>
 </svelte:head>
 
-<p class="studio-intro">
+<PageIntro>
   {t('studio.items.intro')}
-</p>
+</PageIntro>
 
 {#if data.deletedItemTitle}
   <StudioFormStatus
@@ -113,9 +113,9 @@
       </label>
     </fieldset>
 
-    <div class="actions">
+    <FormActions>
       <Button type="submit" disabled={!itemNamesDirty}>{t('studio.items.saveNames')}</Button>
-    </div>
+    </FormActions>
 
     <StudioFormStatus message={form?.itemNamesMessage} status={form?.itemNamesStatus} />
   </form>
@@ -170,9 +170,9 @@
         </ol>
       </fieldset>
 
-      <div class="actions">
+      <FormActions class="order-form-actions">
         <Button type="submit" disabled={!orderDirty}>{t('studio.items.saveOrder')}</Button>
-      </div>
+      </FormActions>
 
       <StudioFormStatus message={form?.itemOrderMessage} status={form?.itemOrderStatus} />
     </form>
@@ -248,7 +248,7 @@
     cursor: not-allowed;
   }
 
-  .actions {
+  :global(.order-form-actions) {
     margin-top: 1rem;
   }
 

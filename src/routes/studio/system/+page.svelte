@@ -1,5 +1,5 @@
 <script>
-  import { Button } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro } from 'giadaware-ui-components/studio';
   // @ts-nocheck
   import { enhance } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
@@ -68,7 +68,7 @@
   <title>{t('studio.system.pageTitle')}</title>
 </svelte:head>
 
-<p class="studio-intro">{t('studio.system.intro')}</p>
+<PageIntro>{t('studio.system.intro')}</PageIntro>
 
 <div class="system-sections">
   <section class="studio-panel" aria-labelledby="language-settings-title">
@@ -97,9 +97,9 @@
         </select>
       </label>
 
-      <div class="actions">
+      <FormActions>
         <Button type="submit" disabled={!isDirty}>{t('studio.system.language.save')}</Button>
-      </div>
+      </FormActions>
 
       <StudioFormStatus message={form?.languageMessage} status={form?.languageStatus} />
     </form>
@@ -124,13 +124,13 @@
     >
       <p class="hint">{t('studio.system.shutdown.hint')}</p>
 
-      <div class="actions">
+      <FormActions>
         <Button variant="danger" type="submit" class="danger" disabled={shutdownPending}>
           {shutdownPending
             ? t('studio.system.shutdown.stopping')
             : t('studio.system.shutdown.action')}
         </Button>
-      </div>
+      </FormActions>
 
       <StudioFormStatus message={form?.shutdownMessage} status={form?.shutdownStatus} />
     </form>

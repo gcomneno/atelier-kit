@@ -118,14 +118,6 @@ async function waitFor(predicate, message) {
   assert.fail(message);
 }
 
-async function waitForPassive(predicate, message) {
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    await Promise.resolve();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    if (predicate()) return;
-  }
-  assert.fail(message);
-}
 
 async function mountHarness(props) {
   const window = new Window({ url: 'http://localhost/' });
@@ -443,7 +435,7 @@ test('Meta add and remove support zero rows, notify dirty after updates and defi
   }
 });
 
-test('Meta index keys preserve physical DOM positions while FormData follows reordered values', async () => {
+test('Meta object keys preserve row DOM identity and FormData order during reordering', async () => {
   const dirty = [];
   const harness = await mountHarness({
     kind: 'meta',
@@ -458,9 +450,9 @@ test('Meta index keys preserve physical DOM positions while FormData follows reo
   });
 
   try {
-    const physicalFirst = inputs(harness.target, 'meta_labels')[0];
+    const identityInput = inputs(harness.target, 'meta_labels')[0];
     button(harness.target, 'Move detail row 1 down').click();
-    await waitForPassive(() => dirty.length === 1, 'Meta move down did not notify dirty');
+    await waitFor(() => dirty.length === 1, 'Meta move down did not notify dirty');
 
     assert.deepEqual(formValues(harness.window, harness.target, 'meta_labels'), [
       'Year',
@@ -472,18 +464,18 @@ test('Meta index keys preserve physical DOM positions while FormData follows reo
       'Wood',
       'Lucca'
     ]);
-    assert.equal(physicalFirst, inputs(harness.target, 'meta_labels')[0]);
-    assert.equal(physicalFirst.value, 'Year');
+    assert.equal(inputs(harness.target, 'meta_labels')[1], identityInput);
+    assert.equal(identityInput.value, 'Material');
 
     button(harness.target, 'Move detail row 2 up').click();
-    await waitForPassive(() => dirty.length === 2, 'Meta move up did not notify dirty');
+    await waitFor(() => dirty.length === 2, 'Meta move up did not notify dirty');
     assert.deepEqual(formValues(harness.window, harness.target, 'meta_labels'), [
       'Material',
       'Year',
       'Origin'
     ]);
-    assert.equal(harness.window.document.activeElement, physicalFirst);
-    assert.equal(physicalFirst.value, 'Material');
+    assert.equal(inputs(harness.target, 'meta_labels')[0], identityInput);
+    assert.equal(identityInput.value, 'Material');
   } finally {
     await harness.close();
   }
@@ -502,7 +494,7 @@ test('Gallery, Meta and Relation retain their application-owned boundaries', () 
 
   assert.match(meta, /name="meta_labels"/);
   assert.match(meta, /name="meta_values"/);
-  assert.match(meta, /\{#each rows as row, index \(index\)\}/);
+  assert.match(meta, /\{#each rows as row, index \(row\)\}/);
   assert.match(meta, /item-meta-label-suggestions/);
   assert.match(meta, /item-meta-value-suggestions/);
 

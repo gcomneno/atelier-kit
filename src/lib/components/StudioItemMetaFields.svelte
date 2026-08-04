@@ -105,7 +105,7 @@
     <p class="empty">{t('studio.itemsEdit.detailsEmpty')}</p>
   {:else}
     <ol class="ordered-list">
-      {#each rows as row, index (index)}
+      {#each rows as row, index (row)}
         <li>
           <span class="order-label">{index + 1}.</span>
 

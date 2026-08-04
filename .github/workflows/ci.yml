@@ -15,6 +15,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Inventory Studio panel consumers
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path('src')
+          total = 0
+
+          for path in sorted(root.rglob('*.svelte')):
+              lines = path.read_text(encoding='utf-8').splitlines()
+              hits = [index for index, line in enumerate(lines) if 'studio-panel' in line]
+              if not hits:
+                  continue
+
+              print(f'\n===== {path} — {len(hits)} occurrence(s) =====')
+              total += len(hits)
+
+              for number, index in enumerate(hits, start=1):
+                  print(f'--- occurrence {number}: line {index + 1} ---')
+                  start = max(0, index - 10)
+                  end = min(len(lines), index + 22)
+                  for current in range(start, end):
+                      marker = '>' if current == index else ' '
+                      print(f'{marker} {current + 1:4}: {lines[current]}')
+
+          print(f'\nTOTAL_STUDIO_PANEL_OCCURRENCES={total}')
+          PY
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:

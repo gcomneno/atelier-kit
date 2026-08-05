@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 export const TEST_ROOTS = ['test', 'src/*.test.js', 'src/lib', 'src/routes'];
 export const MAX_ARGUMENT_BYTES = 24 * 1024;
+export const TEST_RUNNER_ARGUMENTS = ['--test', '--test-concurrency=1'];
 const SKIP_DIRECTORIES = new Set([
   '.cache', '.git', '.svelte-kit', '.vercel',
   'backup', 'backups', 'build', 'cache', 'caches', 'coverage', 'dist',
@@ -73,11 +74,13 @@ export function discoverTests(root) {
 export function batchTests(tests, maxBytes = MAX_ARGUMENT_BYTES) {
   const batches = [];
   let current = [];
-  let bytes = Buffer.byteLength(process.execPath) + Buffer.byteLength('--test') + 2;
+  const fixedBytes = [process.execPath, ...TEST_RUNNER_ARGUMENTS]
+    .reduce((total, argument) => total + Buffer.byteLength(argument) + 1, 0);
+  let bytes = fixedBytes;
   for (const testPath of tests) {
     const size = Buffer.byteLength(testPath) + 1;
     if (current.length > 0 && bytes + size > maxBytes) {
-      batches.push(current); current = []; bytes = Buffer.byteLength(process.execPath) + 8;
+      batches.push(current); current = []; bytes = fixedBytes;
     }
     current.push(testPath); bytes += size;
   }
@@ -99,7 +102,7 @@ export function runTests(root, spawn = spawnSync, maxArgumentBytes = MAX_ARGUMEN
 
   const nativeTests = tests.map((testPath) => path.join(...testPath.split('/')));
   for (const batch of batchTests(nativeTests, maxArgumentBytes)) {
-    const result = spawn(process.execPath, ['--test', ...batch], {
+    const result = spawn(process.execPath, [...TEST_RUNNER_ARGUMENTS, ...batch], {
       cwd: root, stdio: 'inherit', shell: false
     });
     if (result.error) {

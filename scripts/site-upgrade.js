@@ -27,13 +27,13 @@ const VERSION_FILE = '.atelier-kit-version';
 const PRESERVE_MANIFEST = '.atelier-kit-preserve';
 const UI_COMPONENTS_PACKAGE = 'giadaware-ui-components';
 const UI_COMPONENTS_DEPENDENCY =
-  'file:vendor/giadaware-ui-components/8a5144c/giadaware-ui-components-0.0.0.tgz';
+  'file:vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz';
 const UI_COMPONENTS_ARTIFACT =
-  'vendor/giadaware-ui-components/8a5144c/giadaware-ui-components-0.0.0.tgz';
+  'vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz';
 const UI_COMPONENTS_ARTIFACT_SHA256 =
-  '59181ff03d30c22a679fe5f75d1000201815618495d93956f723e184b37e38c7';
+  '88b5cc12417fa911f5a885b9e554abd198f29a4322f0ac8d1fad823da16e2c7d';
 const UI_COMPONENTS_IDENTITY =
-  'vendor/giadaware-ui-components/8a5144c/integration.json';
+  'vendor/giadaware-ui-components/b088653/integration.json';
 const UI_COMPONENTS_INTEGRATION_FILES = [
   UI_COMPONENTS_ARTIFACT,
   UI_COMPONENTS_IDENTITY
@@ -707,7 +707,7 @@ export function buildUiComponentsDependencyPlan(kitRoot, clientRoot) {
 }
 
 /**
- * Complete the issue #169 integration preflight before any target mutation.
+ * Complete the issue #232 integration preflight before any target mutation.
  * Preserved identity files are usable only when they are already exact.
  *
  * @param {string} kitRoot
@@ -726,7 +726,7 @@ export function buildUiComponentsIntegrationPlan(
 
   if (!fs.existsSync(kitArtifact) || hashFile(kitArtifact) !== UI_COMPONENTS_ARTIFACT_SHA256) {
     throw new Error(
-      `Issue #169 source artifact is missing or has the wrong SHA-256: ${UI_COMPONENTS_ARTIFACT}`
+      `Issue #232 source artifact is missing or has the wrong SHA-256: ${UI_COMPONENTS_ARTIFACT}`
     );
   }
 
@@ -735,16 +735,16 @@ export function buildUiComponentsIntegrationPlan(
   try {
     identity = JSON.parse(fs.readFileSync(kitIdentity, 'utf8'));
   } catch {
-    throw new Error(`Issue #169 source identity is missing or invalid: ${UI_COMPONENTS_IDENTITY}`);
+    throw new Error(`Issue #232 source identity is missing or invalid: ${UI_COMPONENTS_IDENTITY}`);
   }
   if (
     identity.package !== UI_COMPONENTS_PACKAGE ||
     identity.version !== '0.0.0' ||
-    identity.sourceCommit !== '8a5144c88b317be7849f019c17099d59b8aa0a10' ||
+    identity.sourceCommit !== 'b088653cba3c940ff6b4baf3b396a109cb04e8b7' ||
     identity.filename !== path.basename(UI_COMPONENTS_ARTIFACT) ||
     identity.sha256 !== UI_COMPONENTS_ARTIFACT_SHA256
   ) {
-    throw new Error(`Issue #169 source identity does not describe the immutable artifact: ${UI_COMPONENTS_IDENTITY}`);
+    throw new Error(`Issue #232 source identity does not describe the immutable artifact: ${UI_COMPONENTS_IDENTITY}`);
   }
 
   for (const rel of UI_COMPONENTS_INTEGRATION_FILES) {
@@ -756,7 +756,7 @@ export function buildUiComponentsIntegrationPlan(
         : 'Required state: a readable regular file that exactly matches the Atelier-Kit copy, including the exact integration identity/content.';
       /** @param {string} problem @param {unknown} [cause] */
       const preserveError = (problem, cause) => new Error(
-        `${PRESERVE_MANIFEST} preserves required issue #169 file ${rel}, but ${problem}. ` +
+        `${PRESERVE_MANIFEST} preserves required issue #232 file ${rel}, but ${problem}. ` +
           `${expectedState} Remove or adjust the ${PRESERVE_MANIFEST} rule, or restore the exact required file before retrying.`,
         cause === undefined ? undefined : { cause }
       );
@@ -819,7 +819,7 @@ let atomicWriteCounter = 0;
 /** @param {string} target */
 function temporarySibling(target) {
   atomicWriteCounter += 1;
-  return path.join(path.dirname(target), `.${path.basename(target)}.issue-169-${process.pid}-${atomicWriteCounter}.tmp`);
+  return path.join(path.dirname(target), `.${path.basename(target)}.issue-232-${process.pid}-${atomicWriteCounter}.tmp`);
 }
 
 /**
@@ -861,7 +861,7 @@ function atomicWriteClientFile(clientRoot, relativePath, contents) {
 }
 
 /**
- * Apply only the giadaware-ui-components issue-169 transaction. The optional
+ * Apply only the giadaware-ui-components issue-232 transaction. The optional
  * hooks exist solely for deterministic failure-injection tests.
  *
  * @param {{ dependency: { changed: boolean }, artifactChanged: boolean, identityChanged: boolean }} plan

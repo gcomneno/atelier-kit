@@ -28,8 +28,8 @@ const currentKitVersion = detectKitVersion(kitRoot);
 const childEnv = { ...process.env };
 delete childEnv.NODE_TEST_CONTEXT;
 const currentViteConfig = fs.readFileSync(path.join(kitRoot, 'vite.config.js'), 'utf8');
-const artifact = 'vendor/giadaware-ui-components/8a5144c/giadaware-ui-components-0.0.0.tgz';
-const identity = 'vendor/giadaware-ui-components/8a5144c/integration.json';
+const artifact = 'vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz';
+const identity = 'vendor/giadaware-ui-components/b088653/integration.json';
 const legacyViteConfig = `import adapter from '@sveltejs/adapter-vercel';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { readFileSync } from 'node:fs';
@@ -203,7 +203,7 @@ test('installs a missing vite.config.js', () => {
   } finally { cleanup(clientRoot); }
 });
 
-test('successfully migrates the fresh issue-169 dependency, identity and artifact', async () => {
+test('successfully migrates the fresh issue-232 dependency, identity and artifact', async () => {
   const clientRoot = makeClient();
   try {
     await runMain(clientRoot);
@@ -223,7 +223,7 @@ for (const [label, value] of [['missing', undefined], ['wrong', 'file:vendor/wro
       const before = snapshotTree(clientRoot);
       await assert.rejects(
         runMain(clientRoot),
-        /preserves package\.json.*Expected "file:vendor\/giadaware-ui-components\/8a5144c\/giadaware-ui-components-0\.0\.0\.tgz".*Remove the package\.json preserve rule/
+        /preserves package\.json.*Expected "file:vendor\/giadaware-ui-components\/b088653\/giadaware-ui-components-0\.0\.0\.tgz".*Remove the package\.json preserve rule/
       );
       assert.deepEqual(snapshotTree(clientRoot), before);
     } finally { cleanup(clientRoot); }
@@ -263,14 +263,14 @@ const preservedIntegrationCases = [
 ];
 
 for (const { label, relativePath, prepare } of preservedIntegrationCases) {
-  test(`preserved issue-169 ${label} aborts before all target mutations`, async () => {
+  test(`preserved issue-232 ${label} aborts before all target mutations`, async () => {
     const clientRoot = makeClient();
     try {
       prepare(clientRoot);
       fs.writeFileSync(path.join(clientRoot, '.atelier-kit-preserve'), `${relativePath}\n`);
       const before = snapshotTree(clientRoot);
       const expectedDetail = relativePath === artifact
-        ? 'required SHA-256: 59181ff03d30c22a679fe5f75d1000201815618495d93956f723e184b37e38c7'
+        ? 'required SHA-256: 88b5cc12417fa911f5a885b9e554abd198f29a4322f0ac8d1fad823da16e2c7d'
         : 'exact integration identity/content';
       await assert.rejects(
         runMain(clientRoot),
@@ -281,7 +281,7 @@ for (const { label, relativePath, prepare } of preservedIntegrationCases) {
   });
 }
 
-test('unreadable preserved issue-169 identity aborts preflight before all mutations', async () => {
+test('unreadable preserved issue-232 identity aborts preflight before all mutations', async () => {
   const clientRoot = makeClient();
   const target = path.join(clientRoot, identity);
   try {
@@ -366,7 +366,7 @@ test('repairs a missing artifact before an unrelated normal copy can fail', asyn
     applyUiComponentsIntegrationPlan(integrationPlan, kitRoot, clientRoot);
     const failingNormalPlan = { add: ['src/injected-missing-file.svelte'], update: [], remove: [] };
     assert.throws(() => applyFilePlan(failingNormalPlan, kitRoot, clientRoot), /ENOENT/);
-    assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(clientRoot, artifact))).digest('hex'), '59181ff03d30c22a679fe5f75d1000201815618495d93956f723e184b37e38c7');
+    assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(clientRoot, artifact))).digest('hex'), '88b5cc12417fa911f5a885b9e554abd198f29a4322f0ac8d1fad823da16e2c7d');
     assert.equal(JSON.parse(fs.readFileSync(path.join(clientRoot, 'package.json'), 'utf8')).dependencies['giadaware-ui-components'], `file:${artifact}`);
   } finally { cleanup(clientRoot); }
 });
@@ -380,7 +380,7 @@ const integrationFailureCases = [
 ];
 
 for (const { label, hooks, expected } of integrationFailureCases) {
-  test(`rolls back issue-169 state on failure during ${label}`, () => {
+  test(`rolls back issue-232 state on failure during ${label}`, () => {
     const clientRoot = makeClient();
     try {
       const before = snapshotTree(clientRoot);
@@ -416,7 +416,7 @@ test('prints npm install before dependency-consuming validation commands', async
   } finally { cleanup(clientRoot); }
 });
 
-test('does not request npm install when issue-169 dependency and artifact are unchanged', async () => {
+test('does not request npm install when issue-232 dependency and artifact are unchanged', async () => {
   const clientRoot = makeClient(currentViteConfig);
   try {
     copyIntegrationFile(clientRoot, artifact);

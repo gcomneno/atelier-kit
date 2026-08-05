@@ -177,7 +177,7 @@ The private-incubation trial set is exactly **`SocialIcon` and `FormStatus`**. `
 
 `BookReading`, `CatalogSidebar`, `ItemCard`, `MetaInfo`, `SignalCloud`, `SiteHeader`, `SiteFooter`, `SiteSearch`, and `VisitorBrief` are excluded because they implement Atelier-Kit visitor features and composition policy:
 
-- `BookReading` owns the news/book grammar and opinionated reading surface;
+- `BookReading` owns structured-reading normalization and rendering, the legacy news/book grammar compatibility path, and the opinionated reading surface;
 - `CatalogSidebar` owns block order, content models, dates, labels, and literal routes;
 - `ItemCard` owns item/cover models, item routes, Atelier Mark, fallback policy, and metadata labels;
 - `MetaInfo` owns the recursive item metadata presentation; a future neutral description-list primitive would be a different component;

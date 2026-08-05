@@ -13,6 +13,10 @@ import {
 } from '../src/lib/layout-blocks.js';
 import { validateLayoutBlockPlacements } from '../src/lib/layout-block-validation.js';
 import { isReadingFormat } from '../src/lib/reading-formats.js';
+import {
+  STRUCTURED_READING_BLOCK_TYPES,
+  STRUCTURED_READING_COLOPHON_ROLES
+} from '../src/lib/structured-reading.js';
 import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
 import { isFontPreset } from '../src/lib/site-typography.js';
 import { isAppearancePreset } from '../src/lib/site-appearance.js';
@@ -21,6 +25,8 @@ import { analyzeCatalogItemRelations, normalizeCatalogItemId } from '../src/lib/
 
 const ROOT = process.cwd();
 const t = createTranslator(loadOperatorLocale());
+const structuredReadingBlockTypes = new Set(STRUCTURED_READING_BLOCK_TYPES);
+const structuredReadingColophonRoles = new Set(STRUCTURED_READING_COLOPHON_ROLES);
 
 function fail(message) {
   console.error(`ERROR: ${message}`);
@@ -64,6 +70,71 @@ function requireString(record, field, source) {
 
 function isValidId(value) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+}
+
+/**
+ * Validate the explicit, product-neutral structured-reading authoring contract.
+ *
+ * Runtime normalization remains defensive, but malformed authoring is rejected
+ * before publication so operators receive precise diagnostics.
+ *
+ * @param {unknown} blocks
+ * @param {string} source
+ */
+function validateNewsReadingBlocks(blocks, source) {
+  if (blocks === undefined) {
+    return;
+  }
+
+  if (!Array.isArray(blocks)) {
+    failKey('newsReadingBlocksMustBeArray', { source });
+    return;
+  }
+
+  if (blocks.length === 0) {
+    failKey('newsReadingBlocksMustNotBeEmpty', { source });
+    return;
+  }
+
+  blocks.forEach((block, index) => {
+    const blockSource = `${source}:reading_blocks[${index}]`;
+
+    if (!block || typeof block !== 'object' || Array.isArray(block)) {
+      failKey('newsReadingBlockMustBeObject', { blockSource });
+      return;
+    }
+
+    const type = typeof block.type === 'string' ? block.type.trim() : '';
+
+    if (!structuredReadingBlockTypes.has(type)) {
+      const value = typeof block.type === 'string' ? block.type : String(block.type);
+      failKey('newsReadingBlockTypeInvalid', { blockSource, value });
+      return;
+    }
+
+    if (type === 'colophon') {
+      const role = typeof block.role === 'string' ? block.role.trim() : '';
+
+      if (!structuredReadingColophonRoles.has(role)) {
+        const value = typeof block.role === 'string' ? block.role : String(block.role);
+        failKey('newsReadingColophonRoleInvalid', { blockSource, value });
+      }
+    } else if (block.role !== undefined) {
+      failKey('newsReadingBlockRoleOnlyColophon', { blockSource });
+    }
+
+    if (type !== 'ornament' && (typeof block.text !== 'string' || block.text.trim() === '')) {
+      failKey('newsReadingBlockTextInvalid', { blockSource });
+    }
+
+    if (block.drop_cap !== undefined) {
+      if (typeof block.drop_cap !== 'boolean') {
+        failKey('newsReadingBlockDropCapInvalid', { blockSource });
+      } else if (type !== 'paragraph') {
+        failKey('newsReadingBlockDropCapOnlyParagraph', { blockSource });
+      }
+    }
+  });
 }
 
 function assertUnique(values, label) {
@@ -1007,6 +1078,8 @@ function validateNews() {
 
       failKey('newsReadingFormatInvalid', { source, value });
     }
+
+    validateNewsReadingBlocks(post.reading_blocks, source);
 
     if (typeof post.image_file === 'string' && post.image_file.trim() !== '') {
       const imageFile = post.image_file.trim();

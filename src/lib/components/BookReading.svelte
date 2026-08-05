@@ -2,8 +2,9 @@
   import EditorialText from '$lib/components/EditorialText.svelte';
   import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
   import { linkifyPlainText, parseBookContent } from '$lib/book-content.js';
+  import { normalizeStructuredReadingBlocks } from '$lib/structured-reading.js';
 
-  /** @typedef {{ id: string, title: string, excerpt?: string, body: string }} NewsPost */
+  /** @typedef {{ id: string, title: string, excerpt?: string, body: string, reading_blocks?: unknown[] }} NewsPost */
 
   /**
    * @type {{
@@ -14,7 +15,26 @@
    */
   let { post, backHref = '/news', backLabel } = $props();
 
-  const blocks = $derived(parseBookContent(post.body));
+  /**
+   * Prefer explicit structured content only when it normalizes to at least one
+   * readable block. Empty or wholly malformed input falls back to the legacy
+   * body so published pages cannot become blank.
+   *
+   * @param {NewsPost} value
+   */
+  function resolveReadingBlocks(value) {
+    if (Array.isArray(value.reading_blocks)) {
+      const explicitBlocks = normalizeStructuredReadingBlocks(value.reading_blocks);
+
+      if (explicitBlocks.length > 0) {
+        return explicitBlocks;
+      }
+    }
+
+    return parseBookContent(value.body);
+  }
+
+  const blocks = $derived(resolveReadingBlocks(post));
 </script>
 
 <main class="book-reading">
@@ -49,6 +69,13 @@
             <p class="book-staccato">{block.text}</p>
           {:else if block.type === 'ornament'}
             <div class="book-ornament" aria-hidden="true">§</div>
+          {:else if block.type === 'colophon'}
+            <p
+              class="book-colophon-entry book-colophon-{block.role}"
+              data-colophon-role={block.role}
+            >
+              <EditorialText value={block.text} />
+            </p>
           {:else if block.type === 'cta'}
             {@const linked = linkifyPlainText(block.text ?? '')}
             <p class="book-cta">
@@ -144,6 +171,56 @@
     letter-spacing: 0.08em;
     line-height: 1.25;
     text-transform: uppercase;
+  }
+
+  .book-colophon-entry {
+    margin: 0;
+    color: var(--book-reading-colophon-color, #4f4033);
+    line-height: 1.55;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .book-colophon-entry + .book-colophon-entry {
+    margin-top: 0.45rem;
+  }
+
+  .book-colophon-title {
+    color: var(--book-reading-colophon-title-color, #241c15);
+    font-size: clamp(1.15rem, 3vw, 1.45rem);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .book-colophon-series,
+  .book-colophon-epigraph {
+    color: var(--book-reading-colophon-muted-color, #6f5f4d);
+    font-style: italic;
+  }
+
+  .book-colophon-author {
+    font-weight: 600;
+  }
+
+  .book-colophon-imprint {
+    color: var(--book-reading-colophon-muted-color, #6f5f4d);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .book-colophon-body {
+    max-width: 34rem;
+    margin-inline: auto;
+  }
+
+  .book-colophon-tagline {
+    color: var(
+      --book-reading-colophon-accent-color,
+      var(--site-accent-color, #8c3a44)
+    );
+    font-style: italic;
+    font-weight: 600;
   }
 
   .book-body {

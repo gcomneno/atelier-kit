@@ -12,7 +12,6 @@ import { Window } from 'happy-dom';
 const root = path.resolve('.');
 const galleryPath = 'src/lib/components/StudioItemGalleryFields.svelte';
 const metaPath = 'src/lib/components/StudioItemMetaFields.svelte';
-const relationPath = 'src/lib/components/StudioItemRelationFields.svelte';
 
 const harnessSource = `<script>
   import { setI18nContext } from '$lib/i18n/context.js';
@@ -35,7 +34,7 @@ const harnessSource = `<script>
       const form = document.querySelector('[data-editable-fields-harness]');
       onDirty({
         rows: rows.map((row) => ({ ...row })),
-        domRowCount: form?.querySelectorAll('.ordered-list > li').length ?? -1,
+        domRowCount: form?.querySelectorAll('li').length ?? -1,
         activeName: document.activeElement?.getAttribute?.('name') ?? '',
         activeValue: document.activeElement?.value ?? ''
       });
@@ -54,10 +53,6 @@ const harnessSource = `<script>
 
 let harnessRoot;
 let bundle;
-
-function read(relativePath) {
-  return fs.readFileSync(path.join(root, relativePath), 'utf8');
-}
 
 function installDomGlobals(window) {
   const values = {
@@ -143,7 +138,7 @@ async function mountHarness(props) {
 }
 
 function rows(target) {
-  return [...target.querySelectorAll('.ordered-list > li')];
+  return [...target.querySelectorAll('form li')];
 }
 
 function inputs(target, name) {
@@ -164,6 +159,12 @@ function formValues(window, target, name) {
   const form = target.querySelector('form');
   assert.ok(form);
   return [...new window.FormData(form).getAll(name)];
+}
+
+function formEntries(window, target) {
+  const form = target.querySelector('form');
+  assert.ok(form);
+  return [...new window.FormData(form).entries()];
 }
 
 before(async () => {
@@ -230,6 +231,9 @@ test('Gallery renders zero, one and multiple rows with its minimum-row controls'
     assert.equal(button(one.target, 'Move image 1 up').disabled, true);
     assert.equal(button(one.target, 'Move image 1 down').disabled, true);
     assert.equal(button(one.target, 'Remove').disabled, true);
+    for (const entry of one.target.querySelectorAll('button')) {
+      assert.equal(entry.getAttribute('type'), 'button');
+    }
   } finally {
     await one.close();
   }
@@ -249,6 +253,7 @@ test('Gallery renders zero, one and multiple rows with its minimum-row controls'
     assert.equal(button(multiple.target, 'Move image 2 down').disabled, false);
     assert.equal(button(multiple.target, 'Move image 3 down').disabled, true);
     assert.equal([...multiple.target.querySelectorAll('button')].filter((entry) => entry.textContent?.trim() === 'Remove').length, 3);
+    assert.deepEqual(formValues(multiple.window, multiple.target, 'gallery_files'), ['a.jpg', 'b.jpg', 'c.jpg']);
   } finally {
     await multiple.close();
   }
@@ -306,6 +311,7 @@ test('Gallery object keys preserve row DOM identity and FormData order during re
     const identityInput = inputs(harness.target, 'gallery_alts')[1];
     button(harness.target, 'Move image 2 up').click();
     await waitFor(() => dirty.length === 1, 'Gallery move up did not notify dirty');
+    assert.equal(dirty[0].activeName, '');
 
     assert.deepEqual(formValues(harness.window, harness.target, 'gallery_files'), [
       'b.jpg',
@@ -321,6 +327,17 @@ test('Gallery object keys preserve row DOM identity and FormData order during re
       'detail',
       'cover',
       ''
+    ]);
+    assert.deepEqual(formEntries(harness.window, harness.target), [
+      ['gallery_files', 'b.jpg'],
+      ['gallery_alts', 'B alt'],
+      ['gallery_roles', 'detail'],
+      ['gallery_files', 'a.jpg'],
+      ['gallery_alts', 'A alt'],
+      ['gallery_roles', 'cover'],
+      ['gallery_files', 'c.jpg'],
+      ['gallery_alts', 'C alt'],
+      ['gallery_roles', '']
     ]);
     assert.equal(inputs(harness.target, 'gallery_alts')[0], identityInput);
     assert.equal(identityInput.closest('li'), rows(harness.target)[0]);
@@ -379,6 +396,9 @@ test('Meta renders zero, one and multiple rows with datalists and accessible act
     assert.equal(button(multiple.target, 'Move detail row 2 up').disabled, false);
     assert.equal(button(multiple.target, 'Move detail row 2 down').disabled, true);
     assert.equal([...multiple.target.querySelectorAll('button')].filter((entry) => entry.textContent?.trim() === 'Remove').length, 2);
+    for (const entry of multiple.target.querySelectorAll('button')) {
+      assert.equal(entry.getAttribute('type'), 'button');
+    }
   } finally {
     await multiple.close();
   }
@@ -450,6 +470,7 @@ test('Meta object keys preserve row DOM identity and FormData order during reord
     const identityInput = inputs(harness.target, 'meta_labels')[0];
     button(harness.target, 'Move detail row 1 down').click();
     await waitFor(() => dirty.length === 1, 'Meta move down did not notify dirty');
+    assert.equal(dirty[0].activeName, '');
 
     assert.deepEqual(formValues(harness.window, harness.target, 'meta_labels'), [
       'Year',
@@ -460,6 +481,14 @@ test('Meta object keys preserve row DOM identity and FormData order during reord
       '2026',
       'Wood',
       'Lucca'
+    ]);
+    assert.deepEqual(formEntries(harness.window, harness.target), [
+      ['meta_labels', 'Year'],
+      ['meta_values', '2026'],
+      ['meta_labels', 'Material'],
+      ['meta_values', 'Wood'],
+      ['meta_labels', 'Origin'],
+      ['meta_values', 'Lucca']
     ]);
     assert.equal(inputs(harness.target, 'meta_labels')[1], identityInput);
     assert.equal(identityInput.value, 'Material');
@@ -478,28 +507,24 @@ test('Meta object keys preserve row DOM identity and FormData order during reord
   }
 });
 
-test('Gallery, Meta and Relation retain their application-owned boundaries', () => {
-  const gallery = read(galleryPath);
-  const meta = read(metaPath);
-  const relation = read(relationPath);
+test('disabled shared controls do not trigger consumer mutations', async () => {
+  const dirty = [];
+  const harness = await mountHarness({
+    kind: 'gallery',
+    initialRows: [{ file: 'a.jpg', alt: 'A', role: 'cover' }],
+    onDirty: (event) => dirty.push(event)
+  });
 
-  assert.match(gallery, /name="gallery_files"/);
-  assert.match(gallery, /name="gallery_alts"/);
-  assert.match(gallery, /name="gallery_roles"/);
-  assert.match(gallery, /\{#each rows as row, index \(row\)\}/);
-  assert.match(gallery, /rows\.length <= 1/);
+  try {
+    const before = formValues(harness.window, harness.target, 'gallery_files');
+    button(harness.target, 'Move image 1 up').click();
+    button(harness.target, 'Move image 1 down').click();
+    button(harness.target, 'Remove').click();
+    await settle();
 
-  assert.match(meta, /name="meta_labels"/);
-  assert.match(meta, /name="meta_values"/);
-  assert.match(meta, /\{#each rows as row, index \(row\)\}/);
-  assert.match(meta, /item-meta-label-suggestions/);
-  assert.match(meta, /item-meta-value-suggestions/);
-
-  for (const source of [gallery, meta]) {
-    assert.match(source, /await tick\(\);\s*dirtyControl\.checkDirty\?\.\(\)/);
-    assert.doesNotMatch(source, /StudioItemRelationFields|DynamicFieldList|EditableList/);
+    assert.deepEqual(formValues(harness.window, harness.target, 'gallery_files'), before);
+    assert.equal(dirty.length, 0);
+  } finally {
+    await harness.close();
   }
-
-  assert.match(relation, /combobox|listbox|search/i);
-  assert.doesNotMatch(relation, /DynamicFieldList|EditableList/);
 });

@@ -49,20 +49,6 @@ const adoptionFiles = [
 /** @type {Map<string, NativeButtonMatcher[]>} */
 const nativeButtonAllowlist = new Map([
   [
-    "src/lib/components/StudioItemGalleryFields.svelte",
-    [
-      (source) => source.includes("moveUp(index)") && source.includes("↑"),
-      (source) => source.includes("moveDown(index)") && source.includes("↓"),
-    ],
-  ],
-  [
-    "src/lib/components/StudioItemMetaFields.svelte",
-    [
-      (source) => source.includes("moveUp(index)") && source.includes("↑"),
-      (source) => source.includes("moveDown(index)") && source.includes("↓"),
-    ],
-  ],
-  [
     "src/lib/components/StudioItemRelationFields.svelte",
     [(source) => source.includes("chooseTarget(index, item)")],
   ],
@@ -127,11 +113,17 @@ function inspectSvelte(relativePath) {
   /** @type {AstNode[]} */
   const components = [];
   /** @type {AstNode[]} */
+  const reorderActions = [];
+  /** @type {AstNode[]} */
   const nativeButtons = [];
 
   walk(ast.fragment, (node) => {
     if (node.type === "Component" && node.name === "Button") {
       components.push(node);
+    }
+
+    if (node.type === "Component" && node.name === "ReorderActions") {
+      reorderActions.push(node);
     }
 
     if (node.type === "RegularElement" && node.name === "button") {
@@ -142,6 +134,7 @@ function inspectSvelte(relativePath) {
   return {
     source,
     components,
+    reorderActions,
     nativeButtons: nativeButtons.map((node) =>
       source.slice(node.start, node.end),
     ),
@@ -161,6 +154,39 @@ test("standard Studio actions adopt the Giada UI Button entry point", () => {
     assert.ok(
       components.length > 0,
       `${relativePath}: renders at least one Giada UI Button`,
+    );
+  }
+});
+
+test("Gallery and Meta delegate reorder controls to Giada UI ReorderActions", () => {
+  const editableListFiles = [
+    "src/lib/components/StudioItemGalleryFields.svelte",
+    "src/lib/components/StudioItemMetaFields.svelte",
+  ];
+
+  for (const relativePath of editableListFiles) {
+    const {
+      source,
+      reorderActions,
+      nativeButtons,
+    } = inspectSvelte(relativePath);
+
+    assert.match(
+      source,
+      /import\s*\{[^}]*\bReorderActions\b[^}]*\}\s*from\s*['"]giadaware-ui-components\/studio['"]/,
+      `${relativePath}: imports ReorderActions from the narrow Studio entry point`,
+    );
+
+    assert.equal(
+      reorderActions.length,
+      1,
+      `${relativePath}: composes exactly one ReorderActions template node`,
+    );
+
+    assert.deepEqual(
+      nativeButtons,
+      [],
+      `${relativePath}: retains no consumer-owned native buttons`,
     );
   }
 });

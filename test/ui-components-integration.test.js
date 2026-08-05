@@ -10,9 +10,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const artifactRelative =
-  'vendor/giadaware-ui-components/8a5144c/giadaware-ui-components-0.0.0.tgz';
+  'vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz';
 const dependency = `file:${artifactRelative}`;
-const expectedSha256 = '59181ff03d30c22a679fe5f75d1000201815618495d93956f723e184b37e38c7';
+const expectedSha256 = '88b5cc12417fa911f5a885b9e554abd198f29a4322f0ac8d1fad823da16e2c7d';
 const npmCache = path.join(os.tmpdir(), 'atelier-kit-npm-cache');
 /** @type {string} */
 let fixtureRoot = '';
@@ -29,7 +29,7 @@ test.before(async () => {
   fs.copyFileSync(path.join(root, 'package-lock.json'), path.join(fixtureRoot, 'package-lock.json'));
   for (const relativePath of [
     artifactRelative,
-    'vendor/giadaware-ui-components/8a5144c/integration.json',
+    'vendor/giadaware-ui-components/b088653/integration.json',
     'src/lib/components/AtelierSocialIcon.svelte',
     'src/lib/components/AtelierFormStatus.svelte',
     'src/lib/social-icon-adapter.js',
@@ -158,11 +158,11 @@ function collectFiles(directory) {
 }
 
 test('records and installs the exact immutable package artifact', () => {
-  const manifest = JSON.parse(read('vendor/giadaware-ui-components/8a5144c/integration.json'));
+  const manifest = JSON.parse(read('vendor/giadaware-ui-components/b088653/integration.json'));
   assert.deepEqual(manifest, {
     package: 'giadaware-ui-components',
     version: '0.0.0',
-    sourceCommit: '8a5144c88b317be7849f019c17099d59b8aa0a10',
+    sourceCommit: 'b088653cba3c940ff6b4baf3b396a109cb04e8b7',
     filename: 'giadaware-ui-components-0.0.0.tgz',
     sha256: expectedSha256
   });
@@ -234,7 +234,7 @@ test('lock and install use one physical Svelte runtime and the package host peer
   assert.doesNotMatch(archive.stdout, /(?:^|\/)svelte(?:\/src|\/internal)(?:\/|$)/);
 });
 
-test('package root exposes both trial components and adapters consume no third component', () => {
+test('package entry points expose the admitted components and adapters consume no third root component', () => {
   const packageEntry = fixtureRequire.resolve('giadaware-ui-components');
   assert.equal(
     path.relative(fixtureRoot, packageEntry).split(path.sep).join('/'),
@@ -243,6 +243,16 @@ test('package root exposes both trial components and adapters consume no third c
   const packageRoot = fs.readFileSync(packageEntry, 'utf8');
   assert.match(packageRoot, /FormStatus/);
   assert.match(packageRoot, /SocialIcon/);
+
+  const studioEntry = fixtureRequire.resolve('giadaware-ui-components/studio');
+  assert.equal(
+    path.relative(fixtureRoot, studioEntry).split(path.sep).join('/'),
+    'node_modules/giadaware-ui-components/dist/studio/index.js'
+  );
+  const studioRoot = fs.readFileSync(studioEntry, 'utf8');
+  assert.match(studioRoot, /EditableList/);
+  assert.match(studioRoot, /EditableListRow/);
+  assert.match(studioRoot, /ReorderActions/);
 
   const sourceFiles = collectFiles(path.join(root, 'src'))
     .filter((file) => /\.(?:js|svelte)$/.test(file));

@@ -1095,3 +1095,52 @@ test('unsafe client namespaces fail preflight and dry-run without external or cl
     } finally { cleanup(clientRoot); cleanup(external); }
   }
 });
+
+test('structured-reading core upgrades around preserved legacy reader files', async () => {
+  const clientRoot = makeClient();
+  const parserPath = 'src/lib/book-content.js';
+  const readerPath = 'src/lib/components/BookReading.svelte';
+  const canonicalPath = 'src/lib/structured-reading.js';
+  const customParser = '// client-owned legacy parser\n';
+  const customReader = '<!-- client-owned legacy reader -->\n';
+
+  try {
+    fs.mkdirSync(path.dirname(path.join(clientRoot, parserPath)), { recursive: true });
+    fs.mkdirSync(path.dirname(path.join(clientRoot, readerPath)), { recursive: true });
+
+    fs.writeFileSync(path.join(clientRoot, parserPath), customParser);
+    fs.writeFileSync(path.join(clientRoot, readerPath), customReader);
+    fs.writeFileSync(
+      path.join(clientRoot, '.atelier-kit-preserve'),
+      `${parserPath}\n${readerPath}\n`
+    );
+
+    const firstOutput = await runMain(clientRoot);
+
+    assert.match(firstOutput, /Core-managed preserve entries:/);
+    assert.ok(firstOutput.includes(parserPath));
+    assert.ok(firstOutput.includes(readerPath));
+
+    assert.equal(
+      fs.readFileSync(path.join(clientRoot, parserPath), 'utf8'),
+      customParser
+    );
+    assert.equal(
+      fs.readFileSync(path.join(clientRoot, readerPath), 'utf8'),
+      customReader
+    );
+    assert.deepEqual(
+      fs.readFileSync(path.join(clientRoot, canonicalPath)),
+      fs.readFileSync(path.join(kitRoot, canonicalPath))
+    );
+
+    const beforeSecondUpgrade = snapshotTree(clientRoot);
+    const secondOutput = await runMain(clientRoot);
+
+    assert.ok(secondOutput.includes(parserPath));
+    assert.ok(secondOutput.includes(readerPath));
+    assert.deepEqual(snapshotTree(clientRoot), beforeSecondUpgrade);
+  } finally {
+    cleanup(clientRoot);
+  }
+});

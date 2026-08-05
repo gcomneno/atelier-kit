@@ -1239,7 +1239,25 @@ export default {
     newsDateInvalid: '{source}: date must use YYYY-MM-DD format.',
     newsSortOrderInvalid: '{source}: sort_order must be a whole number when present.',
     newsReadingFormatInvalid:
-      '{source}: reading_format must be one of: book (got "{value}").'
+      '{source}: reading_format must be one of: book (got "{value}").',
+    newsReadingBlocksMustBeArray:
+      '{source}: reading_blocks must be an array.',
+    newsReadingBlocksMustNotBeEmpty:
+      '{source}: reading_blocks must contain at least one block.',
+    newsReadingBlockMustBeObject:
+      '{blockSource}: block must be an object.',
+    newsReadingBlockTypeInvalid:
+      '{blockSource}: type "{value}" is not a supported structured-reading block type.',
+    newsReadingColophonRoleInvalid:
+      '{blockSource}: colophon role "{value}" is not supported.',
+    newsReadingBlockTextInvalid:
+      '{blockSource}: text must be a non-empty string.',
+    newsReadingBlockDropCapInvalid:
+      '{blockSource}: drop_cap must be a boolean when present.',
+    newsReadingBlockDropCapOnlyParagraph:
+      '{blockSource}: drop_cap is allowed only on paragraph blocks.',
+    newsReadingBlockRoleOnlyColophon:
+      '{blockSource}: role is allowed only on colophon blocks.'
   },
   wizard: {
     usageTitle: 'Usage:',

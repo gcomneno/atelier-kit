@@ -889,6 +889,7 @@ export function getNewsPosts() {
       const post = parseYaml(source, raw);
       const imageFile = optionalString(post, 'image_file');
       const readingFormat = optionalString(post, 'reading_format');
+      const readingBlocks = Array.isArray(post.reading_blocks) ? post.reading_blocks : undefined;
       const sortOrder =
         typeof post.sort_order === 'number' && Number.isInteger(post.sort_order)
           ? post.sort_order
@@ -902,6 +903,7 @@ export function getNewsPosts() {
         body: requiredString(post, 'body', source),
         sort_order: sortOrder,
         ...(readingFormat ? { reading_format: readingFormat } : {}),
+        ...(readingBlocks ? { reading_blocks: readingBlocks } : {}),
         ...(imageFile ? { image_file: imageFile, image_alt: optionalString(post, 'image_alt') } : {})
       };
     })

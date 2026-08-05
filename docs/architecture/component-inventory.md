@@ -65,17 +65,17 @@ Test coverage is described conservatively: a test that reads component source is
 ### `BookReading.svelte`
 
 - **Source:** `src/lib/components/BookReading.svelte`.
-- **Responsibility:** renders a `NewsPost` body as a styled book page, mapping parsed block types to fixed semantic markup and linkifying CTA text.
+- **Responsibility:** renders a `NewsPost` as a styled long-form reading page, preferring explicit normalized `reading_blocks` and falling back to the legacy free-form body parser; maps canonical block types to semantic markup and linkifies CTA text.
 - **Direct consumers:** `src/routes/news/[slug]/+page.svelte`.
-- **Public props:** `post: { id, title, excerpt?, body }`; `backHref?: string` (default `/news`); required `backLabel: string`.
+- **Public props:** `post: { id, title, excerpt?, body, reading_blocks? }`; `backHref?: string` (default `/news`); required `backLabel: string`.
 - **Events/callbacks/bindings/slots:** none.
 - **Imported components:** `EditorialText`.
-- **Imported modules:** `$lib/editorial-markup.js` (`splitEditorialParagraphs`), `$lib/book-content.js` (`parseBookContent`, `linkifyPlainText`). No `$app/*` dependency.
-- **Domain/i18n/marked text:** hard-coded news-post shape and `/news` route; no i18n context because the label is supplied; title/excerpt use Atelier Mark through `EditorialText`, while body semantics depend on the Atelier-Kit book-content grammar.
-- **CSS assumptions/tokens:** large, opinionated scoped book design; global `.book-series` styling reaches the child component. Uses `--site-text-color` and `--site-accent-color`; otherwise many fixed colors, spacing and typography assumptions.
+- **Imported modules:** `$lib/editorial-markup.js` (`splitEditorialParagraphs`), `$lib/structured-reading.js` (`normalizeStructuredReadingBlocks`), `$lib/book-content.js` (`parseBookContent`, `linkifyPlainText`). No `$app/*` dependency.
+- **Domain/i18n/marked text:** hard-coded news-post shape and `/news` route; no i18n context because the label is supplied. Title, excerpt and colophon text use Atelier Mark through `EditorialText`. Explicit body semantics use the product-neutral structured-reading contract, while legacy bodies remain supported by the Atelier-Kit book-content grammar.
+- **CSS assumptions/tokens:** large, opinionated scoped book design; global `.book-series` styling reaches the child component. Uses `--site-text-color`, `--site-accent-color`, and the public colophon overrides `--book-reading-colophon-color`, `--book-reading-colophon-title-color`, `--book-reading-colophon-muted-color`, and `--book-reading-colophon-accent-color`; otherwise retains fixed spacing and typography assumptions.
 - **Browser/lifecycle:** no lifecycle or explicit browser-only API; external CTA links use normal browser navigation.
-- **Tests:** no direct component test identified; indirect coverage may exist for editorial/book helper behavior, but no component rendering assertion was found.
-- **Assessment:** `high`; `atelier-kit-application-component`. It is a complete news-reading feature and content grammar renderer, not a presentation primitive. Extraction would require a generic block/renderer contract, injected navigation, and a decision about Atelier Mark ownership.
+- **Tests:** direct component characterization covers semantic rendering, Atelier Mark safety, explicit block precedence, ordered colophon roles, CSS-token presence and fallback to the legacy body. Separate contract, content-loader, validator and site-upgrade tests cover normalization and adoption boundaries.
+- **Assessment:** `high`; `atelier-kit-application-component`. It is a complete news-reading feature and compatibility renderer, not a presentation primitive. The product-neutral block contract is now explicit, but extraction would still require injected navigation, ownership decisions for Atelier Mark and legacy parsing, and evidence of a reusable presentation primitive.
 
 ### `CatalogSidebar.svelte`
 

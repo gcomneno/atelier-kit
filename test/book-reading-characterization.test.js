@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test, { after, before } from 'node:test';
 import { pathToFileURL } from 'node:url';
-import { build } from 'vite';
+import { build, createServer } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { Window } from 'happy-dom';
 
@@ -82,6 +82,37 @@ async function mountReader(props) {
   };
 }
 
+async function renderReader(props) {
+  const server = await createServer({
+    configFile: false,
+    root: harnessRoot,
+    logLevel: 'error',
+    appType: 'custom',
+    plugins: [svelte({ compilerOptions: { css: 'injected' } })],
+    resolve: {
+      alias: {
+        $reader: path.join(projectRoot, 'src/lib/components/BookReading.svelte'),
+        $lib: path.join(projectRoot, 'src/lib')
+      },
+      dedupe: ['svelte']
+    },
+    server: {
+      middlewareMode: true,
+      hmr: false,
+      fs: { allow: [projectRoot, harnessRoot] }
+    }
+  });
+
+  try {
+    const harness = await server.ssrLoadModule('/Harness.svelte');
+    const svelteServer = await server.ssrLoadModule('svelte/server');
+
+    return svelteServer.render(harness.default, { props });
+  } finally {
+    await server.close();
+  }
+}
+
 after(() => {
   if (harnessRoot) fs.rmSync(harnessRoot, { recursive: true, force: true });
 });
@@ -98,7 +129,7 @@ before(async () => {
     path.join(harnessRoot, 'entry.js'),
     `export { default as Harness } from './Harness.svelte';
 export { parseBookContent, isBookReadingFormat, linkifyPlainText } from ${JSON.stringify(path.join(projectRoot, 'src/lib/book-content.js'))};
-export { flushSync, mount, unmount } from 'svelte';
+export { flushSync, hydrate, mount, unmount } from 'svelte';
 `
   );
 
@@ -288,5 +319,202 @@ Testo in bozza
     );
   } finally {
     await reader.close();
+  }
+});
+
+test('BookReading prefers explicit structured blocks and preserves colophon order', async () => {
+  const reader = await mountReader({
+    backLabel: 'Back to updates',
+    post: {
+      id: 'explicit-structured-reading',
+      title: 'Neutral edition',
+      excerpt: 'Neutral series',
+      body: 'LEGACY BODY MUST NOT RENDER',
+      reading_blocks: [
+        { type: 'colophon', role: 'title', text: 'Colophon title' },
+        { type: 'colophon', role: 'series', text: 'Series name' },
+        { type: 'colophon', role: 'author', text: 'Author name' },
+        { type: 'colophon', role: 'imprint', text: 'Imprint name' },
+        { type: 'colophon', role: 'body', text: 'Publishing note' },
+        { type: 'colophon', role: 'epigraph', text: 'Colophon epigraph' },
+        { type: 'colophon', role: 'tagline', text: 'Closing tagline' },
+        { type: 'ornament' },
+        { type: 'chapter-title', text: 'Chapter One' },
+        { type: 'paragraph', text: 'Chapter content', drop_cap: true }
+      ]
+    }
+  });
+
+  try {
+    const { target } = reader;
+    const colophonEntries = [...target.querySelectorAll('[data-colophon-role]')];
+
+    assert.deepEqual(
+      colophonEntries.map((entry) => entry.getAttribute('data-colophon-role')),
+      ['title', 'series', 'author', 'imprint', 'body', 'epigraph', 'tagline']
+    );
+
+    assert.deepEqual(
+      colophonEntries.map((entry) => entry.textContent),
+      [
+        'Colophon title',
+        'Series name',
+        'Author name',
+        'Imprint name',
+        'Publishing note',
+        'Colophon epigraph',
+        'Closing tagline'
+      ]
+    );
+
+    assert.equal(target.querySelector('.book-ornament')?.textContent, '§');
+    assert.equal(target.querySelector('h2.book-chapter-title')?.textContent, 'Chapter One');
+    assert.equal(target.querySelector('.book-paragraph.drop-cap')?.textContent, 'Chapter content');
+    assert.doesNotMatch(target.textContent, /LEGACY BODY MUST NOT RENDER/);
+
+    const css = fs.readFileSync(path.join(harnessRoot, 'dist/bundle.css'), 'utf8');
+    assert.match(css, /--book-reading-colophon-color/);
+    assert.match(css, /--book-reading-colophon-title-color/);
+    assert.match(css, /--book-reading-colophon-muted-color/);
+    assert.match(css, /--book-reading-colophon-accent-color/);
+    assert.match(css, /padding:\s*clamp\(/);
+    assert.match(css, /@media\s*\(min-width:\s*720px\)/);
+  } finally {
+    await reader.close();
+  }
+});
+
+test('BookReading falls back to legacy body when explicit blocks contain no readable content', async () => {
+  for (const readingBlocks of [
+    [],
+    [null, 42, { type: 'paragraph', text: '   ' }]
+  ]) {
+    const reader = await mountReader({
+      backLabel: 'Back to updates',
+      post: {
+        id: 'structured-reading-safe-fallback',
+        title: 'Fallback edition',
+        body: `LEGACY FALLBACK LEAD
+
+Legacy fallback paragraph with enough ordinary prose to remain readable.`,
+        reading_blocks: readingBlocks
+      }
+    });
+
+    try {
+      const { target } = reader;
+
+      assert.equal(
+        target.querySelector('.book-lead')?.textContent,
+        'LEGACY FALLBACK LEAD'
+      );
+      assert.match(target.textContent, /Legacy fallback paragraph/);
+    } finally {
+      await reader.close();
+    }
+  }
+});
+
+test('BookReading preserves structured semantics across SSR and hydration', async () => {
+  const props = {
+    backHref: '/updates',
+    backLabel: 'Back to updates',
+    post: {
+      id: 'structured-reading-ssr',
+      title: 'Server-rendered edition',
+      excerpt: 'A neutral hydration fixture.',
+      body: 'Legacy fallback must remain unused.',
+      reading_blocks: [
+        { type: 'colophon', role: 'title', text: 'Publication title' },
+        { type: 'colophon', role: 'author', text: 'Publication author' },
+        { type: 'ornament' },
+        { type: 'chapter-title', text: 'Hydrated Chapter' },
+        {
+          type: 'paragraph',
+          text: 'The server-rendered paragraph remains readable.',
+          drop_cap: true
+        }
+      ]
+    }
+  };
+
+  const ssr = await renderReader(props);
+
+  assert.match(
+    ssr.body,
+    /<main[^>]*class="[^"]*\bbook-reading\b[^"]*"/
+  );
+  assert.match(
+    ssr.body,
+    /<article[^>]*\bclass="[^"]*\bbook-page\b[^"]*"[^>]*aria-labelledby="book-title"/
+  );
+  assert.match(ssr.body, /data-colophon-role="title"/);
+  assert.match(ssr.body, /data-colophon-role="author"/);
+  assert.match(ssr.body, /Hydrated Chapter/);
+  assert.doesNotMatch(ssr.body, /Legacy fallback must remain unused/);
+
+  const window = new Window({ url: 'http://localhost/' });
+  const restore = installDomGlobals(window);
+  const target = window.document.createElement('div');
+  target.innerHTML = ssr.body;
+  window.document.body.append(target);
+
+  const originalMain = target.querySelector('main.book-reading');
+  const originalArticle = target.querySelector('article.book-page');
+  const originalTitle = target.querySelector('h1#book-title');
+  const originalChapter = target.querySelector('h2.book-chapter-title');
+  const originalParagraph = target.querySelector('.book-paragraph.drop-cap');
+  const originalColophon = [
+    ...target.querySelectorAll('[data-colophon-role]')
+  ];
+
+  let instance;
+
+  try {
+    assert.ok(originalMain);
+    assert.ok(originalArticle);
+    assert.ok(originalTitle);
+    assert.ok(originalChapter);
+    assert.ok(originalParagraph);
+    assert.equal(originalColophon.length, 2);
+
+    instance = runtime.hydrate(runtime.Harness, { target, props });
+    await settle();
+
+    assert.equal(target.querySelector('main.book-reading'), originalMain);
+    assert.equal(target.querySelector('article.book-page'), originalArticle);
+    assert.equal(target.querySelector('h1#book-title'), originalTitle);
+    assert.equal(
+      target.querySelector('h2.book-chapter-title'),
+      originalChapter
+    );
+    assert.equal(
+      target.querySelector('.book-paragraph.drop-cap'),
+      originalParagraph
+    );
+
+    const hydratedColophon = [
+      ...target.querySelectorAll('[data-colophon-role]')
+    ];
+
+    assert.deepEqual(hydratedColophon, originalColophon);
+    assert.deepEqual(
+      hydratedColophon.map((entry) => entry.getAttribute('data-colophon-role')),
+      ['title', 'author']
+    );
+    assert.equal(target.querySelectorAll('main.book-reading').length, 1);
+    assert.equal(target.querySelectorAll('article.book-page').length, 1);
+    assert.equal(target.querySelectorAll('h1#book-title').length, 1);
+    assert.equal(
+      target.querySelector('.book-paragraph.drop-cap')?.textContent,
+      'The server-rendered paragraph remains readable.'
+    );
+  } finally {
+    if (instance) {
+      await runtime.unmount(instance);
+    }
+
+    restore();
+    window.close();
   }
 });

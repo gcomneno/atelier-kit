@@ -541,6 +541,8 @@ export default {
       orderLegend: 'Site order',
       orderHint:
         'Arrows reorder collections on the home page, sidebar, and /collections. Save to write sort_order into the YAML files.',
+      moveUp: 'Move collection {position} up',
+      moveDown: 'Move collection {position} down',
       saveOrder: 'Save ordering',
       deletedSuccess: 'Collection “{title}” deleted.',
       missingCollection: 'Collection “{id}” no longer exists. It may have been deleted.'
@@ -570,6 +572,8 @@ export default {
       description: 'Collection description',
       itemOrder: 'Item order',
       orderHint: 'The order below is used on the public collection page.',
+      moveUp: 'Move item {position} up',
+      moveDown: 'Move item {position} down',
       noItemsSelected: 'No items selected yet. Add items from the list below.',
       addItems: 'Add items',
       add: 'Add',
@@ -595,6 +599,8 @@ export default {
       orderLegend: 'Catalog order',
       orderHint:
         'Used on the public site when Catalog sort is set to Manual. Arrows reorder item cards; save to apply.',
+      moveUp: 'Move item {position} up',
+      moveDown: 'Move item {position} down',
       saveOrder: 'Save ordering',
       deletedSuccess: 'Item “{title}” deleted.',
       missingItem: 'Item “{id}” no longer exists. It may have been deleted.'
@@ -686,6 +692,8 @@ export default {
       orderLegend: 'Site order',
       orderHint:
         'Arrows reorder posts on the home page, sidebar, and /news. Save to write sort_order into the YAML files. When manual order ties, the newest date wins.',
+      moveUp: 'Move post {position} up',
+      moveDown: 'Move post {position} down',
       saveOrder: 'Save ordering',
       deletedSuccess: 'Post “{title}” deleted.',
       missingPost: 'Post “{id}” no longer exists. It may have been deleted.'

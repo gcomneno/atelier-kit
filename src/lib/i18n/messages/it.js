@@ -546,6 +546,8 @@ export default {
       orderLegend: 'Ordine sul sito',
       orderHint:
         'Le frecce riordinano le collezioni in home, sidebar e pagina /collections. Salva per scrivere sort_order nei file YAML.',
+      moveUp: 'Sposta la collezione {position} verso l’alto',
+      moveDown: 'Sposta la collezione {position} verso il basso',
       saveOrder: 'Salva ordinamento',
       deletedSuccess: 'Collezione «{title}» eliminata.',
       missingCollection: 'La collezione «{id}» non esiste più. Potrebbe essere stata eliminata.'
@@ -575,6 +577,8 @@ export default {
       description: 'Descrizione collezione',
       itemOrder: 'Ordine oggetti',
       orderHint: 'L’ordine sotto viene usato nella pagina pubblica della collezione.',
+      moveUp: 'Sposta l’oggetto {position} verso l’alto',
+      moveDown: 'Sposta l’oggetto {position} verso il basso',
       noItemsSelected: 'Nessun oggetto selezionato. Aggiungili dall’elenco sotto.',
       addItems: 'Aggiungi oggetti',
       add: 'Aggiungi',
@@ -600,6 +604,8 @@ export default {
       orderLegend: 'Ordine nel catalogo',
       orderHint:
         'Usato sul sito quando in Catalogo è impostato «Manuale». Le frecce riordinano le card degli oggetti; salva per applicare.',
+      moveUp: 'Sposta l’oggetto {position} verso l’alto',
+      moveDown: 'Sposta l’oggetto {position} verso il basso',
       saveOrder: 'Salva ordinamento',
       deletedSuccess: 'Oggetto «{title}» eliminato.',
       missingItem: 'L\'oggetto «{id}» non esiste più. Potrebbe essere stata eliminata.'
@@ -691,6 +697,8 @@ export default {
       orderLegend: 'Ordine sul sito',
       orderHint:
         'Le frecce riordinano i post in home, sidebar e pagina /news. Salva per scrivere sort_order nei file YAML. A parità di ordine manuale, vale la data più recente.',
+      moveUp: 'Sposta il post {position} verso l’alto',
+      moveDown: 'Sposta il post {position} verso il basso',
       saveOrder: 'Salva ordinamento',
       deletedSuccess: 'Post «{title}» eliminato.',
       missingPost: 'Il post «{id}» non esiste più. Potrebbe essere stato eliminato.'

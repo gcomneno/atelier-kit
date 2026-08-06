@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Panel, ReorderActions } from 'giadaware-ui-components/studio';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
@@ -143,12 +143,15 @@
               <span class="order-title">{itemById[itemId]?.title ?? itemId}</span>
               <span class="order-id">({itemId})</span>
               <div class="order-actions">
-                <button type="button" onclick={() => moveUp(index)} disabled={index === 0}>↑</button>
-                <button
-                  type="button"
-                  onclick={() => moveDown(index)}
-                  disabled={index === orderedIds.length - 1}>↓</button
-                >
+                <ReorderActions
+                  size="compact"
+                  moveUpLabel={t('studio.collectionsEdit.moveUp', { position: index + 1 })}
+                  moveDownLabel={t('studio.collectionsEdit.moveDown', { position: index + 1 })}
+                  onMoveUp={() => moveUp(index)}
+                  onMoveDown={() => moveDown(index)}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < orderedIds.length - 1}
+                />
                 <Button variant="danger" type="button" class="remove" onclick={() => removeItem(itemId)}>{t('studio.collectionsEdit.remove')}</Button>
               </div>
             </li>
@@ -231,6 +234,15 @@
   .order-actions {
     display: flex;
     gap: 0.35rem;
+    --giu-reorder-actions-gap: 0.35rem;
+    --giu-reorder-actions-compact-control-size: auto;
+    --giu-reorder-actions-padding: 0.25rem 0.55rem;
+    --giu-reorder-actions-border: 1px solid var(--studio-border);
+    --giu-reorder-actions-border-radius: 0.45rem;
+    --giu-reorder-actions-color: inherit;
+    --giu-reorder-actions-background: #fff;
+    --giu-reorder-actions-arrow-size: inherit;
+    --giu-reorder-actions-disabled-opacity: 0.4;
   }
 
   .available-list {
@@ -250,24 +262,6 @@
     border-radius: 0.75rem;
     background: #fff;
     border: 1px solid var(--studio-border);
-  }
-
-
-
-  .order-actions button {
-    border: 1px solid var(--studio-border);
-    border-radius: 0.45rem;
-    padding: 0.25rem 0.55rem;
-    background: #fff;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-  }
-
-
-  .order-actions button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
   }
 
 

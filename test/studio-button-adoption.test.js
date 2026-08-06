@@ -52,34 +52,6 @@ const nativeButtonAllowlist = new Map([
     "src/lib/components/StudioItemRelationFields.svelte",
     [(source) => source.includes("chooseTarget(index, item)")],
   ],
-  [
-    "src/routes/studio/collections/+page.svelte",
-    [
-      (source) => source.includes("moveUp(index)") && source.includes("↑"),
-      (source) => source.includes("moveDown(index)") && source.includes("↓"),
-    ],
-  ],
-  [
-    "src/routes/studio/collections/[id]/+page.svelte",
-    [
-      (source) => source.includes("moveUp(index)") && source.includes("↑"),
-      (source) => source.includes("moveDown(index)") && source.includes("↓"),
-    ],
-  ],
-  [
-    "src/routes/studio/items/+page.svelte",
-    [
-      (source) => source.includes("moveUp(index)") && source.includes("↑"),
-      (source) => source.includes("moveDown(index)") && source.includes("↓"),
-    ],
-  ],
-  [
-    "src/routes/studio/news/+page.svelte",
-    [
-      (source) => source.includes("moveUp(index)") && source.includes("↑"),
-      (source) => source.includes("moveDown(index)") && source.includes("↓"),
-    ],
-  ],
 ]);
 
 /** @typedef {Record<string, any>} AstNode */
@@ -158,13 +130,17 @@ test("standard Studio actions adopt the Giada UI Button entry point", () => {
   }
 });
 
-test("Gallery and Meta delegate reorder controls to Giada UI ReorderActions", () => {
-  const editableListFiles = [
+test("characterized Studio ordering controls delegate to Giada UI ReorderActions", () => {
+  const reorderConsumerFiles = [
     "src/lib/components/StudioItemGalleryFields.svelte",
     "src/lib/components/StudioItemMetaFields.svelte",
+    "src/routes/studio/collections/+page.svelte",
+    "src/routes/studio/collections/[id]/+page.svelte",
+    "src/routes/studio/items/+page.svelte",
+    "src/routes/studio/news/+page.svelte",
   ];
 
-  for (const relativePath of editableListFiles) {
+  for (const relativePath of reorderConsumerFiles) {
     const {
       source,
       reorderActions,
@@ -188,6 +164,104 @@ test("Gallery and Meta delegate reorder controls to Giada UI ReorderActions", ()
       [],
       `${relativePath}: retains no consumer-owned native buttons`,
     );
+  }
+});
+
+test("ordering ReorderActions preserve localized labels and movement boundaries", () => {
+  const orderingFiles = [
+    {
+      relativePath: "src/routes/studio/collections/+page.svelte",
+      scope: "studio.collections",
+    },
+    {
+      relativePath: "src/routes/studio/collections/[id]/+page.svelte",
+      scope: "studio.collectionsEdit",
+    },
+    {
+      relativePath: "src/routes/studio/items/+page.svelte",
+      scope: "studio.items",
+    },
+    {
+      relativePath: "src/routes/studio/news/+page.svelte",
+      scope: "studio.news",
+    },
+  ];
+
+  for (const { relativePath, scope } of orderingFiles) {
+    const { source } = inspectSvelte(relativePath);
+
+    assert.ok(
+      source.includes(
+        `moveUpLabel={t('${scope}.moveUp', { position: index + 1 })}`,
+      ),
+      `${relativePath}: localized move-up label includes position`,
+    );
+
+    assert.ok(
+      source.includes(
+        `moveDownLabel={t('${scope}.moveDown', { position: index + 1 })}`,
+      ),
+      `${relativePath}: localized move-down label includes position`,
+    );
+
+    assert.ok(
+      source.includes("onMoveUp={() => moveUp(index)}"),
+      `${relativePath}: preserves move-up callback`,
+    );
+
+    assert.ok(
+      source.includes("onMoveDown={() => moveDown(index)}"),
+      `${relativePath}: preserves move-down callback`,
+    );
+
+    assert.ok(
+      source.includes("canMoveUp={index > 0}"),
+      `${relativePath}: preserves first-row boundary`,
+    );
+
+    assert.ok(
+      source.includes("canMoveDown={index < orderedIds.length - 1}"),
+      `${relativePath}: preserves last-row boundary`,
+    );
+
+    assert.ok(
+      source.includes('size="compact"'),
+      `${relativePath}: uses compact controls`,
+    );
+  }
+});
+
+test("ordering labels are defined in English and Italian", () => {
+  const english = fs.readFileSync(
+    path.join(root, "src/lib/i18n/messages/en.js"),
+    "utf8",
+  );
+
+  const italian = fs.readFileSync(
+    path.join(root, "src/lib/i18n/messages/it.js"),
+    "utf8",
+  );
+
+  for (const expected of [
+    "moveUp: 'Move collection {position} up'",
+    "moveDown: 'Move collection {position} down'",
+    "moveUp: 'Move item {position} up'",
+    "moveDown: 'Move item {position} down'",
+    "moveUp: 'Move post {position} up'",
+    "moveDown: 'Move post {position} down'",
+  ]) {
+    assert.ok(english.includes(expected), `English catalog: ${expected}`);
+  }
+
+  for (const expected of [
+    "moveUp: 'Sposta la collezione {position} verso l’alto'",
+    "moveDown: 'Sposta la collezione {position} verso il basso'",
+    "moveUp: 'Sposta l’oggetto {position} verso l’alto'",
+    "moveDown: 'Sposta l’oggetto {position} verso il basso'",
+    "moveUp: 'Sposta il post {position} verso l’alto'",
+    "moveDown: 'Sposta il post {position} verso il basso'",
+  ]) {
+    assert.ok(italian.includes(expected), `Italian catalog: ${expected}`);
   }
 });
 

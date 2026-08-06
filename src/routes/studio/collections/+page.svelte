@@ -1,5 +1,5 @@
 <script>
-  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
+  import { Button, FormActions, PageIntro, Panel, ReorderActions } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
@@ -117,12 +117,15 @@
                 <span>{t('studio.collections.itemCount', { count: collection?.itemCount ?? 0 })}</span>
               </a>
               <div class="order-actions">
-                <button type="button" onclick={() => moveUp(index)} disabled={index === 0}>↑</button>
-                <button
-                  type="button"
-                  onclick={() => moveDown(index)}
-                  disabled={index === orderedIds.length - 1}>↓</button
-                >
+                <ReorderActions
+                  size="compact"
+                  moveUpLabel={t('studio.collections.moveUp', { position: index + 1 })}
+                  moveDownLabel={t('studio.collections.moveDown', { position: index + 1 })}
+                  onMoveUp={() => moveUp(index)}
+                  onMoveDown={() => moveDown(index)}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < orderedIds.length - 1}
+                />
               </div>
             </li>
           {/each}
@@ -190,21 +193,15 @@
   .order-actions {
     display: flex;
     gap: 0.35rem;
-  }
-
-  .order-actions button {
-    border: 1px solid var(--studio-border);
-    border-radius: 0.45rem;
-    padding: 0.25rem 0.55rem;
-    background: #fff;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-  }
-
-  .order-actions button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+    --giu-reorder-actions-gap: 0.35rem;
+    --giu-reorder-actions-compact-control-size: auto;
+    --giu-reorder-actions-padding: 0.25rem 0.55rem;
+    --giu-reorder-actions-border: 1px solid var(--studio-border);
+    --giu-reorder-actions-border-radius: 0.45rem;
+    --giu-reorder-actions-color: inherit;
+    --giu-reorder-actions-background: #fff;
+    --giu-reorder-actions-arrow-size: inherit;
+    --giu-reorder-actions-disabled-opacity: 0.4;
   }
 
   :global(.order-form-actions) {

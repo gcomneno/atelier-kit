@@ -23,6 +23,10 @@ import { translate } from '$lib/i18n/index.js';
 import { MAX_CATALOG_HOME_LIMIT } from '$lib/layout-presets.js';
 import { collectItemRelationTypeSuggestions, withStudioItemRelations } from '$lib/studio-item-relations.js';
 import { buildAboutData, loadAboutFormData } from '$lib/about-config.js';
+import {
+  mergeCollectionsEditorialConfig,
+  normalizeCollectionsEditorialConfig
+} from '$lib/collections-editorial.js';
 export { checkboxEnabled } from './studio-form-values.js';
 
 const ROOT = process.cwd();
@@ -980,6 +984,71 @@ export async function saveNewsImageUpload(id, file, locale = 'en') {
   writeFileSync(absolutePath, buffer);
 
   return `/images/news/${filename}`;
+}
+
+/**
+ * @param {string} [locale]
+ */
+export function loadCollectionsEditorialForm(locale = 'en') {
+  const relativePath = 'config/collections.yaml';
+  const absolutePath = path.join(ROOT, relativePath);
+
+  if (!existsSync(absolutePath)) {
+    return normalizeCollectionsEditorialConfig(null);
+  }
+
+  const data = readProjectYaml(relativePath);
+  const collections = data.collections;
+
+  if (
+    !collections ||
+    typeof collections !== 'object' ||
+    Array.isArray(collections)
+  ) {
+    throw new Error(
+      translate('errors.missingCollectionsEditorial', locale)
+    );
+  }
+
+  return normalizeCollectionsEditorialConfig(collections);
+}
+
+/**
+ * @param {Record<string, unknown>} form
+ * @param {string} [locale]
+ */
+export function writeCollectionsEditorialForm(form, locale = 'en') {
+  const relativePath = 'config/collections.yaml';
+  const absolutePath = path.join(ROOT, relativePath);
+
+  const existing = existsSync(absolutePath)
+    ? readProjectYaml(relativePath)
+    : {};
+
+  const current = existing.collections;
+
+  if (
+    current !== undefined &&
+    (
+      !current ||
+      typeof current !== 'object' ||
+      Array.isArray(current)
+    )
+  ) {
+    throw new Error(
+      translate('errors.missingCollectionsEditorial', locale)
+    );
+  }
+
+  const collections = mergeCollectionsEditorialConfig(
+    current,
+    form
+  );
+
+  writeProjectYaml(relativePath, {
+    ...existing,
+    collections
+  });
 }
 
 export function loadCatalogForm(locale = 'en') {

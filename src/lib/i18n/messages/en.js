@@ -534,6 +534,14 @@ export default {
       pageTitle: 'Studio · Collections',
       intro: 'Choose a collection to edit, reorder how they appear on the site, or create a new one.',
       title: 'Collections',
+      editorialLegend: 'Public collection wording',
+      homeEyebrow: 'Home eyebrow',
+      homeEyebrowHint:
+        'Optional. Overrides the localized “Collections” eyebrow above the collections block on the home page.',
+      pageEyebrow: 'Collections page eyebrow',
+      pageEyebrowHint:
+        'Optional. Overrides the eyebrow on /collections. When empty, the Layout collections label remains the fallback.',
+      saveEditorial: 'Save wording',
       count: '{count} collection file(s) in content/collections/',
       createLink: '+ Create new collection',
       empty: 'No collections yet.',
@@ -884,6 +892,7 @@ export default {
     deleteItemError: 'Could not delete item.',
     saveCollectionError: 'Could not save collection.',
     saveCollectionOrderError: 'Could not save collection order.',
+    saveCollectionsEditorialError: 'Could not save collection wording.',
     deleteCollectionError: 'Could not delete collection.',
     saveNewsOrderError: 'Could not save news post order.',
     deleteNewsError: 'Could not delete news post.',
@@ -931,6 +940,7 @@ export default {
     imageSize: 'Image must be 5 MB or smaller.',
     imageUploadRemoveConflict: 'Choose either a new image or removal, not both.',
     missingCatalog: 'config/catalog.yaml is missing a catalog object.',
+    missingCollectionsEditorial: 'config/collections.yaml is missing a collections object.',
     missingAbout: 'config/about.yaml is missing an about object.',
     missingSignalClouds: 'config/signal-clouds.yaml is missing signal_clouds.',
     missingSite: 'config/site.yaml is missing a site object.',
@@ -1168,12 +1178,14 @@ export default {
     ogImagePathInvalid: '{source}: site.og_image must be a path under /images/ or a full https URL.',
     siteFaviconInvalid: '{source}: site.favicon must be a path under /images/site/ when provided.',
     missingCatalogObject: '{source}: missing "catalog" object.',
+    missingCollectionsObject: '{source}: missing "collections" object.',
     catalogSortInvalid:
       '{source}: catalog.sort must be one of: manual, title_asc, title_desc.',
     catalogHomeLimitInvalid:
       '{source}: catalog.home_limit must be an integer from 1 to {max} when provided (or omit the field to show all).',
     catalogEyebrowInvalid: '{source}: catalog.eyebrow must be a string when provided.',
     catalogIntroInvalid: '{source}: catalog.intro must be a string when provided.',
+    collectionsEditorialFieldInvalid: '{source}: collections.{field} must be a string when provided.',
     routeSegmentUnsupported:
       '{source}: route_segment is intentionally not supported in Atelier-Kit 1.0. Items live under /items.',
     missingSignalCloudsArray: '{source}: missing "signal_clouds" array.',

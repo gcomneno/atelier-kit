@@ -539,6 +539,14 @@ export default {
       pageTitle: 'Studio · Collezioni',
       intro: 'Scegli una collezione da modificare, riordina l’elenco sul sito o creane una nuova.',
       title: 'Collezioni',
+      editorialLegend: 'Testi pubblici delle collezioni',
+      homeEyebrow: 'Occhiello Home',
+      homeEyebrowHint:
+        'Facoltativo. Sostituisce l’occhiello localizzato «Collezioni» sopra il blocco delle collezioni in Home.',
+      pageEyebrow: 'Occhiello pagina Collezioni',
+      pageEyebrowHint:
+        'Facoltativo. Sostituisce l’occhiello di /collections. Se vuoto, resta valido il label Collezioni configurato nel Layout.',
+      saveEditorial: 'Salva testi',
       count: '{count} file di collezione in content/collections/',
       createLink: '+ Crea nuova collezione',
       empty: 'Nessuna collezione ancora.',
@@ -891,6 +899,7 @@ export default {
     deleteItemError: 'Impossibile eliminare l\'oggetto.',
     saveCollectionError: 'Impossibile salvare la collezione.',
     saveCollectionOrderError: 'Impossibile salvare l\'ordine delle collezioni.',
+    saveCollectionsEditorialError: 'Impossibile salvare i testi pubblici delle collezioni.',
     deleteCollectionError: 'Impossibile eliminare la collezione.',
     saveNewsOrderError: 'Impossibile salvare l\'ordine dei post news.',
     deleteNewsError: 'Impossibile eliminare il post news.',
@@ -938,6 +947,7 @@ export default {
     imageSize: 'L’immagine deve essere di 5 MB o meno.',
     imageUploadRemoveConflict: 'Scegli se caricare una nuova immagine oppure rimuoverla, non entrambe le opzioni.',
     missingCatalog: 'config/catalog.yaml non contiene un oggetto catalog.',
+    missingCollectionsEditorial: 'config/collections.yaml non contiene un oggetto collections.',
     missingAbout: 'config/about.yaml non contiene un oggetto about.',
     missingSignalClouds: 'config/signal-clouds.yaml non contiene signal_clouds.',
     missingSite: 'config/site.yaml non contiene un oggetto site.',
@@ -1175,12 +1185,14 @@ export default {
     ogImagePathInvalid: '{source}: site.og_image deve essere un percorso sotto /images/ o un URL https completo.',
     siteFaviconInvalid: '{source}: site.favicon deve essere un percorso sotto /images/site/ quando presente.',
     missingCatalogObject: '{source}: manca l’oggetto "catalog".',
+    missingCollectionsObject: '{source}: manca l\'oggetto "collections".',
     catalogSortInvalid:
       '{source}: catalog.sort deve essere uno tra: manual, title_asc, title_desc.',
     catalogHomeLimitInvalid:
       '{source}: catalog.home_limit deve essere un intero tra 1 e {max} quando presente (oppure ometti il campo per mostrarle tutte).',
     catalogEyebrowInvalid: '{source}: catalog.eyebrow deve essere una stringa quando presente.',
     catalogIntroInvalid: '{source}: catalog.intro deve essere una stringa quando presente.',
+    collectionsEditorialFieldInvalid: '{source}: collections.{field} deve essere una stringa quando presente.',
     routeSegmentUnsupported:
       '{source}: route_segment non è supportato in Atelier-Kit 1.0. Gli oggetti vivono sotto /items.',
     missingSignalCloudsArray: '{source}: manca l’array "signal_clouds".',

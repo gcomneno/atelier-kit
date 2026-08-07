@@ -40,6 +40,44 @@ Item detail pages remain under:
 /items/<id>
 ```
 
+## Editorial wording
+
+Collection records under `content/collections/` define the individual curated
+groups. Separate, collection-wide editorial wording can optionally live in:
+
+```text
+config/collections.yaml
+```
+
+Example:
+
+```yaml
+collections:
+  home_eyebrow: "Series"
+  page_eyebrow: "Browse the series"
+```
+
+The three collection labels have intentionally different responsibilities:
+
+- the **Layout collections block label** is the structural heading used by
+  configured Layout placements and navigation;
+- `home_eyebrow` is the small editorial overline above the collections block
+  on `/`;
+- `page_eyebrow` is the small editorial overline on `/collections`.
+
+Fallbacks remain backward compatible:
+
+- an empty or missing `home_eyebrow` uses the localized Atelier-Kit Home
+  default (`Collections` / `Collezioni`);
+- an empty or missing `page_eyebrow` uses the effective Layout collections
+  block label, then the localized collections default if no usable label is
+  available.
+
+Changing either eyebrow never renames the Layout block label. Existing client
+sites do not need `config/collections.yaml`.
+
+The same two fields are editable from **Studio → Collections**.
+
 ## Validation
 
 Run:

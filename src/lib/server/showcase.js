@@ -35,6 +35,9 @@ import { getItemCoverImage, normalizeItemImages } from '$lib/item-images.js';
 import { normalizeItemRelations } from '$lib/item-relations.js';
 import { projectFaqEntries } from '$lib/signal-cloud-faq.js';
 import { parseAboutPortrait } from '$lib/about-config.js';
+import {
+  normalizeCollectionsEditorialConfig
+} from '$lib/collections-editorial.js';
 
 const configFiles = import.meta.glob('/config/*.yaml', {
   query: '?raw',
@@ -403,6 +406,36 @@ export function getCatalogConfig() {
         ? Math.min(homeLimitRaw, MAX_CATALOG_HOME_LIMIT)
         : 0
   };
+}
+
+/**
+ * Optional consumer-owned editorial wording for collection surfaces.
+ *
+ * Existing consumers do not need config/collections.yaml: absence preserves
+ * the localized Atelier-Kit defaults.
+ *
+ * @returns {{
+ *   home_eyebrow: string,
+ *   page_eyebrow: string
+ * }}
+ */
+export function getCollectionsEditorialConfig() {
+  const source = '/config/collections.yaml';
+  const raw = readYamlRaw(source);
+
+  if (raw === null) {
+    return normalizeCollectionsEditorialConfig(null);
+  }
+
+  const data = parseYaml(source, raw);
+
+  if (!isRecord(data.collections)) {
+    throw new Error(
+      'config/collections.yaml: missing "collections" object.'
+    );
+  }
+
+  return normalizeCollectionsEditorialConfig(data.collections);
 }
 
 /**

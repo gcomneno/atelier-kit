@@ -60,7 +60,7 @@ The studio edits:
 - about page (`config/about.yaml`)
 - catalog labels and visible fields (`config/catalog.yaml`)
 - items with photo upload (`content/items/*.yaml`, `static/images/items/`)
-- collections (`content/collections/*.yaml`)
+- collection-wide Home/page eyebrows (`config/collections.yaml`) and collections (`content/collections/*.yaml`)
 - news posts (`content/news/*.yaml`)
 - Signal Cloud questions, answer labels and optional public FAQ answers (`config/signal-clouds.yaml`)
 - publish readiness via Content Doctor (`/studio/readiness`)
@@ -89,7 +89,7 @@ The studio does **not** yet:
 | `/studio/items` | List items |
 | `/studio/items/new` | Create a new item |
 | `/studio/items/[id]` | Edit one item and upload its photo |
-| `/studio/collections` | List collections |
+| `/studio/collections` | Edit collection-wide Home/page eyebrows, list and reorder collections |
 | `/studio/collections/[id]` | Edit one collection |
 | `/studio/news` | List news posts |
 | `/studio/news/new` | Create a news post |

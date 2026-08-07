@@ -151,6 +151,7 @@ export const actions = {
         }
 
         const item = withStudioItemRelations({
+          ...original,
           id: readString(original, 'id', params.id),
           title: requiredField(formData.get('title'), t('fields.itemTitle'), locale),
           subtitle: optionalField(formData.get('subtitle')),

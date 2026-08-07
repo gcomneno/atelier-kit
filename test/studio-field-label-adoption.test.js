@@ -174,7 +174,7 @@ test('all existing consumers retain the stable local adapter import', () => {
       /import\s*\{[^}]*\bFieldLabel\b[^}]*\}\s*from\s*['"]giadaware-ui-components\/studio['"]/.test(source);
   });
 
-  assert.equal(consumers.length, 21);
+  assert.equal(consumers.length, 22);
   assert.deepEqual(directPackageConsumers, []);
 });
 

@@ -479,6 +479,40 @@ function validateCatalog() {
   }
 }
 
+function validateCollectionsEditorial() {
+  const source = 'config/collections.yaml';
+  const absolutePath = path.join(ROOT, source);
+
+  if (!existsSync(absolutePath)) {
+    return;
+  }
+
+  const data = readYaml(source);
+  const collections = data.collections;
+
+  if (
+    !collections ||
+    typeof collections !== 'object' ||
+    Array.isArray(collections)
+  ) {
+    failKey('missingCollectionsObject', { source });
+    return;
+  }
+
+  for (const field of ['home_eyebrow', 'page_eyebrow']) {
+    if (
+      field in collections &&
+      collections[field] !== undefined &&
+      typeof collections[field] !== 'string'
+    ) {
+      failKey('collectionsEditorialFieldInvalid', {
+        source,
+        field
+      });
+    }
+  }
+}
+
 function validateSignalClouds() {
   const source = 'config/signal-clouds.yaml';
   const data = readYaml(source);
@@ -1102,6 +1136,7 @@ function validateNews() {
 
 validateSite();
 validateCatalog();
+validateCollectionsEditorial();
 validateAbout();
 validateSignalClouds();
 validateContact();

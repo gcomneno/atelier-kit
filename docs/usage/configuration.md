@@ -12,6 +12,11 @@ Atelier-Kit 1.0 has three main configuration files:
 - `config/catalog.yaml`
 - `config/signal-clouds.yaml`
 
+Collection-wide editorial wording can additionally use the optional,
+site-owned file:
+
+- `config/collections.yaml`
+
 Content items live separately in:
 
 - `content/items/`
@@ -149,6 +154,35 @@ Rules:
 - items always live under `/items`;
 - configurable route segments are intentionally out of scope for Atelier-Kit 1.0;
 - field visibility should stay simple and predictable.
+
+## Collection editorial configuration
+
+`config/collections.yaml` is optional and controls collection-wide editorial
+overlines without changing collection records or the structural Layout label.
+
+Example:
+
+```yaml
+collections:
+  home_eyebrow: "Series"
+  page_eyebrow: "Browse the series"
+```
+
+Both fields are optional plain text and can also be edited from
+**Studio → Collections**.
+
+Their responsibilities and fallbacks are deliberately separate:
+
+1. **Layout collections block label** — structural heading/navigation wording
+   configured by the Layout system.
+2. **Home eyebrow** — `collections.home_eyebrow`; when absent or empty, the
+   localized visitor default is used.
+3. **Collections page eyebrow** — `collections.page_eyebrow`; when absent or
+   empty, the effective Layout collections label is used first, followed by
+   the localized visitor default.
+
+The file lives under `config/`, so `site:upgrade` treats it as client-owned and
+does not overwrite it.
 
 ## Signal Cloud configuration
 

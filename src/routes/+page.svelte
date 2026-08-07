@@ -145,7 +145,7 @@
     {#if showCollections}
       <section class="collections" aria-labelledby="collections-title">
         <div class="section-heading">
-          <p class="eyebrow">{t('home.collectionsEyebrow')}</p>
+          <p class="eyebrow">{data.homeCollectionsEyebrow}</p>
           <h2 id="collections-title">{data.blockLabels.collections}</h2>
         </div>
 

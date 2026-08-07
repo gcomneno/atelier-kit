@@ -2,6 +2,7 @@
   import { Button, FormActions, PageIntro, Panel, ReorderActions } from 'giadaware-ui-components/studio';
   import { enhance } from '$app/forms';
   import { tick } from 'svelte';
+  import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
   import { useI18n } from '$lib/i18n/context.js';
@@ -19,16 +20,29 @@
   const collectionById = $derived(
     Object.fromEntries(collections.map((/** @type {CollectionSummary} */ collection) => [collection.id, collection]))
   );
+  const collectionsEditorialForm = $derived(
+    form?.collectionsEditorialForm ?? data.collectionsEditorialForm
+  );
 
   /** @type {string[]} */
   let orderedIds = $state([]);
-  let isDirty = $state(false);
+  let editorialIsDirty = $state(false);
+  let orderIsDirty = $state(false);
+
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
-  const dirtyControl = {};
+  const editorialDirtyControl = {};
+
+  /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
+  const orderDirtyControl = {};
+
+  $effect(() => {
+    collectionsEditorialForm;
+    editorialDirtyControl.resetBaseline?.();
+  });
 
   $effect(() => {
     orderedIds = collections.map((/** @type {CollectionSummary} */ collection) => collection.id);
-    dirtyControl.resetBaseline?.();
+    orderDirtyControl.resetBaseline?.();
   });
 
   /**
@@ -43,7 +57,7 @@
     [next[index - 1], next[index]] = [next[index], next[index - 1]];
     orderedIds = next;
     await tick();
-    dirtyControl.checkDirty?.();
+    orderDirtyControl.checkDirty?.();
   }
 
   /**
@@ -58,7 +72,7 @@
     [next[index + 1], next[index]] = [next[index], next[index + 1]];
     orderedIds = next;
     await tick();
-    dirtyControl.checkDirty?.();
+    orderDirtyControl.checkDirty?.();
   }
 </script>
 
@@ -84,6 +98,61 @@
 
 <Panel title={t('studio.collections.title')} id="collections" class="atelier-studio-panel">
 
+  <form
+    method="POST"
+    action="?/saveCollectionsEditorial"
+    use:studioFormDirty={{
+      setDirty: (value) => (editorialIsDirty = value),
+      dirtyControl: editorialDirtyControl
+    }}
+    use:enhance={() =>
+      studioFormEnhanceDirty(editorialDirtyControl)}
+    class="studio-form"
+  >
+    <StudioFormLegend />
+
+    <fieldset>
+      <legend>{t('studio.collections.editorialLegend')}</legend>
+
+      <label>
+        <StudioFieldLabel
+          label={t('studio.collections.homeEyebrow')}
+          optional
+          hint={t('studio.collections.homeEyebrowHint')}
+        />
+        <input
+          type="text"
+          name="home_eyebrow"
+          value={collectionsEditorialForm.home_eyebrow}
+        />
+      </label>
+
+      <label>
+        <StudioFieldLabel
+          label={t('studio.collections.pageEyebrow')}
+          optional
+          hint={t('studio.collections.pageEyebrowHint')}
+        />
+        <input
+          type="text"
+          name="page_eyebrow"
+          value={collectionsEditorialForm.page_eyebrow}
+        />
+      </label>
+    </fieldset>
+
+    <FormActions>
+      <Button type="submit" disabled={!editorialIsDirty}>
+        {t('studio.collections.saveEditorial')}
+      </Button>
+    </FormActions>
+
+    <StudioFormStatus
+      message={form?.collectionsEditorialMessage}
+      status={form?.collectionsEditorialStatus}
+    />
+  </form>
+
   <div class="panel-summary">
     <p>{t('studio.collections.count', { count: collections.length })}</p>
     <p class="create-link"><a href="/studio/collections/new">{t('studio.collections.createLink')}</a></p>
@@ -95,8 +164,12 @@
     <form
       method="POST"
       action="?/saveCollectionOrder"
-      use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
-      use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+      use:studioFormDirty={{
+        setDirty: (value) => (orderIsDirty = value),
+        dirtyControl: orderDirtyControl
+      }}
+      use:enhance={() =>
+        studioFormEnhanceDirty(orderDirtyControl)}
       class="studio-form"
     >
       <StudioFormLegend />
@@ -133,7 +206,7 @@
       </fieldset>
 
       <FormActions class="order-form-actions">
-        <Button type="submit" disabled={!isDirty}>{t('studio.collections.saveOrder')}</Button>
+        <Button type="submit" disabled={!orderIsDirty}>{t('studio.collections.saveOrder')}</Button>
       </FormActions>
 
       <StudioFormStatus message={form?.collectionOrderMessage} status={form?.collectionOrderStatus} />

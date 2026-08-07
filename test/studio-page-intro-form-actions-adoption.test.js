@@ -34,7 +34,7 @@ const introConsumers = [
 const actionConsumers = new Map([
   ['src/routes/studio/about/+page.svelte', 1],
   ['src/routes/studio/catalog/+page.svelte', 1],
-  ['src/routes/studio/collections/+page.svelte', 1],
+  ['src/routes/studio/collections/+page.svelte', 2],
   ['src/routes/studio/collections/[id]/+page.svelte', 1],
   ['src/routes/studio/collections/new/+page.svelte', 1],
   ['src/routes/studio/items/+page.svelte', 2],
@@ -171,7 +171,7 @@ test('mixed-content PageIntro consumers preserve their preview links', () => {
   }
 });
 
-test('all 22 standard Studio action groups adopt FormActions', () => {
+test('all 23 standard Studio action groups adopt FormActions', () => {
   let total = 0;
 
   for (const [file, expectedCount] of actionConsumers) {
@@ -193,7 +193,7 @@ test('all 22 standard Studio action groups adopt FormActions', () => {
     total += count;
   }
 
-  assert.equal(total, 22);
+  assert.equal(total, 23);
 });
 
 test('two-action groups preserve primary Button before secondary navigation', () => {

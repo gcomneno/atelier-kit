@@ -148,6 +148,30 @@ async function runMain(clientRoot, extraArgs = ['--yes'], integrationValidation 
   }
 }
 
+test('site upgrade preserves client-owned collections editorial config byte-for-byte', async () => {
+  const clientRoot = makeClient();
+  const relativePath = 'config/collections.yaml';
+  const original = [
+    'collections:',
+    '  home_eyebrow: "Series"',
+    '  page_eyebrow: "Browse the series"',
+    '  future_field: "client-owned"',
+    ''
+  ].join('\n');
+
+  try {
+    fs.writeFileSync(path.join(clientRoot, relativePath), original);
+    await runMain(clientRoot);
+
+    assert.equal(
+      fs.readFileSync(path.join(clientRoot, relativePath), 'utf8'),
+      original
+    );
+  } finally {
+    cleanup(clientRoot);
+  }
+});
+
 test('updates a known standard legacy vite.config.js', () => {
   const clientRoot = makeClient(legacyViteConfig);
   try {

@@ -277,6 +277,7 @@ function inspectMarkedConfig() {
   const catalog = readYaml('config/catalog.yaml')?.catalog;
   if (isRecord(catalog)) reportMarkedErrors('config/catalog.yaml', [
     { path: 'catalog.eyebrow', value: catalog.eyebrow },
+    { path: 'catalog.title', value: catalog.title },
     { path: 'catalog.intro', value: catalog.intro, mode: 'multiline' }
   ]);
 

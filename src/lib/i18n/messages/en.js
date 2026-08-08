@@ -771,6 +771,8 @@ export default {
       presentationLegend: 'Catalog page',
       eyebrow: 'Home catalog eyebrow',
       eyebrowHint: 'Optional label above the catalog section title on the home page. The /catalog page uses the label set under Site → Layout.',
+      titleField: 'Page title',
+      titleHint: 'Optional title for /catalog. Leave empty to show the item count and name automatically, for example “3 creations”.',
       introField: 'Intro text',
       introHint: 'Shown in the home catalog section and on /catalog. Leave empty for the theme default (on /catalog only).',
       listingLegend: 'Listing',
@@ -1184,6 +1186,7 @@ export default {
     catalogHomeLimitInvalid:
       '{source}: catalog.home_limit must be an integer from 1 to {max} when provided (or omit the field to show all).',
     catalogEyebrowInvalid: '{source}: catalog.eyebrow must be a string when provided.',
+    catalogTitleInvalid: '{source}: catalog.title must be a string when provided.',
     catalogIntroInvalid: '{source}: catalog.intro must be a string when provided.',
     collectionsEditorialFieldInvalid: '{source}: collections.{field} must be a string when provided.',
     routeSegmentUnsupported:

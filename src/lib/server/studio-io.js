@@ -1070,6 +1070,7 @@ export function loadCatalogForm(locale = 'en') {
     item_name_singular: typeof catalog.item_name_singular === 'string' ? catalog.item_name_singular : 'creation',
     item_name_plural: typeof catalog.item_name_plural === 'string' ? catalog.item_name_plural : 'creations',
     eyebrow: typeof catalog.eyebrow === 'string' ? catalog.eyebrow : '',
+    title: typeof catalog.title === 'string' ? catalog.title : '',
     intro: typeof catalog.intro === 'string' ? catalog.intro : '',
     sort:
       catalog.sort === 'title_asc' || catalog.sort === 'title_desc' ? catalog.sort : 'manual',
@@ -1090,6 +1091,7 @@ export function writeCatalogForm(catalogForm, locale = 'en') {
   const singular = String(catalogForm.item_name_singular ?? '').trim();
   const plural = String(catalogForm.item_name_plural ?? '').trim();
   const eyebrow = optionalField(String(catalogForm.eyebrow ?? ''));
+  const title = optionalField(String(catalogForm.title ?? ''));
   const intro = optionalField(String(catalogForm.intro ?? ''));
   const sortRaw = String(catalogForm.sort ?? 'manual').trim();
   const sort = sortRaw === 'title_asc' || sortRaw === 'title_desc' ? sortRaw : 'manual';
@@ -1099,6 +1101,7 @@ export function writeCatalogForm(catalogForm, locale = 'en') {
 
   assertValidMarkedText([
     { path: 'catalog.eyebrow', value: eyebrow },
+    { path: 'catalog.title', value: title },
     { path: 'catalog.intro', value: intro, mode: 'multiline' }
   ]);
 
@@ -1131,6 +1134,10 @@ export function writeCatalogForm(catalogForm, locale = 'en') {
 
   if (eyebrow !== '') {
     catalog.eyebrow = eyebrow;
+  }
+
+  if (title !== '') {
+    catalog.title = title;
   }
 
   if (intro !== '') {

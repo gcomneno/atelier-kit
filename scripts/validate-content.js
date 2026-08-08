@@ -470,6 +470,10 @@ function validateCatalog() {
     failKey('catalogEyebrowInvalid', { source });
   }
 
+  if ('title' in catalog && catalog.title !== undefined && typeof catalog.title !== 'string') {
+    failKey('catalogTitleInvalid', { source });
+  }
+
   if ('intro' in catalog && catalog.intro !== undefined && typeof catalog.intro !== 'string') {
     failKey('catalogIntroInvalid', { source });
   }

@@ -3,6 +3,7 @@
 import { fail } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
 import {
+  getCatalogConfig,
   listCollectionSummaries,
   loadCollectionsEditorialForm,
   runStructuralValidation,
@@ -20,6 +21,7 @@ export function load({ url }) {
   const locale = getOperatorLocale();
 
   return {
+    catalog: getCatalogConfig(),
     collections: listCollectionSummaries(),
     collectionsEditorialForm:
       loadCollectionsEditorialForm(locale),

@@ -129,6 +129,10 @@ export function resolveCollectionsPageIntro(config, itemPlural, locale) {
   }
 
   return createTranslator(locale)('visitor.collections.intro', { itemPlural });
+  return createTranslator(locale)(
+    'visitor.collections.intro',
+    { itemPlural }
+  );
 }
 
 /**

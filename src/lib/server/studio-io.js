@@ -1051,6 +1051,13 @@ export function writeCollectionsEditorialForm(form, locale = 'en') {
   });
 }
 
+/**
+ * @returns {ReturnType<typeof loadCatalogForm>}
+ */
+export function getCatalogConfig(locale = 'en') {
+  return loadCatalogForm(locale);
+}
+
 export function loadCatalogForm(locale = 'en') {
   const data = readProjectYaml('config/catalog.yaml');
   const catalog = data.catalog;

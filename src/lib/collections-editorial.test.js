@@ -244,6 +244,7 @@ test('collections page eyebrow finally falls back to localized wording', () => {
   );
 });
 
+
 test('collections editorial merge owns all public wording and preserves unknown future fields', () => {
   assert.deepEqual(
     mergeCollectionsEditorialConfig(

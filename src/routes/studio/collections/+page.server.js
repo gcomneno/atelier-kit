@@ -44,7 +44,9 @@ export const actions = {
       writeCollectionsEditorialForm(
         {
           home_eyebrow: formData.get('home_eyebrow'),
-          page_eyebrow: formData.get('page_eyebrow')
+          page_eyebrow: formData.get('page_eyebrow'),
+          title: formData.get('title'),
+          intro: formData.get('intro')
         },
         locale
       );

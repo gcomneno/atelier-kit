@@ -2,23 +2,45 @@
 
 import { dev } from '$app/environment';
 import { error } from '@sveltejs/kit';
+import {
+  canAccessStudio,
+  resolveStudioRuntimeMode
+} from '$lib/studio-runtime.js';
 
 /**
- * Production-safe studio gating (ADR 0007 — Path B: Atelier Desktop).
+ * Production-safe Studio gating.
  *
- * Write routes are enabled only during local authoring:
- * - Vite dev (`dev === true`), or
- * - explicit `ATELIER_STUDIO=1` (studio:launch / Atelier Desktop on 127.0.0.1).
+ * ADR 0007:
+ * - Vite development is Local Studio.
+ * - ATELIER_STUDIO=1 enables controlled Local Studio.
  *
- * Production Vercel builds must never set `ATELIER_STUDIO`. The public site stays read-only;
- * clients edit via Atelier Desktop on their machine, not via the live URL.
+ * ADR 0008:
+ * - ATELIER_STUDIO_MODE=hosted identifies the separate Hosted Studio runtime.
+ * - Hosted Studio remains inaccessible until authentication/authorization is
+ *   implemented and supplies a trusted server-side authorization result.
+ *
+ * Visitor production, invalid configuration, and unauthenticated Hosted Studio
+ * fail closed with 404.
  *
  * @see docs/architecture/adr-0007-production-safe-studio-desktop.md
+ * @see docs/architecture/adr-0008-hosted-studio-architecture.md
  */
 
-/** @returns {boolean} */
+/** @returns {'visitor' | 'local' | 'hosted' | 'invalid'} */
+export function getStudioRuntimeMode() {
+  return resolveStudioRuntimeMode(dev, process.env);
+}
+
+/**
+ * Backward-compatible helper for existing callers/tests.
+ *
+ * Hosted Studio intentionally remains disabled here until the authentication
+ * vertical provides an authorization context.
+ *
+ * @returns {boolean}
+ */
 export function isStudioEnabled() {
-  return dev || process.env.ATELIER_STUDIO === '1';
+  return canAccessStudio(getStudioRuntimeMode());
 }
 
 export function guardStudio() {

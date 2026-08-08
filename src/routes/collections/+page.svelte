@@ -2,13 +2,12 @@
   import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
   import EditorialText from '$lib/components/EditorialText.svelte';
   import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
-  import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
+  import { formatPageTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
 
-  const siteLabel = $derived(resolveDocumentTitle(data.site));
   const pageTitle = $derived(formatPageTitle(data.pageTitle, data.site));
   const metaDescription = $derived(data.pageIntro);
 </script>

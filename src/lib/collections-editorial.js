@@ -3,7 +3,9 @@ import { createTranslator } from './i18n/index.js';
 /**
  * @typedef {{
  *   home_eyebrow: string,
- *   page_eyebrow: string
+ *   page_eyebrow: string,
+ *   title?: string,
+ *   intro?: string
  * }} CollectionsEditorialConfig
  */
 
@@ -29,7 +31,9 @@ export function normalizeCollectionsEditorialConfig(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return {
       home_eyebrow: '',
-      page_eyebrow: ''
+      page_eyebrow: '',
+      title: '',
+      intro: ''
     };
   }
 
@@ -37,15 +41,16 @@ export function normalizeCollectionsEditorialConfig(value) {
 
   return {
     home_eyebrow: normalizedOptionalString(record.home_eyebrow),
-    page_eyebrow: normalizedOptionalString(record.page_eyebrow)
+    page_eyebrow: normalizedOptionalString(record.page_eyebrow),
+    title: normalizedOptionalString(record.title),
+    intro: normalizedOptionalString(record.intro)
   };
 }
 
 /**
- * Merge the two eyebrow fields into an existing collections editorial object.
+ * Merge Studio-owned collection wording into an existing editorial object.
  *
- * Unknown keys are deliberately preserved so later editorial additions
- * such as page title and introduction can share the same site-owned file.
+ * Unknown keys are deliberately preserved for forward compatibility.
  *
  * @param {unknown} existing
  * @param {unknown} updates
@@ -61,6 +66,8 @@ export function mergeCollectionsEditorialConfig(existing, updates) {
 
   delete next.home_eyebrow;
   delete next.page_eyebrow;
+  delete next.title;
+  delete next.intro;
 
   if (normalized.home_eyebrow) {
     next.home_eyebrow = normalized.home_eyebrow;
@@ -68,6 +75,14 @@ export function mergeCollectionsEditorialConfig(existing, updates) {
 
   if (normalized.page_eyebrow) {
     next.page_eyebrow = normalized.page_eyebrow;
+  }
+
+  if (normalized.title) {
+    next.title = normalized.title;
+  }
+
+  if (normalized.intro) {
+    next.intro = normalized.intro;
   }
 
   return next;
@@ -85,6 +100,39 @@ export function resolveHomeCollectionsEyebrow(config, locale) {
   }
 
   return createTranslator(locale)('visitor.home.collectionsEyebrow');
+}
+
+/**
+ * @param {CollectionsEditorialConfig} config
+ * @param {string} locale
+ */
+export function resolveCollectionsPageTitle(config, locale) {
+  const custom = normalizedOptionalString(config?.title);
+
+  if (custom) {
+    return custom;
+  }
+
+  return createTranslator(locale)('visitor.collections.title');
+}
+
+/**
+ * @param {CollectionsEditorialConfig} config
+ * @param {string} itemPlural
+ * @param {string} locale
+ */
+export function resolveCollectionsPageIntro(config, itemPlural, locale) {
+  const custom = normalizedOptionalString(config?.intro);
+
+  if (custom) {
+    return custom;
+  }
+
+  return createTranslator(locale)('visitor.collections.intro', { itemPlural });
+  return createTranslator(locale)(
+    'visitor.collections.intro',
+    { itemPlural }
+  );
 }
 
 /**

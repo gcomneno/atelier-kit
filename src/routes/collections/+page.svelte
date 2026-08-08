@@ -2,19 +2,14 @@
   import CatalogSidebar from '$lib/components/CatalogSidebar.svelte';
   import EditorialText from '$lib/components/EditorialText.svelte';
   import { splitEditorialParagraphs } from '$lib/editorial-markup.js';
-  import { formatPageTitle, resolveDocumentTitle } from '$lib/site-branding.js';
+  import { formatPageTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
 
-  const siteLabel = $derived(resolveDocumentTitle(data.site));
-  const pageTitle = $derived(formatPageTitle(t('collections.pageTitle'), data.site));
-  const metaDescription = $derived(
-    siteLabel
-      ? t('collections.metaDescription', { siteName: siteLabel })
-      : t('collections.intro', { itemPlural: data.catalog.item_name_plural })
-  );
+  const pageTitle = $derived(formatPageTitle(data.pageTitle, data.site));
+  const metaDescription = $derived(data.pageIntro);
 </script>
 
 <svelte:head>
@@ -33,8 +28,8 @@
 
         <header>
           <p class="eyebrow">{data.pageEyebrow}</p>
-          <h1>{t('collections.title')}</h1>
-          <p>{t('collections.intro', { itemPlural: data.catalog.item_name_plural })}</p>
+          <h1>{data.pageTitle}</h1>
+          <p>{data.pageIntro}</p>
         </header>
       </div>
 

@@ -139,6 +139,29 @@
           value={collectionsEditorialForm.page_eyebrow}
         />
       </label>
+
+      <label>
+        <StudioFieldLabel
+          label={t('collections.pageTitle')}
+          optional
+        />
+        <input
+          type="text"
+          name="title"
+          value={collectionsEditorialForm.title}
+        />
+      </label>
+
+      <label>
+        <StudioFieldLabel
+          label={t('collections.intro', { itemPlural: data.catalog.item_name_plural })}
+          optional
+        />
+        <textarea
+          name="intro"
+          rows="4"
+        >{collectionsEditorialForm.intro}</textarea>
+      </label>
     </fieldset>
 
     <FormActions>

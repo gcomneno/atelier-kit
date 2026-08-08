@@ -142,9 +142,8 @@
 
       <label>
         <StudioFieldLabel
-          label={t('studio.collections.pageTitle')}
+          label={t('collections.pageTitle')}
           optional
-          hint={t('studio.collections.pageTitleHint')}
         />
         <input
           type="text"
@@ -155,9 +154,8 @@
 
       <label>
         <StudioFieldLabel
-          label={t('studio.collections.pageIntro')}
+          label={t('collections.intro', { itemPlural: data.catalog.item_name_plural })}
           optional
-          hint={t('studio.collections.pageIntroHint')}
         />
         <textarea
           name="intro"

@@ -55,15 +55,19 @@ Example:
 collections:
   home_eyebrow: "Series"
   page_eyebrow: "Browse the series"
+  title: "Book series"
+  intro: "Short editorial introduction."
 ```
 
-The three collection labels have intentionally different responsibilities:
+The four collection wording fields have intentionally different responsibilities:
 
 - the **Layout collections block label** is the structural heading used by
   configured Layout placements and navigation;
 - `home_eyebrow` is the small editorial overline above the collections block
   on `/`;
-- `page_eyebrow` is the small editorial overline on `/collections`.
+- `page_eyebrow` is the small editorial overline on `/collections`;
+- `title` is the public page title shown on `/collections`;
+- `intro` is the public introductory paragraph shown on `/collections`.
 
 Fallbacks remain backward compatible:
 
@@ -71,12 +75,15 @@ Fallbacks remain backward compatible:
   default (`Collections` / `Collezioni`);
 - an empty or missing `page_eyebrow` uses the effective Layout collections
   block label, then the localized collections default if no usable label is
-  available.
+  available;
+- an empty or missing `title` uses the localized collections page title;
+- an empty or missing `intro` uses the localized collections introduction,
+  with the current item plural inserted into the sentence.
 
-Changing either eyebrow never renames the Layout block label. Existing client
-sites do not need `config/collections.yaml`.
+Changing any of these values never renames the Layout block label. Existing
+client sites do not need `config/collections.yaml`.
 
-The same two fields are editable from **Studio → Collections**.
+The same collection wording fields are editable from **Studio → Collections**.
 
 ## Validation
 

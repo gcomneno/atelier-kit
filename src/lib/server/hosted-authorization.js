@@ -7,6 +7,8 @@ import {
 
 const AUTHORIZED_GITHUB_IDS_ENV = 'ATELIER_STUDIO_AUTHORIZED_GITHUB_IDS';
 const BOOTSTRAP_GITHUB_LOGIN_ENV = 'ATELIER_STUDIO_BOOTSTRAP_GITHUB_LOGIN';
+const AUTHORIZED_HOSTED_IDENTITY_TOKEN = Symbol('authorized-hosted-identity');
+const AUTHORIZED_HOSTED_IDENTITIES = new WeakSet();
 
 export class HostedAuthorizationConfigurationError extends Error {
   /**
@@ -28,11 +30,34 @@ export class AuthorizedHostedIdentity {
    *   displayName?: string,
    *   avatarUrl?: string
    * }>} identity
+   * @param {symbol} token
    */
-  constructor(identity) {
+  constructor(identity, token) {
+    if (token !== AUTHORIZED_HOSTED_IDENTITY_TOKEN) {
+      throw new TypeError(
+        'Authorized Hosted identities can only be created by the authorization policy.'
+      );
+    }
+
     this.identity = identity;
+    AUTHORIZED_HOSTED_IDENTITIES.add(this);
     Object.freeze(this);
   }
+}
+
+/**
+ * Verify that a value was actually produced by the centralized authorization
+ * policy rather than merely matching its public object shape or prototype.
+ *
+ * @param {unknown} value
+ * @returns {value is AuthorizedHostedIdentity}
+ */
+export function isAuthorizedHostedIdentity(value) {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    AUTHORIZED_HOSTED_IDENTITIES.has(value)
+  );
 }
 
 /**
@@ -231,5 +256,8 @@ export function authorizeHostedIdentity(identity, config) {
     return null;
   }
 
-  return new AuthorizedHostedIdentity(authenticatedIdentity);
+  return new AuthorizedHostedIdentity(
+    authenticatedIdentity,
+    AUTHORIZED_HOSTED_IDENTITY_TOKEN
+  );
 }

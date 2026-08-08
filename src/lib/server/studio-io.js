@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFile
 import path from 'node:path';
 import { parse, stringify } from 'yaml';
 import { assertValidMarkedText } from '$lib/marked-text.js';
+import { LocalFilesystemAuthoringRepository } from './authoring-repository.js';
 import {
   ITEM_PRESET_OPTIONS,
   buildNewItemRecord,
@@ -30,6 +31,7 @@ import {
 export { checkboxEnabled } from './studio-form-values.js';
 
 const ROOT = process.cwd();
+const LOCAL_AUTHORING_REPOSITORY = new LocalFilesystemAuthoringRepository(ROOT);
 const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -39,8 +41,8 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
  * @returns {Record<string, unknown>}
  */
 export function readProjectYaml(relativePath) {
-  const absolutePath = path.join(ROOT, relativePath);
-  const data = parse(readFileSync(absolutePath, 'utf8'));
+  const { content } = LOCAL_AUTHORING_REPOSITORY.readText(relativePath);
+  const data = parse(content);
 
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     throw new Error(`${relativePath} must contain a YAML object.`);
@@ -54,8 +56,10 @@ export function readProjectYaml(relativePath) {
  * @param {Record<string, unknown>} data
  */
 export function writeProjectYaml(relativePath, data) {
-  const absolutePath = path.join(ROOT, relativePath);
-  writeFileSync(absolutePath, `${stringify(data).trim()}\n`, 'utf8');
+  LOCAL_AUTHORING_REPOSITORY.writeText(
+    relativePath,
+    `${stringify(data).trim()}\n`
+  );
 }
 
 /**

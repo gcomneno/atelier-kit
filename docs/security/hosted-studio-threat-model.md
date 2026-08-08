@@ -252,3 +252,63 @@ The private deployment may begin only after:
 - Hosted Studio is isolated from the public production deployment.
 
 Public or client-facing rollout requires a separate security review.
+
+
+## Authentication and session controls selected by ADR 0009
+
+ADR 0009 resolves the initial Hosted Studio authentication and authorization
+design.
+
+The initial provider is a GitHub App using the OAuth web application flow.
+Provider authentication establishes an `AuthenticatedIdentity`; it does not
+grant Studio authority by itself.
+
+Authorization uses the stable GitHub numeric user ID as the canonical provider
+subject. GitHub login names, display names, avatar URLs and email addresses are
+informational and do not grant authority.
+
+The initial authorization policy is a centralized server-side allow-list for
+the configured authoring deployment. A configured login may be used only to
+bootstrap resolution of the stable numeric subject; GitHub App installation
+does not automatically authorize a human operator.
+
+Hosted Studio uses opaque server-side sessions rather than JWT bearer sessions.
+The browser receives only a cryptographically random session identifier in an
+HttpOnly cookie. Production cookies are Secure and use SameSite=Lax.
+
+The initial session policy has:
+
+- an 8-hour absolute lifetime;
+- a 2-hour idle timeout;
+- rotation immediately after successful authentication;
+- periodic rotation during active use;
+- server-side invalidation on logout;
+- fail-closed handling for unknown, malformed or expired sessions.
+
+The OAuth callback validates cryptographically random OAuth state before a
+session is established.
+
+Hosted Studio mutations additionally require:
+
+- the configured canonical Host;
+- exact match against the configured canonical HTTPS Origin;
+- an explicitly supported state-changing HTTP method;
+- a valid synchronizer CSRF token associated with the authenticated session.
+
+SameSite cookies are defense in depth and do not replace the synchronizer token
+or canonical-origin validation.
+
+The OAuth callback is exempt from the ordinary Studio synchronizer token only
+because it occurs before the Studio session exists and is protected by OAuth
+state.
+
+Operator identity and repository authority remain separate. A GitHub user
+access token obtained for authentication is not the persistent
+GitHubAuthoringRepository credential.
+
+Visitor production receives no Hosted authentication, session-store or
+repository credentials. Both `/studio/**` and `/auth/**` remain unavailable in
+visitor mode.
+
+These controls refine the existing threats and invariants in this document;
+they do not enable Hosted Studio routes or mutations.

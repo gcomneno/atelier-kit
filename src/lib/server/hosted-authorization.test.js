@@ -4,6 +4,7 @@ import {
   AuthorizedHostedIdentity,
   authorizeHostedIdentity,
   HostedAuthorizationConfigurationError,
+  isAuthorizedHostedIdentity,
   parseHostedAuthorizationConfig
 } from './hosted-authorization.js';
 
@@ -81,6 +82,32 @@ test('exact stable GitHub subject match produces authorized identity', () => {
 
   assert.ok(result instanceof AuthorizedHostedIdentity);
   assert.deepEqual(result.identity, githubIdentity('123'));
+});
+
+test('authorized identity trust cannot be forged through constructor or prototype', () => {
+  const config = parseHostedAuthorizationConfig({
+    ATELIER_STUDIO_AUTHORIZED_GITHUB_IDS: '123'
+  });
+
+  const trusted = authorizeHostedIdentity(
+    githubIdentity('123'),
+    config
+  );
+
+  assert.equal(isAuthorizedHostedIdentity(trusted), true);
+
+  assert.throws(
+    () => new AuthorizedHostedIdentity(
+      githubIdentity('123'),
+      Symbol('forged-authorization')
+    ),
+    TypeError
+  );
+
+  const forged = Object.create(AuthorizedHostedIdentity.prototype);
+  forged.identity = githubIdentity('123');
+
+  assert.equal(isAuthorizedHostedIdentity(forged), false);
 });
 
 test('non-allow-listed stable subject is denied', () => {

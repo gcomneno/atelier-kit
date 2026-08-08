@@ -56,6 +56,15 @@
 
       <label>
         <StudioFieldLabel
+          label={t('studio.catalog.titleField')}
+          optional
+          hint={t('studio.catalog.titleHint')}
+        />
+        <MarkedTextField name="title" value={catalogForm.title} />
+      </label>
+
+      <label>
+        <StudioFieldLabel
           label={t('studio.catalog.introField')}
           optional
           hint={t('studio.catalog.introHint')}

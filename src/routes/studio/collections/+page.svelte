@@ -139,6 +139,31 @@
           value={collectionsEditorialForm.page_eyebrow}
         />
       </label>
+
+      <label>
+        <StudioFieldLabel
+          label={t('studio.collections.pageTitle')}
+          optional
+          hint={t('studio.collections.pageTitleHint')}
+        />
+        <input
+          type="text"
+          name="title"
+          value={collectionsEditorialForm.title}
+        />
+      </label>
+
+      <label>
+        <StudioFieldLabel
+          label={t('studio.collections.pageIntro')}
+          optional
+          hint={t('studio.collections.pageIntroHint')}
+        />
+        <textarea
+          name="intro"
+          rows="4"
+        >{collectionsEditorialForm.intro}</textarea>
+      </label>
     </fieldset>
 
     <FormActions>

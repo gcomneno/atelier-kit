@@ -379,6 +379,7 @@ function parseHeroBanner(site) {
  *   item_name_singular: string,
  *   item_name_plural: string,
  *   eyebrow: string,
+ *   title: string,
  *   intro: string,
  *   sort: 'manual' | 'title_asc' | 'title_desc',
  *   home_limit: number
@@ -399,6 +400,7 @@ export function getCatalogConfig() {
     item_name_singular: requiredString(catalog, 'item_name_singular', 'config/catalog.yaml'),
     item_name_plural: requiredString(catalog, 'item_name_plural', 'config/catalog.yaml'),
     eyebrow: optionalString(catalog, 'eyebrow'),
+    title: optionalString(catalog, 'title'),
     intro: optionalString(catalog, 'intro'),
     sort: sort === 'title_asc' || sort === 'title_desc' ? sort : 'manual',
     home_limit:
@@ -979,7 +981,7 @@ export function getPublicMarkedTextValues() {
 
   return [
     site.tagline, site.header_title, site.intro_title, site.hero_intro, site.hero_signature, site.footer_note,
-    banner.description, banner.caption, catalog.eyebrow, catalog.intro,
+    banner.description, banner.caption, catalog.eyebrow, catalog.title, catalog.intro,
     about?.title, about?.intro, about?.portrait?.caption,
     ...(about?.sections.flatMap((section) => [section.heading, section.body]) ?? []),
     ...getItems().flatMap((item) => [item.title, item.subtitle, item.description, item.notice]),

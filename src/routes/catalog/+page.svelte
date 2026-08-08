@@ -43,7 +43,13 @@
 
         <header>
           <EditorialText tag="p" class="eyebrow" value={data.pageEyebrow} />
-          <h1>{data.items.length} {data.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}</h1>
+          <h1>
+            {#if data.catalog.title.trim()}
+              <EditorialText value={data.catalog.title} />
+            {:else}
+              {data.items.length} {data.items.length === 1 ? data.catalog.item_name_singular : data.catalog.item_name_plural}
+            {/if}
+          </h1>
           {#each splitEditorialParagraphs(catalogIntro) as paragraph}
             <EditorialText tag="p" value={paragraph} />
           {/each}

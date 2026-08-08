@@ -25,6 +25,7 @@ function numberedHelpKeys(source, name) {
 
 test('canonical inventory distinguishes single-line and multiline marked fields', () => {
   assert.ok(MARKED_TEXT_FIELDS.some((field) => field.path === 'items.{id}.title' && field.mode === 'single-line'));
+  assert.ok(MARKED_TEXT_FIELDS.some((field) => field.path === 'catalog.title' && field.mode === 'single-line'));
   assert.ok(MARKED_TEXT_FIELDS.some((field) => field.path === 'catalog.intro' && field.mode === 'multiline'));
   assert.ok(!MARKED_TEXT_FIELDS.some((field) => /(?:id|slug|date|url|alt|status|preset)$/.test(field.path)));
 });

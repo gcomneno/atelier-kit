@@ -36,6 +36,7 @@ export const actions = {
         {
           ...currentCatalogForm,
           eyebrow: formData.get('eyebrow'),
+          title: formData.get('title'),
           intro: formData.get('intro'),
           sort: formData.get('sort'),
           home_limit: formData.get('home_limit')

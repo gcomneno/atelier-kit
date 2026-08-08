@@ -29,6 +29,7 @@ export const MARKED_TEXT_FIELDS = Object.freeze([
   { family: 'hero', path: 'site.hero_banner.description', mode: 'multiline' },
   { family: 'hero', path: 'site.hero_banner.caption', mode: 'single-line' },
   { family: 'catalog', path: 'catalog.eyebrow', mode: 'single-line' },
+  { family: 'catalog', path: 'catalog.title', mode: 'single-line' },
   { family: 'catalog', path: 'catalog.intro', mode: 'multiline' },
   { family: 'about', path: 'about.title', mode: 'single-line' },
   { family: 'about', path: 'about.intro', mode: 'multiline' },

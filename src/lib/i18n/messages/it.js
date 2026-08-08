@@ -778,6 +778,8 @@ export default {
       presentationLegend: 'Pagina catalogo',
       eyebrow: 'Eyebrow catalogo in home',
       eyebrowHint: 'Etichetta facoltativa sopra il titolo della sezione catalogo in home. La pagina /catalog usa la label configurata in Sito → Layout.',
+      titleField: 'Titolo pagina',
+      titleHint: 'Titolo facoltativo della pagina /catalog. Lascia vuoto per mostrare automaticamente il numero e il nome degli oggetti, per esempio “3 romanzi”.',
       introField: 'Testo introduttivo',
       introHint: 'Mostrato nella sezione catalogo in home e su /catalog. Lascia vuoto per il testo predefinito del tema (solo su /catalog).',
       listingLegend: 'Elenco',
@@ -1191,6 +1193,7 @@ export default {
     catalogHomeLimitInvalid:
       '{source}: catalog.home_limit deve essere un intero tra 1 e {max} quando presente (oppure ometti il campo per mostrarle tutte).',
     catalogEyebrowInvalid: '{source}: catalog.eyebrow deve essere una stringa quando presente.',
+    catalogTitleInvalid: '{source}: catalog.title deve essere una stringa quando presente.',
     catalogIntroInvalid: '{source}: catalog.intro deve essere una stringa quando presente.',
     collectionsEditorialFieldInvalid: '{source}: collections.{field} deve essere una stringa quando presente.',
     routeSegmentUnsupported:

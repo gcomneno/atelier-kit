@@ -1,0 +1,78 @@
+/**
+ * Studio runtime modes.
+ *
+ * ADR 0007 keeps Local Studio development/local-first.
+ * ADR 0008 introduces Hosted Studio as a separate authenticated authoring mode.
+ *
+ * Hosted mode is intentionally distinguishable before authentication exists,
+ * but it is not accessible by default.
+ */
+
+export const STUDIO_RUNTIME_MODES = Object.freeze({
+  VISITOR: 'visitor',
+  LOCAL: 'local',
+  HOSTED: 'hosted',
+  INVALID: 'invalid'
+});
+
+/**
+ * Resolve the Studio runtime mode from trusted server-side runtime inputs.
+ *
+ * `ATELIER_STUDIO=1` is the existing ADR 0007 local-authoring switch.
+ * `ATELIER_STUDIO_MODE=hosted` requests the new ADR 0008 hosted boundary.
+ *
+ * Hosted mode and local-authoring signals are deliberately mutually exclusive.
+ * Unknown, empty, or conflicting explicit mode configuration fails closed.
+ *
+ * @param {boolean} devMode
+ * @param {NodeJS.ProcessEnv | Record<string, string | undefined>} [environment]
+ * @returns {'visitor' | 'local' | 'hosted' | 'invalid'}
+ */
+export function resolveStudioRuntimeMode(devMode, environment = process.env) {
+  const hasExplicitMode = Object.prototype.hasOwnProperty.call(
+    environment,
+    'ATELIER_STUDIO_MODE'
+  );
+
+  const localAuthoring = devMode || environment.ATELIER_STUDIO === '1';
+
+  if (hasExplicitMode) {
+    if (environment.ATELIER_STUDIO_MODE !== STUDIO_RUNTIME_MODES.HOSTED) {
+      return STUDIO_RUNTIME_MODES.INVALID;
+    }
+
+    if (localAuthoring) {
+      return STUDIO_RUNTIME_MODES.INVALID;
+    }
+
+    return STUDIO_RUNTIME_MODES.HOSTED;
+  }
+
+  if (localAuthoring) {
+    return STUDIO_RUNTIME_MODES.LOCAL;
+  }
+
+  return STUDIO_RUNTIME_MODES.VISITOR;
+}
+
+/**
+ * Decide whether a resolved runtime mode may access Studio.
+ *
+ * Local Studio preserves ADR 0007 behavior.
+ * Hosted Studio requires an explicit future server-side authorization result.
+ *
+ * @param {'visitor' | 'local' | 'hosted' | 'invalid'} mode
+ * @param {{ hostedAuthorized?: boolean }} [context]
+ * @returns {boolean}
+ */
+export function canAccessStudio(mode, context = {}) {
+  if (mode === STUDIO_RUNTIME_MODES.LOCAL) {
+    return true;
+  }
+
+  if (mode === STUDIO_RUNTIME_MODES.HOSTED) {
+    return context.hostedAuthorized === true;
+  }
+
+  return false;
+}

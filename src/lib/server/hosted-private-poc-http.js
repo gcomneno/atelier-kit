@@ -149,15 +149,27 @@ function assertHttpEvent(event) {
   }
 }
 
+const HOSTED_PRIVATE_POC_READ_PATHS =
+  /** @type {ReadonlySet<string>} */ (
+    new Set([
+      '/studio',
+      '/studio/site/social'
+    ])
+  );
+
 /**
- * This slice admits only the root dashboard read request.
+ * Issue #273 admits exactly three authenticated request shapes:
  *
- * Deeper `/studio/**` routes remain untouched and therefore keep
- * their existing contextless fail-closed guards.
+ * - GET /studio
+ * - GET /studio/site/social
+ * - POST /studio/site/social
+ *
+ * No other deeper Studio path or mutation method receives trusted
+ * Hosted request context.
  *
  * @param {unknown} event
  */
-export function isHostedPrivatePocStudioRootRequest(
+export function isHostedPrivatePocStudioAuthorizedRequest(
   event
 ) {
   assertHttpEvent(event);
@@ -168,9 +180,19 @@ export function isHostedPrivatePocStudioRootRequest(
      *   request: { method: string }
      * }} */ (event);
 
+  if (
+    record.request.method === 'GET' &&
+    HOSTED_PRIVATE_POC_READ_PATHS.has(
+      record.url.pathname
+    )
+  ) {
+    return true;
+  }
+
   return (
-    record.url.pathname === '/studio' &&
-    record.request.method === 'GET'
+    record.url.pathname ===
+      '/studio/site/social' &&
+    record.request.method === 'POST'
   );
 }
 
@@ -191,7 +213,7 @@ export function isHostedPrivatePocStudioRootRequest(
  *   ) => HostedPrivatePocRuntime | null
  * }} input
  */
-export function applyHostedPrivatePocStudioRootRequest({
+export function applyHostedPrivatePocStudioAuthorizedRequest({
   event,
   runtimeMode,
   runtimeResolver =
@@ -201,7 +223,7 @@ export function applyHostedPrivatePocStudioRootRequest({
 
   if (
     runtimeMode !== STUDIO_RUNTIME_MODES.HOSTED ||
-    !isHostedPrivatePocStudioRootRequest(event)
+    !isHostedPrivatePocStudioAuthorizedRequest(event)
   ) {
     return HOSTED_PRIVATE_POC_HTTP_OUTCOMES.INERT;
   }

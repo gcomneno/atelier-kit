@@ -3,9 +3,9 @@ import test from 'node:test';
 import {
   HOSTED_PRIVATE_POC_HTTP_OUTCOMES,
   HostedPrivatePocHttpError,
-  applyHostedPrivatePocStudioRootRequest,
+  applyHostedPrivatePocStudioAuthorizedRequest,
   createHostedPrivatePocRuntimeResolver,
-  isHostedPrivatePocStudioRootRequest
+  isHostedPrivatePocStudioAuthorizedRequest
 } from './hosted-private-poc-http.js';
 import {
   HOSTED_PRIVATE_POC_AUTH_RESULTS,
@@ -207,7 +207,7 @@ async function authenticatedRuntime(
 
 test('only exact GET /studio belongs to the initial Hosted read-only HTTP seam', () => {
   assert.equal(
-    isHostedPrivatePocStudioRootRequest(
+    isHostedPrivatePocStudioAuthorizedRequest(
       eventFor().event
     ),
     true
@@ -221,7 +221,7 @@ test('only exact GET /studio belongs to the initial Hosted read-only HTTP seam',
     { pathname: '/studio', method: 'POST' }
   ]) {
     assert.equal(
-      isHostedPrivatePocStudioRootRequest(
+      isHostedPrivatePocStudioAuthorizedRequest(
         eventFor(candidate).event
       ),
       false
@@ -247,7 +247,7 @@ test('visitor Local invalid and unrelated Hosted requests are inert before runti
     let resolverCalls = 0;
 
     const outcome =
-      applyHostedPrivatePocStudioRootRequest({
+      applyHostedPrivatePocStudioAuthorizedRequest({
         event,
         runtimeMode,
         runtimeResolver() {
@@ -275,7 +275,7 @@ test('visitor Local invalid and unrelated Hosted requests are inert before runti
   let resolverCalls = 0;
 
   assert.equal(
-    applyHostedPrivatePocStudioRootRequest({
+    applyHostedPrivatePocStudioAuthorizedRequest({
       event: unrelated.event,
       runtimeMode: 'hosted',
       runtimeResolver() {
@@ -301,7 +301,7 @@ test('disabled private PoC is inert and does not read a presented cookie', () =>
     });
 
   assert.equal(
-    applyHostedPrivatePocStudioRootRequest({
+    applyHostedPrivatePocStudioAuthorizedRequest({
       event,
       runtimeMode: 'hosted',
       runtimeResolver: () => null
@@ -318,7 +318,7 @@ test('missing session requests authentication without creating or clearing brows
   const { event, capture } = eventFor();
 
   const outcome =
-    applyHostedPrivatePocStudioRootRequest({
+    applyHostedPrivatePocStudioAuthorizedRequest({
       event,
       runtimeMode: 'hosted',
       runtimeResolver: () => current
@@ -351,7 +351,7 @@ test('presented malformed or unknown session requests authentication and clears 
       eventFor({ sessionId });
 
     const outcome =
-      applyHostedPrivatePocStudioRootRequest({
+      applyHostedPrivatePocStudioAuthorizedRequest({
         event,
         runtimeMode: 'hosted',
         runtimeResolver: () => current
@@ -386,7 +386,7 @@ test('authorized session places only genuine gate-issued context into locals', a
     });
 
   const outcome =
-    applyHostedPrivatePocStudioRootRequest({
+    applyHostedPrivatePocStudioAuthorizedRequest({
       event,
       runtimeMode: 'hosted',
       runtimeResolver:
@@ -443,7 +443,7 @@ test('periodic rotation replaces the opaque cookie before trusted locals are adm
     });
 
   const outcome =
-    applyHostedPrivatePocStudioRootRequest({
+    applyHostedPrivatePocStudioAuthorizedRequest({
       event,
       runtimeMode: 'hosted',
       runtimeResolver:
@@ -519,7 +519,7 @@ test('forged allowed context cannot be placed into locals', () => {
 
   assert.throws(
     () =>
-      applyHostedPrivatePocStudioRootRequest({
+      applyHostedPrivatePocStudioAuthorizedRequest({
         event,
         runtimeMode: 'hosted',
         runtimeResolver:
@@ -529,4 +529,78 @@ test('forged allowed context cannot be placed into locals', () => {
   );
 
   assert.deepEqual(event.locals, {});
+});
+
+test('private PoC authority seam admits only root GET plus Social GET and POST', () => {
+  for (const [pathname, method] of [
+    ['/studio', 'GET'],
+    ['/studio/site/social', 'GET'],
+    ['/studio/site/social', 'POST']
+  ]) {
+    assert.equal(
+      isHostedPrivatePocStudioAuthorizedRequest(
+        eventFor({
+          pathname,
+          method
+        }).event
+      ),
+      true,
+      `${method} ${pathname}`
+    );
+  }
+
+  for (const [pathname, method] of [
+    ['/studio', 'POST'],
+    ['/studio/site/social', 'PUT'],
+    ['/studio/site/social', 'PATCH'],
+    ['/studio/site/social', 'DELETE'],
+    ['/studio/site/contact', 'GET'],
+    ['/studio/site/contact', 'POST']
+  ]) {
+    assert.equal(
+      isHostedPrivatePocStudioAuthorizedRequest(
+        eventFor({
+          pathname,
+          method
+        }).event
+      ),
+      false,
+      `${method} ${pathname}`
+    );
+  }
+});
+
+test('authorized Social POST receives genuine trusted context before the action', async () => {
+  const authenticated =
+    await authenticatedRuntime();
+
+  const {
+    event
+  } = eventFor({
+    pathname:
+      '/studio/site/social',
+    method: 'POST',
+    sessionId:
+      authenticated.sessionId
+  });
+
+  const result =
+    applyHostedPrivatePocStudioAuthorizedRequest({
+      event,
+      runtimeMode: 'hosted',
+      runtimeResolver: () =>
+        authenticated.runtime
+    });
+
+  assert.equal(
+    result,
+    HOSTED_PRIVATE_POC_HTTP_OUTCOMES.ALLOWED
+  );
+
+  assert.equal(
+    isTrustedHostedRequestContext(
+      event.locals.hostedStudio
+    ),
+    true
+  );
 });

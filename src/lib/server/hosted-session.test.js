@@ -19,6 +19,12 @@ import {
 import {
   InMemoryHostedSessionStore
 } from './hosted-session-store.js';
+import {
+  HOSTED_SECURITY_EVENT_REASONS,
+  HOSTED_SECURITY_EVENT_TYPES,
+  HostedSecurityEventRecorder,
+  serializeHostedSecurityEvent
+} from './hosted-security-events.js';
 
 const HOUR = 60 * 60 * 1000;
 const MINUTE = 60 * 1000;
@@ -62,7 +68,8 @@ function trustedIdentity(subject = '123', login = 'operator') {
  *   ids?: string[],
  *   csrfTokens?: string[],
  *   store?: InMemoryHostedSessionStore,
- *   policy?: unknown
+ *   policy?: unknown,
+ *   securityEventRecorder?: any
  * }} [options]
  */
 function fixture({
@@ -80,7 +87,8 @@ function fixture({
     fixedCsrfToken(104)
   ],
   store = new InMemoryHostedSessionStore(),
-  policy = {}
+  policy = {},
+  securityEventRecorder
 } = {}) {
   let currentTime = now;
   let idIndex = 0;
@@ -93,7 +101,10 @@ function fixture({
       ids[idIndex++] ?? ids.at(-1),
     csrfTokenGenerator: () =>
       csrfTokens[csrfIndex++] ?? csrfTokens.at(-1),
-    policy
+    policy,
+    ...(securityEventRecorder === undefined
+      ? {}
+      : { securityEventRecorder })
   });
 
   return {
@@ -571,5 +582,123 @@ test('malformed generated identifiers fail without leaking their value', () => {
       assert.equal(error.message.includes(secretLikeValue), false);
       return true;
     }
+  );
+});
+
+
+function sessionSecurityEventCapture() {
+  /** @type {any[]} */
+  const events = [];
+
+  return {
+    events,
+    recorder: new HostedSecurityEventRecorder({
+      clock: () => 999999,
+      sink(event) {
+        events.push(event);
+      }
+    })
+  };
+}
+
+test('explicit invalidation records only an actually removed session', () => {
+  const capture = sessionSecurityEventCapture();
+
+  const { lifecycle } = fixture({
+    securityEventRecorder: capture.recorder
+  });
+
+  const created = lifecycle.create(trustedIdentity());
+
+  assert.equal(
+    lifecycle.invalidate(created.sessionId),
+    true
+  );
+
+  assert.equal(
+    lifecycle.invalidate(created.sessionId),
+    false
+  );
+
+  assert.equal(
+    lifecycle.invalidate(
+      'SESSION_IDENTIFIER_SENTINEL_DO_NOT_LOG'
+    ),
+    false
+  );
+
+  assert.deepEqual(capture.events, [{
+    version: 1,
+    type:
+      HOSTED_SECURITY_EVENT_TYPES.SESSION_INVALIDATED,
+    occurredAt: 999999,
+    reason:
+      HOSTED_SECURITY_EVENT_REASONS
+        .SESSION_EXPLICIT_INVALIDATION
+  }]);
+
+  const serialized =
+    serializeHostedSecurityEvent(capture.events[0]);
+
+  assert.equal(
+    serialized.includes(created.sessionId),
+    false
+  );
+  assert.equal(
+    serialized.includes(created.csrfToken),
+    false
+  );
+});
+
+test('automatic expiry cleanup does not masquerade as explicit invalidation telemetry', () => {
+  const capture = sessionSecurityEventCapture();
+  const start = 1_000_000;
+
+  const {
+    lifecycle,
+    setNow
+  } = fixture({
+    now: start,
+    securityEventRecorder: capture.recorder
+  });
+
+  const created = lifecycle.create(trustedIdentity());
+
+  setNow(
+    start +
+      DEFAULT_HOSTED_SESSION_POLICY.idleTimeoutMs
+  );
+
+  assert.equal(
+    lifecycle.resolve(created.sessionId),
+    null
+  );
+
+  assert.deepEqual(capture.events, []);
+});
+
+test('session invalidation recorder failure cannot change successful invalidation', () => {
+  const { lifecycle, store } = fixture({
+    securityEventRecorder: {
+      record() {
+        throw new Error(
+          'LOGGER_SECRET_SHOULD_NOT_ESCAPE'
+        );
+      }
+    }
+  });
+
+  const created = lifecycle.create(trustedIdentity());
+
+  assert.doesNotThrow(() => {
+    assert.equal(
+      lifecycle.invalidate(created.sessionId),
+      true
+    );
+  });
+
+  assert.equal(
+    store.read(created.sessionId),
+    null
   );
 });

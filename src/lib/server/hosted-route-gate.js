@@ -12,6 +12,11 @@ import {
 import {
   isCanonicalHostedCsrfToken
 } from './hosted-session.js';
+import {
+  HOSTED_SECURITY_EVENT_REASONS,
+  HOSTED_SECURITY_EVENT_TYPES,
+  NOOP_HOSTED_SECURITY_EVENT_RECORDER
+} from './hosted-security-events.js';
 
 /**
  * @typedef {{
@@ -216,6 +221,22 @@ function issueTrustedHostedRequestContext(input) {
 }
 
 /**
+ * @param {unknown} recorder
+ */
+function assertSecurityEventRecorder(recorder) {
+  if (
+    recorder === null ||
+    typeof recorder !== 'object' ||
+    typeof /** @type {Record<string, unknown>} */ (recorder)
+      .record !== 'function'
+  ) {
+    throw new HostedRouteGateConfigurationError(
+      'Hosted security event recorder does not implement the required boundary.'
+    );
+  }
+}
+
+/**
  * @param {unknown} lifecycle
  * @returns {asserts lifecycle is HostedSessionLifecycleBoundary}
  */
@@ -293,23 +314,57 @@ export class HostedRouteGate {
   /** @type {unknown} */
   #authorizationConfig;
 
+  /** @type {any} */
+  #securityEventRecorder;
+
   /**
    * @param {{
    *   sessionLifecycle?: unknown,
-   *   authorizationConfig?: unknown
+   *   authorizationConfig?: unknown,
+   *   securityEventRecorder?: unknown
    * }} [options]
    */
   constructor(options = {}) {
     const {
       sessionLifecycle,
-      authorizationConfig
+      authorizationConfig,
+      securityEventRecorder =
+        NOOP_HOSTED_SECURITY_EVENT_RECORDER
     } = options;
 
     assertSessionLifecycle(sessionLifecycle);
     assertHostedAuthorizationConfig(authorizationConfig);
+    assertSecurityEventRecorder(securityEventRecorder);
 
     this.#sessionLifecycle = sessionLifecycle;
     this.#authorizationConfig = authorizationConfig;
+    this.#securityEventRecorder = securityEventRecorder;
+  }
+
+  /**
+   * @param {string} type
+   * @param {string} [reason]
+   */
+  #recordSecurityEvent(type, reason = undefined) {
+    try {
+      this.#securityEventRecorder.record(type, reason);
+    } catch {
+      // Logging is best-effort and cannot affect route authority.
+    }
+  }
+
+  /**
+   * @param {unknown} sessionId
+   */
+  #recordSessionRejectionIfPresented(sessionId) {
+    if (sessionId === undefined || sessionId === null) {
+      return;
+    }
+
+    this.#recordSecurityEvent(
+      HOSTED_SECURITY_EVENT_TYPES.SESSION_REJECTED,
+      HOSTED_SECURITY_EVENT_REASONS.SESSION_INVALID
+    );
   }
 
   /**
@@ -328,10 +383,12 @@ export class HostedRouteGate {
     const resolved = this.#sessionLifecycle.resolve(sessionId);
 
     if (resolved === null) {
+      this.#recordSessionRejectionIfPresented(sessionId);
       return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE);
     }
 
     if (!isCanonicalHostedCsrfToken(resolved.session.csrfToken)) {
+      this.#recordSessionRejectionIfPresented(sessionId);
       return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE);
     }
 
@@ -341,6 +398,10 @@ export class HostedRouteGate {
         this.#authorizationConfig
       )
     ) {
+      this.#recordSecurityEvent(
+        HOSTED_SECURITY_EVENT_TYPES.AUTHORIZATION_REJECTED
+      );
+
       return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.FORBIDDEN);
     }
 
@@ -350,6 +411,7 @@ export class HostedRouteGate {
       touched === null ||
       !hasSameSessionAuthority(resolved.session, touched.session)
     ) {
+      this.#recordSessionRejectionIfPresented(sessionId);
       return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE);
     }
 
@@ -363,6 +425,7 @@ export class HostedRouteGate {
         rotated === null ||
         !hasSameSessionAuthority(resolved.session, rotated)
       ) {
+        this.#recordSessionRejectionIfPresented(sessionId);
         return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE);
       }
 

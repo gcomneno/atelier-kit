@@ -9,6 +9,11 @@ import {
 import {
   HostedSessionStoreConflictError
 } from './hosted-session-store.js';
+import {
+  HOSTED_SECURITY_EVENT_REASONS,
+  HOSTED_SECURITY_EVENT_TYPES,
+  NOOP_HOSTED_SECURITY_EVENT_RECORDER
+} from './hosted-security-events.js';
 
 const SESSION_ID_BYTES = 32;
 const SESSION_ID_LENGTH = 43;
@@ -196,6 +201,22 @@ export function normalizeHostedSessionPolicy(input = {}) {
 }
 
 /**
+ * @param {unknown} recorder
+ */
+function assertSecurityEventRecorder(recorder) {
+  if (
+    recorder === null ||
+    typeof recorder !== 'object' ||
+    typeof /** @type {Record<string, unknown>} */ (recorder)
+      .record !== 'function'
+  ) {
+    throw new HostedSessionConfigurationError(
+      'Hosted security event recorder does not implement the required boundary.'
+    );
+  }
+}
+
+/**
  * @param {unknown} store
  */
 function assertSessionStore(store) {
@@ -265,6 +286,7 @@ export class HostedSessionLifecycle {
   #sessionIdGenerator;
   #csrfTokenGenerator;
   #policy;
+  #securityEventRecorder;
 
   /**
    * @param {{
@@ -278,7 +300,10 @@ export class HostedSessionLifecycle {
    *   clock?: () => number,
    *   sessionIdGenerator?: () => string,
    *   csrfTokenGenerator?: () => string,
-   *   policy?: unknown
+   *   policy?: unknown,
+   *   securityEventRecorder?: {
+   *     record(type: unknown, reason?: unknown): boolean
+   *   }
    * }} options
    */
   constructor({
@@ -286,9 +311,12 @@ export class HostedSessionLifecycle {
     clock = Date.now,
     sessionIdGenerator = generateHostedSessionId,
     csrfTokenGenerator = generateHostedCsrfToken,
-    policy = {}
+    policy = {},
+    securityEventRecorder =
+      NOOP_HOSTED_SECURITY_EVENT_RECORDER
   }) {
     assertSessionStore(store);
+    assertSecurityEventRecorder(securityEventRecorder);
 
     if (typeof clock !== 'function') {
       throw new HostedSessionConfigurationError(
@@ -313,6 +341,19 @@ export class HostedSessionLifecycle {
     this.#sessionIdGenerator = sessionIdGenerator;
     this.#csrfTokenGenerator = csrfTokenGenerator;
     this.#policy = normalizeHostedSessionPolicy(policy);
+    this.#securityEventRecorder = securityEventRecorder;
+  }
+
+  /**
+   * @param {string} type
+   * @param {string} [reason]
+   */
+  #recordSecurityEvent(type, reason = undefined) {
+    try {
+      this.#securityEventRecorder.record(type, reason);
+    } catch {
+      // Logging failure cannot alter session lifecycle semantics.
+    }
   }
 
   get policy() {
@@ -654,6 +695,16 @@ export class HostedSessionLifecycle {
       return false;
     }
 
-    return this.#store.delete(sessionId);
+    const invalidated = this.#store.delete(sessionId);
+
+    if (invalidated) {
+      this.#recordSecurityEvent(
+        HOSTED_SECURITY_EVENT_TYPES.SESSION_INVALIDATED,
+        HOSTED_SECURITY_EVENT_REASONS
+          .SESSION_EXPLICIT_INVALIDATION
+      );
+    }
+
+    return invalidated;
   }
 }

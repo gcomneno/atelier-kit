@@ -37,10 +37,12 @@ import {
 } from '$lib/server/studio-io.js';
 import { readImageMutation } from '$lib/server/studio-image-mutation.js';
 import {
-  socialFormToLinks,
-  socialLinksToForm,
-  SOCIAL_NETWORK_IDS
+  socialLinksToForm
 } from '$lib/social-networks.js';
+import {
+  SOCIAL_AUTHORING_PATH,
+  buildSocialAuthoringDocumentFromFormData
+} from './social-authoring.js';
 import { isValidFooterHref } from '$lib/footer-links.js';
 import { assertValidMarkedText } from '$lib/marked-text.js';
 import { validateEditorialFields } from '$lib/editorial-markup.js';

@@ -2,7 +2,7 @@ import {
   AuthoringRepositoryPathError,
   AuthoringRevisionConflictError,
   normalizeAuthoringPath
-} from './authoring-repository.js';
+} from './authoring-repository-boundary.js';
 
 const GITHUB_REVISION_PATTERN = /^github:[0-9a-f]{40}$/i;
 const REPOSITORY_PATTERN = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;

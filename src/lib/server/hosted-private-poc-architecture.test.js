@@ -74,7 +74,7 @@ async function source(file) {
   return readFile(file, 'utf8');
 }
 
-test('only Studio layout and root page consume Hosted trusted locals', async () => {
+test('only explicitly admitted Studio loaders/actions consume Hosted trusted locals', async () => {
   const serverFiles =
     (await collectFiles(STUDIO_ROOT))
       .filter((file) =>
@@ -99,7 +99,8 @@ test('only Studio layout and root page consume Hosted trusted locals', async () 
     hostedContextConsumers.sort(),
     [
       '+layout.server.js',
-      '+page.server.js'
+      '+page.server.js',
+      'site/social/+page.server.js'
     ]
   );
 
@@ -177,6 +178,45 @@ test('current Studio mutation surface remains contextless and Hosted fail-closed
     relative,
     contents
   } of actionFiles) {
+    if (
+      relative ===
+      'site/social/+page.server.js'
+    ) {
+      assert.match(
+        contents,
+        /guardStudio\s*\(\s*locals\.hostedStudio\s*\)/,
+        'Social loader must require genuine Hosted context'
+      );
+
+      assert.match(
+        contents,
+        /runtime\.evaluateMutation\s*\(/,
+        'Social POST must delegate integrity authority to the existing Hosted mutation guard'
+      );
+
+      assert.match(
+        contents,
+        /saveHostedSocialAuthoringData\s*\(/,
+        'Social POST must use the repository-backed Hosted mutation seam'
+      );
+
+      assert.match(
+        contents,
+        /runtimeMode\s*!==\s*'hosted'[\s\S]*saveSocialAction/,
+        'Local Social must retain its existing Local action'
+      );
+
+      assert.equal(
+        contents.includes(
+          'GitHubAuthoringRepository'
+        ),
+        false,
+        'Social route must not directly own repository authority'
+      );
+
+      continue;
+    }
+
     assert.match(
       contents,
       /guardStudio\s*\(\s*\)/,

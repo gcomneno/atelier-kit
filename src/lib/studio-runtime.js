@@ -56,23 +56,16 @@ export function resolveStudioRuntimeMode(devMode, environment = process.env) {
 }
 
 /**
- * Decide whether a resolved runtime mode may access Studio.
+ * Decide whether a resolved runtime is intrinsically allowed to expose Studio.
  *
  * Local Studio preserves ADR 0007 behavior.
- * Hosted Studio requires an explicit future server-side authorization result.
+ *
+ * Hosted Studio is never authorized at this runtime-only boundary. Hosted
+ * admission requires the server-only trusted request-context policy.
  *
  * @param {'visitor' | 'local' | 'hosted' | 'invalid'} mode
- * @param {{ hostedAuthorized?: boolean }} [context]
  * @returns {boolean}
  */
-export function canAccessStudio(mode, context = {}) {
-  if (mode === STUDIO_RUNTIME_MODES.LOCAL) {
-    return true;
-  }
-
-  if (mode === STUDIO_RUNTIME_MODES.HOSTED) {
-    return context.hostedAuthorized === true;
-  }
-
-  return false;
+export function canAccessStudio(mode) {
+  return mode === STUDIO_RUNTIME_MODES.LOCAL;
 }

@@ -9,6 +9,10 @@ const AUTHORIZED_GITHUB_IDS_ENV = 'ATELIER_STUDIO_AUTHORIZED_GITHUB_IDS';
 const BOOTSTRAP_GITHUB_LOGIN_ENV = 'ATELIER_STUDIO_BOOTSTRAP_GITHUB_LOGIN';
 const AUTHORIZED_HOSTED_IDENTITY_TOKEN = Symbol('authorized-hosted-identity');
 const AUTHORIZED_HOSTED_IDENTITIES = new WeakSet();
+const HOSTED_SESSION_IDENTITY_FIELDS = new Set([
+  'provider',
+  'subject'
+]);
 
 export class HostedAuthorizationConfigurationError extends Error {
   /**
@@ -176,7 +180,7 @@ export function parseHostedAuthorizationConfig(environment) {
  *   bootstrapGitHubLogin: string | null
  * }>}
  */
-function assertHostedAuthorizationConfig(config) {
+export function assertHostedAuthorizationConfig(config) {
   if (
     config === null ||
     typeof config !== 'object' ||
@@ -216,6 +220,68 @@ function assertHostedAuthorizationConfig(config) {
 }
 
 /**
+ * Apply the stable authority decision shared by post-provider authorization and
+ * active Hosted-session re-authorization.
+ *
+ * Only provider + subject participate. Login/display metadata are deliberately
+ * absent from this contract.
+ *
+ * @param {unknown} identity
+ * @param {unknown} config
+ * @returns {boolean}
+ */
+export function isHostedSessionIdentityAuthorized(identity, config) {
+  assertHostedAuthorizationConfig(config);
+
+  return isStableHostedIdentityAuthorized(identity, config);
+}
+
+/**
+ * @param {unknown} identity
+ * @param {unknown} config
+ * @returns {boolean}
+ */
+function isStableHostedIdentityAuthorized(identity, config) {
+  if (
+    identity === null ||
+    typeof identity !== 'object' ||
+    Array.isArray(identity)
+  ) {
+    return false;
+  }
+
+  const record = /** @type {Record<string, unknown>} */ (identity);
+
+  for (const field of Object.keys(record)) {
+    if (!HOSTED_SESSION_IDENTITY_FIELDS.has(field)) {
+      return false;
+    }
+  }
+
+  if (record.provider !== HOSTED_IDENTITY_PROVIDERS.GITHUB) {
+    return false;
+  }
+
+  let subject;
+
+  try {
+    subject = canonicalGitHubSubject(record.subject);
+  } catch (error) {
+    if (error instanceof HostedIdentityValidationError) {
+      return false;
+    }
+
+    throw error;
+  }
+
+  const allowedSubjects =
+    /** @type {{ allowedGitHubSubjects: readonly string[] }} */ (config)
+      .allowedGitHubSubjects;
+
+  return allowedSubjects.includes(subject);
+}
+
+/**
  * Apply the centralized Hosted Studio authorization policy.
  *
  * Routine identity denial returns null. Invalid deployment configuration is a
@@ -243,16 +309,14 @@ export function authorizeHostedIdentity(identity, config) {
   }
 
   if (
-    authenticatedIdentity.provider !== HOSTED_IDENTITY_PROVIDERS.GITHUB
+    !isStableHostedIdentityAuthorized(
+      {
+        provider: authenticatedIdentity.provider,
+        subject: authenticatedIdentity.subject
+      },
+      config
+    )
   ) {
-    return null;
-  }
-
-  const allowedSubjects =
-    /** @type {{ allowedGitHubSubjects: readonly string[] }} */ (config)
-      .allowedGitHubSubjects;
-
-  if (!allowedSubjects.includes(authenticatedIdentity.subject)) {
     return null;
   }
 

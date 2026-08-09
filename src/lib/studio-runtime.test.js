@@ -41,18 +41,11 @@ test('ATELIER_STUDIO_MODE=hosted resolves to Hosted Studio', () => {
   );
 });
 
-test('Hosted Studio is inaccessible until a server-side authorization result exists', () => {
+test('Hosted Studio is never authorized by the runtime-only boundary', () => {
   assert.equal(canAccessStudio(STUDIO_RUNTIME_MODES.HOSTED), false);
   assert.equal(
-    canAccessStudio(STUDIO_RUNTIME_MODES.HOSTED, { hostedAuthorized: false }),
+    canAccessStudio(STUDIO_RUNTIME_MODES.HOSTED),
     false
-  );
-});
-
-test('Hosted Studio can only become accessible through explicit server-side authorization', () => {
-  assert.equal(
-    canAccessStudio(STUDIO_RUNTIME_MODES.HOSTED, { hostedAuthorized: true }),
-    true
   );
 });
 
@@ -64,7 +57,7 @@ test('visitor and invalid modes are always inaccessible', () => {
   assert.equal(canAccessStudio(STUDIO_RUNTIME_MODES.VISITOR), false);
   assert.equal(canAccessStudio(STUDIO_RUNTIME_MODES.INVALID), false);
   assert.equal(
-    canAccessStudio(STUDIO_RUNTIME_MODES.INVALID, { hostedAuthorized: true }),
+    canAccessStudio(STUDIO_RUNTIME_MODES.INVALID),
     false
   );
 });

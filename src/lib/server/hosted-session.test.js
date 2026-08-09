@@ -7,10 +7,12 @@ import {
 } from './hosted-authorization.js';
 import {
   DEFAULT_HOSTED_SESSION_POLICY,
+  generateHostedCsrfToken,
   generateHostedSessionId,
   HostedSessionConfigurationError,
   HostedSessionLifecycle,
   HostedSessionLifecycleError,
+  isCanonicalHostedCsrfToken,
   isCanonicalHostedSessionId,
   normalizeHostedSessionPolicy
 } from './hosted-session.js';
@@ -25,6 +27,13 @@ const MINUTE = 60 * 1000;
  * @param {number} byte
  */
 function fixedSessionId(byte) {
+  return Buffer.alloc(32, byte).toString('base64url');
+}
+
+/**
+ * @param {number} byte
+ */
+function fixedCsrfToken(byte) {
   return Buffer.alloc(32, byte).toString('base64url');
 }
 
@@ -51,6 +60,7 @@ function trustedIdentity(subject = '123', login = 'operator') {
  * @param {{
  *   now?: number,
  *   ids?: string[],
+ *   csrfTokens?: string[],
  *   store?: InMemoryHostedSessionStore,
  *   policy?: unknown
  * }} [options]
@@ -63,16 +73,26 @@ function fixture({
     fixedSessionId(3),
     fixedSessionId(4)
   ],
+  csrfTokens = [
+    fixedCsrfToken(101),
+    fixedCsrfToken(102),
+    fixedCsrfToken(103),
+    fixedCsrfToken(104)
+  ],
   store = new InMemoryHostedSessionStore(),
   policy = {}
 } = {}) {
   let currentTime = now;
-  let index = 0;
+  let idIndex = 0;
+  let csrfIndex = 0;
 
   const lifecycle = new HostedSessionLifecycle({
     store,
     clock: () => currentTime,
-    sessionIdGenerator: () => ids[index++] ?? ids.at(-1),
+    sessionIdGenerator: () =>
+      ids[idIndex++] ?? ids.at(-1),
+    csrfTokenGenerator: () =>
+      csrfTokens[csrfIndex++] ?? csrfTokens.at(-1),
     policy
   });
 
@@ -130,6 +150,55 @@ test('generated session IDs are opaque canonical 256-bit base64url values', () =
   ]) {
     assert.equal(isCanonicalHostedSessionId(candidate), false);
   }
+});
+
+test('generated CSRF tokens are canonical independent 256-bit secrets', () => {
+  const sessionId = generateHostedSessionId();
+  const csrfToken = generateHostedCsrfToken();
+
+  assert.equal(isCanonicalHostedCsrfToken(csrfToken), true);
+  assert.equal(Buffer.from(csrfToken, 'base64url').length, 32);
+
+  for (const candidate of [
+    '',
+    'abc',
+    'a'.repeat(42),
+    'a'.repeat(44),
+    `${'a'.repeat(42)}=`,
+    `${'a'.repeat(42)}+`,
+    null,
+    undefined
+  ]) {
+    assert.equal(isCanonicalHostedCsrfToken(candidate), false);
+  }
+
+  assert.notEqual(csrfToken, sessionId);
+});
+
+test('session and CSRF generators are independent lifecycle dependencies', () => {
+  let sessionCalls = 0;
+  let csrfCalls = 0;
+
+  const lifecycle = new HostedSessionLifecycle({
+    store: new InMemoryHostedSessionStore(),
+    clock: () => 1_000_000,
+    sessionIdGenerator: () => {
+      sessionCalls += 1;
+      return fixedSessionId(1);
+    },
+    csrfTokenGenerator: () => {
+      csrfCalls += 1;
+      return fixedCsrfToken(101);
+    }
+  });
+
+  const session = lifecycle.create(trustedIdentity());
+
+  assert.equal(sessionCalls, 1);
+  assert.equal(csrfCalls, 1);
+  assert.equal(session.sessionId, fixedSessionId(1));
+  assert.equal(session.csrfToken, fixedCsrfToken(101));
+  assert.notEqual(session.sessionId, session.csrfToken);
 });
 
 test('default lifecycle policy is the ADR 0009 8h/2h/45m policy', () => {
@@ -191,6 +260,8 @@ test('creation stores only stable authorization identity and deterministic lifec
     subject: '123'
   });
   assert.equal(session.authorization, 'authorized');
+  assert.equal(session.csrfToken, fixedCsrfToken(101));
+  assert.notEqual(session.csrfToken, session.sessionId);
   assert.equal(session.createdAt, start);
   assert.equal(session.rotatedAt, start);
   assert.equal(session.lastSeenAt, start);
@@ -249,6 +320,7 @@ test('touch advances lastSeenAt without extending absolute expiry', () => {
 
   assert.ok(touched !== null);
   assert.equal(touched.session.createdAt, session.createdAt);
+  assert.equal(touched.session.csrfToken, session.csrfToken);
   assert.equal(touched.session.rotatedAt, session.rotatedAt);
   assert.equal(touched.session.lastSeenAt, start + HOUR);
   assert.equal(touched.session.expiresAt, session.expiresAt);
@@ -289,6 +361,7 @@ test('rotation issues a fresh ID, retires the old ID and preserves absolute life
   assert.notEqual(store.read(rotated.sessionId), null);
 
   assert.equal(rotated.createdAt, original.createdAt);
+  assert.equal(rotated.csrfToken, original.csrfToken);
   assert.equal(rotated.expiresAt, original.expiresAt);
   assert.equal(rotated.rotatedAt, start + 45 * MINUTE);
   assert.equal(rotated.lastSeenAt, start + 45 * MINUTE);
@@ -318,6 +391,51 @@ test('rotation never revives unknown, malformed, idle-expired or absolutely expi
     setNow(start + 8 * HOUR);
     assert.equal(lifecycle.rotate(session.sessionId), null);
   }
+});
+
+test('malformed stored CSRF state invalidates the session fail-closed', () => {
+  const sessionId = fixedSessionId(8);
+  const store = new InMemoryHostedSessionStore();
+
+  store.create({
+    sessionId,
+    identity: {
+      provider: 'github',
+      subject: '123'
+    },
+    authorization: 'authorized',
+    csrfToken: 'not-a-canonical-csrf-token',
+    createdAt: 1_000_000,
+    rotatedAt: 1_000_000,
+    expiresAt: 1_000_000 + 8 * HOUR,
+    lastSeenAt: 1_000_000
+  });
+
+  const { lifecycle } = fixture({
+    now: 1_000_000,
+    store
+  });
+
+  assert.equal(lifecycle.resolve(sessionId), null);
+  assert.equal(store.read(sessionId), null);
+});
+
+test('CSRF token cannot equal the session lookup credential', () => {
+  const shared = fixedSessionId(1);
+
+  const { lifecycle } = fixture({
+    ids: [
+      shared,
+      fixedSessionId(2)
+    ],
+    csrfTokens: [shared]
+  });
+
+  const session = lifecycle.create(trustedIdentity());
+
+  assert.equal(session.csrfToken, shared);
+  assert.equal(session.sessionId, fixedSessionId(2));
+  assert.notEqual(session.sessionId, session.csrfToken);
 });
 
 test('invalidation is effective and idempotent', () => {
@@ -396,6 +514,46 @@ test('returned session snapshots cannot mutate store-owned state', () => {
   assert.equal(
     mustRead(store, session.sessionId).identity.subject,
     '123'
+  );
+});
+
+test('malformed generated CSRF tokens fail without leaking their value', () => {
+  const secretLikeValue = 'this-is-not-a-valid-csrf-secret';
+
+  const { lifecycle } = fixture({
+    csrfTokens: [secretLikeValue]
+  });
+
+  assert.throws(
+    () => lifecycle.create(trustedIdentity()),
+    (error) => {
+      assert.ok(error instanceof HostedSessionLifecycleError);
+      assert.equal(error.message.includes(secretLikeValue), false);
+      return true;
+    }
+  );
+});
+
+test('CSRF generator failures are generic and fail closed', () => {
+  const lifecycle = new HostedSessionLifecycle({
+    store: new InMemoryHostedSessionStore(),
+    clock: () => 1_000_000,
+    sessionIdGenerator: () => fixedSessionId(1),
+    csrfTokenGenerator: () => {
+      throw new Error('csrf-provider-secret');
+    }
+  });
+
+  assert.throws(
+    () => lifecycle.create(trustedIdentity()),
+    (error) => {
+      assert.ok(error instanceof HostedSessionLifecycleError);
+      assert.equal(
+        error.message.includes('csrf-provider-secret'),
+        false
+      );
+      return true;
+    }
   );
 });
 

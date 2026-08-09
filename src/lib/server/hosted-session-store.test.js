@@ -18,6 +18,7 @@ function sessionRecord(sessionId, lastSeenAt = 1000) {
       subject: '123'
     },
     authorization: 'authorized',
+    csrfToken: Buffer.alloc(32, 9).toString('base64url'),
     createdAt: 1000,
     rotatedAt: 1000,
     expiresAt: 9000,
@@ -49,6 +50,10 @@ test('store creates and reads immutable isolated session snapshots', () => {
   assert.equal(Object.isFrozen(created), true);
   assert.equal(Object.isFrozen(created.identity), true);
   assert.equal(created.identity.subject, '123');
+  assert.equal(
+    created.csrfToken,
+    Buffer.alloc(32, 9).toString('base64url')
+  );
   assert.equal(created.lastSeenAt, 1000);
 
   const read = store.read('session-a');

@@ -5,6 +5,7 @@ import {
   authorizeHostedIdentity,
   HostedAuthorizationConfigurationError,
   isAuthorizedHostedIdentity,
+  isHostedSessionIdentityAuthorized,
   parseHostedAuthorizationConfig
 } from './hosted-authorization.js';
 
@@ -108,6 +109,121 @@ test('authorized identity trust cannot be forged through constructor or prototyp
   forged.identity = githubIdentity('123');
 
   assert.equal(isAuthorizedHostedIdentity(forged), false);
+});
+
+test('stable session authority is authorized without synthesizing login metadata', () => {
+  const config = parseHostedAuthorizationConfig({
+    ATELIER_STUDIO_AUTHORIZED_GITHUB_IDS: '123'
+  });
+
+  assert.equal(
+    isHostedSessionIdentityAuthorized(
+      {
+        provider: 'github',
+        subject: '123'
+      },
+      config
+    ),
+    true
+  );
+
+  assert.equal(
+    isHostedSessionIdentityAuthorized(
+      {
+        provider: 'github',
+        subject: '456'
+      },
+      config
+    ),
+    false
+  );
+});
+
+test('stable session authority rejects malformed or metadata-bearing shapes', () => {
+  const config = parseHostedAuthorizationConfig({
+    ATELIER_STUDIO_AUTHORIZED_GITHUB_IDS: '123'
+  });
+
+  for (const identity of [
+    null,
+    {
+      provider: 'gitlab',
+      subject: '123'
+    },
+    {
+      provider: 'github',
+      subject: '01'
+    },
+    {
+      provider: 'github',
+      subject: '123',
+      login: 'operator'
+    },
+    {
+      provider: 'github'
+    }
+  ]) {
+    assert.equal(
+      isHostedSessionIdentityAuthorized(identity, config),
+      false
+    );
+  }
+});
+
+test('post-OAuth and session authorization share the same stable subject decision', () => {
+  const config = parseHostedAuthorizationConfig({
+    ATELIER_STUDIO_AUTHORIZED_GITHUB_IDS: '123'
+  });
+
+  const allowedIdentity = githubIdentity('123', 'first-login');
+  const deniedIdentity = githubIdentity('456', 'same-login-does-not-matter');
+
+  assert.ok(
+    authorizeHostedIdentity(
+      allowedIdentity,
+      config
+    ) instanceof AuthorizedHostedIdentity
+  );
+
+  assert.equal(
+    isHostedSessionIdentityAuthorized(
+      {
+        provider: allowedIdentity.provider,
+        subject: allowedIdentity.subject
+      },
+      config
+    ),
+    true
+  );
+
+  assert.equal(
+    authorizeHostedIdentity(deniedIdentity, config),
+    null
+  );
+
+  assert.equal(
+    isHostedSessionIdentityAuthorized(
+      {
+        provider: deniedIdentity.provider,
+        subject: deniedIdentity.subject
+      },
+      config
+    ),
+    false
+  );
+});
+
+test('stable session authority keeps invalid policy distinct from ordinary denial', () => {
+  assert.throws(
+    () => isHostedSessionIdentityAuthorized(
+      {
+        provider: 'github',
+        subject: '123'
+      },
+      { allowedGitHubSubjects: [] }
+    ),
+    HostedAuthorizationConfigurationError
+  );
 });
 
 test('non-allow-listed stable subject is denied', () => {

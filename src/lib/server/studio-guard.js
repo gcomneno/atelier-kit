@@ -6,6 +6,9 @@ import {
   canAccessStudio,
   resolveStudioRuntimeMode
 } from '$lib/studio-runtime.js';
+import {
+  canAccessStudioRoute
+} from '$lib/server/studio-access-policy.js';
 
 /**
  * Production-safe Studio gating.
@@ -43,8 +46,21 @@ export function isStudioEnabled() {
   return canAccessStudio(getStudioRuntimeMode());
 }
 
-export function guardStudio() {
-  if (!isStudioEnabled()) {
+/**
+ * Guard the Studio route tree.
+ *
+ * Local Studio remains admitted through the existing runtime contract.
+ * Hosted Studio requires a genuinely trusted server-side request context.
+ *
+ * @param {unknown} [hostedContext]
+ */
+export function guardStudio(hostedContext) {
+  if (
+    !canAccessStudioRoute(
+      getStudioRuntimeMode(),
+      hostedContext
+    )
+  ) {
     error(404, 'Not found');
   }
 }

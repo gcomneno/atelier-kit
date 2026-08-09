@@ -1,6 +1,8 @@
 <script>
-    import { PageIntro } from 'giadaware-ui-components/studio';
-import { useI18n } from '$lib/i18n/context.js';
+  import { PageIntro } from 'giadaware-ui-components/studio';
+  import { useI18n } from '$lib/i18n/context.js';
+
+  export let data;
 
   const t = useI18n();
 
@@ -21,6 +23,21 @@ import { useI18n } from '$lib/i18n/context.js';
 
 <PageIntro>{t('studio.dashboard.intro')}</PageIntro>
 
+{#if data?.hostedPrivatePoc}
+  <form
+    method="POST"
+    action="/auth/logout"
+    class="hosted-session"
+  >
+    <input
+      type="hidden"
+      name="csrfToken"
+      value={data.hostedPrivatePoc.logoutCsrfToken}
+    />
+    <button type="submit">Sign out</button>
+  </form>
+{/if}
+
 <section class="zones" aria-label={t('studio.dashboard.zonesLegend')}>
   {#each zones as zone (zone.id)}
     <a class="zone tone-{zone.tone}" href={zone.href}>
@@ -32,6 +49,22 @@ import { useI18n } from '$lib/i18n/context.js';
 </section>
 
 <style>
+  .hosted-session {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 1rem;
+  }
+
+  .hosted-session button {
+    border: 1px solid var(--studio-border);
+    border-radius: 0.65rem;
+    padding: 0.6rem 0.9rem;
+    background: var(--studio-surface);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
   .zones {
     display: grid;
     gap: 1rem;

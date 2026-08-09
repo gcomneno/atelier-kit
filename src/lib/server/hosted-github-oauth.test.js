@@ -15,6 +15,12 @@ import {
 import {
   InMemoryHostedOAuthTransactionStore
 } from './hosted-oauth-transaction-store.js';
+import {
+  HOSTED_SECURITY_EVENT_REASONS,
+  HOSTED_SECURITY_EVENT_TYPES,
+  HostedSecurityEventRecorder,
+  serializeHostedSecurityEvent
+} from './hosted-security-events.js';
 
 const MINUTE = 60 * 1000;
 
@@ -65,7 +71,8 @@ function githubUser(overrides = {}) {
  *   secrets?: string[],
  *   transactionStore?: InMemoryHostedOAuthTransactionStore,
  *   transport?: any,
- *   transactionLifetimeMs?: number
+ *   transactionLifetimeMs?: number,
+ *   securityEventRecorder?: any
  * }} [options]
  */
 function fixture({
@@ -85,7 +92,8 @@ function fixture({
       githubUser()
   },
   transactionLifetimeMs =
-    DEFAULT_HOSTED_OAUTH_TRANSACTION_LIFETIME_MS
+    DEFAULT_HOSTED_OAUTH_TRANSACTION_LIFETIME_MS,
+  securityEventRecorder
 } = {}) {
   let currentTime = now;
   let secretIndex = 0;
@@ -97,7 +105,10 @@ function fixture({
     clock: () => currentTime,
     secretGenerator: () =>
       secrets[secretIndex++] ?? secrets.at(-1),
-    transactionLifetimeMs
+    transactionLifetimeMs,
+    ...(securityEventRecorder === undefined
+      ? {}
+      : { securityEventRecorder })
   });
 
   return {
@@ -879,4 +890,300 @@ test('malformed token responses fail closed without prefix assumptions', async (
     }),
     'completely-opaque-token-with-no-prefix-contract'
   );
+});
+
+
+function securityEventCapture() {
+  /** @type {any[]} */
+  const events = [];
+
+  return {
+    events,
+    recorder: new HostedSecurityEventRecorder({
+      clock: () => 777777,
+      sink(event) {
+        events.push(event);
+      }
+    })
+  };
+}
+
+test('OAuth state failures emit one specific safe event each', async () => {
+  {
+    const capture = securityEventCapture();
+    const { provider } = fixture({
+      securityEventRecorder: capture.recorder
+    });
+
+    await assert.rejects(
+      () => provider.complete({
+        state: 'OAUTH_STATE_SECRET_MALFORMED',
+        code: 'AUTH_CODE_SECRET'
+      }),
+      HostedGitHubOAuthAuthenticationError
+    );
+
+    assert.deepEqual(capture.events, [{
+      version: 1,
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.OAUTH_STATE_REJECTED,
+      occurredAt: 777777,
+      reason:
+        HOSTED_SECURITY_EVENT_REASONS.OAUTH_STATE_MALFORMED
+    }]);
+  }
+
+  {
+    const capture = securityEventCapture();
+    const { provider } = fixture({
+      securityEventRecorder: capture.recorder
+    });
+
+    await assert.rejects(
+      () => provider.complete({
+        state: fixedSecret(99),
+        code: 'AUTH_CODE_SECRET'
+      }),
+      HostedGitHubOAuthAuthenticationError
+    );
+
+    assert.deepEqual(capture.events, [{
+      version: 1,
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.OAUTH_STATE_REJECTED,
+      occurredAt: 777777,
+      reason:
+        HOSTED_SECURITY_EVENT_REASONS
+          .OAUTH_STATE_UNKNOWN_OR_REPLAYED
+    }]);
+  }
+
+  {
+    const capture = securityEventCapture();
+    const start = 1_000_000;
+    const { provider, setNow } = fixture({
+      now: start,
+      securityEventRecorder: capture.recorder
+    });
+
+    const started = provider.begin('/studio');
+    const state =
+      new URL(started.authorizationUrl)
+        .searchParams.get('state');
+
+    assert.ok(state !== null);
+
+    setNow(start + 10 * MINUTE);
+
+    await assert.rejects(
+      () => provider.complete({
+        state,
+        code: 'AUTH_CODE_SECRET'
+      }),
+      HostedGitHubOAuthAuthenticationError
+    );
+
+    assert.deepEqual(capture.events, [{
+      version: 1,
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.OAUTH_STATE_REJECTED,
+      occurredAt: 777777,
+      reason:
+        HOSTED_SECURITY_EVENT_REASONS.OAUTH_STATE_EXPIRED
+    }]);
+  }
+});
+
+test('ordinary callback and provider failures emit one authentication event', async () => {
+  {
+    const capture = securityEventCapture();
+    const { provider } = fixture({
+      securityEventRecorder: capture.recorder
+    });
+
+    const started = provider.begin('/studio');
+    const state =
+      new URL(started.authorizationUrl)
+        .searchParams.get('state');
+
+    assert.ok(state !== null);
+
+    await assert.rejects(
+      () => provider.complete({
+        state,
+        code: ''
+      }),
+      HostedGitHubOAuthAuthenticationError
+    );
+
+    assert.deepEqual(capture.events, [{
+      version: 1,
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.AUTHENTICATION_FAILED,
+      occurredAt: 777777,
+      reason:
+        HOSTED_SECURITY_EVENT_REASONS.OAUTH_CALLBACK_REJECTED
+    }]);
+  }
+
+  {
+    const capture = securityEventCapture();
+    const { provider } = fixture({
+      securityEventRecorder: capture.recorder,
+      transport: {
+        exchangeAuthorizationCode: async () => {
+          throw new HostedGitHubOAuthProviderError();
+        },
+        fetchAuthenticatedUser: async () => {
+          throw new Error('not reached');
+        }
+      }
+    });
+
+    const started = provider.begin('/studio');
+    const state =
+      new URL(started.authorizationUrl)
+        .searchParams.get('state');
+
+    assert.ok(state !== null);
+
+    await assert.rejects(
+      () => provider.complete({
+        state,
+        code: 'AUTH_CODE_SECRET'
+      }),
+      HostedGitHubOAuthProviderError
+    );
+
+    assert.deepEqual(capture.events, [{
+      version: 1,
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.AUTHENTICATION_FAILED,
+      occurredAt: 777777,
+      reason:
+        HOSTED_SECURITY_EVENT_REASONS.OAUTH_PROVIDER_FAILED
+    }]);
+  }
+});
+
+test('OAuth security events never serialize provider or callback secrets', async () => {
+  const sentinels = [
+    'CLIENT_SECRET_DO_NOT_LOG',
+    'ACCESS_TOKEN_DO_NOT_LOG',
+    'AUTH_CODE_DO_NOT_LOG',
+    'RAW_PROVIDER_BODY_DO_NOT_LOG',
+    'AUTHORIZATION_HEADER_DO_NOT_LOG',
+    fixedSecret(1),
+    fixedSecret(2)
+  ];
+
+  const capture = securityEventCapture();
+
+  const config = parseHostedGitHubOAuthConfig({
+    ATELIER_STUDIO_GITHUB_CLIENT_ID:
+      'Iv1.0123456789abcdef',
+    ATELIER_STUDIO_GITHUB_CLIENT_SECRET:
+      sentinels[0],
+    ATELIER_STUDIO_GITHUB_CALLBACK_URL:
+      'https://studio.example.com/auth/github/callback'
+  });
+
+  const store =
+    new InMemoryHostedOAuthTransactionStore();
+
+  const provider = new HostedGitHubOAuthProvider({
+    config,
+    transactionStore: store,
+    clock: () => 1_000_000,
+    secretGenerator: (() => {
+      const values = [sentinels[5], sentinels[6]];
+      let index = 0;
+      return () => values[index++] ?? values.at(-1);
+    })(),
+    securityEventRecorder: capture.recorder,
+    transport: {
+      exchangeAuthorizationCode: async () =>
+        sentinels[1],
+      fetchAuthenticatedUser: async () => {
+        throw new Error(
+          `${sentinels[3]} ${sentinels[4]} ${sentinels[1]}`
+        );
+      }
+    }
+  });
+
+  provider.begin('/studio');
+
+  await assert.rejects(
+    () => provider.complete({
+      state: sentinels[5],
+      code: sentinels[2]
+    }),
+    HostedGitHubOAuthProviderError
+  );
+
+  assert.equal(capture.events.length, 1);
+
+  const serialized =
+    serializeHostedSecurityEvent(capture.events[0]);
+
+  for (const sentinel of sentinels) {
+    assert.equal(
+      serialized.includes(sentinel),
+      false,
+      `security event leaked sentinel: ${sentinel}`
+    );
+  }
+});
+
+test('security-event recorder failure never replaces OAuth rejection semantics', async () => {
+  const { provider } = fixture({
+    securityEventRecorder: {
+      record() {
+        throw new Error(
+          'LOGGER_SECRET_SHOULD_NOT_ESCAPE'
+        );
+      }
+    }
+  });
+
+  await assert.rejects(
+    () => provider.complete({
+      state: 'malformed',
+      code: 'AUTH_CODE_SECRET'
+    }),
+    (error) => {
+      assert.ok(
+        error instanceof HostedGitHubOAuthAuthenticationError
+      );
+      assert.equal(
+        error.message.includes(
+          'LOGGER_SECRET_SHOULD_NOT_ESCAPE'
+        ),
+        false
+      );
+      return true;
+    }
+  );
+});
+
+test('successful OAuth completion emits no rejection telemetry', async () => {
+  const capture = securityEventCapture();
+  const { provider } = fixture({
+    securityEventRecorder: capture.recorder
+  });
+
+  const started = provider.begin('/studio');
+  const state =
+    new URL(started.authorizationUrl)
+      .searchParams.get('state');
+
+  assert.ok(state !== null);
+
+  await provider.complete({
+    state,
+    code: 'authorization-code'
+  });
+
+  assert.deepEqual(capture.events, []);
 });

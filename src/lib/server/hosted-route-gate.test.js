@@ -12,6 +12,12 @@ import {
   HostedRouteGateConfigurationError,
   isHostedAuthenticationRouteEligible
 } from './hosted-route-gate.js';
+import {
+  HOSTED_SECURITY_EVENT_REASONS,
+  HOSTED_SECURITY_EVENT_TYPES,
+  HostedSecurityEventRecorder,
+  serializeHostedSecurityEvent
+} from './hosted-security-events.js';
 
 function fixedCsrfToken(byte = 9) {
   return Buffer.alloc(32, byte).toString('base64url');
@@ -463,4 +469,208 @@ test('authentication endpoints are eligible only in Hosted runtime', () => {
       false
     );
   }
+});
+
+
+function routeSecurityEventCapture() {
+  /** @type {any[]} */
+  const events = [];
+
+  return {
+    events,
+    recorder: new HostedSecurityEventRecorder({
+      clock: () => 888888,
+      sink(event) {
+        events.push(event);
+      }
+    })
+  };
+}
+
+test('missing Hosted session stays quiet but presented invalid credential is recorded safely', () => {
+  {
+    const capture = routeSecurityEventCapture();
+    const sessions = lifecycle({ resolved: null });
+    const gate = new HostedRouteGate({
+      sessionLifecycle: sessions,
+      authorizationConfig: config(),
+      securityEventRecorder: capture.recorder
+    });
+
+    const result = gate.evaluate('hosted', undefined);
+
+    assert.equal(
+      result.outcome,
+      HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
+    );
+    assert.deepEqual(capture.events, []);
+  }
+
+  {
+    const credential =
+      'SESSION_COOKIE_SENTINEL_DO_NOT_LOG';
+    const capture = routeSecurityEventCapture();
+    const sessions = lifecycle({ resolved: null });
+    const gate = new HostedRouteGate({
+      sessionLifecycle: sessions,
+      authorizationConfig: config(),
+      securityEventRecorder: capture.recorder
+    });
+
+    const result = gate.evaluate(
+      'hosted',
+      credential
+    );
+
+    assert.equal(
+      result.outcome,
+      HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
+    );
+
+    assert.deepEqual(capture.events, [{
+      version: 1,
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.SESSION_REJECTED,
+      occurredAt: 888888,
+      reason:
+        HOSTED_SECURITY_EVENT_REASONS.SESSION_INVALID
+    }]);
+
+    assert.equal(
+      serializeHostedSecurityEvent(
+        capture.events[0]
+      ).includes(credential),
+      false
+    );
+  }
+});
+
+test('authorization denial emits one safe event without allow-list data', () => {
+  const allowListSecret = '123';
+  const capture = routeSecurityEventCapture();
+  const sessions = lifecycle({
+    resolved: {
+      session: session({ subject: '456' }),
+      rotationDue: false
+    }
+  });
+
+  const gate = new HostedRouteGate({
+    sessionLifecycle: sessions,
+    authorizationConfig: config(allowListSecret),
+    securityEventRecorder: capture.recorder
+  });
+
+  const result = gate.evaluate(
+    'hosted',
+    'SESSION_COOKIE_SENTINEL_DO_NOT_LOG'
+  );
+
+  assert.equal(
+    result.outcome,
+    HOSTED_ROUTE_GATE_OUTCOMES.FORBIDDEN
+  );
+
+  assert.deepEqual(capture.events, [{
+    version: 1,
+    type:
+      HOSTED_SECURITY_EVENT_TYPES.AUTHORIZATION_REJECTED,
+    occurredAt: 888888
+  }]);
+
+  const serialized =
+    serializeHostedSecurityEvent(capture.events[0]);
+
+  assert.equal(
+    serialized.includes(
+      'SESSION_COOKIE_SENTINEL_DO_NOT_LOG'
+    ),
+    false
+  );
+
+  assert.equal(serialized.includes('"123"'), false);
+  assert.equal(serialized.includes('"456"'), false);
+});
+
+test('post-resolution session integrity failure emits one session rejection', () => {
+  const capture = routeSecurityEventCapture();
+
+  const sessions = lifecycle({
+    touched: {
+      session: session({
+        csrfToken: fixedCsrfToken(10),
+        lastSeenAt: 150
+      }),
+      rotationDue: false
+    }
+  });
+
+  const gate = new HostedRouteGate({
+    sessionLifecycle: sessions,
+    authorizationConfig: config(),
+    securityEventRecorder: capture.recorder
+  });
+
+  const result = gate.evaluate(
+    'hosted',
+    'SESSION_COOKIE_SENTINEL_DO_NOT_LOG'
+  );
+
+  assert.equal(
+    result.outcome,
+    HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
+  );
+
+  assert.equal(capture.events.length, 1);
+  assert.equal(
+    capture.events[0].type,
+    HOSTED_SECURITY_EVENT_TYPES.SESSION_REJECTED
+  );
+});
+
+test('allowed Local visitor and valid Hosted requests emit no rejection telemetry', () => {
+  for (const [mode, sessionId] of [
+    ['local', undefined],
+    ['visitor', 'SESSION_COOKIE_SENTINEL_DO_NOT_LOG'],
+    ['hosted', 'SESSION_COOKIE_SENTINEL_DO_NOT_LOG']
+  ]) {
+    const capture = routeSecurityEventCapture();
+    const gate = new HostedRouteGate({
+      sessionLifecycle: lifecycle(),
+      authorizationConfig: config(),
+      securityEventRecorder: capture.recorder
+    });
+
+    gate.evaluate(mode, sessionId);
+
+    assert.deepEqual(capture.events, []);
+  }
+});
+
+test('route security recorder failure cannot weaken or replace denial semantics', () => {
+  const sessions = lifecycle({ resolved: null });
+
+  const gate = new HostedRouteGate({
+    sessionLifecycle: sessions,
+    authorizationConfig: config(),
+    securityEventRecorder: {
+      record() {
+        throw new Error(
+          'LOGGER_SECRET_SHOULD_NOT_ESCAPE'
+        );
+      }
+    }
+  });
+
+  assert.doesNotThrow(() => {
+    const result = gate.evaluate(
+      'hosted',
+      'SESSION_COOKIE_SENTINEL_DO_NOT_LOG'
+    );
+
+    assert.equal(
+      result.outcome,
+      HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
+    );
+  });
 });

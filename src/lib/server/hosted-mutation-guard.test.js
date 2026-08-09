@@ -12,6 +12,11 @@ import {
   HOSTED_ROUTE_GATE_OUTCOMES,
   HostedRouteGate
 } from './hosted-route-gate.js';
+import {
+  HOSTED_SECURITY_EVENT_TYPES,
+  HostedSecurityEventRecorder,
+  serializeHostedSecurityEvent
+} from './hosted-security-events.js';
 
 const CSRF_TOKEN =
   Buffer.alloc(32, 9).toString('base64url');
@@ -78,9 +83,15 @@ function genuineContext() {
   return result.context;
 }
 
-function guard() {
+/**
+ * @param {any} [securityEventRecorder]
+ */
+function guard(securityEventRecorder = undefined) {
   return new HostedMutationGuard({
-    environment: ENVIRONMENT
+    environment: ENVIRONMENT,
+    ...(securityEventRecorder === undefined
+      ? {}
+      : { securityEventRecorder })
   });
 }
 
@@ -427,4 +438,262 @@ test('supported-method check precedes synchronizer CSRF validation', () => {
     ).outcome,
     HOSTED_MUTATION_GUARD_OUTCOMES.FORBIDDEN
   );
+});
+
+
+function mutationSecurityEventCapture() {
+  /** @type {any[]} */
+  const events = [];
+
+  return {
+    events,
+    recorder: new HostedSecurityEventRecorder({
+      clock: () => 666666,
+      sink(event) {
+        events.push(event);
+      }
+    })
+  };
+}
+
+test('Host Origin and CSRF rejection telemetry follows ADR 0009 precedence exactly', () => {
+  {
+    const capture = mutationSecurityEventCapture();
+    const mutationGuard = guard(capture.recorder);
+
+    const result = mutationGuard.evaluate(
+      validRequest({
+        host: 'HOST_SENTINEL_DO_NOT_LOG',
+        origin: 'https://ORIGIN_SENTINEL_DO_NOT_LOG',
+        method: 'POST',
+        csrfToken: WRONG_CSRF_TOKEN
+      })
+    );
+
+    assert.equal(
+      result.outcome,
+      HOSTED_MUTATION_GUARD_OUTCOMES.FORBIDDEN
+    );
+
+    assert.deepEqual(capture.events, [{
+      version: 1,
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.HOST_REJECTED,
+      occurredAt: 666666
+    }]);
+  }
+
+  {
+    const capture = mutationSecurityEventCapture();
+    const mutationGuard = guard(capture.recorder);
+
+    const result = mutationGuard.evaluate(
+      validRequest({
+        origin: 'https://ORIGIN_SENTINEL_DO_NOT_LOG',
+        method: 'POST',
+        csrfToken: WRONG_CSRF_TOKEN
+      })
+    );
+
+    assert.equal(
+      result.outcome,
+      HOSTED_MUTATION_GUARD_OUTCOMES.FORBIDDEN
+    );
+
+    assert.deepEqual(capture.events, [{
+      version: 1,
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.ORIGIN_REJECTED,
+      occurredAt: 666666
+    }]);
+  }
+
+  {
+    const capture = mutationSecurityEventCapture();
+    const mutationGuard = guard(capture.recorder);
+
+    const result = mutationGuard.evaluate(
+      validRequest({
+        method: 'GET',
+        csrfToken: WRONG_CSRF_TOKEN
+      })
+    );
+
+    assert.equal(
+      result.outcome,
+      HOSTED_MUTATION_GUARD_OUTCOMES.METHOD_NOT_ALLOWED
+    );
+
+    assert.deepEqual(capture.events, []);
+  }
+
+  {
+    const capture = mutationSecurityEventCapture();
+    const mutationGuard = guard(capture.recorder);
+
+    const result = mutationGuard.evaluate(
+      validRequest({
+        method: 'POST',
+        csrfToken: WRONG_CSRF_TOKEN
+      })
+    );
+
+    assert.equal(
+      result.outcome,
+      HOSTED_MUTATION_GUARD_OUTCOMES.FORBIDDEN
+    );
+
+    assert.deepEqual(capture.events, [{
+      version: 1,
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.CSRF_REJECTED,
+      occurredAt: 666666
+    }]);
+  }
+});
+
+test('untrusted context and non-Hosted runtimes never produce downstream Host Origin or CSRF events', () => {
+  for (const request of [
+    validRequest({
+      runtimeMode: 'visitor',
+      host: 'HOST_SENTINEL_DO_NOT_LOG',
+      origin: 'https://ORIGIN_SENTINEL_DO_NOT_LOG',
+      csrfToken: WRONG_CSRF_TOKEN
+    }),
+    validRequest({
+      trustedContext: {},
+      host: 'HOST_SENTINEL_DO_NOT_LOG',
+      origin: 'https://ORIGIN_SENTINEL_DO_NOT_LOG',
+      csrfToken: WRONG_CSRF_TOKEN
+    })
+  ]) {
+    const capture = mutationSecurityEventCapture();
+    const mutationGuard = guard(capture.recorder);
+
+    mutationGuard.evaluate(request);
+
+    assert.deepEqual(capture.events, []);
+  }
+});
+
+test('mutation security events never contain presented or configured Host Origin or CSRF values', () => {
+  const cases = [
+    {
+      override: {
+        host: 'HOST_SENTINEL_DO_NOT_LOG'
+      },
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.HOST_REJECTED
+    },
+    {
+      override: {
+        origin:
+          'https://ORIGIN_SENTINEL_DO_NOT_LOG'
+      },
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.ORIGIN_REJECTED
+    },
+    {
+      override: {
+        csrfToken: WRONG_CSRF_TOKEN
+      },
+      type:
+        HOSTED_SECURITY_EVENT_TYPES.CSRF_REJECTED
+    }
+  ];
+
+  for (const { override, type } of cases) {
+    const capture = mutationSecurityEventCapture();
+    const mutationGuard = guard(capture.recorder);
+
+    mutationGuard.evaluate(
+      validRequest(override)
+    );
+
+    assert.equal(capture.events.length, 1);
+    assert.equal(capture.events[0].type, type);
+
+    const serialized =
+      serializeHostedSecurityEvent(capture.events[0]);
+
+    for (const forbidden of [
+      'HOST_SENTINEL_DO_NOT_LOG',
+      'ORIGIN_SENTINEL_DO_NOT_LOG',
+      'studio.example.com',
+      'https://studio.example.com',
+      CSRF_TOKEN,
+      WRONG_CSRF_TOKEN
+    ]) {
+      assert.equal(
+        serialized.includes(forbidden),
+        false,
+        `security event leaked: ${forbidden}`
+      );
+    }
+  }
+});
+
+test('valid Hosted mutation emits no rejection telemetry', () => {
+  const capture = mutationSecurityEventCapture();
+  const mutationGuard = guard(capture.recorder);
+
+  assert.deepEqual(
+    mutationGuard.evaluate(validRequest()),
+    {
+      outcome:
+        HOSTED_MUTATION_GUARD_OUTCOMES.ALLOWED
+    }
+  );
+
+  assert.deepEqual(capture.events, []);
+});
+
+test('mutation security recorder failure cannot change denial or method semantics', () => {
+  const mutationGuard = guard({
+    record() {
+      throw new Error(
+        'LOGGER_SECRET_SHOULD_NOT_ESCAPE'
+      );
+    }
+  });
+
+  assert.doesNotThrow(() => {
+    assert.equal(
+      mutationGuard.evaluate(
+        validRequest({
+          host: 'HOST_SENTINEL_DO_NOT_LOG'
+        })
+      ).outcome,
+      HOSTED_MUTATION_GUARD_OUTCOMES.FORBIDDEN
+    );
+
+    assert.equal(
+      mutationGuard.evaluate(
+        validRequest({
+          method: 'GET',
+          csrfToken: WRONG_CSRF_TOKEN
+        })
+      ).outcome,
+      HOSTED_MUTATION_GUARD_OUTCOMES.METHOD_NOT_ALLOWED
+    );
+  });
+});
+
+test('mutation guard rejects an invalid security-event recorder at construction', () => {
+  for (const securityEventRecorder of [
+    null,
+    {},
+    [],
+    {
+      record: 'not-callable'
+    }
+  ]) {
+    assert.throws(
+      () => new HostedMutationGuard({
+        environment: ENVIRONMENT,
+        securityEventRecorder
+      }),
+      HostedMutationGuardConfigurationError
+    );
+  }
 });

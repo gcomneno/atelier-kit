@@ -12,6 +12,10 @@ import {
 import {
   isCanonicalHostedCsrfToken
 } from './hosted-session.js';
+import {
+  HOSTED_SECURITY_EVENT_TYPES,
+  NOOP_HOSTED_SECURITY_EVENT_RECORDER
+} from './hosted-security-events.js';
 
 const SUPPORTED_MUTATION_METHODS =
   /** @type {ReadonlySet<string>} */ (
@@ -64,13 +68,42 @@ function outcome(outcome) {
   return Object.freeze({ outcome });
 }
 
+/**
+ * @param {unknown} recorder
+ */
+function assertSecurityEventRecorder(recorder) {
+  if (
+    recorder === null ||
+    typeof recorder !== 'object' ||
+    typeof /** @type {Record<string, unknown>} */ (recorder)
+      .record !== 'function'
+  ) {
+    throw new HostedMutationGuardConfigurationError(
+      'Hosted security event recorder does not implement the required boundary.'
+    );
+  }
+}
+
 export class HostedMutationGuard {
   #originConfig;
 
+  /** @type {{ record(type: unknown, reason?: unknown): unknown }} */
+  #securityEventRecorder;
+
   /**
-   * @param {{ environment?: unknown }} [options]
+   * @param {{
+   *   environment?: unknown,
+   *   securityEventRecorder?: unknown
+   * }} [options]
    */
   constructor(options = {}) {
+    const securityEventRecorder =
+      options.securityEventRecorder === undefined
+        ? NOOP_HOSTED_SECURITY_EVENT_RECORDER
+        : options.securityEventRecorder;
+
+    assertSecurityEventRecorder(securityEventRecorder);
+
     try {
       this.#originConfig =
         parseHostedOriginConfig(options.environment);
@@ -79,6 +112,33 @@ export class HostedMutationGuard {
         'Hosted mutation origin configuration is invalid.'
       );
     }
+
+    this.#securityEventRecorder =
+      /** @type {{ record(type: unknown, reason?: unknown): unknown }} */ (
+        securityEventRecorder
+      );
+  }
+
+  /**
+   * @param {string} type
+   */
+  #recordSecurityEvent(type) {
+    try {
+      this.#securityEventRecorder.record(type);
+    } catch {
+      // Operational logging cannot alter mutation authority.
+    }
+  }
+
+  /**
+   * @param {string} type
+   */
+  #forbidWithSecurityEvent(type) {
+    this.#recordSecurityEvent(type);
+
+    return outcome(
+      HOSTED_MUTATION_GUARD_OUTCOMES.FORBIDDEN
+    );
   }
 
   /**
@@ -115,14 +175,18 @@ export class HostedMutationGuard {
       typeof host !== 'string' ||
       host !== this.#originConfig.host
     ) {
-      return outcome(HOSTED_MUTATION_GUARD_OUTCOMES.FORBIDDEN);
+      return this.#forbidWithSecurityEvent(
+        HOSTED_SECURITY_EVENT_TYPES.HOST_REJECTED
+      );
     }
 
     if (
       typeof origin !== 'string' ||
       origin !== this.#originConfig.origin
     ) {
-      return outcome(HOSTED_MUTATION_GUARD_OUTCOMES.FORBIDDEN);
+      return this.#forbidWithSecurityEvent(
+        HOSTED_SECURITY_EVENT_TYPES.ORIGIN_REJECTED
+      );
     }
 
     if (
@@ -135,7 +199,9 @@ export class HostedMutationGuard {
     }
 
     if (!isCanonicalHostedCsrfToken(csrfToken)) {
-      return outcome(HOSTED_MUTATION_GUARD_OUTCOMES.FORBIDDEN);
+      return this.#forbidWithSecurityEvent(
+        HOSTED_SECURITY_EVENT_TYPES.CSRF_REJECTED
+      );
     }
 
     let expectedCsrfToken;
@@ -144,11 +210,15 @@ export class HostedMutationGuard {
       expectedCsrfToken =
         getTrustedHostedRequestCsrfToken(trustedContext);
     } catch {
-      return outcome(HOSTED_MUTATION_GUARD_OUTCOMES.FORBIDDEN);
+      return this.#forbidWithSecurityEvent(
+        HOSTED_SECURITY_EVENT_TYPES.CSRF_REJECTED
+      );
     }
 
     if (!csrfTokensEqual(expectedCsrfToken, csrfToken)) {
-      return outcome(HOSTED_MUTATION_GUARD_OUTCOMES.FORBIDDEN);
+      return this.#forbidWithSecurityEvent(
+        HOSTED_SECURITY_EVENT_TYPES.CSRF_REJECTED
+      );
     }
 
     return outcome(HOSTED_MUTATION_GUARD_OUTCOMES.ALLOWED);

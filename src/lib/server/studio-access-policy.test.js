@@ -18,6 +18,7 @@ function trustedContext() {
       subject: '123'
     },
     authorization: 'authorized',
+    csrfToken: Buffer.alloc(32, 9).toString('base64url'),
     createdAt: 100,
     rotatedAt: 100,
     lastSeenAt: 120,

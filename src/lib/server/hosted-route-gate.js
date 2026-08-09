@@ -9,6 +9,9 @@ import {
 import {
   STUDIO_RUNTIME_MODES
 } from '../studio-runtime.js';
+import {
+  isCanonicalHostedCsrfToken
+} from './hosted-session.js';
 
 /**
  * @typedef {{
@@ -19,6 +22,7 @@ import {
  */
 
 const TRUSTED_HOSTED_REQUEST_CONTEXTS = new WeakSet();
+const TRUSTED_HOSTED_REQUEST_CSRF_TOKENS = new WeakMap();
 
 export const HOSTED_ROUTE_GATE_OUTCOMES = Object.freeze({
   NOT_FOUND: 'not-found',
@@ -74,6 +78,30 @@ export function requireTrustedHostedRequestContext(value) {
 }
 
 /**
+ * Server-only capability accessor.
+ *
+ * The synchronizer token is associated privately with a genuinely trusted
+ * context and never becomes part of the context's enumerable public shape.
+ *
+ * @param {unknown} value
+ * @returns {string}
+ */
+export function getTrustedHostedRequestCsrfToken(value) {
+  const context = /** @type {object} */ (
+    requireTrustedHostedRequestContext(value)
+  );
+  const csrfToken = TRUSTED_HOSTED_REQUEST_CSRF_TOKENS.get(context);
+
+  if (!isCanonicalHostedCsrfToken(csrfToken)) {
+    throw new HostedRequestContextTrustError(
+      'Trusted Hosted request CSRF capability is unavailable.'
+    );
+  }
+
+  return csrfToken;
+}
+
+/**
  * Private issuance primitive.
  *
  * No exported API can mint a trusted context directly. Context issuance occurs
@@ -111,6 +139,14 @@ function issueTrustedHostedRequestContext(input) {
     /** @type {Record<string, unknown>} */ (record.identity);
   const session =
     /** @type {Record<string, unknown>} */ (record.session);
+
+  if (!isCanonicalHostedCsrfToken(record.csrfToken)) {
+    throw new HostedRequestContextTrustError(
+      'Hosted request context CSRF capability is invalid.'
+    );
+  }
+
+  const csrfToken = record.csrfToken;
 
   if (identity.provider !== HOSTED_IDENTITY_PROVIDERS.GITHUB) {
     throw new HostedRequestContextTrustError(
@@ -174,6 +210,7 @@ function issueTrustedHostedRequestContext(input) {
   });
 
   TRUSTED_HOSTED_REQUEST_CONTEXTS.add(context);
+  TRUSTED_HOSTED_REQUEST_CSRF_TOKENS.set(context, csrfToken);
 
   return context;
 }
@@ -232,7 +269,7 @@ function publicSessionMetadata(session) {
  * @param {any} second
  * @returns {boolean}
  */
-function hasSameStableIdentity(first, second) {
+function hasSameSessionAuthority(first, second) {
   return (
     first !== null &&
     typeof first === 'object' &&
@@ -243,7 +280,9 @@ function hasSameStableIdentity(first, second) {
     second.identity !== null &&
     typeof second.identity === 'object' &&
     first.identity.provider === second.identity.provider &&
-    first.identity.subject === second.identity.subject
+    first.identity.subject === second.identity.subject &&
+    isCanonicalHostedCsrfToken(first.csrfToken) &&
+    second.csrfToken === first.csrfToken
   );
 }
 
@@ -292,6 +331,10 @@ export class HostedRouteGate {
       return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE);
     }
 
+    if (!isCanonicalHostedCsrfToken(resolved.session.csrfToken)) {
+      return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE);
+    }
+
     if (
       !isHostedSessionIdentityAuthorized(
         resolved.session.identity,
@@ -305,7 +348,7 @@ export class HostedRouteGate {
 
     if (
       touched === null ||
-      !hasSameStableIdentity(resolved.session, touched.session)
+      !hasSameSessionAuthority(resolved.session, touched.session)
     ) {
       return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE);
     }
@@ -318,7 +361,7 @@ export class HostedRouteGate {
 
       if (
         rotated === null ||
-        !hasSameStableIdentity(resolved.session, rotated)
+        !hasSameSessionAuthority(resolved.session, rotated)
       ) {
         return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE);
       }
@@ -331,7 +374,8 @@ export class HostedRouteGate {
 
     const context = issueTrustedHostedRequestContext({
       identity: effectiveSession.identity,
-      session: publicSessionMetadata(effectiveSession)
+      session: publicSessionMetadata(effectiveSession),
+      csrfToken: effectiveSession.csrfToken
     });
 
     return Object.freeze({

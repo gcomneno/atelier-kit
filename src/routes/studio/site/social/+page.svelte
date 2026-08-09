@@ -13,6 +13,7 @@
   let { data, form } = $props();
 
   const socialForm = $derived(form?.socialForm ?? data.socialForm);
+  const hostedSocial = $derived(form?.hostedSocial ?? data.hostedSocial);
   let isDirty = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};
@@ -41,6 +42,19 @@
     use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
     use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
   >
+    {#if hostedSocial}
+      <input
+        type="hidden"
+        name="hosted_csrf_token"
+        value={hostedSocial.csrfToken}
+      />
+      <input
+        type="hidden"
+        name="authoring_revision"
+        value={hostedSocial.authoringRevision}
+      />
+    {/if}
+
     <StudioFormLegend />
 
     {#each SOCIAL_NETWORK_IDS as networkId}

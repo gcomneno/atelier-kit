@@ -885,6 +885,8 @@ export default {
     saveSiteError: 'Impossibile salvare le impostazioni sito.',
     saveLanguageError: 'Impossibile salvare la lingua.',
     saveContactError: 'Impossibile salvare i contatti.',
+    saveSocialSuccess: 'Link social salvati.',
+    saveSocialConflict: 'I link social sono cambiati da quando hai aperto questa pagina. Ricarica la pagina prima di salvare di nuovo.',
     saveSocialError: 'Impossibile salvare i link social.',
     saveFooterError: 'Impossibile salvare il footer.',
     saveLayoutError: 'Impossibile salvare il layout.',

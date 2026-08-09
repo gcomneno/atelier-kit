@@ -6,7 +6,7 @@ import {
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
 import {
   HOSTED_PRIVATE_POC_HTTP_OUTCOMES,
-  applyHostedPrivatePocStudioRootRequest
+  applyHostedPrivatePocStudioAuthorizedRequest
 } from '$lib/server/hosted-private-poc-http.js';
 import { getSiteConfig } from '$lib/server/showcase.js';
 import {
@@ -22,7 +22,7 @@ export async function handle({ event, resolve }) {
     );
 
   const hostedPrivatePoc =
-    applyHostedPrivatePocStudioRootRequest({
+    applyHostedPrivatePocStudioAuthorizedRequest({
       event,
       runtimeMode
     });

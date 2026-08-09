@@ -878,6 +878,8 @@ export default {
     saveSiteError: 'Could not save site settings.',
     saveLanguageError: 'Could not save language.',
     saveContactError: 'Could not save contact settings.',
+    saveSocialSuccess: 'Social links saved.',
+    saveSocialConflict: 'Social links changed since this page was loaded. Reload the page before saving again.',
     saveSocialError: 'Could not save social links.',
     saveFooterError: 'Could not save footer.',
     saveLayoutError: 'Could not save layout.',

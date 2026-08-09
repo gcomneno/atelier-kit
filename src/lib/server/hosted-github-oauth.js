@@ -9,6 +9,11 @@ import {
 import {
   HostedOAuthTransactionStoreConflictError
 } from './hosted-oauth-transaction-store.js';
+import {
+  HOSTED_SECURITY_EVENT_REASONS,
+  HOSTED_SECURITY_EVENT_TYPES,
+  NOOP_HOSTED_SECURITY_EVENT_RECORDER
+} from './hosted-security-events.js';
 
 const GITHUB_AUTHORIZE_URL =
   'https://github.com/login/oauth/authorize';
@@ -535,6 +540,22 @@ function assertTransport(transport) {
 }
 
 /**
+ * @param {unknown} recorder
+ */
+function assertSecurityEventRecorder(recorder) {
+  if (
+    recorder === null ||
+    typeof recorder !== 'object' ||
+    typeof /** @type {Record<string, unknown>} */ (recorder)
+      .record !== 'function'
+  ) {
+    throw new HostedGitHubOAuthConfigurationError(
+      'Hosted security event recorder does not implement the required boundary.'
+    );
+  }
+}
+
+/**
  * @param {unknown} lifetime
  */
 function normalizeTransactionLifetime(lifetime) {
@@ -620,6 +641,7 @@ export class HostedGitHubOAuthProvider {
   #clock;
   #secretGenerator;
   #transactionLifetimeMs;
+  #securityEventRecorder;
 
   /**
    * @param {{
@@ -639,7 +661,10 @@ export class HostedGitHubOAuthProvider {
    *   },
    *   clock?: () => number,
    *   secretGenerator?: () => string,
-   *   transactionLifetimeMs?: number
+   *   transactionLifetimeMs?: number,
+   *   securityEventRecorder?: {
+   *     record(type: unknown, reason?: unknown): boolean
+   *   }
    * }} options
    */
   constructor(options = {}) {
@@ -660,7 +685,9 @@ export class HostedGitHubOAuthProvider {
       clock = Date.now,
       secretGenerator = generateHostedOAuthSecret,
       transactionLifetimeMs =
-        DEFAULT_HOSTED_OAUTH_TRANSACTION_LIFETIME_MS
+        DEFAULT_HOSTED_OAUTH_TRANSACTION_LIFETIME_MS,
+      securityEventRecorder =
+        NOOP_HOSTED_SECURITY_EVENT_RECORDER
     } = options;
 
     const normalizedConfig =
@@ -674,6 +701,7 @@ export class HostedGitHubOAuthProvider {
       );
 
     assertTransport(transport);
+    assertSecurityEventRecorder(securityEventRecorder);
 
     if (typeof clock !== 'function') {
       throw new HostedGitHubOAuthConfigurationError(
@@ -695,6 +723,48 @@ export class HostedGitHubOAuthProvider {
     this.#secretGenerator = secretGenerator;
     this.#transactionLifetimeMs =
       normalizeTransactionLifetime(transactionLifetimeMs);
+    this.#securityEventRecorder = securityEventRecorder;
+  }
+
+  /**
+   * Operational telemetry is best-effort and never participates in the
+   * authentication decision.
+   *
+   * @param {string} type
+   * @param {string} [reason]
+   */
+  #recordSecurityEvent(type, reason = undefined) {
+    try {
+      this.#securityEventRecorder.record(type, reason);
+    } catch {
+      // A logging failure must not replace or weaken the security decision.
+    }
+  }
+
+  /**
+   * @param {string} reason
+   * @returns {never}
+   */
+  #rejectOAuthState(reason) {
+    this.#recordSecurityEvent(
+      HOSTED_SECURITY_EVENT_TYPES.OAUTH_STATE_REJECTED,
+      reason
+    );
+
+    throw new HostedGitHubOAuthAuthenticationError();
+  }
+
+  /**
+   * @param {string} reason
+   * @returns {never}
+   */
+  #rejectAuthentication(reason) {
+    this.#recordSecurityEvent(
+      HOSTED_SECURITY_EVENT_TYPES.AUTHENTICATION_FAILED,
+      reason
+    );
+
+    throw new HostedGitHubOAuthAuthenticationError();
   }
 
   #now() {
@@ -834,7 +904,9 @@ export class HostedGitHubOAuthProvider {
       typeof input !== 'object' ||
       Array.isArray(input)
     ) {
-      throw new HostedGitHubOAuthAuthenticationError();
+      this.#rejectAuthentication(
+        HOSTED_SECURITY_EVENT_REASONS.OAUTH_CALLBACK_REJECTED
+      );
     }
 
     const callback =
@@ -851,7 +923,9 @@ export class HostedGitHubOAuthProvider {
     } = callback;
 
     if (!isCanonicalHostedOAuthSecret(state)) {
-      throw new HostedGitHubOAuthAuthenticationError();
+      this.#rejectOAuthState(
+        HOSTED_SECURITY_EVENT_REASONS.OAUTH_STATE_MALFORMED
+      );
     }
 
     const canonicalState =
@@ -861,7 +935,10 @@ export class HostedGitHubOAuthProvider {
       this.#transactionStore.consume(canonicalState);
 
     if (transaction === null) {
-      throw new HostedGitHubOAuthAuthenticationError();
+      this.#rejectOAuthState(
+        HOSTED_SECURITY_EVENT_REASONS
+          .OAUTH_STATE_UNKNOWN_OR_REPLAYED
+      );
     }
 
     const now = this.#now();
@@ -876,21 +953,37 @@ export class HostedGitHubOAuthProvider {
       typeof transaction.returnTo !== 'string' ||
       !Number.isSafeInteger(transaction.createdAt) ||
       !Number.isSafeInteger(transaction.expiresAt) ||
-      now < transaction.createdAt ||
       transaction.expiresAt !==
         transaction.createdAt +
           this.#transactionLifetimeMs ||
-      now >= transaction.expiresAt
+      now < transaction.createdAt
     ) {
-      throw new HostedGitHubOAuthAuthenticationError();
+      this.#rejectAuthentication(
+        HOSTED_SECURITY_EVENT_REASONS.OAUTH_CALLBACK_REJECTED
+      );
+    }
+
+    if (now >= transaction.expiresAt) {
+      this.#rejectOAuthState(
+        HOSTED_SECURITY_EVENT_REASONS.OAUTH_STATE_EXPIRED
+      );
     }
 
     if (providerError !== undefined) {
-      throw new HostedGitHubOAuthAuthenticationError();
+      this.#rejectAuthentication(
+        HOSTED_SECURITY_EVENT_REASONS.OAUTH_CALLBACK_REJECTED
+      );
     }
 
-    const normalizedCode =
-      normalizeAuthorizationCode(code);
+    let normalizedCode;
+
+    try {
+      normalizedCode = normalizeAuthorizationCode(code);
+    } catch {
+      this.#rejectAuthentication(
+        HOSTED_SECURITY_EVENT_REASONS.OAUTH_CALLBACK_REJECTED
+      );
+    }
 
     let accessToken;
     let user;
@@ -908,18 +1001,48 @@ export class HostedGitHubOAuthProvider {
           accessToken
         );
     } catch (error) {
-      if (
-        error instanceof HostedGitHubOAuthProviderError ||
-        error instanceof HostedGitHubOAuthAuthenticationError
-      ) {
+      if (error instanceof HostedGitHubOAuthProviderError) {
+        this.#recordSecurityEvent(
+          HOSTED_SECURITY_EVENT_TYPES.AUTHENTICATION_FAILED,
+          HOSTED_SECURITY_EVENT_REASONS.OAUTH_PROVIDER_FAILED
+        );
         throw error;
       }
+
+      if (
+        error instanceof HostedGitHubOAuthAuthenticationError
+      ) {
+        this.#recordSecurityEvent(
+          HOSTED_SECURITY_EVENT_TYPES.AUTHENTICATION_FAILED,
+          HOSTED_SECURITY_EVENT_REASONS.OAUTH_CALLBACK_REJECTED
+        );
+        throw error;
+      }
+
+      this.#recordSecurityEvent(
+        HOSTED_SECURITY_EVENT_TYPES.AUTHENTICATION_FAILED,
+        HOSTED_SECURITY_EVENT_REASONS.OAUTH_PROVIDER_FAILED
+      );
 
       throw new HostedGitHubOAuthProviderError();
     }
 
-    const identity =
-      authenticatedIdentityFromGitHubUser(user);
+    let identity;
+
+    try {
+      identity = authenticatedIdentityFromGitHubUser(user);
+    } catch (error) {
+      if (
+        error instanceof HostedGitHubOAuthAuthenticationError
+      ) {
+        this.#recordSecurityEvent(
+          HOSTED_SECURITY_EVENT_TYPES.AUTHENTICATION_FAILED,
+          HOSTED_SECURITY_EVENT_REASONS.OAUTH_CALLBACK_REJECTED
+        );
+      }
+
+      throw error;
+    }
 
     return Object.freeze({
       identity,

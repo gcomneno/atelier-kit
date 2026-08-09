@@ -4,6 +4,7 @@ import {
   parseHostedAuthorizationConfig
 } from './hosted-authorization.js';
 import {
+  getTrustedHostedRequestCsrfToken,
   HostedRequestContextTrustError,
   isTrustedHostedRequestContext,
   requireTrustedHostedRequestContext
@@ -13,6 +14,9 @@ import {
   HostedRouteGate
 } from './hosted-route-gate.js';
 
+const CSRF_TOKEN =
+  Buffer.alloc(32, 9).toString('base64url');
+
 function genuineContext() {
   const session = {
     sessionId: 'A'.repeat(43),
@@ -21,6 +25,7 @@ function genuineContext() {
       subject: '123'
     },
     authorization: 'authorized',
+    csrfToken: CSRF_TOKEN,
     createdAt: 100,
     rotatedAt: 120,
     lastSeenAt: 140,
@@ -87,6 +92,16 @@ test('gate issues minimal immutable trusted Hosted request context', () => {
   assert.equal(Object.isFrozen(context.identity), true);
   assert.equal(Object.isFrozen(context.session), true);
   assert.equal('sessionId' in context.session, false);
+  assert.equal('csrfToken' in context, false);
+  assert.equal('csrfToken' in context.session, false);
+  assert.equal(
+    JSON.stringify(context).includes(CSRF_TOKEN),
+    false
+  );
+  assert.equal(
+    getTrustedHostedRequestCsrfToken(context),
+    CSRF_TOKEN
+  );
 });
 
 test('trusted context cannot be forged by shape or prototype', () => {
@@ -102,6 +117,16 @@ test('trusted context cannot be forged by shape or prototype', () => {
 
   assert.throws(
     () => requireTrustedHostedRequestContext(byShape),
+    HostedRequestContextTrustError
+  );
+
+  assert.throws(
+    () => getTrustedHostedRequestCsrfToken(byShape),
+    HostedRequestContextTrustError
+  );
+
+  assert.throws(
+    () => getTrustedHostedRequestCsrfToken(byPrototype),
     HostedRequestContextTrustError
   );
 });

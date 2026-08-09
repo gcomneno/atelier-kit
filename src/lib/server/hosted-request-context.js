@@ -1,4 +1,5 @@
 export {
+  getTrustedHostedRequestCsrfToken,
   HostedRequestContextTrustError,
   isTrustedHostedRequestContext,
   requireTrustedHostedRequestContext

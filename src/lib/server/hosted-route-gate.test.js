@@ -13,9 +13,14 @@ import {
   isHostedAuthenticationRouteEligible
 } from './hosted-route-gate.js';
 
+function fixedCsrfToken(byte = 9) {
+  return Buffer.alloc(32, byte).toString('base64url');
+}
+
 function session({
   subject = '123',
   sessionId = 'A'.repeat(43),
+  csrfToken = fixedCsrfToken(),
   createdAt = 100,
   rotatedAt = 100,
   lastSeenAt = 100,
@@ -28,6 +33,7 @@ function session({
       subject
     },
     authorization: 'authorized',
+    csrfToken,
     createdAt,
     rotatedAt,
     lastSeenAt,
@@ -191,6 +197,97 @@ test('allowed active session is touched and produces trusted minimal context', (
     ['resolve', 'opaque-session-credential'],
     ['touch', 'opaque-session-credential']
   ]);
+});
+
+test('malformed session CSRF authority fails closed before admitted activity', () => {
+  const sessions = lifecycle({
+    resolved: {
+      session: session({
+        csrfToken: 'malformed-csrf'
+      }),
+      rotationDue: false
+    }
+  });
+
+  const gate = new HostedRouteGate({
+    sessionLifecycle: sessions,
+    authorizationConfig: config()
+  });
+
+  const result = gate.evaluate(
+    'hosted',
+    'opaque-session-credential'
+  );
+
+  assert.equal(
+    result.outcome,
+    HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
+  );
+  assert.equal(result.context, null);
+  assert.deepEqual(sessions.calls, [
+    ['resolve', 'opaque-session-credential']
+  ]);
+});
+
+test('touch cannot substitute CSRF authority after authorization', () => {
+  const sessions = lifecycle({
+    touched: {
+      session: session({
+        csrfToken: fixedCsrfToken(10),
+        lastSeenAt: 150
+      }),
+      rotationDue: false
+    }
+  });
+
+  const gate = new HostedRouteGate({
+    sessionLifecycle: sessions,
+    authorizationConfig: config()
+  });
+
+  const result = gate.evaluate(
+    'hosted',
+    'opaque-session-credential'
+  );
+
+  assert.equal(
+    result.outcome,
+    HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
+  );
+  assert.equal(result.context, null);
+});
+
+test('rotation cannot substitute CSRF authority after authorization', () => {
+  const sessions = lifecycle({
+    touched: {
+      session: session({
+        lastSeenAt: 150
+      }),
+      rotationDue: true
+    },
+    rotated: session({
+      sessionId: 'B'.repeat(43),
+      csrfToken: fixedCsrfToken(10),
+      rotatedAt: 150,
+      lastSeenAt: 150
+    })
+  });
+
+  const gate = new HostedRouteGate({
+    sessionLifecycle: sessions,
+    authorizationConfig: config()
+  });
+
+  const result = gate.evaluate(
+    'hosted',
+    'opaque-session-credential'
+  );
+
+  assert.equal(
+    result.outcome,
+    HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
+  );
+  assert.equal(result.context, null);
 });
 
 test('touch cannot substitute a different identity after authorization', () => {

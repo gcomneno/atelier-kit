@@ -13,6 +13,11 @@ import {
 const SESSION_ID_BYTES = 32;
 const SESSION_ID_LENGTH = 43;
 const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{43}$/;
+
+const CSRF_TOKEN_BYTES = 32;
+const CSRF_TOKEN_LENGTH = 43;
+const CSRF_TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
+
 const MAX_ID_ALLOCATION_ATTEMPTS = 4;
 
 export const DEFAULT_HOSTED_SESSION_POLICY = Object.freeze({
@@ -60,6 +65,16 @@ export function generateHostedSessionId() {
 }
 
 /**
+ * Generate a synchronizer CSRF token independently from the session lookup
+ * credential.
+ *
+ * @returns {string}
+ */
+export function generateHostedCsrfToken() {
+  return randomBytes(CSRF_TOKEN_BYTES).toString('base64url');
+}
+
+/**
  * @param {unknown} value
  * @returns {value is string}
  */
@@ -77,6 +92,31 @@ export function isCanonicalHostedSessionId(value) {
 
     return (
       decoded.length === SESSION_ID_BYTES &&
+      decoded.toString('base64url') === value
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is string}
+ */
+export function isCanonicalHostedCsrfToken(value) {
+  if (
+    typeof value !== 'string' ||
+    value.length !== CSRF_TOKEN_LENGTH ||
+    !CSRF_TOKEN_PATTERN.test(value)
+  ) {
+    return false;
+  }
+
+  try {
+    const decoded = Buffer.from(value, 'base64url');
+
+    return (
+      decoded.length === CSRF_TOKEN_BYTES &&
       decoded.toString('base64url') === value
     );
   } catch {
@@ -185,6 +225,7 @@ function assertSessionStore(store) {
  *   sessionId: string,
  *   identity: { provider: string, subject: string },
  *   authorization: string,
+ *   csrfToken: string,
  *   createdAt: number,
  *   rotatedAt: number,
  *   expiresAt: number,
@@ -199,6 +240,7 @@ function snapshotSession(record) {
       subject: record.identity.subject
     }),
     authorization: record.authorization,
+    csrfToken: record.csrfToken,
     createdAt: record.createdAt,
     rotatedAt: record.rotatedAt,
     expiresAt: record.expiresAt,
@@ -221,6 +263,7 @@ export class HostedSessionLifecycle {
   #store;
   #clock;
   #sessionIdGenerator;
+  #csrfTokenGenerator;
   #policy;
 
   /**
@@ -234,6 +277,7 @@ export class HostedSessionLifecycle {
    *   },
    *   clock?: () => number,
    *   sessionIdGenerator?: () => string,
+   *   csrfTokenGenerator?: () => string,
    *   policy?: unknown
    * }} options
    */
@@ -241,6 +285,7 @@ export class HostedSessionLifecycle {
     store,
     clock = Date.now,
     sessionIdGenerator = generateHostedSessionId,
+    csrfTokenGenerator = generateHostedCsrfToken,
     policy = {}
   }) {
     assertSessionStore(store);
@@ -257,9 +302,16 @@ export class HostedSessionLifecycle {
       );
     }
 
+    if (typeof csrfTokenGenerator !== 'function') {
+      throw new HostedSessionConfigurationError(
+        'Hosted CSRF token generator must be callable.'
+      );
+    }
+
     this.#store = store;
     this.#clock = clock;
     this.#sessionIdGenerator = sessionIdGenerator;
+    this.#csrfTokenGenerator = csrfTokenGenerator;
     this.#policy = normalizeHostedSessionPolicy(policy);
   }
 
@@ -302,6 +354,26 @@ export class HostedSessionLifecycle {
     return candidate;
   }
 
+  #nextCsrfToken() {
+    let candidate;
+
+    try {
+      candidate = this.#csrfTokenGenerator();
+    } catch {
+      throw new HostedSessionLifecycleError(
+        'Hosted CSRF token generation failed.'
+      );
+    }
+
+    if (!isCanonicalHostedCsrfToken(candidate)) {
+      throw new HostedSessionLifecycleError(
+        'Hosted CSRF token generation failed.'
+      );
+    }
+
+    return candidate;
+  }
+
   /**
    * @param {any} record
    * @param {string} expectedSessionId
@@ -313,6 +385,8 @@ export class HostedSessionLifecycle {
       record.sessionId !== expectedSessionId ||
       !isCanonicalHostedSessionId(record.sessionId) ||
       record.authorization !== 'authorized' ||
+      !isCanonicalHostedCsrfToken(record.csrfToken) ||
+      record.csrfToken === record.sessionId ||
       record.identity === null ||
       typeof record.identity !== 'object' ||
       record.identity.provider !== HOSTED_IDENTITY_PROVIDERS.GITHUB
@@ -410,12 +484,15 @@ export class HostedSessionLifecycle {
       );
     }
 
+    const csrfToken = this.#nextCsrfToken();
+
     const baseRecord = {
       identity: {
         provider: authorizedIdentity.identity.provider,
         subject: authorizedIdentity.identity.subject
       },
       authorization: 'authorized',
+      csrfToken,
       createdAt: now,
       rotatedAt: now,
       expiresAt,
@@ -428,6 +505,10 @@ export class HostedSessionLifecycle {
       attempt += 1
     ) {
       const sessionId = this.#nextSessionId();
+
+      if (sessionId === csrfToken) {
+        continue;
+      }
 
       try {
         const created = this.#store.create({

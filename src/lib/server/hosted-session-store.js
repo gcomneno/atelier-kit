@@ -50,6 +50,46 @@ function snapshotSessionRecord(record) {
   });
 }
 
+/** @param {any} left @param {any} right */
+function sameSessionRecord(left, right) {
+  return left.sessionId === right.sessionId &&
+    left.identity.provider === right.identity.provider &&
+    left.identity.subject === right.identity.subject &&
+    left.authorization === right.authorization &&
+    left.csrfToken === right.csrfToken &&
+    left.createdAt === right.createdAt &&
+    left.rotatedAt === right.rotatedAt &&
+    left.expiresAt === right.expiresAt &&
+    left.lastSeenAt === right.lastSeenAt;
+}
+
+/** @param {any} expected @param {any} next @param {boolean} rotation */
+function assertTransition(expected, next, rotation) {
+  if ((expected.sessionId === next.sessionId) !== !rotation) {
+    throw new HostedSessionStoreInvariantError(
+      rotation
+        ? 'Hosted session rotation requires a new lookup credential.'
+        : 'Hosted session update cannot change its lookup credential.'
+    );
+  }
+
+  if (
+    expected.identity.provider !== next.identity.provider ||
+    expected.identity.subject !== next.identity.subject ||
+    expected.authorization !== next.authorization ||
+    expected.csrfToken !== next.csrfToken ||
+    expected.createdAt !== next.createdAt ||
+    expected.expiresAt !== next.expiresAt ||
+    next.rotatedAt < expected.rotatedAt ||
+    next.lastSeenAt < expected.lastSeenAt ||
+    next.lastSeenAt < next.rotatedAt
+  ) {
+    throw new HostedSessionStoreInvariantError(
+      'Hosted session transition violates lifecycle invariants.'
+    );
+  }
+}
+
 /**
  * In-memory implementation of the Hosted session-store boundary.
  *
@@ -61,9 +101,9 @@ export class InMemoryHostedSessionStore {
 
   /**
    * @param {string} sessionId
-   * @returns {ReturnType<typeof snapshotSessionRecord> | null}
+   * @returns {Promise<ReturnType<typeof snapshotSessionRecord> | null>}
    */
-  read(sessionId) {
+  async read(sessionId) {
     const record = this.#records.get(sessionId);
 
     return record
@@ -73,9 +113,9 @@ export class InMemoryHostedSessionStore {
 
   /**
    * @param {Parameters<typeof snapshotSessionRecord>[0]} record
-   * @returns {ReturnType<typeof snapshotSessionRecord>}
+   * @returns {Promise<ReturnType<typeof snapshotSessionRecord>>}
    */
-  create(record) {
+  async create(record) {
     const snapshot = snapshotSessionRecord(record);
 
     if (this.#records.has(snapshot.sessionId)) {
@@ -91,21 +131,21 @@ export class InMemoryHostedSessionStore {
    * Update one existing session without changing its lookup credential.
    *
    * @param {string} sessionId
+   * @param {Parameters<typeof snapshotSessionRecord>[0]} expectedRecord
    * @param {Parameters<typeof snapshotSessionRecord>[0]} record
-   * @returns {ReturnType<typeof snapshotSessionRecord> | null}
+   * @returns {Promise<ReturnType<typeof snapshotSessionRecord> | null>}
    */
-  update(sessionId, record) {
-    if (!this.#records.has(sessionId)) {
+  async update(sessionId, expectedRecord, record) {
+    const current = this.#records.get(sessionId);
+    if (!current) {
       return null;
     }
 
+    const expected = snapshotSessionRecord(expectedRecord);
     const snapshot = snapshotSessionRecord(record);
 
-    if (snapshot.sessionId !== sessionId) {
-      throw new HostedSessionStoreInvariantError(
-        'Hosted session update cannot change its lookup credential.'
-      );
-    }
+    assertTransition(expected, snapshot, false);
+    if (!sameSessionRecord(current, expected)) return null;
 
     this.#records.set(sessionId, snapshot);
 
@@ -120,21 +160,21 @@ export class InMemoryHostedSessionStore {
    * all-or-nothing semantic.
    *
    * @param {string} oldSessionId
+   * @param {Parameters<typeof snapshotSessionRecord>[0]} expectedRecord
    * @param {Parameters<typeof snapshotSessionRecord>[0]} newRecord
-   * @returns {ReturnType<typeof snapshotSessionRecord> | null}
+   * @returns {Promise<ReturnType<typeof snapshotSessionRecord> | null>}
    */
-  replace(oldSessionId, newRecord) {
-    if (!this.#records.has(oldSessionId)) {
+  async replace(oldSessionId, expectedRecord, newRecord) {
+    const current = this.#records.get(oldSessionId);
+    if (!current) {
       return null;
     }
 
+    const expected = snapshotSessionRecord(expectedRecord);
     const snapshot = snapshotSessionRecord(newRecord);
 
-    if (snapshot.sessionId === oldSessionId) {
-      throw new HostedSessionStoreInvariantError(
-        'Hosted session rotation requires a new lookup credential.'
-      );
-    }
+    assertTransition(expected, snapshot, true);
+    if (!sameSessionRecord(current, expected)) return null;
 
     if (this.#records.has(snapshot.sessionId)) {
       throw new HostedSessionStoreConflictError();
@@ -150,9 +190,9 @@ export class InMemoryHostedSessionStore {
    * Idempotent invalidation primitive.
    *
    * @param {string} sessionId
-   * @returns {boolean}
+   * @returns {Promise<boolean>}
    */
-  delete(sessionId) {
+  async delete(sessionId) {
     return this.#records.delete(sessionId);
   }
 }

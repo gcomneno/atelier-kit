@@ -75,7 +75,7 @@ function formData(values = {}) {
   };
 }
 
-function genuineContext() {
+async function createGenuineContext() {
   const csrfToken =
     Buffer.alloc(32, 7).toString('base64url');
 
@@ -125,7 +125,7 @@ function genuineContext() {
     });
 
   const result =
-    gate.evaluate(
+    await gate.evaluate(
       'hosted',
       currentSession.sessionId
     );
@@ -134,6 +134,12 @@ function genuineContext() {
   assert.ok(result.context);
 
   return result.context;
+}
+
+const GENUINE_CONTEXT = await createGenuineContext();
+
+function genuineContext() {
+  return GENUINE_CONTEXT;
 }
 
 portableTest('Hosted Social read requires genuine Hosted trusted context', async () => {

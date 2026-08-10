@@ -291,11 +291,11 @@ export class HostedSessionLifecycle {
   /**
    * @param {{
    *   store: {
-   *     read(sessionId: string): any,
-   *     create(record: any): any,
-   *     update(sessionId: string, record: any): any,
-   *     replace(oldSessionId: string, record: any): any,
-   *     delete(sessionId: string): boolean
+   *     read(sessionId: string): Promise<any>,
+   *     create(record: any): Promise<any>,
+   *     update(sessionId: string, expectedRecord: any, record: any): Promise<any>,
+   *     replace(oldSessionId: string, expectedRecord: any, record: any): Promise<any>,
+   *     delete(sessionId: string): Promise<boolean>
    *   },
    *   clock?: () => number,
    *   sessionIdGenerator?: () => string,
@@ -473,19 +473,19 @@ export class HostedSessionLifecycle {
    * @param {string} sessionId
    * @param {number} now
    */
-  #activeRecord(sessionId, now) {
+  async #activeRecord(sessionId, now) {
     if (!isCanonicalHostedSessionId(sessionId)) {
       return null;
     }
 
-    const record = this.#store.read(sessionId);
+    const record = await this.#store.read(sessionId);
 
     if (record === null) {
       return null;
     }
 
     if (!this.#isStoredRecordValid(record, sessionId)) {
-      this.#store.delete(sessionId);
+      await this.#store.delete(sessionId);
       return null;
     }
 
@@ -496,7 +496,7 @@ export class HostedSessionLifecycle {
       now >= record.expiresAt ||
       now - record.lastSeenAt >= this.#policy.idleTimeoutMs
     ) {
-      this.#store.delete(sessionId);
+      await this.#store.delete(sessionId);
       return null;
     }
 
@@ -509,7 +509,7 @@ export class HostedSessionLifecycle {
    *
    * @param {unknown} authorizedIdentity
    */
-  create(authorizedIdentity) {
+  async create(authorizedIdentity) {
     if (!isAuthorizedHostedIdentity(authorizedIdentity)) {
       throw new HostedSessionLifecycleError(
         'Hosted session creation requires trusted authorization context.'
@@ -552,7 +552,7 @@ export class HostedSessionLifecycle {
       }
 
       try {
-        const created = this.#store.create({
+        const created = await this.#store.create({
           sessionId,
           ...baseRecord
         });
@@ -577,13 +577,13 @@ export class HostedSessionLifecycle {
    *
    * @param {unknown} sessionId
    */
-  resolve(sessionId) {
+  async resolve(sessionId) {
     if (!isCanonicalHostedSessionId(sessionId)) {
       return null;
     }
 
     const now = this.#now();
-    const record = this.#activeRecord(sessionId, now);
+    const record = await this.#activeRecord(sessionId, now);
 
     if (record === null) {
       return null;
@@ -600,19 +600,19 @@ export class HostedSessionLifecycle {
    *
    * @param {unknown} sessionId
    */
-  touch(sessionId) {
+  async touch(sessionId) {
     if (!isCanonicalHostedSessionId(sessionId)) {
       return null;
     }
 
     const now = this.#now();
-    const record = this.#activeRecord(sessionId, now);
+    const record = await this.#activeRecord(sessionId, now);
 
     if (record === null) {
       return null;
     }
 
-    const touched = this.#store.update(sessionId, {
+    const touched = await this.#store.update(sessionId, record, {
       ...record,
       lastSeenAt: Math.max(record.lastSeenAt, now)
     });
@@ -635,13 +635,13 @@ export class HostedSessionLifecycle {
    *
    * @param {unknown} sessionId
    */
-  rotate(sessionId) {
+  async rotate(sessionId) {
     if (!isCanonicalHostedSessionId(sessionId)) {
       return null;
     }
 
     const now = this.#now();
-    const record = this.#activeRecord(sessionId, now);
+    const record = await this.#activeRecord(sessionId, now);
 
     if (record === null) {
       return null;
@@ -659,7 +659,7 @@ export class HostedSessionLifecycle {
       }
 
       try {
-        const replacement = this.#store.replace(sessionId, {
+        const replacement = await this.#store.replace(sessionId, record, {
           ...record,
           sessionId: replacementId,
           rotatedAt: Math.max(record.rotatedAt, now),
@@ -690,12 +690,12 @@ export class HostedSessionLifecycle {
    *
    * @param {unknown} sessionId
    */
-  invalidate(sessionId) {
+  async invalidate(sessionId) {
     if (!isCanonicalHostedSessionId(sessionId)) {
       return false;
     }
 
-    const invalidated = this.#store.delete(sessionId);
+    const invalidated = await this.#store.delete(sessionId);
 
     if (invalidated) {
       this.#recordSecurityEvent(

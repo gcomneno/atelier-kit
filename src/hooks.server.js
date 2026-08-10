@@ -22,7 +22,7 @@ export async function handle({ event, resolve }) {
     );
 
   const hostedPrivatePoc =
-    applyHostedPrivatePocStudioAuthorizedRequest({
+    await applyHostedPrivatePocStudioAuthorizedRequest({
       event,
       runtimeMode
     });

@@ -38,7 +38,7 @@ function result(outcome, location = null) {
  *   runtimeResolver?: typeof getHostedPrivatePocRuntime
  * }} input
  */
-export function beginHostedPrivatePocLogin({
+export async function beginHostedPrivatePocLogin({
   runtimeMode,
   returnTo = undefined,
   runtimeResolver = getHostedPrivatePocRuntime
@@ -67,7 +67,7 @@ export function beginHostedPrivatePocLogin({
 
   try {
     const begun =
-      runtime.beginAuthentication(returnTo);
+      await runtime.beginAuthentication(returnTo);
 
     return result(
       HOSTED_PRIVATE_POC_AUTH_HTTP_OUTCOMES.REDIRECT,
@@ -166,7 +166,7 @@ export async function completeHostedPrivatePocCallback({
      * browser transport could not be established.
      */
     try {
-      runtime.invalidateSession(
+      await runtime.invalidateSession(
         completed.sessionId
       );
     } catch {

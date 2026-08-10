@@ -13,8 +13,8 @@
 <div class="studio-shell">
   <aside class="studio-sidebar">
     <p class="eyebrow">{t('studio.layout.eyebrow')}</p>
-    <h1>{t('studio.layout.title')}</h1>
-    <StudioNav />
+    <h1>{t(data.hostedAuthoring ? 'studio.layout.hostedTitle' : 'studio.layout.title')}</h1>
+    <StudioNav hostedAuthoring={data.hostedAuthoring} />
   </aside>
 
   <main class="studio-content">

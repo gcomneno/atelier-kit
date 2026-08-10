@@ -28,6 +28,7 @@ const PRESERVE_MANIFEST = '.atelier-kit-preserve';
 const UI_COMPONENTS_PACKAGE = 'giadaware-ui-components';
 const UI_COMPONENTS_DEPENDENCY =
   'file:vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz';
+const HOSTED_UPSTASH_REDIS_PACKAGE = '@upstash/redis';
 const UI_COMPONENTS_ARTIFACT =
   'vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz';
 const UI_COMPONENTS_ARTIFACT_SHA256 =
@@ -707,6 +708,27 @@ export function buildUiComponentsDependencyPlan(kitRoot, clientRoot) {
 }
 
 /**
+ * Hosted server files are managed by site upgrades, so their runtime imports
+ * must be present in every upgraded client package as well.
+ *
+ * @param {string} kitRoot
+ * @param {string} clientRoot
+ * @returns {{ package: string, changed: boolean, from?: string, to: string }}
+ */
+export function buildHostedUpstashRedisDependencyPlan(kitRoot, clientRoot) {
+  const kitPkg = JSON.parse(fs.readFileSync(path.join(kitRoot, 'package.json'), 'utf8'));
+  const clientPkg = JSON.parse(fs.readFileSync(path.join(clientRoot, 'package.json'), 'utf8'));
+  const required = kitPkg.dependencies?.[HOSTED_UPSTASH_REDIS_PACKAGE];
+
+  if (typeof required !== 'string' || required === '') {
+    throw new Error(`Atelier-Kit must declare ${HOSTED_UPSTASH_REDIS_PACKAGE} as a runtime dependency`);
+  }
+
+  const current = clientPkg.dependencies?.[HOSTED_UPSTASH_REDIS_PACKAGE];
+  return { package: HOSTED_UPSTASH_REDIS_PACKAGE, changed: current !== required, from: current, to: required };
+}
+
+/**
  * Complete the issue #232 integration preflight before any target mutation.
  * Preserved identity files are usable only when they are already exact.
  *
@@ -714,7 +736,7 @@ export function buildUiComponentsDependencyPlan(kitRoot, clientRoot) {
  * @param {string} clientRoot
  * @param {Set<string>} preservePaths
  * @param {{ readPreservedFile?: (filePath: string) => Buffer }} [validation]
- * @returns {{ dependency: { changed: boolean, from?: string, to: string }, artifactChanged: boolean, identityChanged: boolean, packageJsonPreserved: boolean }}
+ * @returns {{ dependency: { changed: boolean, from?: string, to: string }, hostedDependency: { package: string, changed: boolean, from?: string, to: string }, dependencies: { package: string, changed: boolean, from?: string, to: string }[], artifactChanged: boolean, identityChanged: boolean, packageJsonPreserved: boolean }}
  */
 export function buildUiComponentsIntegrationPlan(
   kitRoot,
@@ -788,8 +810,10 @@ export function buildUiComponentsIntegrationPlan(
     !fs.existsSync(clientIdentity) || hashFile(clientIdentity) !== hashFile(kitIdentity);
   const packageJsonPreserved = preservePaths.has('package.json');
   let dependency;
+  let hostedDependency;
   try {
     dependency = buildUiComponentsDependencyPlan(kitRoot, clientRoot);
+    hostedDependency = buildHostedUpstashRedisDependencyPlan(kitRoot, clientRoot);
   } catch (error) {
     if (packageJsonPreserved) {
       throw new Error(
@@ -811,7 +835,23 @@ export function buildUiComponentsIntegrationPlan(
     );
   }
 
-  return { dependency, artifactChanged, identityChanged, packageJsonPreserved };
+  if (packageJsonPreserved && hostedDependency.changed) {
+    const actual = hostedDependency.from === undefined ? '(missing)' : JSON.stringify(hostedDependency.from);
+    throw new Error(
+      `${PRESERVE_MANIFEST} preserves package.json, but dependencies.${HOSTED_UPSTASH_REDIS_PACKAGE} is ${actual}. ` +
+        `Expected ${JSON.stringify(hostedDependency.to)}. Remove the package.json preserve rule to allow migration, ` +
+        `or set the dependency to the expected value before upgrading.`
+    );
+  }
+
+  return {
+    dependency,
+    hostedDependency,
+    dependencies: [{ package: UI_COMPONENTS_PACKAGE, ...dependency }, hostedDependency],
+    artifactChanged,
+    identityChanged,
+    packageJsonPreserved
+  };
 }
 
 let atomicWriteCounter = 0;
@@ -864,7 +904,7 @@ function atomicWriteClientFile(clientRoot, relativePath, contents) {
  * Apply only the giadaware-ui-components issue-232 transaction. The optional
  * hooks exist solely for deterministic failure-injection tests.
  *
- * @param {{ dependency: { changed: boolean }, artifactChanged: boolean, identityChanged: boolean }} plan
+ * @param {{ dependency: { package?: string, changed: boolean, to?: string }, dependencies?: { package: string, changed: boolean, to: string }[], artifactChanged: boolean, identityChanged: boolean }} plan
  * @param {string} kitRoot
  * @param {string} clientRoot
  * @param {{ key: string, to: string, preserve?: boolean }[]} scriptPlan
@@ -893,6 +933,8 @@ export function applyUiComponentsIntegrationPlan(
   ])].map((directory) => ({ directory, existed: fs.existsSync(directory) }));
   /** @type {string[]} */
   const temporaryFiles = [];
+  const dependencies = plan.dependencies || [plan.dependency];
+  const dependencyChanged = dependencies.some((dependency) => dependency.changed);
 
   /** @param {string} target @param {{ bytes: Buffer, mode: number } | null} previous */
   const restore = (target, previous) => {
@@ -934,13 +976,15 @@ export function applyUiComponentsIntegrationPlan(
       fs.renameSync(temporary, identityTarget);
     }
 
-    if (plan.dependency.changed || scriptPlan.length > 0) {
+    if (dependencyChanged || scriptPlan.length > 0) {
       if (!fs.existsSync(artifactTarget) || hashFile(artifactTarget) !== UI_COMPONENTS_ARTIFACT_SHA256) {
         throw new Error(`Issue #169 refuses to migrate package.json without the verified artifact.`);
       }
       const packageJson = JSON.parse(fs.readFileSync(packageTarget, 'utf8'));
       packageJson.dependencies = packageJson.dependencies || {};
-      packageJson.dependencies[UI_COMPONENTS_PACKAGE] = UI_COMPONENTS_DEPENDENCY;
+      for (const dependency of dependencies) {
+        if (dependency.changed) packageJson.dependencies[dependency.package || UI_COMPONENTS_PACKAGE] = dependency.to;
+      }
       packageJson.scripts = packageJson.scripts || {};
       for (const { key, to, preserve } of scriptPlan) if (!preserve) packageJson.scripts[key] = to;
       const contents = `${JSON.stringify(packageJson, null, 2)}\n`;
@@ -951,7 +995,7 @@ export function applyUiComponentsIntegrationPlan(
       fs.renameSync(temporary, packageTarget);
     }
 
-    return { dependencyChanged: plan.dependency.changed, artifactChanged: plan.artifactChanged };
+    return { dependencyChanged, artifactChanged: plan.artifactChanged };
   } catch (error) {
     for (const temporary of temporaryFiles) fs.rmSync(temporary, { force: true });
     if (plan.identityChanged) restore(identityTarget, previousIdentity);
@@ -966,7 +1010,7 @@ export function applyUiComponentsIntegrationPlan(
 /**
  * @param {{ add: string[], update: string[], remove: string[], preserve: string[], manualReview: string[] }} filePlan
  * @param {{ key: string, from?: string, to: string, preserve?: boolean }[]} scriptPlan
- * @param {{ changed: boolean, from?: string, to: string, artifactChanged: boolean, identityChanged: boolean }} dependencyPlan
+ * @param {{ changed: boolean, from?: string, to: string, package?: string, dependencies?: { package: string, changed: boolean, from?: string, to: string }[], artifactChanged: boolean, identityChanged: boolean }} dependencyPlan
  * @param {{ changed: boolean, kitPath: string, previousVersion: string | null, previousTrackedVersion: string | null }} metadataPlan
  * @param {string} kitRoot
  * @param {string} clientRoot
@@ -984,6 +1028,7 @@ export function printPlan(
   kitVersion,
   coreManagedPreserveEntries
 ) {
+  const managedDependencies = dependencyPlan.dependencies || [dependencyPlan];
   console.log('Atelier-Kit site upgrade');
   console.log(`Kit:    ${kitRoot}${kitVersion ? ` (${kitVersion})` : ''}`);
   console.log(`Client: ${clientRoot}`);
@@ -1007,7 +1052,7 @@ export function printPlan(
 
   const total =
     filePlan.add.length + filePlan.update.length + filePlan.remove.length + scriptPlan.filter((entry) => !entry.preserve).length +
-    (dependencyPlan.changed ? 1 : 0) +
+    managedDependencies.filter((dependency) => dependency.changed).length +
     (dependencyPlan.artifactChanged ? 1 : 0) +
     (dependencyPlan.identityChanged ? 1 : 0) +
     (metadataPlan.changed ? 1 : 0);
@@ -1089,11 +1134,14 @@ export function printPlan(
     }
   }
 
-  if (dependencyPlan.changed) {
-    console.log('package.json dependency (1):');
-    console.log(`  ~ dependencies.${UI_COMPONENTS_PACKAGE}`);
-    if (dependencyPlan.from) console.log(`      was: ${dependencyPlan.from}`);
-    console.log(`      now: ${dependencyPlan.to}`);
+  const changedDependencies = managedDependencies.filter((dependency) => dependency.changed);
+  if (changedDependencies.length > 0) {
+    console.log(`package.json ${changedDependencies.length === 1 ? 'dependency' : 'dependencies'} (${changedDependencies.length}):`);
+    for (const dependency of changedDependencies) {
+      console.log(`  ~ dependencies.${dependency.package || UI_COMPONENTS_PACKAGE}`);
+      if (dependency.from) console.log(`      was: ${dependency.from}`);
+      console.log(`      now: ${dependency.to}`);
+    }
   }
 
   if (dependencyPlan.artifactChanged) {
@@ -1192,7 +1240,7 @@ export function writeManifest(clientRoot, kitRoot, kitVersion, deriveFinalProven
  * pointers and provenance. Hooks are deterministic test-only failure points.
  */
 /**
- * @param {{ integrationPlan: any, filePlan: { add: string[], update: string[], remove: string[] }, scriptPlan: { key: string, to: string, preserve?: boolean }[], metadataPlan: object }} plans
+ * @param {{ integrationPlan: { dependency: { package?: string, changed: boolean, to?: string }, dependencies?: { package: string, changed: boolean, to: string }[], artifactChanged: boolean, identityChanged: boolean }, filePlan: { add: string[], update: string[], remove: string[] }, scriptPlan: { key: string, to: string, preserve?: boolean }[], metadataPlan: object }} plans
  * @param {string} kitRoot @param {string} clientRoot @param {string | null} kitVersion
  * @param {{ integration?: any, afterPackage?: Function, beforeCopy?: (rel: string) => void, beforeRemove?: (rel: string) => void, afterFilesApplied?: Function, afterProvenanceComputed?: Function, afterVersionWritten?: Function, beforeRollbackRestore?: (rel: string) => void, writePointer?: Function, writeMetadata?: Function, provenanceHashHooks?: any }} [hooks] writeMetadata is a pre-final-boundary test hook despite its historical name.
  */
@@ -1203,7 +1251,7 @@ export function applyUpgradeTransaction(plans, kitRoot, clientRoot, kitVersion, 
     SOURCE_POINTER, VERSION_FILE, UPGRADE_MANIFEST,
     ...(integrationPlan.artifactChanged ? [UI_COMPONENTS_ARTIFACT] : []),
     ...(integrationPlan.identityChanged ? [UI_COMPONENTS_IDENTITY] : []),
-    ...(integrationPlan.dependency.changed || scriptPlan.some((entry) => !entry.preserve) ? ['package.json'] : [])
+    ...((integrationPlan.dependencies || [integrationPlan.dependency]).some((dependency) => dependency.changed) || scriptPlan.some((entry) => !entry.preserve) ? ['package.json'] : [])
   ]);
   validateUpgradePaths(clientRoot);
   const parentDirectories = new Set();
@@ -1382,6 +1430,7 @@ export async function main(integrationValidation = {}) {
   const scriptPlan = buildScriptPlan(kitRoot, clientRoot, integrationPlan.packageJsonPreserved);
   const dependencyPlan = {
     ...integrationPlan.dependency,
+    dependencies: integrationPlan.dependencies,
     artifactChanged: integrationPlan.artifactChanged,
     identityChanged: integrationPlan.identityChanged
   };

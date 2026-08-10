@@ -174,7 +174,7 @@ test('raw request provider repository environment and error objects cannot enter
   assert.deepEqual(events, []);
 });
 
-test('trusted Hosted request context remains telemetry-free and secret-minimal', () => {
+test('trusted Hosted request context remains telemetry-free and secret-minimal', async () => {
   const session = {
     sessionId: SENTINELS.sessionId,
     identity: {
@@ -225,7 +225,7 @@ test('trusted Hosted request context remains telemetry-free and secret-minimal',
       })
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     SENTINELS.sessionCookie
   );

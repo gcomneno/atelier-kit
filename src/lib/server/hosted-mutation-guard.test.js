@@ -29,7 +29,7 @@ const ENVIRONMENT = Object.freeze({
     'https://studio.example.com'
 });
 
-function genuineContext() {
+async function createGenuineContext() {
   const session = {
     sessionId: 'A'.repeat(43),
     identity: {
@@ -69,7 +69,7 @@ function genuineContext() {
     })
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -81,6 +81,12 @@ function genuineContext() {
   assert.ok(result.context);
 
   return result.context;
+}
+
+const GENUINE_CONTEXT = await createGenuineContext();
+
+function genuineContext() {
+  return GENUINE_CONTEXT;
 }
 
 /**

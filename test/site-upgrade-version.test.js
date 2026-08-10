@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -30,6 +31,10 @@ delete childEnv.NODE_TEST_CONTEXT;
 const currentViteConfig = fs.readFileSync(path.join(kitRoot, 'vite.config.js'), 'utf8');
 const artifact = 'vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz';
 const identity = 'vendor/giadaware-ui-components/b088653/integration.json';
+const hostedRedisPackage = '@upstash/redis';
+const hostedRedisDependency = JSON.parse(
+  fs.readFileSync(path.join(kitRoot, 'package.json'), 'utf8')
+).dependencies[hostedRedisPackage];
 const legacyViteConfig = `import adapter from '@sveltejs/adapter-vercel';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { readFileSync } from 'node:fs';
@@ -118,6 +123,31 @@ function setDependency(clientRoot, value) {
   if (value === undefined) delete packageJson.dependencies['giadaware-ui-components'];
   else packageJson.dependencies['giadaware-ui-components'] = value;
   fs.writeFileSync(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
+}
+
+/** @param {string} clientRoot @param {string | undefined} value */
+function setHostedRedisDependency(clientRoot, value) {
+  const packagePath = path.join(clientRoot, 'package.json');
+  const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+  packageJson.dependencies = packageJson.dependencies || {};
+  if (value === undefined) delete packageJson.dependencies[hostedRedisPackage];
+  else packageJson.dependencies[hostedRedisPackage] = value;
+  fs.writeFileSync(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
+}
+
+/** @param {string} clientRoot */
+function provideInstalledHostedRedisForPortableRunner(clientRoot) {
+  // This is the real package tree resolved by the Kit lockfile, not a test
+  // double. The upgrade contract writes package.json; a client performs its
+  // normal npm install before running its managed test command.
+  for (const relative of ['@upstash/redis', 'uncrypto']) {
+    fs.cpSync(
+      path.join(kitRoot, 'node_modules', ...relative.split('/')),
+      path.join(clientRoot, 'node_modules', ...relative.split('/')),
+      { recursive: true }
+    );
+  }
+  assert.equal(fs.existsSync(path.join(clientRoot, 'node_modules', ...hostedRedisPackage.split('/'))), true);
 }
 
 /** @param {string} clientRoot @param {string[]} extraArgs @param {{ readPreservedFile?: (filePath: string) => Buffer, transactionHooks?: any }} integrationValidation */
@@ -233,6 +263,7 @@ test('successfully migrates the fresh issue-232 dependency, identity and artifac
     await runMain(clientRoot);
     const clientPackage = JSON.parse(fs.readFileSync(path.join(clientRoot, 'package.json'), 'utf8'));
     assert.equal(clientPackage.dependencies['giadaware-ui-components'], `file:${artifact}`);
+    assert.equal(clientPackage.dependencies[hostedRedisPackage], hostedRedisDependency);
     assert.deepEqual(fs.readFileSync(path.join(clientRoot, artifact)), fs.readFileSync(path.join(kitRoot, artifact)));
     assert.deepEqual(fs.readFileSync(path.join(clientRoot, identity)), fs.readFileSync(path.join(kitRoot, identity)));
   } finally { cleanup(clientRoot); }
@@ -243,6 +274,7 @@ for (const [label, value] of [['missing', undefined], ['wrong', 'file:vendor/wro
     const clientRoot = makeClient();
     try {
       setDependency(clientRoot, value);
+      setHostedRedisDependency(clientRoot, hostedRedisDependency);
       fs.writeFileSync(path.join(clientRoot, '.atelier-kit-preserve'), 'package.json\n');
       const before = snapshotTree(clientRoot);
       await assert.rejects(
@@ -258,6 +290,7 @@ test('preserved package.json with the exact dependency is allowed and never rewr
   const clientRoot = makeClient();
   try {
     setDependency(clientRoot, `file:${artifact}`);
+    setHostedRedisDependency(clientRoot, hostedRedisDependency);
     const packagePath = path.join(clientRoot, 'package.json');
     const before = fs.readFileSync(packagePath);
     fs.writeFileSync(path.join(clientRoot, '.atelier-kit-preserve'), 'package.json\n');
@@ -266,6 +299,23 @@ test('preserved package.json with the exact dependency is allowed and never rewr
     assert.equal(fs.existsSync(path.join(clientRoot, artifact)), true);
   } finally { cleanup(clientRoot); }
 });
+
+for (const [label, value] of [['missing', undefined], ['incompatible', '^0.1.0']]) {
+  test(`preserved package.json with ${label} Hosted Redis dependency aborts with zero mutations`, async () => {
+    const clientRoot = makeClient();
+    try {
+      setDependency(clientRoot, `file:${artifact}`);
+      setHostedRedisDependency(clientRoot, value);
+      fs.writeFileSync(path.join(clientRoot, '.atelier-kit-preserve'), 'package.json\n');
+      const before = snapshotTree(clientRoot);
+      await assert.rejects(
+        runMain(clientRoot),
+        new RegExp(`preserves package\\.json.*dependencies\\.${hostedRedisPackage.replace('/', '\\/')}.*Expected "${hostedRedisDependency.replace(/[.^$*+?()[\]{}|]/g, '\\$&')}".*Remove the package\\.json preserve rule`)
+      );
+      assert.deepEqual(snapshotTree(clientRoot), before);
+    } finally { cleanup(clientRoot); }
+  });
+}
 
 /** @type {{ label: string, relativePath: string, prepare: (clientRoot: string) => void }[]} */
 const preservedIntegrationCases = [
@@ -453,7 +503,8 @@ test('does not request npm install when issue-232 dependency and artifact are un
     const clientPackage = JSON.parse(fs.readFileSync(clientPackagePath, 'utf8'));
     clientPackage.scripts = kitPackage.scripts;
     clientPackage.dependencies = {
-      'giadaware-ui-components': `file:${artifact}`
+      'giadaware-ui-components': `file:${artifact}`,
+      [hostedRedisPackage]: hostedRedisDependency
     };
     fs.writeFileSync(clientPackagePath, `${JSON.stringify(clientPackage, null, 2)}\n`);
 
@@ -461,6 +512,17 @@ test('does not request npm install when issue-232 dependency and artifact are un
     assert.doesNotMatch(output, /npm install/);
     assert.match(output, /npm run check[\s\S]*npm run build/);
     assert.deepEqual(fs.readFileSync(path.join(clientRoot, 'scripts/site-upgrade.js')), fs.readFileSync(path.join(kitRoot, 'scripts/site-upgrade.js')));
+  } finally { cleanup(clientRoot); }
+});
+
+test('Hosted Redis dependency migration is visible in dry-run and makes no mutations', async () => {
+  const clientRoot = makeClient();
+  try {
+    const before = snapshotTree(clientRoot);
+    const output = await runMain(clientRoot, ['--dry-run']);
+    assert.match(output, new RegExp(`dependencies\\.${hostedRedisPackage.replace('/', '\\/')}`));
+    assert.match(output, new RegExp(`now: ${hostedRedisDependency.replace(/[.^$*+?()[\]{}|]/g, '\\$&')}`));
+    assert.deepEqual(snapshotTree(clientRoot), before);
   } finally { cleanup(clientRoot); }
 });
 
@@ -486,10 +548,9 @@ test('upgrade installs the existing-file test runner without requiring a root te
     assert.equal(clientPackage.scripts.test, 'node scripts/run-tests.js');
     assert.doesNotMatch(clientPackage.scripts.test, /test\/\*\.test\.js/);
     assert.equal(fs.existsSync(path.join(clientRoot, 'test')), false);
+    provideInstalledHostedRedisForPortableRunner(clientRoot);
 
-    const result = await import('node:child_process').then(({ spawnSync }) =>
-      spawnSync(process.execPath, ['scripts/run-tests.js'], { cwd: clientRoot, encoding: 'utf8', env: childEnv })
-    );
+    const result = spawnSync(process.execPath, ['scripts/run-tests.js'], { cwd: clientRoot, encoding: 'utf8', env: childEnv });
     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   } finally { cleanup(clientRoot); }
 });
@@ -500,11 +561,10 @@ test('upgrade retains client tests and adds newly managed src tests', async () =
     fs.mkdirSync(path.join(clientRoot, 'src/client'), { recursive: true });
     fs.writeFileSync(path.join(clientRoot, 'src/client/custom.test.js'), "import test from 'node:test'; test('client', () => {});\n");
     await runMain(clientRoot);
+    provideInstalledHostedRedisForPortableRunner(clientRoot);
     assert.equal(fs.existsSync(path.join(clientRoot, 'src/client/custom.test.js')), true);
     assert.equal(fs.existsSync(path.join(clientRoot, 'src/lib/about-config.test.js')), true);
-    const result = await import('node:child_process').then(({ spawnSync }) =>
-      spawnSync(process.execPath, ['scripts/run-tests.js'], { cwd: clientRoot, encoding: 'utf8', env: childEnv })
-    );
+    const result = spawnSync(process.execPath, ['scripts/run-tests.js'], { cwd: clientRoot, encoding: 'utf8', env: childEnv });
     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   } finally { cleanup(clientRoot); }
 });
@@ -608,9 +668,7 @@ test('a failing retained client test propagates through the upgraded portable ru
     fs.mkdirSync(path.join(clientRoot, 'src/lib'), { recursive: true });
     fs.writeFileSync(path.join(clientRoot, 'src/lib/failing client test.test.js'), "import test from 'node:test'; test('failure', () => { throw new Error('client failure'); });\n");
     await runMain(clientRoot);
-    const result = await import('node:child_process').then(({ spawnSync }) =>
-      spawnSync(process.execPath, ['scripts/run-tests.js'], { cwd: clientRoot, encoding: 'utf8', env: childEnv })
-    );
+    const result = spawnSync(process.execPath, ['scripts/run-tests.js'], { cwd: clientRoot, encoding: 'utf8', env: childEnv });
     assert.notEqual(result.status, 0);
   } finally { cleanup(clientRoot); }
 });

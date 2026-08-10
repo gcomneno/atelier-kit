@@ -12,7 +12,13 @@ const SECRETS = Object.freeze({
   repository:
     'REPOSITORY_SECRET_POC_SENTINEL_DO_NOT_LOG',
   unrelated:
-    'UNRELATED_SECRET_POC_SENTINEL_DO_NOT_LOG'
+    'UNRELATED_SECRET_POC_SENTINEL_DO_NOT_LOG',
+  redisUrl:
+    'https://redis-config-secret.example.com',
+  redisToken:
+    'REDIS_TOKEN_POC_SENTINEL_DO_NOT_LOG',
+  redisNamespace:
+    'private-prod-redis-sentinel'
 });
 
 function completeEnvironment(overrides = {}) {
@@ -36,6 +42,20 @@ function completeEnvironment(overrides = {}) {
     UNRELATED_SECRET: SECRETS.unrelated,
     ...overrides
   };
+}
+
+function persistentRedisEnvironment(overrides = {}) {
+  return completeEnvironment({
+    ATELIER_STUDIO_PRIVATE_POC_STATE_TOPOLOGY:
+      'persistent-redis',
+    ATELIER_STUDIO_STATE_REDIS_REST_URL:
+      SECRETS.redisUrl,
+    ATELIER_STUDIO_STATE_REDIS_REST_TOKEN:
+      SECRETS.redisToken,
+    ATELIER_STUDIO_STATE_NAMESPACE:
+      SECRETS.redisNamespace,
+    ...overrides
+  });
 }
 
 test('visitor Local and invalid runtimes never require Hosted PoC configuration', () => {
@@ -174,6 +194,90 @@ test('complete Hosted private PoC configuration reuses canonical security bounda
     Object.isFrozen(config.authorization),
     true
   );
+});
+
+test('persistent Redis requires exactly its complete validated server configuration', () => {
+  const config = resolveHostedPrivatePocConfig(
+    'hosted',
+    persistentRedisEnvironment()
+  );
+
+  assert.equal(
+    config?.stateTopology,
+    HOSTED_PRIVATE_POC_STATE_TOPOLOGIES.PERSISTENT_REDIS
+  );
+  assert.deepEqual(config?.redis, {
+    url: SECRETS.redisUrl,
+    token: SECRETS.redisToken,
+    namespace: SECRETS.redisNamespace
+  });
+  assert.equal(Object.isFrozen(config?.redis), true);
+
+  for (const missing of [
+    'ATELIER_STUDIO_STATE_REDIS_REST_URL',
+    'ATELIER_STUDIO_STATE_REDIS_REST_TOKEN',
+    'ATELIER_STUDIO_STATE_NAMESPACE'
+  ]) {
+    const environment = persistentRedisEnvironment();
+    delete /** @type {Record<string, unknown>} */ (environment)[missing];
+    assert.throws(
+      () => resolveHostedPrivatePocConfig('hosted', environment),
+      HostedPrivatePocConfigurationError
+    );
+  }
+});
+
+test('Redis settings are a closed topology contract', () => {
+  for (const settings of [
+    {
+      ATELIER_STUDIO_STATE_REDIS_REST_URL: SECRETS.redisUrl
+    },
+    {
+      ATELIER_STUDIO_STATE_REDIS_REST_TOKEN: SECRETS.redisToken
+    },
+    {
+      ATELIER_STUDIO_STATE_NAMESPACE: SECRETS.redisNamespace
+    },
+    {
+      ATELIER_STUDIO_STATE_REDIS_REST_URL: SECRETS.redisUrl,
+      ATELIER_STUDIO_STATE_REDIS_REST_TOKEN: SECRETS.redisToken,
+      ATELIER_STUDIO_STATE_NAMESPACE: SECRETS.redisNamespace
+    }
+  ]) {
+    assert.throws(
+      () => resolveHostedPrivatePocConfig(
+        'hosted', completeEnvironment(settings)
+      ),
+      HostedPrivatePocConfigurationError
+    );
+  }
+});
+
+test('persistent Redis rejects non-canonical URLs and invalid namespaces without diagnostics', () => {
+  for (const overrides of [
+    { ATELIER_STUDIO_STATE_REDIS_REST_URL: 'http://redis.example.com' },
+    { ATELIER_STUDIO_STATE_REDIS_REST_URL: 'https://redis.example.com/' },
+    { ATELIER_STUDIO_STATE_REDIS_REST_URL: 'https://REDIS.example.com' },
+    { ATELIER_STUDIO_STATE_REDIS_REST_URL: 'https://redis.example.com/path' },
+    { ATELIER_STUDIO_STATE_REDIS_REST_URL: 'https://redis.example.com?x=1' },
+    { ATELIER_STUDIO_STATE_NAMESPACE: 'Invalid Namespace' },
+    { ATELIER_STUDIO_STATE_NAMESPACE: 'too__many' }
+  ]) {
+    let caught;
+    try {
+      resolveHostedPrivatePocConfig(
+        'hosted', persistentRedisEnvironment(overrides)
+      );
+    } catch (error) {
+      caught = error;
+    }
+    assert.ok(caught instanceof HostedPrivatePocConfigurationError);
+    /** @type {string} */
+    const diagnostic = String(caught);
+    for (const value of Object.values(SECRETS)) {
+      assert.equal(diagnostic.includes(value), false);
+    }
+  }
 });
 
 test('OAuth callback must belong to the exact canonical authoring origin', () => {

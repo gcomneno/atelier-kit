@@ -4,6 +4,7 @@ export default {
     layout: {
       eyebrow: 'Atelier-Kit studio',
       title: 'Local authoring',
+      hostedTitle: 'Hosted authoring',
       nav: {
         dashboard: 'Overview',
         siteGroup: 'Showcase settings',
@@ -37,6 +38,9 @@ export default {
       intro:
         'Four areas, matching the left menu: pick where to work. Each box opens the first page in that group.',
       zonesLegend: 'Studio areas',
+      hostedIntro:
+        'This private PoC currently exposes a limited Hosted authoring surface: manage social links or preview the public site.',
+      hostedZonesLegend: 'Hosted authoring areas',
       zones: {
         site: {
           eyebrow: 'Showcase',
@@ -57,6 +61,16 @@ export default {
           eyebrow: 'System',
           title: 'Configure Studio',
           description: 'Language, operator guide and closing Studio.'
+        },
+        social: {
+          eyebrow: 'Hosted',
+          title: 'Social authoring',
+          description: 'Manage the social links shown on the public site.'
+        },
+        preview: {
+          eyebrow: 'Public site',
+          title: 'Public preview',
+          description: 'Open the public site in a new tab.'
         }
       }
     },
@@ -1475,6 +1489,7 @@ export default {
       pageNotFoundTitle: 'Page not found',
       pageNotFoundBody: 'The page you are looking for does not exist or is no longer available.',
       backToHome: 'Back to home',
+      backToStudio: 'Back to Studio',
       genericTitle: 'Something went wrong',
       unexpectedError: 'Unexpected error.'
     },

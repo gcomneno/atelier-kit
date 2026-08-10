@@ -2,6 +2,8 @@
   import { page } from '$app/state';
   import { useI18n } from '$lib/i18n/context.js';
 
+  let { hostedAuthoring = false } = $props();
+
   const t = useI18n();
 
   const pathname = $derived(page.url.pathname);
@@ -13,52 +15,68 @@
 
 <nav class="studio-nav" aria-label="Studio">
   <ul class="studio-nav-list">
-    <li>
-      <a class:active={isActive('/studio')} href="/studio">
-        {t('studio.layout.nav.dashboard')}
-      </a>
-    </li>
+    {#if hostedAuthoring}
+      <li>
+        <a class:active={isActive('/studio')} href="/studio">
+          {t('studio.layout.nav.dashboard')}
+        </a>
+      </li>
+      <li>
+        <a class:active={isActive('/studio/site/social')} href="/studio/site/social">
+          {t('studio.layout.nav.social')}
+        </a>
+      </li>
+      <li>
+        <a href="/" target="_blank" rel="noreferrer">{t('studio.layout.nav.preview')}</a>
+      </li>
+    {:else}
+      <li>
+        <a class:active={isActive('/studio')} href="/studio">
+          {t('studio.layout.nav.dashboard')}
+        </a>
+      </li>
 
-    <li class="group">
-      <p class="group-title">{t('studio.layout.nav.siteGroup')}</p>
-      <ul class="sub-list" class:active-group={isActiveGroup(['/studio/site/'])}>
-        <li><a class:active={isActive('/studio/site/identity')} href="/studio/site/identity">{t('studio.layout.nav.identity')}</a></li>
-        <li><a class:active={isActive('/studio/site/appearance')} href="/studio/site/appearance">{t('studio.layout.nav.appearance')}</a></li>
-        <li><a class:active={isActive('/studio/site/hero')} href="/studio/site/hero">{t('studio.layout.nav.hero')}</a></li>
-        <li><a class:active={isActive('/studio/site/layout')} href="/studio/site/layout">{t('studio.layout.nav.layout')}</a></li>
-        <li><a class:active={isActive('/studio/site/contact')} href="/studio/site/contact">{t('studio.layout.nav.contact')}</a></li>
-        <li><a class:active={isActive('/studio/site/social')} href="/studio/site/social">{t('studio.layout.nav.social')}</a></li>
-        <li><a class:active={isActive('/studio/site/footer')} href="/studio/site/footer">{t('studio.layout.nav.footer')}</a></li>
-      </ul>
-    </li>
+      <li class="group">
+        <p class="group-title">{t('studio.layout.nav.siteGroup')}</p>
+        <ul class="sub-list" class:active-group={isActiveGroup(['/studio/site/'])}>
+          <li><a class:active={isActive('/studio/site/identity')} href="/studio/site/identity">{t('studio.layout.nav.identity')}</a></li>
+          <li><a class:active={isActive('/studio/site/appearance')} href="/studio/site/appearance">{t('studio.layout.nav.appearance')}</a></li>
+          <li><a class:active={isActive('/studio/site/hero')} href="/studio/site/hero">{t('studio.layout.nav.hero')}</a></li>
+          <li><a class:active={isActive('/studio/site/layout')} href="/studio/site/layout">{t('studio.layout.nav.layout')}</a></li>
+          <li><a class:active={isActive('/studio/site/contact')} href="/studio/site/contact">{t('studio.layout.nav.contact')}</a></li>
+          <li><a class:active={isActive('/studio/site/social')} href="/studio/site/social">{t('studio.layout.nav.social')}</a></li>
+          <li><a class:active={isActive('/studio/site/footer')} href="/studio/site/footer">{t('studio.layout.nav.footer')}</a></li>
+        </ul>
+      </li>
 
-    <li class="group">
-      <p class="group-title">{t('studio.layout.nav.contentGroup')}</p>
-      <ul class="sub-list" class:active-group={isActiveGroup(['/studio/about', '/studio/catalog', '/studio/items', '/studio/collections', '/studio/news', '/studio/signal-clouds'])}>
-        <li><a class:active={isActive('/studio/about')} href="/studio/about">{t('studio.layout.nav.about')}</a></li>
-        <li><a class:active={isActive('/studio/catalog')} href="/studio/catalog">{t('studio.layout.nav.catalog')}</a></li>
-        <li><a class:active={pathname.startsWith('/studio/items')} href="/studio/items">{t('studio.layout.nav.items')}</a></li>
-        <li><a class:active={pathname.startsWith('/studio/collections')} href="/studio/collections">{t('studio.layout.nav.collections')}</a></li>
-        <li><a class:active={isActive('/studio/signal-clouds')} href="/studio/signal-clouds">{t('studio.layout.nav.signals')}</a></li>
-        <li><a class:active={pathname.startsWith('/studio/news')} href="/studio/news">{t('studio.layout.nav.news')}</a></li>
-      </ul>
-    </li>
+      <li class="group">
+        <p class="group-title">{t('studio.layout.nav.contentGroup')}</p>
+        <ul class="sub-list" class:active-group={isActiveGroup(['/studio/about', '/studio/catalog', '/studio/items', '/studio/collections', '/studio/news', '/studio/signal-clouds'])}>
+          <li><a class:active={isActive('/studio/about')} href="/studio/about">{t('studio.layout.nav.about')}</a></li>
+          <li><a class:active={isActive('/studio/catalog')} href="/studio/catalog">{t('studio.layout.nav.catalog')}</a></li>
+          <li><a class:active={pathname.startsWith('/studio/items')} href="/studio/items">{t('studio.layout.nav.items')}</a></li>
+          <li><a class:active={pathname.startsWith('/studio/collections')} href="/studio/collections">{t('studio.layout.nav.collections')}</a></li>
+          <li><a class:active={isActive('/studio/signal-clouds')} href="/studio/signal-clouds">{t('studio.layout.nav.signals')}</a></li>
+          <li><a class:active={pathname.startsWith('/studio/news')} href="/studio/news">{t('studio.layout.nav.news')}</a></li>
+        </ul>
+      </li>
 
-    <li class="group">
-      <p class="group-title">{t('studio.layout.nav.publishGroup')}</p>
-      <ul class="sub-list" class:active-group={isActiveGroup(['/studio/readiness'])}>
-        <li><a href="/" target="_blank" rel="noreferrer">{t('studio.layout.nav.preview')}</a></li>
-        <li><a class:active={isActive('/studio/readiness')} href="/studio/readiness">{t('studio.layout.nav.readiness')}</a></li>
-      </ul>
-    </li>
+      <li class="group">
+        <p class="group-title">{t('studio.layout.nav.publishGroup')}</p>
+        <ul class="sub-list" class:active-group={isActiveGroup(['/studio/readiness'])}>
+          <li><a href="/" target="_blank" rel="noreferrer">{t('studio.layout.nav.preview')}</a></li>
+          <li><a class:active={isActive('/studio/readiness')} href="/studio/readiness">{t('studio.layout.nav.readiness')}</a></li>
+        </ul>
+      </li>
 
-    <li class="group">
-      <p class="group-title">{t('studio.layout.nav.systemGroup')}</p>
-      <ul class="sub-list" class:active-group={isActiveGroup(['/studio/system', '/studio/help'])}>
-        <li><a class:active={isActive('/studio/system')} href="/studio/system">{t('studio.layout.nav.system')}</a></li>
-        <li><a class:active={isActive('/studio/help')} href="/studio/help">{t('studio.layout.nav.help')}</a></li>
-      </ul>
-    </li>
+      <li class="group">
+        <p class="group-title">{t('studio.layout.nav.systemGroup')}</p>
+        <ul class="sub-list" class:active-group={isActiveGroup(['/studio/system', '/studio/help'])}>
+          <li><a class:active={isActive('/studio/system')} href="/studio/system">{t('studio.layout.nav.system')}</a></li>
+          <li><a class:active={isActive('/studio/help')} href="/studio/help">{t('studio.layout.nav.help')}</a></li>
+        </ul>
+      </li>
+    {/if}
   </ul>
 </nav>
 

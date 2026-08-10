@@ -1,5 +1,6 @@
 <script>
   import { page } from '$app/state';
+  import { getErrorRecovery } from '$lib/error-recovery.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
 
   const t = useVisitorI18n();
@@ -10,10 +11,9 @@
     return match?.[1] ? decodeURIComponent(match[1]) : '';
   });
   let isItemNotFound = $derived(isNotFound && missingItemId !== '');
-  let backHref = $derived(isItemNotFound ? '/catalog' : '/');
-  let backLabel = $derived(
-    isItemNotFound ? t('common.backToCatalog') : t('error.backToHome')
-  );
+  let recovery = $derived(getErrorRecovery(page.url.pathname, page.status));
+  let backHref = $derived(recovery.href);
+  let backLabel = $derived(t(recovery.labelKey));
 </script>
 
 <main class="error-page">

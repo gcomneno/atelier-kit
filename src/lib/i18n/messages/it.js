@@ -1486,6 +1486,7 @@ export default {
       pageNotFoundTitle: 'Pagina non trovata',
       pageNotFoundBody: 'La pagina che cerchi non esiste o non è più disponibile.',
       backToHome: 'Torna alla home',
+      backToStudio: 'Torna allo Studio',
       genericTitle: 'Qualcosa è andato storto',
       unexpectedError: 'Errore imprevisto.'
     },

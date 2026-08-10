@@ -4,6 +4,7 @@ export default {
     layout: {
       eyebrow: 'Atelier-Kit studio',
       title: 'Modifica locale',
+      hostedTitle: 'Modifica ospitata',
       nav: {
         dashboard: 'Panoramica',
         siteGroup: 'Vetrina e impostazioni',
@@ -37,6 +38,9 @@ export default {
       intro:
         'Quattro aree, come nel menu a sinistra: scegli dove lavorare. Ogni box apre la prima pagina del gruppo.',
       zonesLegend: 'Aree Studio',
+      hostedIntro:
+        'Questo PoC privato espone al momento una superficie di modifica ospitata limitata: gestisci i link social oppure visualizza l’anteprima del sito pubblico.',
+      hostedZonesLegend: 'Aree di modifica ospitata',
       zones: {
         site: {
           eyebrow: 'Vetrina',
@@ -57,6 +61,16 @@ export default {
           eyebrow: 'Sistema',
           title: 'Configura Studio',
           description: 'Lingua, guida operatore e chiusura dello Studio.'
+        },
+        social: {
+          eyebrow: 'Ospitato',
+          title: 'Modifica social',
+          description: 'Gestisci i link social mostrati sul sito pubblico.'
+        },
+        preview: {
+          eyebrow: 'Sito pubblico',
+          title: 'Anteprima pubblica',
+          description: 'Apri il sito pubblico in una nuova scheda.'
         }
       }
     },
@@ -1486,6 +1500,7 @@ export default {
       pageNotFoundTitle: 'Pagina non trovata',
       pageNotFoundBody: 'La pagina che cerchi non esiste o non è più disponibile.',
       backToHome: 'Torna alla home',
+      backToStudio: 'Torna allo Studio',
       genericTitle: 'Qualcosa è andato storto',
       unexpectedError: 'Errore imprevisto.'
     },

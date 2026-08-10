@@ -34,9 +34,9 @@ export class HostedPrivatePocHttpError extends Error {
 /**
  * Create one lazy runtime resolver.
  *
- * The active runtime is instantiated once and then retained for
- * the lifetime of this server process. This is essential for the
- * explicitly supported single-process in-memory PoC topology.
+ * The active runtime is instantiated once and then retained for the lifetime
+ * of this server process. For `single-process`, that instance owns the
+ * in-memory state; `persistent-redis` authority remains in Redis.
  *
  * @param {{
  *   environment?: unknown,
@@ -213,7 +213,7 @@ export function isHostedPrivatePocStudioAuthorizedRequest(
  *   ) => HostedPrivatePocRuntime | null
  * }} input
  */
-export function applyHostedPrivatePocStudioAuthorizedRequest({
+export async function applyHostedPrivatePocStudioAuthorizedRequest({
   event,
   runtimeMode,
   runtimeResolver =
@@ -252,7 +252,7 @@ export function applyHostedPrivatePocStudioAuthorizedRequest({
     readHostedSessionCookie(httpEvent.cookies);
 
   const decision =
-    runtime.evaluateRequest(
+    await runtime.evaluateRequest(
       runtimeMode,
       presentedSessionId
     );

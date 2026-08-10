@@ -271,7 +271,7 @@ test('PKCE uses canonical independent 256-bit secrets and S256', () => {
   );
 });
 
-test('begin creates one-time state and deterministic GitHub authorization URL', () => {
+test('begin creates one-time state and deterministic GitHub authorization URL', async () => {
   const state = fixedSecret(1);
   const verifier = fixedSecret(2);
 
@@ -282,7 +282,7 @@ test('begin creates one-time state and deterministic GitHub authorization URL', 
     secrets: [state, verifier]
   });
 
-  const result = provider.begin(
+  const result = await provider.begin(
     '/studio/items/example?tab=content'
   );
 
@@ -310,7 +310,7 @@ test('begin creates one-time state and deterministic GitHub authorization URL', 
     'S256'
   );
 
-  const stored = transactionStore.read(state);
+  const stored = await transactionStore.read(state);
 
   assert.ok(stored !== null);
   assert.equal(stored.pkceVerifier, verifier);
@@ -326,12 +326,12 @@ test('begin creates one-time state and deterministic GitHub authorization URL', 
   assert.notEqual(stored.state, stored.pkceVerifier);
 });
 
-test('state collision never overwrites and retries with fresh independent secrets', () => {
+test('state collision never overwrites and retries with fresh independent secrets', async () => {
   const store =
     new InMemoryHostedOAuthTransactionStore();
   const collision = fixedSecret(1);
 
-  store.create({
+  await store.create({
     state: collision,
     pkceVerifier: fixedSecret(9),
     returnTo: '/studio/original',
@@ -352,7 +352,7 @@ test('state collision never overwrites and retries with fresh independent secret
     ]
   });
 
-  const result = provider.begin('/studio/new');
+  const result = await provider.begin('/studio/new');
   const url = new URL(result.authorizationUrl);
 
   assert.equal(
@@ -360,7 +360,7 @@ test('state collision never overwrites and retries with fresh independent secret
     freshState
   );
 
-  const original = store.read(collision);
+  const original = await store.read(collision);
 
   assert.ok(original !== null);
   assert.equal(original.returnTo, '/studio/original');
@@ -380,7 +380,7 @@ test('valid callback state is consumed before malformed code is considered', asy
     }
   });
 
-  const started = provider.begin('/studio');
+  const started = await provider.begin('/studio');
   const state =
     new URL(started.authorizationUrl)
       .searchParams.get('state');
@@ -396,7 +396,7 @@ test('valid callback state is consumed before malformed code is considered', asy
   );
 
   assert.equal(tokenRequests, 0);
-  assert.equal(transactionStore.read(state), null);
+  assert.equal(await transactionStore.read(state), null);
 
   await assert.rejects(
     () => provider.complete({
@@ -463,7 +463,7 @@ test('provider error callback consumes valid state and never exchanges a token',
     }
   });
 
-  const started = provider.begin('/studio');
+  const started = await provider.begin('/studio');
   const state =
     new URL(started.authorizationUrl)
       .searchParams.get('state');
@@ -479,7 +479,7 @@ test('provider error callback consumes valid state and never exchanges a token',
   );
 
   assert.equal(tokenRequests, 0);
-  assert.equal(transactionStore.read(state), null);
+  assert.equal(await transactionStore.read(state), null);
 });
 
 test('expired state and clock rollback fail closed after one-time consumption', async () => {
@@ -492,7 +492,7 @@ test('expired state and clock rollback fail closed after one-time consumption', 
       setNow
     } = fixture({ now: start });
 
-    const started = provider.begin('/studio');
+    const started = await provider.begin('/studio');
     const state =
       new URL(started.authorizationUrl)
         .searchParams.get('state');
@@ -509,7 +509,7 @@ test('expired state and clock rollback fail closed after one-time consumption', 
       HostedGitHubOAuthAuthenticationError
     );
 
-    assert.equal(transactionStore.read(state), null);
+    assert.equal(await transactionStore.read(state), null);
   }
 
   {
@@ -519,7 +519,7 @@ test('expired state and clock rollback fail closed after one-time consumption', 
       setNow
     } = fixture({ now: start });
 
-    const started = provider.begin('/studio');
+    const started = await provider.begin('/studio');
     const state =
       new URL(started.authorizationUrl)
         .searchParams.get('state');
@@ -536,7 +536,7 @@ test('expired state and clock rollback fail closed after one-time consumption', 
       HostedGitHubOAuthAuthenticationError
     );
 
-    assert.equal(transactionStore.read(state), null);
+    assert.equal(await transactionStore.read(state), null);
   }
 });
 
@@ -582,7 +582,7 @@ test('successful completion uses matching verifier and returns canonical identit
     transport
   });
 
-  provider.begin('/studio/items');
+  await provider.begin('/studio/items');
 
   const result = await provider.complete({
     state,
@@ -631,7 +631,7 @@ test('nullable optional GitHub metadata becomes absent identity metadata', async
     }
   });
 
-  const started = provider.begin();
+  const started = await provider.begin();
   const state =
     new URL(started.authorizationUrl)
       .searchParams.get('state');
@@ -672,7 +672,7 @@ test('malformed GitHub user identity fails closed', async () => {
       }
     });
 
-    const started = provider.begin();
+    const started = await provider.begin();
     const state =
       new URL(started.authorizationUrl)
         .searchParams.get('state');
@@ -966,7 +966,7 @@ test('OAuth state failures emit one specific safe event each', async () => {
       securityEventRecorder: capture.recorder
     });
 
-    const started = provider.begin('/studio');
+    const started = await provider.begin('/studio');
     const state =
       new URL(started.authorizationUrl)
         .searchParams.get('state');
@@ -1001,7 +1001,7 @@ test('ordinary callback and provider failures emit one authentication event', as
       securityEventRecorder: capture.recorder
     });
 
-    const started = provider.begin('/studio');
+    const started = await provider.begin('/studio');
     const state =
       new URL(started.authorizationUrl)
         .searchParams.get('state');
@@ -1040,7 +1040,7 @@ test('ordinary callback and provider failures emit one authentication event', as
       }
     });
 
-    const started = provider.begin('/studio');
+    const started = await provider.begin('/studio');
     const state =
       new URL(started.authorizationUrl)
         .searchParams.get('state');
@@ -1112,7 +1112,7 @@ test('OAuth security events never serialize provider or callback secrets', async
     }
   });
 
-  provider.begin('/studio');
+  await provider.begin('/studio');
 
   await assert.rejects(
     () => provider.complete({
@@ -1173,7 +1173,7 @@ test('successful OAuth completion emits no rejection telemetry', async () => {
     securityEventRecorder: capture.recorder
   });
 
-  const started = provider.begin('/studio');
+  const started = await provider.begin('/studio');
   const state =
     new URL(started.authorizationUrl)
       .searchParams.get('state');

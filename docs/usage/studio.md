@@ -35,7 +35,8 @@ During normal development you can also open `/studio` with:
 npm run dev
 ```
 
-Studio write routes remain disabled outside development unless `ATELIER_STUDIO=1` is set.
+For Local Studio, write routes remain disabled outside development unless
+`ATELIER_STUDIO=1` is set.
 
 ## Security model
 
@@ -44,11 +45,13 @@ Studio write routes remain disabled outside development unless `ATELIER_STUDIO=1
 | **Who can write** | Operator or client with the site folder and an active local studio session |
 | **When** | Local dev server running with `ATELIER_STUDIO=1` on `127.0.0.1` |
 | **Where** | Localhost only — `config/`, `content/`, approved `static/images/` |
-| **Production** | `/studio` returns **404**. Never set `ATELIER_STUDIO=1` on Vercel or other hosted environments |
+| **Ordinary visitor production** | `/studio` returns **404**. Never set `ATELIER_STUDIO=1` on Vercel or other hosted environments |
 
 Implementation: `src/lib/server/studio-guard.js`. Full decision record: [ADR 0007](../architecture/adr-0007-production-safe-studio-desktop.md).
 
-Hosted studio with production auth (Path A) is **out of scope** for the current micro-CMS contract; see ADR 0007 for rationale.
+This Local Studio guide does not cover the private Hosted authoring deployment:
+it is a separate, explicitly configured runtime with a deliberately limited
+surface. See [the Hosted Studio operator runbook](./hosted-studio.md).
 
 ## Studio scope
 
@@ -222,7 +225,8 @@ The studio is **local authoring only**. Follow these rules:
 1. **Clients:** use **Atelier Desktop** (see [`desktop/README.md`](../../desktop/README.md)) — no terminal required after handoff.
 2. **Operators:** start with `npm run studio:launch` from the client site folder.
 3. Bind to localhost only — do not expose the dev server on your network.
-4. `/studio` write routes are disabled in production builds. Never set `ATELIER_STUDIO=1` on Vercel or other hosted environments.
+4. `/studio` write routes are disabled in ordinary visitor production builds.
+   Never set `ATELIER_STUDIO=1` on Vercel or other hosted environments.
 5. Preview visitor pages at `http://127.0.0.1:5173/` in a separate tab after saving.
 6. **Publish:** open `/studio/readiness` and click **Put site online** (or **Metti online**). No terminal commands required.
 7. Keep Git backups before large edits. Item photos live in `static/images/items/`.

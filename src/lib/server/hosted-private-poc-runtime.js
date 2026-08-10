@@ -9,6 +9,12 @@ import {
   InMemoryHostedOAuthTransactionStore
 } from './hosted-oauth-transaction-store.js';
 import {
+  HostedRedisOAuthTransactionStore
+} from './hosted-redis-oauth-transaction-store.js';
+import {
+  HostedRedisSessionStore
+} from './hosted-redis-session-store.js';
+import {
   HostedRouteGate
 } from './hosted-route-gate.js';
 import {
@@ -26,6 +32,9 @@ import {
 import {
   resolveHostedPrivatePocConfig
 } from './hosted-private-poc-config.js';
+import {
+  HostedUpstashRedisTransport
+} from './hosted-upstash-redis-transport.js';
 
 export const HOSTED_PRIVATE_POC_AUTH_RESULTS =
   Object.freeze({
@@ -62,11 +71,9 @@ function assertSecurityEventRecorder(recorder) {
 }
 
 /**
- * Private single-process composition root for issue #271.
+ * Private Hosted composition root.
  *
- * Store instances are owned by this runtime and are intentionally
- * not exposed. A future persistent deployment adapter can replace
- * this composition without changing OAuth/session/route contracts.
+ * Store instances are owned by this runtime and are intentionally not exposed.
  */
 export class HostedPrivatePocRuntime {
   #oauthProvider;
@@ -112,8 +119,8 @@ export class HostedPrivatePocRuntime {
   /**
    * @param {unknown} [returnTo]
    */
-  beginAuthentication(returnTo = undefined) {
-    return this.#oauthProvider.begin(returnTo);
+  async beginAuthentication(returnTo = undefined) {
+    return await this.#oauthProvider.begin(returnTo);
   }
 
   /**
@@ -146,7 +153,7 @@ export class HostedPrivatePocRuntime {
     }
 
     const session =
-      this.#sessionLifecycle.create(authorized);
+      await this.#sessionLifecycle.create(authorized);
 
     return Object.freeze({
       result:
@@ -162,8 +169,8 @@ export class HostedPrivatePocRuntime {
    * @param {unknown} runtimeMode
    * @param {unknown} sessionId
    */
-  evaluateRequest(runtimeMode, sessionId) {
-    return this.#routeGate.evaluate(
+  async evaluateRequest(runtimeMode, sessionId) {
+    return await this.#routeGate.evaluate(
       runtimeMode,
       sessionId
     );
@@ -189,15 +196,14 @@ export class HostedPrivatePocRuntime {
   /**
    * @param {unknown} sessionId
    */
-  invalidateSession(sessionId) {
-    return this.#sessionLifecycle.invalidate(sessionId);
+  async invalidateSession(sessionId) {
+    return await this.#sessionLifecycle.invalidate(sessionId);
   }
 }
 
 /**
- * Construct the only state topology currently supported by the
- * private PoC: one long-lived server process owning both in-memory
- * transaction and session stores.
+ * Construct the selected private Hosted state topology while retaining one
+ * canonical OAuth, session, route-gate and mutation-guard composition path.
  *
  * Returns null when the private PoC is intentionally inactive.
  *
@@ -212,6 +218,7 @@ export class HostedPrivatePocRuntime {
  *   oauthSecretGenerator?: () => string,
  *   sessionIdGenerator?: () => string,
  *   csrfTokenGenerator?: () => string,
+ *   upstashClientFactory?: (options: object) => object,
  *   securityEventRecorder?: {
  *     record(type: unknown, reason?: unknown): boolean
  *   }
@@ -246,6 +253,7 @@ export function createHostedPrivatePocRuntime(
     oauthSecretGenerator,
     sessionIdGenerator,
     csrfTokenGenerator,
+    upstashClientFactory,
     securityEventRecorder =
       NOOP_HOSTED_SECURITY_EVENT_RECORDER
   } = dependencies;
@@ -254,11 +262,38 @@ export function createHostedPrivatePocRuntime(
     securityEventRecorder
   );
 
-  const transactionStore =
-    new InMemoryHostedOAuthTransactionStore();
+  let transactionStore;
+  let sessionStore;
 
-  const sessionStore =
-    new InMemoryHostedSessionStore();
+  if (config.stateTopology === 'single-process') {
+    transactionStore = new InMemoryHostedOAuthTransactionStore();
+    sessionStore = new InMemoryHostedSessionStore();
+  } else {
+    const transportOptions = {
+      url: config.redis.url,
+      token: config.redis.token
+    };
+
+    if (upstashClientFactory !== undefined) {
+      Object.assign(transportOptions, {
+        clientFactory: upstashClientFactory
+      });
+    }
+
+    const redisTransport =
+      new HostedUpstashRedisTransport(transportOptions);
+
+    transactionStore = new HostedRedisOAuthTransactionStore({
+      namespace: config.redis.namespace,
+      transport: redisTransport,
+      clock
+    });
+    sessionStore = new HostedRedisSessionStore({
+      namespace: config.redis.namespace,
+      transport: redisTransport,
+      clock
+    });
+  }
 
   const oauthOptions = {
     config: config.oauth,

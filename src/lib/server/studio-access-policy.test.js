@@ -10,7 +10,7 @@ import {
   canAccessStudioRoute
 } from './studio-access-policy.js';
 
-function trustedContext() {
+async function createTrustedContext() {
   const session = {
     sessionId: 'A'.repeat(43),
     identity: {
@@ -48,7 +48,7 @@ function trustedContext() {
     })
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -56,6 +56,12 @@ function trustedContext() {
   assert.ok(result.context);
 
   return result.context;
+}
+
+const TRUSTED_CONTEXT = await createTrustedContext();
+
+function trustedContext() {
+  return TRUSTED_CONTEXT;
 }
 
 test('Local Studio remains admitted without Hosted context', () => {

@@ -32,7 +32,7 @@ export async function POST({
     );
 
   const result =
-    performHostedPrivatePocLogout({
+    await performHostedPrivatePocLogout({
       runtimeMode,
       cookies,
       host:

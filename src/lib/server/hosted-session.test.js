@@ -123,8 +123,8 @@ function fixture({
  * @param {HostedSessionLifecycle} lifecycle
  * @param {string} sessionId
  */
-function mustResolve(lifecycle, sessionId) {
-  const result = lifecycle.resolve(sessionId);
+async function mustResolve(lifecycle, sessionId) {
+  const result = await lifecycle.resolve(sessionId);
 
   assert.ok(result !== null);
 
@@ -135,8 +135,8 @@ function mustResolve(lifecycle, sessionId) {
  * @param {InMemoryHostedSessionStore} store
  * @param {string} sessionId
  */
-function mustRead(store, sessionId) {
-  const record = store.read(sessionId);
+async function mustRead(store, sessionId) {
+  const record = await store.read(sessionId);
 
   assert.ok(record !== null);
 
@@ -186,7 +186,7 @@ test('generated CSRF tokens are canonical independent 256-bit secrets', () => {
   assert.notEqual(csrfToken, sessionId);
 });
 
-test('session and CSRF generators are independent lifecycle dependencies', () => {
+test('session and CSRF generators are independent lifecycle dependencies', async () => {
   let sessionCalls = 0;
   let csrfCalls = 0;
 
@@ -203,7 +203,7 @@ test('session and CSRF generators are independent lifecycle dependencies', () =>
     }
   });
 
-  const session = lifecycle.create(trustedIdentity());
+  const session = await lifecycle.create(trustedIdentity());
 
   assert.equal(sessionCalls, 1);
   assert.equal(csrfCalls, 1);
@@ -236,7 +236,7 @@ test('invalid policy configuration fails closed', () => {
   }
 });
 
-test('session creation requires a genuinely trusted authorization result', () => {
+test('session creation requires a genuinely trusted authorization result', async () => {
   const { lifecycle } = fixture();
 
   for (const value of [
@@ -251,18 +251,18 @@ test('session creation requires a genuinely trusted authorization result', () =>
     },
     Object.create(AuthorizedHostedIdentity.prototype)
   ]) {
-    assert.throws(
+    await assert.rejects(
       () => lifecycle.create(value),
       HostedSessionLifecycleError
     );
   }
 });
 
-test('creation stores only stable authorization identity and deterministic lifecycle state', () => {
+test('creation stores only stable authorization identity and deterministic lifecycle state', async () => {
   const start = 1_000_000;
   const { lifecycle } = fixture({ now: start });
 
-  const session = lifecycle.create(
+  const session = await lifecycle.create(
     trustedIdentity('123', 'display-login')
   );
 
@@ -283,51 +283,51 @@ test('creation stores only stable authorization identity and deterministic lifec
   assert.equal('avatarUrl' in session.identity, false);
 });
 
-test('clock rollback relative to session state fails closed', () => {
+test('clock rollback relative to session state fails closed', async () => {
   const start = 1_000_000;
   const { lifecycle, store, setNow } = fixture({ now: start });
 
-  const session = lifecycle.create(trustedIdentity());
+  const session = await lifecycle.create(trustedIdentity());
 
   setNow(start - 1);
 
-  assert.equal(lifecycle.resolve(session.sessionId), null);
-  assert.equal(store.read(session.sessionId), null);
+  assert.equal(await lifecycle.resolve(session.sessionId), null);
+  assert.equal(await store.read(session.sessionId), null);
 });
 
-test('exact absolute-expiry boundary fails closed and removes the session', () => {
+test('exact absolute-expiry boundary fails closed and removes the session', async () => {
   const start = 1_000_000;
   const { lifecycle, store, setNow } = fixture({ now: start });
 
-  const session = lifecycle.create(trustedIdentity());
+  const session = await lifecycle.create(trustedIdentity());
 
   setNow(start + 8 * HOUR);
 
-  assert.equal(lifecycle.resolve(session.sessionId), null);
-  assert.equal(store.read(session.sessionId), null);
+  assert.equal(await lifecycle.resolve(session.sessionId), null);
+  assert.equal(await store.read(session.sessionId), null);
 });
 
-test('exact idle-timeout boundary fails closed and removes the session', () => {
+test('exact idle-timeout boundary fails closed and removes the session', async () => {
   const start = 1_000_000;
   const { lifecycle, store, setNow } = fixture({ now: start });
 
-  const session = lifecycle.create(trustedIdentity());
+  const session = await lifecycle.create(trustedIdentity());
 
   setNow(start + 2 * HOUR);
 
-  assert.equal(lifecycle.resolve(session.sessionId), null);
-  assert.equal(store.read(session.sessionId), null);
+  assert.equal(await lifecycle.resolve(session.sessionId), null);
+  assert.equal(await store.read(session.sessionId), null);
 });
 
-test('touch advances lastSeenAt without extending absolute expiry', () => {
+test('touch advances lastSeenAt without extending absolute expiry', async () => {
   const start = 1_000_000;
   const { lifecycle, setNow } = fixture({ now: start });
 
-  const session = lifecycle.create(trustedIdentity());
+  const session = await lifecycle.create(trustedIdentity());
 
   setNow(start + HOUR);
 
-  const touched = lifecycle.touch(session.sessionId);
+  const touched = await lifecycle.touch(session.sessionId);
 
   assert.ok(touched !== null);
   assert.equal(touched.session.createdAt, session.createdAt);
@@ -337,39 +337,39 @@ test('touch advances lastSeenAt without extending absolute expiry', () => {
   assert.equal(touched.session.expiresAt, session.expiresAt);
 });
 
-test('rotation becomes due exactly at the configured 45-minute boundary', () => {
+test('rotation becomes due exactly at the configured 45-minute boundary', async () => {
   const start = 1_000_000;
   const { lifecycle, setNow } = fixture({ now: start });
 
-  const session = lifecycle.create(trustedIdentity());
+  const session = await lifecycle.create(trustedIdentity());
 
   setNow(start + 45 * MINUTE - 1);
   assert.equal(
-    mustResolve(lifecycle, session.sessionId).rotationDue,
+    (await mustResolve(lifecycle, session.sessionId)).rotationDue,
     false
   );
 
   setNow(start + 45 * MINUTE);
   assert.equal(
-    mustResolve(lifecycle, session.sessionId).rotationDue,
+    (await mustResolve(lifecycle, session.sessionId)).rotationDue,
     true
   );
 });
 
-test('rotation issues a fresh ID, retires the old ID and preserves absolute lifetime', () => {
+test('rotation issues a fresh ID, retires the old ID and preserves absolute lifetime', async () => {
   const start = 1_000_000;
   const { lifecycle, store, setNow } = fixture({ now: start });
 
-  const original = lifecycle.create(trustedIdentity());
+  const original = await lifecycle.create(trustedIdentity());
 
   setNow(start + 45 * MINUTE);
 
-  const rotated = lifecycle.rotate(original.sessionId);
+  const rotated = await lifecycle.rotate(original.sessionId);
 
   assert.ok(rotated !== null);
   assert.notEqual(rotated.sessionId, original.sessionId);
-  assert.equal(store.read(original.sessionId), null);
-  assert.notEqual(store.read(rotated.sessionId), null);
+  assert.equal(await store.read(original.sessionId), null);
+  assert.notEqual(await store.read(rotated.sessionId), null);
 
   assert.equal(rotated.createdAt, original.createdAt);
   assert.equal(rotated.csrfToken, original.csrfToken);
@@ -378,37 +378,37 @@ test('rotation issues a fresh ID, retires the old ID and preserves absolute life
   assert.equal(rotated.lastSeenAt, start + 45 * MINUTE);
 });
 
-test('rotation never revives unknown, malformed, idle-expired or absolutely expired sessions', () => {
+test('rotation never revives unknown, malformed, idle-expired or absolutely expired sessions', async () => {
   const start = 1_000_000;
 
   {
     const { lifecycle } = fixture({ now: start });
-    assert.equal(lifecycle.rotate(fixedSessionId(99)), null);
-    assert.equal(lifecycle.rotate('not-a-session-id'), null);
+    assert.equal(await lifecycle.rotate(fixedSessionId(99)), null);
+    assert.equal(await lifecycle.rotate('not-a-session-id'), null);
   }
 
   {
     const { lifecycle, setNow } = fixture({ now: start });
-    const session = lifecycle.create(trustedIdentity());
+    const session = await lifecycle.create(trustedIdentity());
 
     setNow(start + 2 * HOUR);
-    assert.equal(lifecycle.rotate(session.sessionId), null);
+    assert.equal(await lifecycle.rotate(session.sessionId), null);
   }
 
   {
     const { lifecycle, setNow } = fixture({ now: start });
-    const session = lifecycle.create(trustedIdentity());
+    const session = await lifecycle.create(trustedIdentity());
 
     setNow(start + 8 * HOUR);
-    assert.equal(lifecycle.rotate(session.sessionId), null);
+    assert.equal(await lifecycle.rotate(session.sessionId), null);
   }
 });
 
-test('malformed stored CSRF state invalidates the session fail-closed', () => {
+test('malformed stored CSRF state invalidates the session fail-closed', async () => {
   const sessionId = fixedSessionId(8);
   const store = new InMemoryHostedSessionStore();
 
-  store.create({
+  await store.create({
     sessionId,
     identity: {
       provider: 'github',
@@ -427,11 +427,11 @@ test('malformed stored CSRF state invalidates the session fail-closed', () => {
     store
   });
 
-  assert.equal(lifecycle.resolve(sessionId), null);
-  assert.equal(store.read(sessionId), null);
+  assert.equal(await lifecycle.resolve(sessionId), null);
+  assert.equal(await store.read(sessionId), null);
 });
 
-test('CSRF token cannot equal the session lookup credential', () => {
+test('CSRF token cannot equal the session lookup credential', async () => {
   const shared = fixedSessionId(1);
 
   const { lifecycle } = fixture({
@@ -442,24 +442,24 @@ test('CSRF token cannot equal the session lookup credential', () => {
     csrfTokens: [shared]
   });
 
-  const session = lifecycle.create(trustedIdentity());
+  const session = await lifecycle.create(trustedIdentity());
 
   assert.equal(session.csrfToken, shared);
   assert.equal(session.sessionId, fixedSessionId(2));
   assert.notEqual(session.sessionId, session.csrfToken);
 });
 
-test('invalidation is effective and idempotent', () => {
+test('invalidation is effective and idempotent', async () => {
   const { lifecycle } = fixture();
-  const session = lifecycle.create(trustedIdentity());
+  const session = await lifecycle.create(trustedIdentity());
 
-  assert.equal(lifecycle.invalidate(session.sessionId), true);
-  assert.equal(lifecycle.resolve(session.sessionId), null);
-  assert.equal(lifecycle.invalidate(session.sessionId), false);
-  assert.equal(lifecycle.invalidate('malformed'), false);
+  assert.equal(await lifecycle.invalidate(session.sessionId), true);
+  assert.equal(await lifecycle.resolve(session.sessionId), null);
+  assert.equal(await lifecycle.invalidate(session.sessionId), false);
+  assert.equal(await lifecycle.invalidate('malformed'), false);
 });
 
-test('generated ID collisions never overwrite an existing session', () => {
+test('generated ID collisions never overwrite an existing session', async () => {
   const firstId = fixedSessionId(1);
   const secondId = fixedSessionId(2);
 
@@ -471,26 +471,26 @@ test('generated ID collisions never overwrite an existing session', () => {
     ]
   });
 
-  const first = lifecycle.create(trustedIdentity('123'));
-  const second = lifecycle.create(trustedIdentity('456'));
+  const first = await lifecycle.create(trustedIdentity('123'));
+  const second = await lifecycle.create(trustedIdentity('456'));
 
   assert.equal(first.sessionId, firstId);
   assert.equal(second.sessionId, secondId);
 
-  assert.equal(mustRead(store, firstId).identity.subject, '123');
-  assert.equal(mustRead(store, secondId).identity.subject, '456');
+  assert.equal((await mustRead(store, firstId)).identity.subject, '123');
+  assert.equal((await mustRead(store, secondId)).identity.subject, '456');
 });
 
-test('persistent generated ID collisions fail without disclosing or overwriting the existing ID', () => {
+test('persistent generated ID collisions fail without disclosing or overwriting the existing ID', async () => {
   const collisionId = fixedSessionId(7);
 
   const { lifecycle, store } = fixture({
     ids: [collisionId]
   });
 
-  lifecycle.create(trustedIdentity('123'));
+  await lifecycle.create(trustedIdentity('123'));
 
-  assert.throws(
+  await assert.rejects(
     () => lifecycle.create(trustedIdentity('456')),
     (error) => {
       assert.ok(error instanceof HostedSessionLifecycleError);
@@ -499,13 +499,13 @@ test('persistent generated ID collisions fail without disclosing or overwriting 
     }
   );
 
-  assert.equal(mustRead(store, collisionId).identity.subject, '123');
+  assert.equal((await mustRead(store, collisionId)).identity.subject, '123');
 });
 
-test('returned session snapshots cannot mutate store-owned state', () => {
+test('returned session snapshots cannot mutate store-owned state', async () => {
   const { lifecycle, store } = fixture();
 
-  const session = lifecycle.create(trustedIdentity());
+  const session = await lifecycle.create(trustedIdentity());
 
   assert.equal(Object.isFrozen(session), true);
   assert.equal(Object.isFrozen(session.identity), true);
@@ -523,19 +523,19 @@ test('returned session snapshots cannot mutate store-owned state', () => {
   );
 
   assert.equal(
-    mustRead(store, session.sessionId).identity.subject,
+    (await mustRead(store, session.sessionId)).identity.subject,
     '123'
   );
 });
 
-test('malformed generated CSRF tokens fail without leaking their value', () => {
+test('malformed generated CSRF tokens fail without leaking their value', async () => {
   const secretLikeValue = 'this-is-not-a-valid-csrf-secret';
 
   const { lifecycle } = fixture({
     csrfTokens: [secretLikeValue]
   });
 
-  assert.throws(
+  await assert.rejects(
     () => lifecycle.create(trustedIdentity()),
     (error) => {
       assert.ok(error instanceof HostedSessionLifecycleError);
@@ -545,7 +545,7 @@ test('malformed generated CSRF tokens fail without leaking their value', () => {
   );
 });
 
-test('CSRF generator failures are generic and fail closed', () => {
+test('CSRF generator failures are generic and fail closed', async () => {
   const lifecycle = new HostedSessionLifecycle({
     store: new InMemoryHostedSessionStore(),
     clock: () => 1_000_000,
@@ -555,7 +555,7 @@ test('CSRF generator failures are generic and fail closed', () => {
     }
   });
 
-  assert.throws(
+  await assert.rejects(
     () => lifecycle.create(trustedIdentity()),
     (error) => {
       assert.ok(error instanceof HostedSessionLifecycleError);
@@ -568,14 +568,14 @@ test('CSRF generator failures are generic and fail closed', () => {
   );
 });
 
-test('malformed generated identifiers fail without leaking their value', () => {
+test('malformed generated identifiers fail without leaking their value', async () => {
   const secretLikeValue = 'this-is-not-a-valid-session-secret';
 
   const { lifecycle } = fixture({
     ids: [secretLikeValue]
   });
 
-  assert.throws(
+  await assert.rejects(
     () => lifecycle.create(trustedIdentity()),
     (error) => {
       assert.ok(error instanceof HostedSessionLifecycleError);
@@ -601,27 +601,27 @@ function sessionSecurityEventCapture() {
   };
 }
 
-test('explicit invalidation records only an actually removed session', () => {
+test('explicit invalidation records only an actually removed session', async () => {
   const capture = sessionSecurityEventCapture();
 
   const { lifecycle } = fixture({
     securityEventRecorder: capture.recorder
   });
 
-  const created = lifecycle.create(trustedIdentity());
+  const created = await lifecycle.create(trustedIdentity());
 
   assert.equal(
-    lifecycle.invalidate(created.sessionId),
+    await lifecycle.invalidate(created.sessionId),
     true
   );
 
   assert.equal(
-    lifecycle.invalidate(created.sessionId),
+    await lifecycle.invalidate(created.sessionId),
     false
   );
 
   assert.equal(
-    lifecycle.invalidate(
+    await lifecycle.invalidate(
       'SESSION_IDENTIFIER_SENTINEL_DO_NOT_LOG'
     ),
     false
@@ -650,7 +650,7 @@ test('explicit invalidation records only an actually removed session', () => {
   );
 });
 
-test('automatic expiry cleanup does not masquerade as explicit invalidation telemetry', () => {
+test('automatic expiry cleanup does not masquerade as explicit invalidation telemetry', async () => {
   const capture = sessionSecurityEventCapture();
   const start = 1_000_000;
 
@@ -662,7 +662,7 @@ test('automatic expiry cleanup does not masquerade as explicit invalidation tele
     securityEventRecorder: capture.recorder
   });
 
-  const created = lifecycle.create(trustedIdentity());
+  const created = await lifecycle.create(trustedIdentity());
 
   setNow(
     start +
@@ -670,14 +670,14 @@ test('automatic expiry cleanup does not masquerade as explicit invalidation tele
   );
 
   assert.equal(
-    lifecycle.resolve(created.sessionId),
+    await lifecycle.resolve(created.sessionId),
     null
   );
 
   assert.deepEqual(capture.events, []);
 });
 
-test('session invalidation recorder failure cannot change successful invalidation', () => {
+test('session invalidation recorder failure cannot change successful invalidation', async () => {
   const { lifecycle, store } = fixture({
     securityEventRecorder: {
       record() {
@@ -688,17 +688,15 @@ test('session invalidation recorder failure cannot change successful invalidatio
     }
   });
 
-  const created = lifecycle.create(trustedIdentity());
-
-  assert.doesNotThrow(() => {
-    assert.equal(
-      lifecycle.invalidate(created.sessionId),
-      true
-    );
-  });
+  const created = await lifecycle.create(trustedIdentity());
 
   assert.equal(
-    store.read(created.sessionId),
+    await lifecycle.invalidate(created.sessionId),
+    true
+  );
+
+  assert.equal(
+    await store.read(created.sessionId),
     null
   );
 });

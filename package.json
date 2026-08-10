@@ -37,6 +37,7 @@
     "vite": "^8.0.16"
   },
   "dependencies": {
+    "@upstash/redis": "^1.38.2",
     "giadaware-ui-components": "file:vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz",
     "yaml": "^2.9.0"
   }

@@ -58,7 +58,7 @@ function outcome(value) {
  *   runtimeResolver?: typeof getHostedPrivatePocRuntime
  * }} input
  */
-export function performHostedPrivatePocLogout({
+export async function performHostedPrivatePocLogout({
   runtimeMode,
   cookies,
   host,
@@ -101,7 +101,7 @@ export function performHostedPrivatePocLogout({
   }
 
   const routeDecision =
-    runtime.evaluateRequest(
+    await runtime.evaluateRequest(
       runtimeMode,
       presentedSessionId
     );
@@ -161,7 +161,7 @@ export function performHostedPrivatePocLogout({
        * than leaving unreachable server-side authority behind.
        */
       try {
-        runtime.invalidateSession(
+        await runtime.invalidateSession(
           effectiveSessionId
         );
       } catch {
@@ -206,7 +206,7 @@ export function performHostedPrivatePocLogout({
   }
 
   if (typeof effectiveSessionId === 'string') {
-    runtime.invalidateSession(
+    await runtime.invalidateSession(
       effectiveSessionId
     );
   }

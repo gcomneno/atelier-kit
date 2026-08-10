@@ -225,7 +225,10 @@ test('all five neutral visual containers adopt Surface without inventing landmar
 
 test('dashboard links and specialized operational panels keep their own semantics', () => {
   const dashboard = read('src/routes/studio/+page.svelte');
-  assert.match(dashboard, /<a class="zone tone-\{zone\.tone\}" href=\{zone\.href\}>/);
+  assert.match(
+    dashboard,
+    /<a\b(?=[^>]*\bclass="zone tone-\{zone\.tone\}")(?=[^>]*\bhref=\{zone\.href\})[^>]*>/
+  );
   assert.doesNotMatch(dashboard, /<Panel\b|<Surface\b/);
   assert.match(dashboard, /\.zone\s*\{[\s\S]*padding:\s*1\.35rem/);
   assert.match(dashboard, /\.zone\s*\{[\s\S]*box-shadow:\s*var\(--studio-shadow\)/);

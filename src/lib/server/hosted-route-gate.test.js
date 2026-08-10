@@ -100,7 +100,7 @@ function config(subjects = '123') {
   });
 }
 
-test('visitor and invalid runtime fail closed before session resolution', () => {
+test('visitor and invalid runtime fail closed before session resolution', async () => {
   for (const mode of ['visitor', 'invalid', 'unknown']) {
     const sessions = lifecycle();
     const gate = new HostedRouteGate({
@@ -108,7 +108,7 @@ test('visitor and invalid runtime fail closed before session resolution', () => 
       authorizationConfig: config()
     });
 
-    const result = gate.evaluate(mode, 'browser-value');
+    const result = await gate.evaluate(mode, 'browser-value');
 
     assert.equal(result.outcome, HOSTED_ROUTE_GATE_OUTCOMES.NOT_FOUND);
     assert.equal(result.context, null);
@@ -116,21 +116,21 @@ test('visitor and invalid runtime fail closed before session resolution', () => 
   }
 });
 
-test('Local Studio preserves its separate existing behavior', () => {
+test('Local Studio preserves its separate existing behavior', async () => {
   const sessions = lifecycle();
   const gate = new HostedRouteGate({
     sessionLifecycle: sessions,
     authorizationConfig: config()
   });
 
-  const result = gate.evaluate('local');
+  const result = await gate.evaluate('local');
 
   assert.equal(result.outcome, HOSTED_ROUTE_GATE_OUTCOMES.LOCAL);
   assert.equal(result.context, null);
   assert.deepEqual(sessions.calls, []);
 });
 
-test('missing or invalid Hosted session requires authentication', () => {
+test('missing or invalid Hosted session requires authentication', async () => {
   const sessions = lifecycle({
     resolved: null
   });
@@ -140,7 +140,7 @@ test('missing or invalid Hosted session requires authentication', () => {
     authorizationConfig: config()
   });
 
-  const result = gate.evaluate('hosted', undefined);
+  const result = await gate.evaluate('hosted', undefined);
 
   assert.equal(result.outcome, HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE);
   assert.equal(result.context, null);
@@ -149,7 +149,7 @@ test('missing or invalid Hosted session requires authentication', () => {
   ]);
 });
 
-test('current allow-list denial forbids without recording admitted activity', () => {
+test('current allow-list denial forbids without recording admitted activity', async () => {
   const sessions = lifecycle({
     resolved: {
       session: session({
@@ -164,7 +164,7 @@ test('current allow-list denial forbids without recording admitted activity', ()
     authorizationConfig: config('123')
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -176,7 +176,7 @@ test('current allow-list denial forbids without recording admitted activity', ()
   ]);
 });
 
-test('allowed active session is touched and produces trusted minimal context', () => {
+test('allowed active session is touched and produces trusted minimal context', async () => {
   const sessions = lifecycle();
 
   const gate = new HostedRouteGate({
@@ -184,7 +184,7 @@ test('allowed active session is touched and produces trusted minimal context', (
     authorizationConfig: config()
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -205,7 +205,51 @@ test('allowed active session is touched and produces trusted minimal context', (
   ]);
 });
 
-test('malformed session CSRF authority fails closed before admitted activity', () => {
+test('trusted context is not issued before awaited lifecycle activity completes', async () => {
+  const current = session();
+  /** @type {() => void} */
+  let releaseTouch = () => {
+    throw new Error('touch resolver not assigned');
+  };
+  const gate = new HostedRouteGate({
+    sessionLifecycle: {
+      resolve() {
+        return { session: current, rotationDue: false };
+      },
+      touch() {
+        return new Promise((resolve) => {
+          releaseTouch = () => resolve({
+            session: { ...current, lastSeenAt: 150 },
+            rotationDue: false
+          });
+        });
+      },
+      rotate() {
+        throw new Error('rotation not expected');
+      }
+    },
+    authorizationConfig: config()
+  });
+
+  let settled = false;
+  const decisionPromise = gate.evaluate(
+    'hosted',
+    'opaque-session-credential'
+  ).then((decision) => {
+    settled = true;
+    return decision;
+  });
+
+  await Promise.resolve();
+  assert.equal(settled, false);
+
+  releaseTouch();
+  const decision = await decisionPromise;
+  assert.equal(decision.outcome, HOSTED_ROUTE_GATE_OUTCOMES.ALLOWED);
+  assert.ok(isTrustedHostedRequestContext(decision.context));
+});
+
+test('malformed session CSRF authority fails closed before admitted activity', async () => {
   const sessions = lifecycle({
     resolved: {
       session: session({
@@ -220,7 +264,7 @@ test('malformed session CSRF authority fails closed before admitted activity', (
     authorizationConfig: config()
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -235,7 +279,7 @@ test('malformed session CSRF authority fails closed before admitted activity', (
   ]);
 });
 
-test('touch cannot substitute CSRF authority after authorization', () => {
+test('touch cannot substitute CSRF authority after authorization', async () => {
   const sessions = lifecycle({
     touched: {
       session: session({
@@ -251,7 +295,7 @@ test('touch cannot substitute CSRF authority after authorization', () => {
     authorizationConfig: config()
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -263,7 +307,7 @@ test('touch cannot substitute CSRF authority after authorization', () => {
   assert.equal(result.context, null);
 });
 
-test('rotation cannot substitute CSRF authority after authorization', () => {
+test('rotation cannot substitute CSRF authority after authorization', async () => {
   const sessions = lifecycle({
     touched: {
       session: session({
@@ -284,7 +328,7 @@ test('rotation cannot substitute CSRF authority after authorization', () => {
     authorizationConfig: config()
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -296,7 +340,7 @@ test('rotation cannot substitute CSRF authority after authorization', () => {
   assert.equal(result.context, null);
 });
 
-test('touch cannot substitute a different identity after authorization', () => {
+test('touch cannot substitute a different identity after authorization', async () => {
   const sessions = lifecycle({
     touched: {
       session: session({
@@ -312,7 +356,7 @@ test('touch cannot substitute a different identity after authorization', () => {
     authorizationConfig: config('123')
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -321,7 +365,7 @@ test('touch cannot substitute a different identity after authorization', () => {
   assert.equal(result.context, null);
 });
 
-test('rotation cannot substitute a different identity after authorization', () => {
+test('rotation cannot substitute a different identity after authorization', async () => {
   const sessions = lifecycle({
     touched: {
       session: session({
@@ -342,7 +386,7 @@ test('rotation cannot substitute a different identity after authorization', () =
     authorizationConfig: config('123')
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -351,7 +395,7 @@ test('rotation cannot substitute a different identity after authorization', () =
   assert.equal(result.context, null);
 });
 
-test('session disappearing before admitted activity fails closed', () => {
+test('session disappearing before admitted activity fails closed', async () => {
   const sessions = lifecycle({
     touched: null
   });
@@ -361,7 +405,7 @@ test('session disappearing before admitted activity fails closed', () => {
     authorizationConfig: config()
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -374,7 +418,7 @@ test('session disappearing before admitted activity fails closed', () => {
   ]);
 });
 
-test('due rotation is lifecycle-owned and surfaced for future cookie transport', () => {
+test('due rotation is lifecycle-owned and surfaced for future cookie transport', async () => {
   const sessions = lifecycle({
     touched: {
       session: session({
@@ -389,7 +433,7 @@ test('due rotation is lifecycle-owned and surfaced for future cookie transport',
     authorizationConfig: config()
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -413,7 +457,7 @@ test('due rotation is lifecycle-owned and surfaced for future cookie transport',
   ]);
 });
 
-test('failed periodic rotation fails closed instead of pretending browser rotation', () => {
+test('failed periodic rotation fails closed instead of pretending browser rotation', async () => {
   const sessions = lifecycle({
     touched: {
       session: session({
@@ -429,7 +473,7 @@ test('failed periodic rotation fails closed instead of pretending browser rotati
     authorizationConfig: config()
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'opaque-session-credential'
   );
@@ -487,7 +531,7 @@ function routeSecurityEventCapture() {
   };
 }
 
-test('missing Hosted session stays quiet but presented invalid credential is recorded safely', () => {
+test('missing Hosted session stays quiet but presented invalid credential is recorded safely', async () => {
   {
     const capture = routeSecurityEventCapture();
     const sessions = lifecycle({ resolved: null });
@@ -497,7 +541,7 @@ test('missing Hosted session stays quiet but presented invalid credential is rec
       securityEventRecorder: capture.recorder
     });
 
-    const result = gate.evaluate('hosted', undefined);
+    const result = await gate.evaluate('hosted', undefined);
 
     assert.equal(
       result.outcome,
@@ -517,7 +561,7 @@ test('missing Hosted session stays quiet but presented invalid credential is rec
       securityEventRecorder: capture.recorder
     });
 
-    const result = gate.evaluate(
+    const result = await gate.evaluate(
       'hosted',
       credential
     );
@@ -545,7 +589,7 @@ test('missing Hosted session stays quiet but presented invalid credential is rec
   }
 });
 
-test('authorization denial emits one safe event without allow-list data', () => {
+test('authorization denial emits one safe event without allow-list data', async () => {
   const allowListSecret = '123';
   const capture = routeSecurityEventCapture();
   const sessions = lifecycle({
@@ -561,7 +605,7 @@ test('authorization denial emits one safe event without allow-list data', () => 
     securityEventRecorder: capture.recorder
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'SESSION_COOKIE_SENTINEL_DO_NOT_LOG'
   );
@@ -592,7 +636,7 @@ test('authorization denial emits one safe event without allow-list data', () => 
   assert.equal(serialized.includes('"456"'), false);
 });
 
-test('post-resolution session integrity failure emits one session rejection', () => {
+test('post-resolution session integrity failure emits one session rejection', async () => {
   const capture = routeSecurityEventCapture();
 
   const sessions = lifecycle({
@@ -611,7 +655,7 @@ test('post-resolution session integrity failure emits one session rejection', ()
     securityEventRecorder: capture.recorder
   });
 
-  const result = gate.evaluate(
+  const result = await gate.evaluate(
     'hosted',
     'SESSION_COOKIE_SENTINEL_DO_NOT_LOG'
   );
@@ -628,7 +672,7 @@ test('post-resolution session integrity failure emits one session rejection', ()
   );
 });
 
-test('allowed Local visitor and valid Hosted requests emit no rejection telemetry', () => {
+test('allowed Local visitor and valid Hosted requests emit no rejection telemetry', async () => {
   for (const [mode, sessionId] of [
     ['local', undefined],
     ['visitor', 'SESSION_COOKIE_SENTINEL_DO_NOT_LOG'],
@@ -641,13 +685,13 @@ test('allowed Local visitor and valid Hosted requests emit no rejection telemetr
       securityEventRecorder: capture.recorder
     });
 
-    gate.evaluate(mode, sessionId);
+    await gate.evaluate(mode, sessionId);
 
     assert.deepEqual(capture.events, []);
   }
 });
 
-test('route security recorder failure cannot weaken or replace denial semantics', () => {
+test('route security recorder failure cannot weaken or replace denial semantics', async () => {
   const sessions = lifecycle({ resolved: null });
 
   const gate = new HostedRouteGate({
@@ -662,15 +706,13 @@ test('route security recorder failure cannot weaken or replace denial semantics'
     }
   });
 
-  assert.doesNotThrow(() => {
-    const result = gate.evaluate(
-      'hosted',
-      'SESSION_COOKIE_SENTINEL_DO_NOT_LOG'
-    );
+  const result = await gate.evaluate(
+    'hosted',
+    'SESSION_COOKIE_SENTINEL_DO_NOT_LOG'
+  );
 
-    assert.equal(
-      result.outcome,
-      HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
-    );
-  });
+  assert.equal(
+    result.outcome,
+    HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
+  );
 });

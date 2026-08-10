@@ -56,9 +56,9 @@ const MAX_TRANSACTION_ALLOCATION_ATTEMPTS = 4;
 
 /**
  * @typedef {{
- *   create(record: any): any,
- *   consume(state: string): any,
- *   delete(state: string): boolean
+ *   create(record: any): Promise<any>,
+ *   consume(state: string): Promise<any>,
+ *   delete(state: string): Promise<boolean>
  * }} HostedOAuthTransactionStore
  */
 
@@ -651,9 +651,9 @@ export class HostedGitHubOAuthProvider {
    *     callbackUrl: string
    *   }>,
    *   transactionStore?: {
-   *     create(record: any): any,
-   *     consume(state: string): any,
-   *     delete(state: string): boolean
+   *     create(record: any): Promise<any>,
+   *     consume(state: string): Promise<any>,
+   *     delete(state: string): Promise<boolean>
    *   },
    *   transport?: {
    *     exchangeAuthorizationCode(input: any): Promise<string>,
@@ -807,7 +807,7 @@ export class HostedGitHubOAuthProvider {
    *
    * @param {unknown} returnTo
    */
-  begin(returnTo = undefined) {
+  async begin(returnTo = undefined) {
     const normalizedReturnTo =
       normalizeHostedOAuthReturnTo(returnTo);
     const now = this.#now();
@@ -836,7 +836,7 @@ export class HostedGitHubOAuthProvider {
         derivePkceS256Challenge(pkceVerifier);
 
       try {
-        this.#transactionStore.create({
+        await this.#transactionStore.create({
           state,
           pkceVerifier,
           returnTo: normalizedReturnTo,
@@ -932,7 +932,7 @@ export class HostedGitHubOAuthProvider {
       /** @type {string} */ (state);
 
     const transaction =
-      this.#transactionStore.consume(canonicalState);
+      await this.#transactionStore.consume(canonicalState);
 
     if (transaction === null) {
       this.#rejectOAuthState(

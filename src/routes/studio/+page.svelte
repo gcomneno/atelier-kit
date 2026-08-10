@@ -8,12 +8,17 @@
 
   /** @typedef {'site' | 'content' | 'publish' | 'system'} StudioZoneId */
 
-  /** @type {Array<{ id: StudioZoneId, href: string, tone: StudioZoneId }>} */
+  /** @type {Array<{ id: StudioZoneId, href: string, tone: StudioZoneId, external: boolean }>} */
   const zones = [
-    { id: 'site', href: '/studio/site/identity', tone: 'site' },
-    { id: 'content', href: '/studio/about', tone: 'content' },
-    { id: 'publish', href: '/studio/readiness', tone: 'publish' },
-    { id: 'system', href: '/studio/system', tone: 'system' }
+    { id: 'site', href: '/studio/site/identity', tone: 'site', external: false },
+    { id: 'content', href: '/studio/about', tone: 'content', external: false },
+    { id: 'publish', href: '/studio/readiness', tone: 'publish', external: false },
+    { id: 'system', href: '/studio/system', tone: 'system', external: false }
+  ];
+
+  const hostedZones = [
+    { id: 'social', href: '/studio/site/social', tone: 'site' },
+    { id: 'preview', href: '/', tone: 'publish', external: true }
   ];
 </script>
 
@@ -21,7 +26,9 @@
   <title>{t('studio.dashboard.pageTitle')}</title>
 </svelte:head>
 
-<PageIntro>{t('studio.dashboard.intro')}</PageIntro>
+<PageIntro>
+  {t(data?.hostedAuthoring ? 'studio.dashboard.hostedIntro' : 'studio.dashboard.intro')}
+</PageIntro>
 
 {#if data?.hostedPrivatePoc}
   <form
@@ -38,9 +45,14 @@
   </form>
 {/if}
 
-<section class="zones" aria-label={t('studio.dashboard.zonesLegend')}>
-  {#each zones as zone (zone.id)}
-    <a class="zone tone-{zone.tone}" href={zone.href}>
+<section class="zones" aria-label={t(data?.hostedAuthoring ? 'studio.dashboard.hostedZonesLegend' : 'studio.dashboard.zonesLegend')}>
+  {#each (data?.hostedAuthoring ? hostedZones : zones) as zone (zone.id)}
+    <a
+      class="zone tone-{zone.tone}"
+      href={zone.href}
+      target={zone.external ? '_blank' : undefined}
+      rel={zone.external ? 'noreferrer' : undefined}
+    >
       <p class="zone-eyebrow">{t(`studio.dashboard.zones.${zone.id}.eyebrow`)}</p>
       <h2>{t(`studio.dashboard.zones.${zone.id}.title`)}</h2>
       <p class="zone-description">{t(`studio.dashboard.zones.${zone.id}.description`)}</p>

@@ -6,6 +6,9 @@ Hosted Studio deployment in issue #275.
 This document applies only to the Hosted Studio runtime defined by ADR 0008.
 Local Studio continues to follow ADR 0007.
 
+For the first private deployment's operating procedure and recorded validation
+evidence, see the [Private Hosted Studio operator runbook](../usage/hosted-studio.md).
+
 ## Assets
 
 Protected assets include:

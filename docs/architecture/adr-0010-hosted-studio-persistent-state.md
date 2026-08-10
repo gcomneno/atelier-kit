@@ -289,6 +289,7 @@ preconditions is sufficient.
 - ADR 0008 — Hosted Studio architecture.
 - ADR 0009 — Hosted Studio authentication and authorization boundary.
 - Hosted Studio threat model.
+- [Private Hosted Studio operator runbook](../usage/hosted-studio.md).
 - Issue #82 — Hosted Studio parent epic.
 - Issue #275 — first private Hosted Studio deployment; this ADR does not mark
   it complete.

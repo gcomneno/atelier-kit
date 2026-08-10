@@ -12,7 +12,7 @@ import {
 } from '$lib/studio-runtime.js';
 
 /** @type {import('./$types').RequestHandler} */
-export function GET({ url }) {
+export async function GET({ url }) {
   const runtimeMode =
     resolveStudioRuntimeMode(
       dev,
@@ -20,7 +20,7 @@ export function GET({ url }) {
     );
 
   const outcome =
-    beginHostedPrivatePocLogin({
+    await beginHostedPrivatePocLogin({
       runtimeMode,
       returnTo:
         url.searchParams.get('returnTo') ??

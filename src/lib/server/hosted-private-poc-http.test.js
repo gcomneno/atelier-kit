@@ -186,7 +186,7 @@ async function authenticatedRuntime(
 ) {
   const current = runtime(clock);
 
-  current.beginAuthentication('/studio');
+  await current.beginAuthentication('/studio');
 
   const completed =
     await current.completeAuthentication({
@@ -229,7 +229,7 @@ test('only exact GET /studio belongs to the initial Hosted read-only HTTP seam',
   }
 });
 
-test('visitor Local invalid and unrelated Hosted requests are inert before runtime or cookie state is touched', () => {
+test('visitor Local invalid and unrelated Hosted requests are inert before runtime or cookie state is touched', async () => {
   for (
     const runtimeMode of
     /** @type {Array<'visitor' | 'local' | 'invalid'>} */ ([
@@ -247,7 +247,7 @@ test('visitor Local invalid and unrelated Hosted requests are inert before runti
     let resolverCalls = 0;
 
     const outcome =
-      applyHostedPrivatePocStudioAuthorizedRequest({
+      await applyHostedPrivatePocStudioAuthorizedRequest({
         event,
         runtimeMode,
         runtimeResolver() {
@@ -275,7 +275,7 @@ test('visitor Local invalid and unrelated Hosted requests are inert before runti
   let resolverCalls = 0;
 
   assert.equal(
-    applyHostedPrivatePocStudioAuthorizedRequest({
+    await applyHostedPrivatePocStudioAuthorizedRequest({
       event: unrelated.event,
       runtimeMode: 'hosted',
       runtimeResolver() {
@@ -293,7 +293,7 @@ test('visitor Local invalid and unrelated Hosted requests are inert before runti
   );
 });
 
-test('disabled private PoC is inert and does not read a presented cookie', () => {
+test('disabled private PoC is inert and does not read a presented cookie', async () => {
   const { event, capture } =
     eventFor({
       sessionId:
@@ -301,7 +301,7 @@ test('disabled private PoC is inert and does not read a presented cookie', () =>
     });
 
   assert.equal(
-    applyHostedPrivatePocStudioAuthorizedRequest({
+    await applyHostedPrivatePocStudioAuthorizedRequest({
       event,
       runtimeMode: 'hosted',
       runtimeResolver: () => null
@@ -313,12 +313,12 @@ test('disabled private PoC is inert and does not read a presented cookie', () =>
   assert.deepEqual(event.locals, {});
 });
 
-test('missing session requests authentication without creating or clearing browser state', () => {
+test('missing session requests authentication without creating or clearing browser state', async () => {
   const current = runtime();
   const { event, capture } = eventFor();
 
   const outcome =
-    applyHostedPrivatePocStudioAuthorizedRequest({
+    await applyHostedPrivatePocStudioAuthorizedRequest({
       event,
       runtimeMode: 'hosted',
       runtimeResolver: () => current
@@ -340,7 +340,7 @@ test('missing session requests authentication without creating or clearing brows
   assert.deepEqual(event.locals, {});
 });
 
-test('presented malformed or unknown session requests authentication and clears the stale cookie safely', () => {
+test('presented malformed or unknown session requests authentication and clears the stale cookie safely', async () => {
   const current = runtime();
 
   for (const sessionId of [
@@ -351,7 +351,7 @@ test('presented malformed or unknown session requests authentication and clears 
       eventFor({ sessionId });
 
     const outcome =
-      applyHostedPrivatePocStudioAuthorizedRequest({
+      await applyHostedPrivatePocStudioAuthorizedRequest({
         event,
         runtimeMode: 'hosted',
         runtimeResolver: () => current
@@ -386,7 +386,7 @@ test('authorized session places only genuine gate-issued context into locals', a
     });
 
   const outcome =
-    applyHostedPrivatePocStudioAuthorizedRequest({
+    await applyHostedPrivatePocStudioAuthorizedRequest({
       event,
       runtimeMode: 'hosted',
       runtimeResolver:
@@ -443,7 +443,7 @@ test('periodic rotation replaces the opaque cookie before trusted locals are adm
     });
 
   const outcome =
-    applyHostedPrivatePocStudioAuthorizedRequest({
+    await applyHostedPrivatePocStudioAuthorizedRequest({
       event,
       runtimeMode: 'hosted',
       runtimeResolver:
@@ -499,7 +499,7 @@ test('runtime resolver retains exactly one process-local state owner', () => {
   assert.equal(first, second);
 });
 
-test('forged allowed context cannot be placed into locals', () => {
+test('forged allowed context cannot be placed into locals', async () => {
   const { event } = eventFor({
     sessionId: SESSION_1
   });
@@ -517,7 +517,7 @@ test('forged allowed context cannot be placed into locals', () => {
     sessionTransport: null
   });
 
-  assert.throws(
+  await assert.rejects(
     () =>
       applyHostedPrivatePocStudioAuthorizedRequest({
         event,
@@ -585,7 +585,7 @@ test('authorized Social POST receives genuine trusted context before the action'
   });
 
   const result =
-    applyHostedPrivatePocStudioAuthorizedRequest({
+    await applyHostedPrivatePocStudioAuthorizedRequest({
       event,
       runtimeMode: 'hosted',
       runtimeResolver: () =>

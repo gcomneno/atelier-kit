@@ -122,7 +122,7 @@ function cookieCapture({
   };
 }
 
-test('login is unavailable outside active Hosted private PoC mode', () => {
+test('login is unavailable outside active Hosted private PoC mode', async () => {
   for (
     const runtimeMode of
     /** @type {Array<'visitor' | 'local' | 'invalid'>} */ ([
@@ -132,7 +132,7 @@ test('login is unavailable outside active Hosted private PoC mode', () => {
     ])
   ) {
     assert.deepEqual(
-      beginHostedPrivatePocLogin({
+      await beginHostedPrivatePocLogin({
         runtimeMode,
         runtimeResolver() {
           throw new Error('must not run');
@@ -148,7 +148,7 @@ test('login is unavailable outside active Hosted private PoC mode', () => {
   }
 
   assert.deepEqual(
-    beginHostedPrivatePocLogin({
+    await beginHostedPrivatePocLogin({
       runtimeMode: 'hosted',
       runtimeResolver: () => null
     }),
@@ -161,11 +161,11 @@ test('login is unavailable outside active Hosted private PoC mode', () => {
   );
 });
 
-test('login begins provider-owned OAuth redirect with canonical return target', () => {
+test('login begins provider-owned OAuth redirect with canonical return target', async () => {
   const runtime = runtimeForUser(123);
 
   const response =
-    beginHostedPrivatePocLogin({
+    await beginHostedPrivatePocLogin({
       runtimeMode: 'hosted',
       returnTo: '/studio',
       runtimeResolver: () => runtime
@@ -197,12 +197,12 @@ test('login begins provider-owned OAuth redirect with canonical return target', 
   );
 });
 
-test('login rejects external or malformed return targets without leaking input', () => {
+test('login rejects external or malformed return targets without leaking input', async () => {
   const external =
     'https://attacker.example/SECRET_RETURN_SENTINEL';
 
   const response =
-    beginHostedPrivatePocLogin({
+    await beginHostedPrivatePocLogin({
       runtimeMode: 'hosted',
       returnTo: external,
       runtimeResolver:
@@ -228,7 +228,7 @@ test('login rejects external or malformed return targets without leaking input',
 test('authorized callback creates opaque cookie and redirects only to stored return target', async () => {
   const runtime = runtimeForUser(123);
 
-  beginHostedPrivatePocLogin({
+  await beginHostedPrivatePocLogin({
     runtimeMode: 'hosted',
     returnTo: '/studio',
     runtimeResolver: () => runtime
@@ -272,7 +272,7 @@ test('authorized callback creates opaque cookie and redirects only to stored ret
 test('authenticated but unauthorized callback creates no browser or session authority', async () => {
   const runtime = runtimeForUser(999);
 
-  beginHostedPrivatePocLogin({
+  await beginHostedPrivatePocLogin({
     runtimeMode: 'hosted',
     runtimeResolver: () => runtime
   });
@@ -303,10 +303,10 @@ test('authenticated but unauthorized callback creates no browser or session auth
   assert.deepEqual(capture.calls, []);
 
   assert.equal(
-    runtime.evaluateRequest(
+    (await runtime.evaluateRequest(
       'hosted',
       SESSION_ID
-    ).outcome,
+    )).outcome,
     HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
   );
 });
@@ -360,7 +360,7 @@ test('invalid callback is generic and never sets browser state', async () => {
 test('cookie transport failure invalidates the newly-created session before returning failure', async () => {
   const runtime = runtimeForUser(123);
 
-  beginHostedPrivatePocLogin({
+  await beginHostedPrivatePocLogin({
     runtimeMode: 'hosted',
     runtimeResolver: () => runtime
   });
@@ -386,10 +386,10 @@ test('cookie transport failure invalidates the newly-created session before retu
   );
 
   assert.equal(
-    runtime.evaluateRequest(
+    (await runtime.evaluateRequest(
       'hosted',
       SESSION_ID
-    ).outcome,
+    )).outcome,
     HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
   );
 

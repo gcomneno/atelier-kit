@@ -35,8 +35,9 @@ export class InMemoryHostedOAuthTransactionStore {
 
   /**
    * @param {Parameters<typeof snapshotTransaction>[0]} record
+   * @returns {Promise<ReturnType<typeof snapshotTransaction>>}
    */
-  create(record) {
+  async create(record) {
     const snapshot = snapshotTransaction(record);
 
     if (this.#records.has(snapshot.state)) {
@@ -52,8 +53,9 @@ export class InMemoryHostedOAuthTransactionStore {
    * Read without consuming. Intended for diagnostics/tests, not callback use.
    *
    * @param {string} state
+   * @returns {Promise<ReturnType<typeof snapshotTransaction> | null>}
    */
-  read(state) {
+  async read(state) {
     const record = this.#records.get(state);
 
     return record
@@ -65,8 +67,9 @@ export class InMemoryHostedOAuthTransactionStore {
    * Atomically consume one transaction.
    *
    * @param {string} state
+   * @returns {Promise<ReturnType<typeof snapshotTransaction> | null>}
    */
-  consume(state) {
+  async consume(state) {
     const record = this.#records.get(state);
 
     if (!record) {
@@ -80,8 +83,9 @@ export class InMemoryHostedOAuthTransactionStore {
 
   /**
    * @param {string} state
+   * @returns {Promise<boolean>}
    */
-  delete(state) {
+  async delete(state) {
     return this.#records.delete(state);
   }
 }

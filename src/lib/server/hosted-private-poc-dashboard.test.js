@@ -72,7 +72,7 @@ async function trustedContext() {
 
   assert.ok(runtime);
 
-  runtime.beginAuthentication('/studio');
+  await runtime.beginAuthentication('/studio');
 
   const completed =
     await runtime.completeAuthentication({
@@ -86,7 +86,7 @@ async function trustedContext() {
   );
 
   const decision =
-    runtime.evaluateRequest(
+    await runtime.evaluateRequest(
       'hosted',
       completed.sessionId
     );

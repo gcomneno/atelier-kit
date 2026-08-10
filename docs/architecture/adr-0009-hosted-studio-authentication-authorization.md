@@ -204,6 +204,22 @@ runtime topology.
 
 The initial design does not require Redis or a specific database.
 
+## Persistent-state refinement
+
+ADR 0010 selects the deployment-capable persistent-state topology for issue
+#275. In that topology, Hosted sessions and OAuth transactions use async,
+persistent, server-side store contracts. `single-process` remains limited to
+the private test/local PoC topology; it is not a production deployment model.
+
+A persistent-store outage, timeout, malformed record or configuration failure
+must fail closed. The application must not fall back to process memory, a
+browser-held session, or a JWT/bearer-token session architecture.
+
+This state remains an authentication and session boundary only. It does not
+give Redis, browser state or OAuth state repository mutation authority; that
+authority remains separately server-controlled as specified below and in ADR
+0008.
+
 ## Session cookie
 
 The Hosted Studio session cookie must be:
@@ -555,8 +571,10 @@ complete and verified.
 
 - ADR 0007 — Local Studio boundary and localhost safety.
 - ADR 0008 — Hosted Studio architecture.
+- ADR 0010 — Hosted Studio persistent state.
 - Hosted Studio threat model.
 - Issue #82 — Hosted Studio.
+- Issue #275 — first private Hosted Studio deployment.
 - Issue #257 — Hosted Studio authentication and authorization boundary.
 - Issue #251 — runtime/security modes.
 - Issue #253 — AuthoringRepository boundary.

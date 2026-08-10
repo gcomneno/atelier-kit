@@ -1,9 +1,10 @@
 # Hosted Studio threat model
 
-Status: Draft security model for issue #82.
+Status: Draft security model for issue #82, refined for the first private
+Hosted Studio deployment in issue #275.
 
-This document applies only to the proposed Hosted Studio runtime. Local Studio
-continues to follow ADR 0007.
+This document applies only to the Hosted Studio runtime defined by ADR 0008.
+Local Studio continues to follow ADR 0007.
 
 ## Assets
 
@@ -25,19 +26,24 @@ Operator browser
     | untrusted HTTP input
     v
 Hosted Studio deployment
-    |
-    | authenticated/authorized repository operations
-    v
-GitHub
-    |
-    | repository-triggered deployment
-    v
-Public site
+    |                                |
+    | transient security/session      | authenticated/authorized
+    | state only                      | repository operations
+    v                                v
+Persistent state store           GitHub
+                                     |
+                                     | repository-triggered deployment
+                                     v
+                                 Public site
 ```
 
 The browser is never trusted merely because it rendered Studio UI.
 
 GitHub and the configured identity provider are external security dependencies.
+The persistent state store is a separate server-side trust boundary. It stores
+only transient OAuth and session security state; GitHub remains the canonical
+editorial history and repository-authority boundary. ADR 0010 defines this
+boundary for the deployment-capable topology.
 
 ## Primary threats and controls
 
@@ -89,6 +95,46 @@ Controls:
 - bounded session lifetime;
 - logout invalidation;
 - secrets never serialized into page data or client bundles.
+
+### Persistent-state isolation, integrity and availability
+
+Threats:
+
+- a shared store key collides across deployments or environments;
+- a stored serialized record is malformed, tampered with, or incompatible with
+  the expected schema/version;
+- Redis TTL cleanup disagrees with application expiry timestamps;
+- concurrent requests race while touching, updating, invalidating or rotating
+  a session;
+- a stale session is resurrected after expiry, invalidation or rotation;
+- non-atomic session-ID rotation leaves both old and new identifiers usable;
+- an OAuth transaction is replayed;
+- the state store is unavailable, slow or times out;
+- Redis credentials leak into browser-visible data or ordinary logs;
+- an implementation falls back to process memory and fails open during a store
+  error.
+
+Controls:
+
+- deployment-unique, versioned key namespaces isolate every deployment and
+  environment;
+- only server-side configuration may provide Redis credentials, and those
+  credentials are excluded from client bundles, page data, errors and ordinary
+  logs;
+- stored values are treated as untrusted input and are schema-validated on
+  every read; malformed, unknown, expired or incompatible records fail closed;
+- application timestamps and lifecycle validation are authoritative for
+  absolute and idle expiry; Redis TTL is cleanup and availability support only;
+- OAuth state is collision-safe at creation, bounded by TTL and atomically
+  consumed once before callback processing continues;
+- session creation is collision-safe and bounded by absolute TTL;
+- touch/update and rotation use atomic, preconditioned server-side operations
+  so stale state cannot overwrite, revive or outlive a newer lifecycle state;
+- rotation atomically retires the old session ID while establishing the new
+  session ID;
+- delete/invalidation is idempotent;
+- store errors, timeouts and failed configuration deny the request and never
+  fall back to memory, browser state or JWTs.
 
 ### Repository credential theft
 
@@ -238,7 +284,13 @@ These invariants must have automated coverage before private PoC approval:
 7. one logical multi-file mutation produces one repository revision;
 8. invalid content never advances the branch;
 9. repository/auth secrets never enter browser-visible data;
-10. Local Studio remains functional without Hosted Studio credentials.
+10. Local Studio remains functional without Hosted Studio credentials;
+11. persistent-state records are namespace-isolated, schema-validated and fail
+    closed when malformed or expired;
+12. OAuth state is one-time and session lifecycle operations cannot resurrect a
+    stale, invalidated, expired or rotated session;
+13. persistent-state outages and partial configuration do not enable a memory,
+    browser or JWT fallback.
 
 ## Private PoC gate
 
@@ -247,6 +299,7 @@ The private deployment may begin only after:
 - auth provider selected and documented;
 - repository credentials scoped;
 - all security invariants above have tests;
+- persistent-state contract tests and outage/concurrency invariants are green;
 - CSRF/session configuration reviewed;
 - upload path reviewed;
 - Hosted Studio is isolated from the public production deployment.
@@ -312,3 +365,7 @@ visitor mode.
 
 These controls refine the existing threats and invariants in this document;
 they do not enable Hosted Studio routes or mutations.
+
+ADR 0010 further governs the persistent state boundary selected for issue
+#275. It does not expand the Hosted route allow-list or repository mutation
+scope.

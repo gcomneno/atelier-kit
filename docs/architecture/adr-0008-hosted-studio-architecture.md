@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed — design phase for issue #82.
+Accepted.
 
 ## Context
 
@@ -12,6 +12,13 @@ authoring model. The public deployment remains read-only and `/studio` returns
 
 Issue #82 revisits hosted authoring for operators who need browser-based access
 without a local checkout, Node installation, or Atelier Desktop.
+
+The Hosted application and security foundations described by this ADR now
+exist, including explicit runtime separation, the repository boundary and the
+Hosted authentication/authorization boundary. Hosted Studio is still not a
+fully deployed authoring product: route and mutation enablement remain
+deliberately limited and fail closed outside their explicitly implemented
+scope.
 
 The current Studio implementation cannot simply be enabled on a hosted Vercel
 deployment:
@@ -108,6 +115,12 @@ closed when required configuration is absent.
 ## Persistence model
 
 Git remains the canonical content history.
+
+Process or function memory is never the persistence model for deployment
+security state. It can support local development and tests, but process reuse
+does not make it durable across scaling, restart or instance changes. ADR 0010
+defines the persistent OAuth-transaction and session-state topology required
+for a real Hosted Studio deployment.
 
 Hosted Studio will introduce a storage/repository boundary instead of calling
 the current filesystem primitives directly.
@@ -396,4 +409,7 @@ repository persistence, validation, uploads, concurrency, or publication.
 
 - ADR 0002 — Local Studio research.
 - ADR 0007 — Production-safe Studio authoring / Atelier Desktop.
+- ADR 0009 — Hosted Studio authentication and authorization boundary.
+- ADR 0010 — Hosted Studio persistent state.
 - Issue #82 — Hosted Studio with authentication.
+- Issue #275 — first private Hosted Studio deployment.

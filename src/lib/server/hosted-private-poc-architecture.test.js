@@ -24,6 +24,11 @@ const HOOK_FILE =
     new URL('../../hooks.server.js', import.meta.url)
   );
 
+const SOURCE_ROOT =
+  fileURLToPath(
+    new URL('../..', import.meta.url)
+  );
+
 /**
  * @param {string} root
  * @returns {Promise<string[]>}
@@ -293,7 +298,7 @@ test('live auth surface is exactly login callback and POST logout', async () => 
 
   assert.match(
     login,
-    /export\s+function\s+GET\s*\(/
+    /export\s+async\s+function\s+GET\s*\(/
   );
   assert.match(
     callback,
@@ -435,4 +440,38 @@ test('live Hosted PoC wiring imports no repository filesystem or publish mutatio
       );
     }
   }
+});
+
+test('Upstash state configuration and client remain in the server-only Hosted boundary', async () => {
+  const allSourceFiles = await collectFiles(SOURCE_ROOT);
+  const nonServerFiles = allSourceFiles.filter((file) =>
+    !file.includes(`${path.sep}lib${path.sep}server${path.sep}`)
+  );
+
+  for (const file of nonServerFiles) {
+    const contents = await source(file);
+    for (const forbidden of [
+      '@upstash/redis',
+      'ATELIER_STUDIO_STATE_REDIS_REST_URL',
+      'ATELIER_STUDIO_STATE_REDIS_REST_TOKEN',
+      'ATELIER_STUDIO_STATE_NAMESPACE',
+      'HostedUpstashRedisTransport'
+    ]) {
+      assert.equal(
+        contents.includes(forbidden),
+        false,
+        `${relativePath(SOURCE_ROOT, file)} must not expose ${forbidden}`
+      );
+    }
+  }
+
+  const adapter = await source(
+    path.join(
+      SOURCE_ROOT,
+      'lib/server/hosted-upstash-redis-transport.js'
+    )
+  );
+  assert.match(adapter, /import\s+\{\s*Redis\s*\}\s+from\s+['"]@upstash\/redis['"]/);
+  assert.doesNotMatch(adapter, /export\s+\{[^}]*Redis/);
+  assert.doesNotMatch(adapter, /fromEnv\s*\(/);
 });

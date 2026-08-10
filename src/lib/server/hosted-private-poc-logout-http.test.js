@@ -143,7 +143,7 @@ async function authenticatedFixture() {
   let now = BASE_TIME;
   const current = runtime(() => now);
 
-  current.beginAuthentication('/studio');
+  await current.beginAuthentication('/studio');
 
   const completed =
     await current.completeAuthentication({
@@ -157,7 +157,7 @@ async function authenticatedFixture() {
   );
 
   const decision =
-    current.evaluateRequest(
+    await current.evaluateRequest(
       'hosted',
       completed.sessionId
     );
@@ -170,6 +170,7 @@ async function authenticatedFixture() {
   return {
     runtime: current,
     sessionId: completed.sessionId,
+    context: decision.context,
     csrf:
       getTrustedHostedRequestCsrfToken(
         decision.context
@@ -183,7 +184,7 @@ async function authenticatedFixture() {
   };
 }
 
-test('logout is unavailable outside active Hosted runtime', () => {
+test('logout is unavailable outside active Hosted runtime', async () => {
   for (
     const runtimeMode of
     /** @type {Array<'visitor' | 'local' | 'invalid'>} */ ([
@@ -193,7 +194,7 @@ test('logout is unavailable outside active Hosted runtime', () => {
     ])
   ) {
     assert.deepEqual(
-      performHostedPrivatePocLogout({
+      await performHostedPrivatePocLogout({
         runtimeMode,
         cookies: cookieJar().cookies,
         runtimeResolver() {
@@ -209,7 +210,7 @@ test('logout is unavailable outside active Hosted runtime', () => {
   }
 
   assert.deepEqual(
-    performHostedPrivatePocLogout({
+    await performHostedPrivatePocLogout({
       runtimeMode: 'hosted',
       cookies: cookieJar().cookies,
       runtimeResolver: () => null
@@ -222,7 +223,7 @@ test('logout is unavailable outside active Hosted runtime', () => {
   );
 });
 
-test('missing or invalid session cannot reach mutation authority', () => {
+test('missing or invalid session cannot reach mutation authority', async () => {
   const current =
     runtime(() => BASE_TIME);
 
@@ -233,7 +234,7 @@ test('missing or invalid session cannot reach mutation authority', () => {
     const jar = cookieJar(presented);
 
     const result =
-      performHostedPrivatePocLogout({
+      await performHostedPrivatePocLogout({
         runtimeMode: 'hosted',
         cookies: jar.cookies,
         host: 'studio.example.com',
@@ -281,7 +282,7 @@ test('wrong Host Origin or CSRF never invalidates an active session', async () =
       cookieJar(fixture.sessionId);
 
     const result =
-      performHostedPrivatePocLogout({
+      await performHostedPrivatePocLogout({
         runtimeMode: 'hosted',
         cookies: jar.cookies,
         ...mutation,
@@ -296,10 +297,10 @@ test('wrong Host Origin or CSRF never invalidates an active session', async () =
     );
 
     assert.equal(
-      fixture.runtime.evaluateRequest(
+      (await fixture.runtime.evaluateRequest(
         'hosted',
         jar.current()
-      ).outcome,
+      )).outcome,
       HOSTED_ROUTE_GATE_OUTCOMES.ALLOWED
     );
   }
@@ -312,7 +313,7 @@ test('unsupported method never invalidates logout state', async () => {
     cookieJar(fixture.sessionId);
 
   const result =
-    performHostedPrivatePocLogout({
+    await performHostedPrivatePocLogout({
       runtimeMode: 'hosted',
       cookies: jar.cookies,
       host: 'studio.example.com',
@@ -330,10 +331,10 @@ test('unsupported method never invalidates logout state', async () => {
   );
 
   assert.equal(
-    fixture.runtime.evaluateRequest(
+    (await fixture.runtime.evaluateRequest(
       'hosted',
       fixture.sessionId
-    ).outcome,
+    )).outcome,
     HOSTED_ROUTE_GATE_OUTCOMES.ALLOWED
   );
 });
@@ -345,7 +346,7 @@ test('valid POST logout invalidates server authority and clears the cookie', asy
     cookieJar(fixture.sessionId);
 
   const result =
-    performHostedPrivatePocLogout({
+    await performHostedPrivatePocLogout({
       runtimeMode: 'hosted',
       cookies: jar.cookies,
       host: 'studio.example.com',
@@ -364,10 +365,10 @@ test('valid POST logout invalidates server authority and clears the cookie', asy
   assert.equal(jar.current(), undefined);
 
   assert.equal(
-    fixture.runtime.evaluateRequest(
+    (await fixture.runtime.evaluateRequest(
       'hosted',
       fixture.sessionId
-    ).outcome,
+    )).outcome,
     HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
   );
 
@@ -382,6 +383,77 @@ test('valid POST logout invalidates server authority and clears the cookie', asy
   );
 });
 
+test('logout awaits invalidation before clearing browser transport', async () => {
+  const fixture = await authenticatedFixture();
+  /** @type {(value: boolean) => void} */
+  let releaseInvalidation = () => {
+    throw new Error('invalidation resolver not assigned');
+  };
+  let invalidationStarted = false;
+  /** @type {() => void} */
+  let notifyInvalidationStarted = () => {
+    throw new Error('invalidation notifier not assigned');
+  };
+  const invalidationStartedPromise = new Promise((resolve) => {
+    notifyInvalidationStarted = () => resolve(undefined);
+  });
+  let cookieCleared = false;
+  const resultPromise = performHostedPrivatePocLogout({
+    runtimeMode: 'hosted',
+    cookies: {
+      get() {
+        return fixture.sessionId;
+      },
+      delete() {
+        cookieCleared = true;
+      }
+    },
+    host: 'studio.example.com',
+    origin: 'https://studio.example.com',
+    method: 'POST',
+    csrfToken: fixture.csrf,
+    runtimeResolver() {
+      return /** @type {import('./hosted-private-poc-runtime.js').HostedPrivatePocRuntime} */ (/** @type {unknown} */ ({
+        async evaluateRequest() {
+          return {
+            outcome: HOSTED_ROUTE_GATE_OUTCOMES.ALLOWED,
+            context: fixture.context,
+            sessionTransport: null
+          };
+        },
+        evaluateMutation() {
+          return {
+            outcome: 'allowed'
+          };
+        },
+        invalidateSession() {
+          invalidationStarted = true;
+          notifyInvalidationStarted();
+          return new Promise((resolve) => {
+            releaseInvalidation = (value) => resolve(value);
+          });
+        }
+      }));
+    }
+  });
+
+  let settled = false;
+  resultPromise.then(() => {
+    settled = true;
+  });
+  await invalidationStartedPromise;
+
+  assert.equal(invalidationStarted, true);
+  assert.equal(cookieCleared, false);
+  assert.equal(settled, false);
+
+  releaseInvalidation(true);
+  assert.deepEqual(await resultPromise, {
+    outcome: HOSTED_PRIVATE_POC_LOGOUT_OUTCOMES.LOGGED_OUT
+  });
+  assert.equal(cookieCleared, true);
+});
+
 test('rotation before rejected logout updates browser credential and preserves active authority', async () => {
   const fixture =
     await authenticatedFixture();
@@ -392,7 +464,7 @@ test('rotation before rejected logout updates browser credential and preserves a
     cookieJar(fixture.sessionId);
 
   const result =
-    performHostedPrivatePocLogout({
+    await performHostedPrivatePocLogout({
       runtimeMode: 'hosted',
       cookies: jar.cookies,
       host: 'studio.example.com',
@@ -413,18 +485,18 @@ test('rotation before rejected logout updates browser credential and preserves a
   assert.equal(jar.current(), SESSION_2);
 
   assert.equal(
-    fixture.runtime.evaluateRequest(
+    (await fixture.runtime.evaluateRequest(
       'hosted',
       SESSION_1
-    ).outcome,
+    )).outcome,
     HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
   );
 
   assert.equal(
-    fixture.runtime.evaluateRequest(
+    (await fixture.runtime.evaluateRequest(
       'hosted',
       SESSION_2
-    ).outcome,
+    )).outcome,
     HOSTED_ROUTE_GATE_OUTCOMES.ALLOWED
   );
 });
@@ -439,7 +511,7 @@ test('successful rotated logout invalidates the replacement credential and clear
     cookieJar(fixture.sessionId);
 
   const result =
-    performHostedPrivatePocLogout({
+    await performHostedPrivatePocLogout({
       runtimeMode: 'hosted',
       cookies: jar.cookies,
       host: 'studio.example.com',
@@ -463,10 +535,10 @@ test('successful rotated logout invalidates the replacement credential and clear
     SESSION_2
   ]) {
     assert.equal(
-      fixture.runtime.evaluateRequest(
+      (await fixture.runtime.evaluateRequest(
         'hosted',
         sessionId
-      ).outcome,
+      )).outcome,
       HOSTED_ROUTE_GATE_OUTCOMES.AUTHENTICATE
     );
   }
@@ -479,7 +551,7 @@ test('logout result and cookie metadata never disclose security secrets', async 
     cookieJar(fixture.sessionId);
 
   const result =
-    performHostedPrivatePocLogout({
+    await performHostedPrivatePocLogout({
       runtimeMode: 'hosted',
       cookies: jar.cookies,
       host: 'wrong.example.com',

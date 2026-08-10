@@ -30,19 +30,19 @@ function sessionRecord(sessionId, lastSeenAt = 1000) {
  * @param {InMemoryHostedSessionStore} store
  * @param {string} sessionId
  */
-function mustRead(store, sessionId) {
-  const record = store.read(sessionId);
+async function mustRead(store, sessionId) {
+  const record = await store.read(sessionId);
 
   assert.ok(record !== null);
 
   return record;
 }
 
-test('store creates and reads immutable isolated session snapshots', () => {
+test('store creates and reads immutable isolated awaitable session snapshots', async () => {
   const store = new InMemoryHostedSessionStore();
   const input = sessionRecord('session-a');
 
-  const created = store.create(input);
+  const created = await store.create(input);
 
   input.identity.subject = '999';
   input.lastSeenAt = 5000;
@@ -56,112 +56,131 @@ test('store creates and reads immutable isolated session snapshots', () => {
   );
   assert.equal(created.lastSeenAt, 1000);
 
-  const read = store.read('session-a');
+  const read = await store.read('session-a');
 
   assert.notEqual(read, created);
   assert.deepEqual(read, created);
 });
 
-test('duplicate session creation never overwrites existing state', () => {
+test('duplicate session creation never overwrites existing state', async () => {
   const store = new InMemoryHostedSessionStore();
 
-  store.create(sessionRecord('session-a'));
+  await store.create(sessionRecord('session-a'));
 
-  assert.throws(
+  await assert.rejects(
     () => store.create(sessionRecord('session-a', 4000)),
     HostedSessionStoreConflictError
   );
 
-  assert.equal(mustRead(store, 'session-a').lastSeenAt, 1000);
+  assert.equal((await mustRead(store, 'session-a')).lastSeenAt, 1000);
 });
 
-test('update changes state without changing the lookup credential', () => {
+test('update changes state without changing the lookup credential', async () => {
   const store = new InMemoryHostedSessionStore();
 
-  store.create(sessionRecord('session-a'));
+  await store.create(sessionRecord('session-a'));
 
-  const updated = store.update(
+  const updated = await store.update(
     'session-a',
+    sessionRecord('session-a'),
     sessionRecord('session-a', 2000)
   );
 
   assert.ok(updated !== null);
   assert.equal(updated.lastSeenAt, 2000);
-  assert.equal(mustRead(store, 'session-a').lastSeenAt, 2000);
+  assert.equal((await mustRead(store, 'session-a')).lastSeenAt, 2000);
 
-  assert.throws(
+  await assert.rejects(
     () => store.update(
       'session-a',
+      sessionRecord('session-a'),
       sessionRecord('session-b', 3000)
     ),
     HostedSessionStoreInvariantError
   );
 });
 
-test('update of an unknown session fails closed without creating it', () => {
+test('update of an unknown session fails closed without creating it', async () => {
   const store = new InMemoryHostedSessionStore();
 
   assert.equal(
-    store.update('missing', sessionRecord('missing')),
+    await store.update('missing', sessionRecord('missing'), sessionRecord('missing')),
     null
   );
-  assert.equal(store.read('missing'), null);
+  assert.equal(await store.read('missing'), null);
 });
 
-test('replace atomically retires the old session credential', () => {
+test('stale update snapshots cannot replace newer in-memory session state', async () => {
+  const store = new InMemoryHostedSessionStore();
+  const original = sessionRecord('session-a');
+
+  await store.create(original);
+  await store.update('session-a', original, sessionRecord('session-a', 2000));
+
+  assert.equal(
+    await store.update('session-a', original, sessionRecord('session-a', 3000)),
+    null
+  );
+  assert.equal((await mustRead(store, 'session-a')).lastSeenAt, 2000);
+});
+
+test('replace atomically retires the old session credential', async () => {
   const store = new InMemoryHostedSessionStore();
 
-  store.create(sessionRecord('session-a'));
+  await store.create(sessionRecord('session-a'));
 
-  const replacement = store.replace(
+  const replacement = await store.replace(
     'session-a',
+    sessionRecord('session-a'),
     sessionRecord('session-b', 2000)
   );
 
   assert.ok(replacement !== null);
   assert.equal(replacement.sessionId, 'session-b');
-  assert.equal(store.read('session-a'), null);
-  assert.equal(mustRead(store, 'session-b').lastSeenAt, 2000);
+  assert.equal(await store.read('session-a'), null);
+  assert.equal((await mustRead(store, 'session-b')).lastSeenAt, 2000);
 });
 
-test('replacement collision preserves both existing sessions unchanged', () => {
+test('async replacement collision preserves both existing sessions unchanged', async () => {
   const store = new InMemoryHostedSessionStore();
 
-  store.create(sessionRecord('session-a'));
-  store.create(sessionRecord('session-b', 3000));
+  await store.create(sessionRecord('session-a'));
+  await store.create(sessionRecord('session-b', 3000));
 
-  assert.throws(
+  await assert.rejects(
     () => store.replace(
       'session-a',
+      sessionRecord('session-a'),
       sessionRecord('session-b', 5000)
     ),
     HostedSessionStoreConflictError
   );
 
-  assert.equal(mustRead(store, 'session-a').lastSeenAt, 1000);
-  assert.equal(mustRead(store, 'session-b').lastSeenAt, 3000);
+  assert.equal((await mustRead(store, 'session-a')).lastSeenAt, 1000);
+  assert.equal((await mustRead(store, 'session-b')).lastSeenAt, 3000);
 });
 
-test('replace requires a genuinely new lookup credential', () => {
+test('replace requires a genuinely new lookup credential', async () => {
   const store = new InMemoryHostedSessionStore();
 
-  store.create(sessionRecord('session-a'));
+  await store.create(sessionRecord('session-a'));
 
-  assert.throws(
+  await assert.rejects(
     () => store.replace(
       'session-a',
+      sessionRecord('session-a'),
       sessionRecord('session-a', 2000)
     ),
     HostedSessionStoreInvariantError
   );
 });
 
-test('invalidation is effective and idempotent', () => {
+test('invalidation is effective and idempotent', async () => {
   const store = new InMemoryHostedSessionStore();
 
-  store.create(sessionRecord('session-a'));
+  await store.create(sessionRecord('session-a'));
 
-  assert.equal(store.delete('session-a'), true);
-  assert.equal(store.read('session-a'), null);
-  assert.equal(store.delete('session-a'), false);
+  assert.equal(await store.delete('session-a'), true);
+  assert.equal(await store.read('session-a'), null);
+  assert.equal(await store.delete('session-a'), false);
 });

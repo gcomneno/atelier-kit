@@ -20,9 +20,9 @@ import {
 
 /**
  * @typedef {{
- *   resolve(sessionId: unknown): any,
- *   touch(sessionId: unknown): any,
- *   rotate(sessionId: unknown): any
+ *   resolve(sessionId: unknown): Promise<any>,
+ *   touch(sessionId: unknown): Promise<any>,
+ *   rotate(sessionId: unknown): Promise<any>
  * }} HostedSessionLifecycleBoundary
  */
 
@@ -371,7 +371,7 @@ export class HostedRouteGate {
    * @param {unknown} runtimeMode
    * @param {unknown} [sessionId]
    */
-  evaluate(runtimeMode, sessionId) {
+  async evaluate(runtimeMode, sessionId) {
     if (runtimeMode === STUDIO_RUNTIME_MODES.LOCAL) {
       return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.LOCAL);
     }
@@ -380,7 +380,7 @@ export class HostedRouteGate {
       return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.NOT_FOUND);
     }
 
-    const resolved = this.#sessionLifecycle.resolve(sessionId);
+    const resolved = await this.#sessionLifecycle.resolve(sessionId);
 
     if (resolved === null) {
       this.#recordSessionRejectionIfPresented(sessionId);
@@ -405,7 +405,7 @@ export class HostedRouteGate {
       return simpleOutcome(HOSTED_ROUTE_GATE_OUTCOMES.FORBIDDEN);
     }
 
-    const touched = this.#sessionLifecycle.touch(sessionId);
+    const touched = await this.#sessionLifecycle.touch(sessionId);
 
     if (
       touched === null ||
@@ -419,7 +419,7 @@ export class HostedRouteGate {
     let sessionTransport = null;
 
     if (touched.rotationDue) {
-      const rotated = this.#sessionLifecycle.rotate(sessionId);
+      const rotated = await this.#sessionLifecycle.rotate(sessionId);
 
       if (
         rotated === null ||

@@ -41,11 +41,11 @@ The canonical runtime classifications are therefore:
 Demo is a separate authority domain. It is not an alias for Hosted Studio and
 does not inherit Hosted authentication or authorization.
 
-### Initial fail-closed contract
+### Slice 1: runtime isolation
 
-The first implementation slice introduces runtime classification only.
+The first implementation slice introduced runtime classification only.
 
-In this state:
+It established that:
 
 - Demo is recognized as a valid explicit runtime;
 - Demo conflicts with Local Studio enablement and resolves to `invalid`;
@@ -54,10 +54,34 @@ In this state:
 - the Hosted route gate does not resolve sessions for Demo;
 - GitHub OAuth login and callback are not eligible in Demo;
 - Hosted logout is unavailable in Demo;
-- the Hosted mutation guard does not admit Demo;
-- no Demo session, trusted context or repository mutation capability exists.
+- the Hosted mutation guard does not admit Demo.
 
-Recognizing Demo must therefore create no new authoring authority by itself.
+Recognizing Demo therefore creates no authoring authority by itself.
+
+### Slice 2: guest-session and trusted-context boundary
+
+The second implementation slice adds server-side Demo authority primitives
+without connecting them to public routes or repository writes.
+
+The Demo boundary now has:
+
+- an identity-free opaque guest-session lifecycle;
+- independent 256-bit session and synchronizer-CSRF secrets;
+- a deliberately short 30-minute absolute lifetime;
+- a 10-minute idle timeout and 5-minute credential-rotation age;
+- a Demo-specific in-memory session-store contract;
+- a distinct `__Host-atelier_demo_session` browser cookie;
+- a Demo-only route gate;
+- an unforgeable trusted Demo request context;
+- private CSRF capability storage that is not enumerable on the context.
+
+The Demo context contains no GitHub identity, authorization marker or synthetic
+principal. A Demo context is not trusted by the Hosted boundary, and Hosted
+context shapes cannot cross into Demo trust.
+
+This slice still does not admit `/studio/**`, create a public session-start
+endpoint, perform mutations or configure repository/deployment authority.
+Those capabilities require later explicit slices.
 
 ## Future Demo authority
 

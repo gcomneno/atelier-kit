@@ -68,6 +68,18 @@
             {/if}
           </div>
         {/if}
+
+        {#if data.demoAvailable}
+          <aside class="demo-try-card" aria-labelledby="demo-try-title">
+            <p class="demo-try-eyebrow">{t('home.demo.eyebrow')}</p>
+            <h2 id="demo-try-title">{t('home.demo.title')}</h2>
+            <p>{t('home.demo.intro')}</p>
+            <form method="POST" action="/demo/start">
+              <button type="submit">{t('home.demo.action')}</button>
+            </form>
+            <p class="demo-try-note">{t('home.demo.note')}</p>
+          </aside>
+        {/if}
       </section>
 
       {#if data.sidebarActive && data.sidebar}
@@ -327,6 +339,84 @@
 
   .hero-intro-card:not(:has(:global(.hero-intro))) :global(.hero-signature) {
     margin-top: 0;
+  }
+
+  .demo-try-card {
+    display: grid;
+    gap: 0.65rem;
+    width: min(100%, 34rem);
+    margin: 1rem auto 0;
+    padding: 1rem 1.15rem;
+    border: 1px solid color-mix(
+      in srgb,
+      var(--site-accent-color, #7d684f) 45%,
+      transparent
+    );
+    border-radius: 1rem;
+    background: color-mix(
+      in srgb,
+      var(--site-card-color, #fffaf2) 92%,
+      var(--site-accent-color, #d6be9a) 8%
+    );
+    text-align: left;
+  }
+
+  .demo-try-card > * {
+    margin: 0;
+  }
+
+  .demo-try-eyebrow {
+    color: color-mix(
+      in srgb,
+      var(--site-accent-color, #7d684f) 82%,
+      var(--site-text-color, #2f281f)
+    );
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .demo-try-card h2 {
+    font-size: clamp(1.25rem, 3vw, 1.6rem);
+  }
+
+  .demo-try-card form {
+    margin-top: 0.15rem;
+  }
+
+  .demo-try-card button {
+    border: 0;
+    border-radius: 999px;
+    padding: 0.7rem 1.1rem;
+    background: var(--site-accent-color, #7d684f);
+    color: var(--site-base-color, #fffaf2);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .demo-try-card button:hover {
+    filter: brightness(0.94);
+  }
+
+  .demo-try-card button:focus-visible {
+    outline: 3px solid color-mix(
+      in srgb,
+      var(--site-accent-color, #7d684f) 45%,
+      transparent
+    );
+    outline-offset: 3px;
+  }
+
+  .demo-try-note {
+    color: color-mix(
+      in srgb,
+      var(--site-text-color, #2f281f) 72%,
+      transparent
+    );
+    font-size: 0.86rem;
+    line-height: 1.5;
   }
 
   .hero-banner {

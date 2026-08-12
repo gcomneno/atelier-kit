@@ -21,7 +21,8 @@
     "site:wizard": "node scripts/site-wizard.js",
     "studio": "node scripts/studio-dev.js",
     "studio:launch": "node scripts/studio-launch.js",
-    "publish": "node scripts/publish.js"
+    "publish": "node scripts/publish.js",
+    "demo:reset-social": "node scripts/demo-reset-social.js"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.1",

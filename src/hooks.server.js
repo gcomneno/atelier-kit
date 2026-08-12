@@ -8,6 +8,9 @@ import {
   HOSTED_PRIVATE_POC_HTTP_OUTCOMES,
   applyHostedPrivatePocStudioAuthorizedRequest
 } from '$lib/server/hosted-private-poc-http.js';
+import {
+  applyDemoPublicSocialAuthorizedRequest
+} from '$lib/server/demo-public-http.js';
 import { getSiteConfig } from '$lib/server/showcase.js';
 import {
   resolveStudioRuntimeMode
@@ -46,6 +49,16 @@ export async function handle({ event, resolve }) {
   ) {
     error(403, 'Forbidden');
   }
+
+  /*
+   * Slice 5A composition is deliberately dormant in production: the default
+   * Demo runtime resolver returns null until persistent state and session
+   * issuance limiting exist. The seam is nevertheless live and testable.
+   */
+  await applyDemoPublicSocialAuthorizedRequest({
+    event,
+    runtimeMode
+  });
 
   let lang = 'en';
 

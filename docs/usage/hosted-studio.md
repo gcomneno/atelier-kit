@@ -202,9 +202,34 @@ fresh unauthorized OAuth callback test. The configuration and deployment were
 restored and verified afterwards; `main` and the validation branch were
 unchanged by this test.
 
-There is no separate Atelier-Kit visitor Vercel project in the giadaware scope.
-The private project created by #275 is the dedicated Hosted authoring
-deployment. Therefore no live visitor-deployment secret audit is claimed.
+## Issue #281 public Visitor deployment validation record
+
+The separately verified public Vercel project is
+`giadaware/atelier-kit-visitor-demo`, at
+<https://atelier-kit-visitor-demo.vercel.app>. It is default-content,
+read-only Visitor deployment and must never share this Hosted Studio
+deployment's configuration or credentials.
+
+The corrected issue #281 live audit was rerun successfully on 2026-08-12.
+`/` returned 200 with the expected `<title>Atelier-Kit Demo</title>` and
+default demo notice. `/about`, `/catalog`, `/collections`, `/news`, and `/faq`
+returned 200. The listed Studio/auth GET routes and canonical-Origin POSTs to
+`/auth/logout` and `/studio/site/social` returned 404, with neither `Location`
+nor `Set-Cookie` response headers.
+
+The environment-variable listing returned no variables. This remains limited
+evidence: it can only report variables visible to the auditing credentials and
+does not prove the absence of unrelated Vercel settings.
+
+Run the explicit-project, canonical-Origin audit in [Deploy to
+Vercel](deploy-vercel.md) after every Visitor deployment. Its assertions prove
+representative default content/page identity, no OAuth redirect, and no
+`Set-Cookie` response transport on denied GET and POST routes, including
+`POST /studio/site/social`. The security interpretation is recorded in the
+[Hosted Studio threat model](../security/hosted-studio-threat-model.md).
+
+Updating the checkbox on GitHub Epic #82 remains the external reconciliation
+step. It was not performed in this worktree.
 
 ### Automated coverage (not live observations)
 

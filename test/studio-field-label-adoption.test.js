@@ -71,35 +71,53 @@ function harnessAliases() {
 
 async function createSsrHarness() {
   const harnessRoot = fs.mkdtempSync(path.join(root, '.tmp-field-label-ssr-'));
-  fs.writeFileSync(path.join(harnessRoot, 'Harness.svelte'), harnessSource);
 
-  const server = await createServer({
-    configFile: false,
-    root: harnessRoot,
-    logLevel: 'error',
-    appType: 'custom',
-    plugins: [svelte({ compilerOptions: { css: 'injected' } })],
-    resolve: { alias: harnessAliases(), dedupe: ['svelte'] },
-    server: {
-      middlewareMode: true,
-      hmr: false,
-      fs: { allow: [root, harnessRoot] }
-    }
-  });
+  /** @type {import('vite').ViteDevServer | undefined} */
+  let server;
+  let cleaned = false;
 
-  const harness = await server.ssrLoadModule('/Harness.svelte');
-  const svelteServer = await server.ssrLoadModule('svelte/server');
+  async function cleanup() {
+    if (cleaned) return;
+    cleaned = true;
 
-  return {
-    /** @param {Record<string, unknown>} props */
-    render(props) {
-      return svelteServer.render(harness.default, { props });
-    },
-    async close() {
-      await server.close();
+    try {
+      await server?.close();
+    } finally {
       fs.rmSync(harnessRoot, { recursive: true, force: true });
     }
-  };
+  }
+
+  try {
+    fs.writeFileSync(path.join(harnessRoot, 'Harness.svelte'), harnessSource);
+
+    server = await createServer({
+      configFile: false,
+      root: harnessRoot,
+      logLevel: 'error',
+      appType: 'custom',
+      plugins: [svelte({ compilerOptions: { css: 'injected' } })],
+      resolve: { alias: harnessAliases(), dedupe: ['svelte'] },
+      server: {
+        middlewareMode: true,
+        hmr: false,
+        fs: { allow: [root, harnessRoot] }
+      }
+    });
+
+    const harness = await server.ssrLoadModule('/Harness.svelte');
+    const svelteServer = await server.ssrLoadModule('svelte/server');
+
+    return {
+      /** @param {Record<string, unknown>} props */
+      render(props) {
+        return svelteServer.render(harness.default, { props });
+      },
+      close: cleanup
+    };
+  } catch (error) {
+    await cleanup();
+    throw error;
+  }
 }
 
 /** @param {string} body */

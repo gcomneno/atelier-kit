@@ -1450,6 +1450,9 @@ export default {
       fitCover: 'Cover',
       fitContain: 'Fit',
       fitNatural: '1:1',
+      galleryNavigation: 'Image navigation',
+      previous: 'Previous',
+      next: 'Next',
       close: 'Close'
     },
     visitorBrief: {

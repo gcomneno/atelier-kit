@@ -185,10 +185,12 @@
       </div>
 
       {#if galleryImages.length > 1}
-        <div class="gallery-nav" role="group" aria-label="Image navigation">
-          <button type="button" class="nav-button" on:click={showPrevious}>Previous</button>
+        <div class="gallery-nav" role="group" aria-label={t('imageLightbox.galleryNavigation')}>
+          <button type="button" class="nav-button" on:click={showPrevious}>
+            {t('imageLightbox.previous')}
+          </button>
           <span class="image-count">{currentIndex + 1} / {galleryImages.length}</span>
-          <button type="button" class="nav-button" on:click={showNext}>Next</button>
+          <button type="button" class="nav-button" on:click={showNext}>{t('imageLightbox.next')}</button>
         </div>
       {/if}
 
@@ -301,6 +303,7 @@
     width: 100%;
     height: min(78vh, 100%);
     object-fit: cover;
+    object-position: center top;
   }
 
   .lightbox-stage[data-fit='contain'] .lightbox-image {

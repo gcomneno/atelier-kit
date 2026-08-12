@@ -7,6 +7,7 @@ import {
   APPEARANCE_PRESETS,
   appearanceCssVariables,
   appearanceFromForm,
+  appearanceThemePreset,
   isAppearancePreset,
   resolveSiteAppearance
 } from '../src/lib/site-appearance.js';
@@ -133,42 +134,71 @@ test('accepts new presets from forms, applies their defaults and preserves expli
   assert.equal(invalid.font_preset, 'lora');
 });
 
-test('emits direct CSS variables for each new preset', () => {
-  /** @type {Record<string, string>} */
-  const schemes = { intimate: 'light', space: 'dark', 'funny-coloured': 'light' };
-
-  for (const [id, palette] of Object.entries(NEW_PRESETS)) {
-    const font = RECOMMENDED_FONTS[id];
+test('maps canonical named palettes to GIADA semantic theme tokens', () => {
+  for (const id of ['warm', 'neutral', 'dark', 'noir', 'intimate', 'space', 'funny-coloured']) {
+    const font = RECOMMENDED_FONTS[id] ?? 'inter';
     const variables = /** @type {Record<string, string>} */ (
-      appearanceCssVariables({ ...palette, font_preset: font })
+      appearanceCssVariables({ ...APPEARANCE_PRESETS[id], font_preset: font })
     );
-    assert.deepEqual(
-      Object.fromEntries(
-        [
-          '--site-base-color',
-          '--site-accent-color',
-          '--site-text-color',
-          '--site-heading-color',
-          '--site-header-title-color',
-          '--site-intro-title-color',
-          '--site-card-color',
-          '--site-font-family',
-          '--site-color-scheme'
-        ].map((key) => [key, variables[key]])
-      ),
-      {
-        '--site-base-color': palette.base_color,
-        '--site-accent-color': palette.accent_color,
-        '--site-text-color': palette.text_color,
-        '--site-heading-color': palette.heading_color,
-        '--site-header-title-color': palette.header_title_color,
-        '--site-intro-title-color': palette.intro_title_color,
-        '--site-card-color': palette.card_color,
-        '--site-font-family': fontFamilyCss(font),
-        '--site-color-scheme': schemes[id]
-      }
-    );
+
+    assert.equal(appearanceThemePreset({ preset: id }), id);
+    assert.equal(variables['--site-base-color'], 'var(--giu-theme-base)');
+    assert.equal(variables['--site-accent-color'], 'var(--giu-theme-accent)');
+    assert.equal(variables['--site-text-color'], 'var(--giu-theme-text)');
+    assert.equal(variables['--site-heading-color'], 'var(--giu-theme-heading)');
+    assert.equal(variables['--site-card-color'], 'var(--giu-theme-card)');
+    assert.equal(variables['--site-muted-text-color'], 'var(--giu-theme-muted)');
+    assert.equal(variables['--site-surface-color'], 'var(--giu-theme-surface)');
+    assert.equal(variables['--site-border-color'], 'var(--giu-theme-border)');
+    assert.equal(variables['--site-color-scheme'], 'var(--giu-theme-color-scheme)');
+    assert.equal(variables['--site-header-title-color'], APPEARANCE_PRESETS[id].header_title_color);
+    assert.equal(variables['--site-intro-title-color'], APPEARANCE_PRESETS[id].intro_title_color);
+    assert.equal(variables['--site-font-family'], fontFamilyCss(font));
+    assert.equal('--giu-theme-base' in variables, false);
   }
+});
+
+test('preserves edited named palettes by overriding the GIADA semantic contract', () => {
+  const variables = /** @type {Record<string, string>} */ (
+    appearanceCssVariables({
+      ...APPEARANCE_PRESETS.warm,
+      base_color: '#123456',
+      text_color: '#fefefe',
+      font_preset: 'inter'
+    })
+  );
+
+  assert.equal(appearanceThemePreset({ preset: 'warm' }), 'warm');
+  assert.equal(variables['--giu-theme-base'], '#123456');
+  assert.equal(variables['--giu-theme-text'], '#fefefe');
+  assert.equal(variables['--site-base-color'], 'var(--giu-theme-base)');
+  assert.equal(variables['--site-text-color'], 'var(--giu-theme-text)');
+  assert.match(variables['--giu-theme-muted'], /^#[0-9a-f]{6}$/);
+  assert.match(variables['--giu-theme-border'], /^#[0-9a-f]{6}$/);
+});
+
+test('custom palettes use a neutral GIADA baseline and override all generic semantic tokens', () => {
+  const custom = {
+    preset: 'custom',
+    base_color: '#123456',
+    accent_color: '#234567',
+    text_color: '#f5f5f5',
+    heading_color: '#ffffff',
+    card_color: '#345678',
+    header_title_color: '#eeeeee',
+    intro_title_color: '#dddddd',
+    font_preset: 'lora'
+  };
+  const variables = /** @type {Record<string, string>} */ (appearanceCssVariables(custom));
+
+  assert.equal(appearanceThemePreset(custom), 'neutral');
+  assert.equal(variables['--giu-theme-base'], '#123456');
+  assert.equal(variables['--giu-theme-accent'], '#234567');
+  assert.equal(variables['--giu-theme-text'], '#f5f5f5');
+  assert.equal(variables['--giu-theme-heading'], '#ffffff');
+  assert.equal(variables['--giu-theme-card'], '#345678');
+  assert.equal(variables['--giu-theme-color-scheme'], 'dark');
+  assert.equal(variables['--site-font-family'], fontFamilyCss('lora'));
 });
 
 test('keeps legacy, custom and invalid-preset resolution compatible', () => {

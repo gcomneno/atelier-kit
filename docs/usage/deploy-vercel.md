@@ -175,15 +175,23 @@ The procedure proves a representative default-content/page-identity response,
 no OAuth redirect, and no `Set-Cookie` response transport on every denied GET
 or POST route, including canonical-Origin `POST /studio/site/social`.
 
-### Historical evidence, not rerun in this worktree
+### Live audit evidence
 
-The issue #281 record dated 2026-08-12 says the public routes returned 200
-with the shipped `Atelier-Kit Demo` content and the denied routes returned
-404. It predates this corrected assertion script and was not rerun here
-because live Vercel access was unavailable. Treat it as historical evidence,
-not a claim about the current deployment; repeat the commands above after the
-next deployment. See the [threat model](../security/hosted-studio-threat-model.md)
-for the boundary interpretation.
+The corrected issue #281 audit was rerun successfully on 2026-08-12 against
+`atelier-kit-visitor-demo.vercel.app`. `GET /` returned 200 with the expected
+`Atelier-Kit Demo` title and default demo notice. The other representative
+public routes returned 200.
+
+`GET /studio`, `GET /studio/site/social`, both GitHub OAuth routes,
+canonical-Origin `POST /auth/logout`, and canonical-Origin
+`POST /studio/site/social` returned 404. Every denied response was verified to
+contain neither `Location` nor `Set-Cookie` headers.
+
+The environment-variable listing returned no variables, subject to the
+credential-visibility limitation described above. Repeat the audit after any
+public-project deployment, environment, or runtime change. See the
+[threat model](../security/hosted-studio-threat-model.md) for the boundary
+interpretation.
 
 ## Privacy note
 

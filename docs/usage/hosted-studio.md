@@ -210,13 +210,16 @@ The separately verified public Vercel project is
 read-only Visitor deployment and must never share this Hosted Studio
 deployment's configuration or credentials.
 
-The 2026-08-12 issue #281 observations are historical evidence, not a current
-deployment assertion: they predate the corrected audit script and were not
-rerun in this worktree because live Vercel access was unavailable. They record
-200 responses for `/`, `/about`, `/catalog`, `/collections`, `/news`, and
-`/faq`, and 404 responses for the listed Studio/auth routes. An
-environment-variable listing can only report variables visible to the auditing
-credentials; it does not prove the absence of unrelated Vercel settings.
+The corrected issue #281 live audit was rerun successfully on 2026-08-12.
+`/` returned 200 with the expected `<title>Atelier-Kit Demo</title>` and
+default demo notice. `/about`, `/catalog`, `/collections`, `/news`, and `/faq`
+returned 200. The listed Studio/auth GET routes and canonical-Origin POSTs to
+`/auth/logout` and `/studio/site/social` returned 404, with neither `Location`
+nor `Set-Cookie` response headers.
+
+The environment-variable listing returned no variables. This remains limited
+evidence: it can only report variables visible to the auditing credentials and
+does not prove the absence of unrelated Vercel settings.
 
 Run the explicit-project, canonical-Origin audit in [Deploy to
 Vercel](deploy-vercel.md) after every Visitor deployment. Its assertions prove

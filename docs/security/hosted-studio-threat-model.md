@@ -282,9 +282,9 @@ The separately verified public Vercel project is
 demo/showcase, not a Hosted Studio deployment. The repeatable audit names this
 project explicitly and does not depend on an ignored local `.vercel` link.
 
-The following 2026-08-12 observations are historical evidence, not a current
-deployment assertion. They predate the corrected audit procedure and were not
-rerun in this worktree because live Vercel access was unavailable:
+The corrected live audit was rerun successfully on 2026-08-12 against the
+dedicated public Visitor deployment. It confirmed the default Atelier-Kit demo
+identity and the expected fail-closed boundary:
 
 | Request | Outcome | Boundary evidence |
 | --- | --- | --- |

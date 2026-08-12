@@ -1,10 +1,11 @@
 <script>
+  import 'giadaware-ui-components/styles.css';
   import { page } from '$app/state';
   import SiteFooter from '$lib/components/SiteFooter.svelte';
   import KitCredit from '$lib/components/KitCredit.svelte';
   import SiteHeader from '$lib/components/SiteHeader.svelte';
   import { setVisitorI18nContext } from '$lib/i18n/visitor-context.js';
-  import { appearanceCssVariables } from '$lib/site-appearance.js';
+  import { appearanceCssVariables, appearanceThemePreset } from '$lib/site-appearance.js';
   import { markedTextFontPresets } from '$lib/marked-text.js';
   import { fontStylesheetHrefs } from '$lib/site-typography.js';
   import { STUDIO_HEAD_STYLE } from '$lib/studio-theme.js';
@@ -14,21 +15,18 @@
 
   setVisitorI18nContext(() => data.locale);
 
-  /**
-   * @param {string} href
-   */
+  /** @param {string} href */
   function faviconTypeFromHref(href) {
     const lower = href.toLowerCase();
-
     if (lower.endsWith('.svg')) return 'image/svg+xml';
     if (lower.endsWith('.png')) return 'image/png';
     if (lower.endsWith('.webp')) return 'image/webp';
     if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
     if (lower.endsWith('.ico')) return 'image/x-icon';
-
     return undefined;
   }
 
+  const giadaThemePreset = $derived(appearanceThemePreset(data.appearance));
   const appearanceStyle = $derived(
     Object.entries(appearanceCssVariables(data.appearance))
       .map(([key, value]) => `${key}: ${value}`)
@@ -50,6 +48,8 @@
     `:root, body { ${appearanceStyle}; color-scheme: var(--site-color-scheme, light); background-color: var(--site-base-color, #f8f0e4); color: var(--site-text-color, #2f281f); font-family: var(--site-font-family, ui-sans-serif, system-ui, sans-serif); }`
   );
 </script>
+
+<svelte:body data-giu-theme={isStudio ? undefined : giadaThemePreset} />
 
 <svelte:head>
   <link rel="icon" href={faviconHref} type={faviconType} />
@@ -82,7 +82,7 @@
 {#if isStudio}
   {@render children()}
 {:else}
-  <div class="site-root" style={appearanceStyle}>
+  <div class="site-root" data-giu-theme={giadaThemePreset} style={appearanceStyle}>
     <SiteHeader
       site={data.site}
       menuNav={data.menuNav}
@@ -253,7 +253,6 @@
     text-align: right;
   }
 
-  /* Chrome <111 (e.g. Windows 7) — no color-mix(): keep solid theme colors */
   @supports not (color: color-mix(in srgb, red, blue)) {
     .site-root,
     .site-content,

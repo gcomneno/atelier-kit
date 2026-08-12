@@ -83,6 +83,38 @@ This slice still does not admit `/studio/**`, create a public session-start
 endpoint, perform mutations or configure repository/deployment authority.
 Those capabilities require later explicit slices.
 
+
+### Slice 3: mutation integrity and bounded public authority
+
+The third implementation slice defines the integrity boundary that any future
+public Demo mutation must cross before repository authority can be reached.
+
+The Demo mutation boundary requires:
+
+- a deployment-controlled canonical HTTPS Demo origin independent from Hosted;
+- exact Host and Origin matching;
+- an explicitly supported state-changing HTTP method;
+- a genuinely trusted Demo request context;
+- synchronizer-CSRF validation using constant-time comparison;
+- a bounded mutation budget tied to the guest authority rather than the
+  rotating session lookup credential.
+
+The default budget allows five admitted mutation attempts per guest authority.
+Its server-side key is derived from the private Demo CSRF capability, so session
+ID rotation cannot reset the budget and the raw capability is not stored as the
+budget key.
+
+The in-memory budget store introduced by this slice is a reference/test adapter
+for the atomic `consume()` contract. It is not the production persistence
+decision. A deployed public Demo must connect the same boundary to persistent
+server-controlled state with expiry before mutation routes are enabled.
+
+Integrity failures do not consume budget. Budget-store failure fails closed and
+is distinct from legitimate budget exhaustion.
+
+This slice still does not connect Demo authority to routes, GitHub authoring,
+repository targets, commits or deployments.
+
 ## Future Demo authority
 
 Later #283 slices may add public-demo capabilities only through separate,

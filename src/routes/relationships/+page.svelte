@@ -13,6 +13,47 @@
       ? t('relationships.metaDescription', { siteName: siteLabel })
       : t('relationships.intro')
   );
+  const relationshipGraphLabels = $derived(
+    data.locale === 'it'
+      ? {
+          region: t('relationships.ariaLabel'),
+          controls: 'Controlli del grafo',
+          zoomIn: 'Ingrandisci',
+          zoomOut: 'Riduci',
+          resetView: 'Reimposta vista',
+          fitGraph: 'Adatta il grafo',
+          panUp: 'Sposta in alto',
+          panDown: 'Sposta in basso',
+          panLeft: 'Sposta a sinistra',
+          panRight: 'Sposta a destra',
+          empty: t('relationships.empty'),
+          summary: ({ nodeCount, edgeCount }) =>
+            `${nodeCount} nodi, ${edgeCount} relazioni dirette.`,
+          relationship: ({ sourceLabel, targetLabel, relationship }) =>
+            relationship
+              ? `${sourceLabel} verso ${targetLabel}: ${relationship}`
+              : `${sourceLabel} verso ${targetLabel}`
+        }
+      : {
+          region: t('relationships.ariaLabel'),
+          controls: 'Graph controls',
+          zoomIn: 'Zoom in',
+          zoomOut: 'Zoom out',
+          resetView: 'Reset view',
+          fitGraph: 'Fit graph',
+          panUp: 'Pan up',
+          panDown: 'Pan down',
+          panLeft: 'Pan left',
+          panRight: 'Pan right',
+          empty: t('relationships.empty'),
+          summary: ({ nodeCount, edgeCount }) =>
+            `${nodeCount} nodes, ${edgeCount} directed relationships.`,
+          relationship: ({ sourceLabel, targetLabel, relationship }) =>
+            relationship
+              ? `${sourceLabel} to ${targetLabel}: ${relationship}`
+              : `${sourceLabel} to ${targetLabel}`
+        }
+  );
 </script>
 
 <svelte:head>
@@ -34,8 +75,7 @@
   <RelationshipGraph
     nodes={data.graph.nodes}
     edges={data.graph.edges}
-    ariaLabel={t('relationships.ariaLabel')}
-    emptyLabel={t('relationships.empty')}
+    labels={relationshipGraphLabels}
     class="catalog-relationship-graph"
   />
 </main>

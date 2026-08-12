@@ -65,7 +65,7 @@ export function createHostedPrivatePocRuntimeResolver({
   let runtime = null;
 
   /**
-   * @param {'visitor' | 'local' | 'hosted' | 'invalid'} runtimeMode
+   * @param {'visitor' | 'local' | 'hosted' | 'demo' | 'invalid'} runtimeMode
    */
   return function resolveRuntime(runtimeMode) {
     if (runtimeMode !== STUDIO_RUNTIME_MODES.HOSTED) {
@@ -102,7 +102,7 @@ const resolveProcessHostedPrivatePocRuntime =
  * Shared process-local composition root used by the hook and
  * future live `/auth/**` adapters.
  *
- * @param {'visitor' | 'local' | 'hosted' | 'invalid'} runtimeMode
+ * @param {'visitor' | 'local' | 'hosted' | 'demo' | 'invalid'} runtimeMode
  */
 export function getHostedPrivatePocRuntime(
   runtimeMode
@@ -206,10 +206,10 @@ export function isHostedPrivatePocStudioAuthorizedRequest(
  * @param {{
  *   event: unknown,
  *   runtimeMode:
- *     'visitor' | 'local' | 'hosted' | 'invalid',
+ *     'visitor' | 'local' | 'hosted' | 'demo' | 'invalid',
  *   runtimeResolver?: (
  *     runtimeMode:
- *       'visitor' | 'local' | 'hosted' | 'invalid'
+ *       'visitor' | 'local' | 'hosted' | 'demo' | 'invalid'
  *   ) => HostedPrivatePocRuntime | null
  * }} input
  */

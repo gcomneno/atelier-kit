@@ -41,6 +41,20 @@ test('ATELIER_STUDIO_MODE=hosted resolves to Hosted Studio', () => {
   );
 });
 
+test('ATELIER_STUDIO_MODE=demo resolves to the inert Demo runtime', () => {
+  assert.equal(
+    resolveStudioRuntimeMode(false, { ATELIER_STUDIO_MODE: 'demo' }),
+    STUDIO_RUNTIME_MODES.DEMO
+  );
+});
+
+test('Demo runtime is never authorized by the runtime-only boundary', () => {
+  assert.equal(
+    canAccessStudio(STUDIO_RUNTIME_MODES.DEMO),
+    false
+  );
+});
+
 test('Hosted Studio is never authorized by the runtime-only boundary', () => {
   assert.equal(canAccessStudio(STUDIO_RUNTIME_MODES.HOSTED), false);
   assert.equal(
@@ -74,6 +88,23 @@ test('hosted mode conflicts with ATELIER_STUDIO=1 and fails closed', () => {
     resolveStudioRuntimeMode(false, {
       ATELIER_STUDIO: '1',
       ATELIER_STUDIO_MODE: 'hosted'
+    }),
+    STUDIO_RUNTIME_MODES.INVALID
+  );
+});
+
+test('demo mode conflicts with Vite development and fails closed', () => {
+  assert.equal(
+    resolveStudioRuntimeMode(true, { ATELIER_STUDIO_MODE: 'demo' }),
+    STUDIO_RUNTIME_MODES.INVALID
+  );
+});
+
+test('demo mode conflicts with ATELIER_STUDIO=1 and fails closed', () => {
+  assert.equal(
+    resolveStudioRuntimeMode(false, {
+      ATELIER_STUDIO: '1',
+      ATELIER_STUDIO_MODE: 'demo'
     }),
     STUDIO_RUNTIME_MODES.INVALID
   );

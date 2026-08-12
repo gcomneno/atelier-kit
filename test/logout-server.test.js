@@ -20,7 +20,7 @@ const RUNTIME_MODULE =
 
 /** @type {import('vite').ViteDevServer | undefined} */
 let server;
-/** @type {{ configure(value: { runtimeMode: 'visitor' | 'hosted', perform: (input: any) => Promise<{ outcome: string }> | { outcome: string } }): void, reset(): void }} */
+/** @type {{ configure(value: { runtimeMode: 'visitor' | 'demo' | 'hosted', perform: (input: any) => Promise<{ outcome: string }> | { outcome: string } }): void, reset(): void }} */
 let state;
 
 /**
@@ -221,6 +221,41 @@ test('Visitor POST logout returns 404 for malformed or non-form input before par
     hasHttpStatus(404)
   );
 
+  assert.equal(delegated, false);
+});
+
+test('Demo POST logout remains unavailable before body parsing or Hosted delegation', async () => {
+  assert.ok(server);
+
+  const handler = await server.ssrLoadModule(
+    '/src/routes/auth/logout/+server.js'
+  );
+
+  const attempted = request({
+    throwFormData: true
+  });
+
+  let delegated = false;
+
+  state.configure({
+    runtimeMode: 'demo',
+    async perform() {
+      delegated = true;
+      throw new Error(
+        'Demo mode must not delegate to Hosted logout'
+      );
+    }
+  });
+
+  await assert.rejects(
+    handler.POST({
+      request: attempted.request,
+      cookies: {}
+    }),
+    hasHttpStatus(404)
+  );
+
+  assert.equal(attempted.formDataCalls(), 0);
   assert.equal(delegated, false);
 });
 

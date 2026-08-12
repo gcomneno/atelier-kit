@@ -207,7 +207,7 @@ export class HostedPrivatePocRuntime {
  *
  * Returns null when the private PoC is intentionally inactive.
  *
- * @param {'visitor' | 'local' | 'hosted' | 'invalid'} runtimeMode
+ * @param {'visitor' | 'local' | 'hosted' | 'demo' | 'invalid'} runtimeMode
  * @param {unknown} environment
  * @param {{
  *   transport?: {

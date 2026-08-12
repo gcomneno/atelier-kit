@@ -71,10 +71,10 @@ test('Local Studio remains admitted without Hosted context', () => {
   );
 });
 
-test('visitor and invalid modes remain fail-closed', () => {
+test('visitor demo and invalid modes remain fail-closed', () => {
   const trusted = trustedContext();
 
-  for (const mode of ['visitor', 'invalid', 'unknown']) {
+  for (const mode of ['visitor', 'demo', 'invalid', 'unknown']) {
     assert.equal(
       canAccessStudioRoute(mode, trusted),
       false

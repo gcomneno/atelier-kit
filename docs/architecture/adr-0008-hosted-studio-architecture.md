@@ -76,7 +76,8 @@ server middleware, but middleware alone is not the authoring architecture.
 
 ## Runtime modes
 
-Atelier-Kit has three distinct runtime modes.
+Atelier-Kit has four distinct runtime modes. ADR 0011 extends the original
+Visitor / Local / Hosted model with an explicitly isolated public Demo runtime.
 
 ### Visitor production
 
@@ -111,6 +112,26 @@ Explicitly configured authoring deployment.
 The concrete environment variable names are intentionally not fixed by this ADR.
 Implementation must expose one unambiguous hosted-authoring switch and must fail
 closed when required configuration is absent.
+
+### Public Demo
+
+ADR 0011 introduces `ATELIER_STUDIO_MODE=demo` as a fourth explicit runtime
+for the public end-to-end product demonstration tracked by issue #283.
+
+Demo is deliberately distinct from Hosted Studio. It does not inherit GitHub
+OAuth identity, the Hosted authorization allow-list, Hosted trusted request
+contexts, Hosted sessions or Hosted mutation authority.
+
+The first Demo implementation slice is intentionally inert:
+
+- Demo is a valid runtime classification;
+- `/studio/**` remains unavailable;
+- existing `/auth/**` routes remain unavailable;
+- Hosted mutation guards return their non-authoritative outcome;
+- no guest session, repository credential or write capability exists yet.
+
+Later Demo capabilities require their own explicitly admitted server-side
+authority boundaries. They must not weaken Visitor, Local or Hosted semantics.
 
 ## Persistence model
 

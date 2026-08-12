@@ -100,8 +100,8 @@ function config(subjects = '123') {
   });
 }
 
-test('visitor and invalid runtime fail closed before session resolution', async () => {
-  for (const mode of ['visitor', 'invalid', 'unknown']) {
+test('visitor Demo and invalid runtimes fail closed before session resolution', async () => {
+  for (const mode of ['visitor', 'demo', 'invalid', 'unknown']) {
     const sessions = lifecycle();
     const gate = new HostedRouteGate({
       sessionLifecycle: sessions,
@@ -507,7 +507,7 @@ test('authentication endpoints are eligible only in Hosted runtime', () => {
     true
   );
 
-  for (const mode of ['visitor', 'local', 'invalid', 'unknown']) {
+  for (const mode of ['visitor', 'local', 'demo', 'invalid', 'unknown']) {
     assert.equal(
       isHostedAuthenticationRouteEligible(mode),
       false

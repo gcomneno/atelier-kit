@@ -61,9 +61,10 @@ function persistentRedisEnvironment(overrides = {}) {
 test('visitor Local and invalid runtimes never require Hosted PoC configuration', () => {
   for (
     const runtimeMode of
-    /** @type {Array<'visitor' | 'local' | 'invalid'>} */ ([
+    /** @type {Array<'visitor' | 'local' | 'demo' | 'invalid'>} */ ([
       'visitor',
       'local',
+      'demo',
       'invalid'
     ])
   ) {

@@ -33,7 +33,7 @@ function result(outcome, location = null) {
 /**
  * @param {{
  *   runtimeMode:
- *     'visitor' | 'local' | 'hosted' | 'invalid',
+ *     'visitor' | 'local' | 'hosted' | 'demo' | 'invalid',
  *   returnTo?: unknown,
  *   runtimeResolver?: typeof getHostedPrivatePocRuntime
  * }} input
@@ -84,7 +84,7 @@ export async function beginHostedPrivatePocLogin({
 /**
  * @param {{
  *   runtimeMode:
- *     'visitor' | 'local' | 'hosted' | 'invalid',
+ *     'visitor' | 'local' | 'hosted' | 'demo' | 'invalid',
  *   callback: {
  *     state?: unknown,
  *     code?: unknown,

@@ -125,9 +125,10 @@ function cookieCapture({
 test('login is unavailable outside active Hosted private PoC mode', async () => {
   for (
     const runtimeMode of
-    /** @type {Array<'visitor' | 'local' | 'invalid'>} */ ([
+    /** @type {Array<'visitor' | 'local' | 'demo' | 'invalid'>} */ ([
       'visitor',
       'local',
+      'demo',
       'invalid'
     ])
   ) {
@@ -223,6 +224,40 @@ test('login rejects external or malformed return targets without leaking input',
     JSON.stringify(response).includes(external),
     false
   );
+});
+
+test('GitHub OAuth callback is unavailable in Demo runtime', async () => {
+  const capture = cookieCapture();
+  let resolved = false;
+
+  const response =
+    await completeHostedPrivatePocCallback({
+      runtimeMode: 'demo',
+      callback: {
+        state: OAUTH_STATE,
+        code: 'oauth-code'
+      },
+      cookies: capture.cookies,
+      runtimeResolver() {
+        resolved = true;
+        throw new Error(
+          'Demo runtime must not resolve Hosted OAuth runtime'
+        );
+      }
+    });
+
+  assert.deepEqual(
+    response,
+    {
+      outcome:
+        HOSTED_PRIVATE_POC_AUTH_HTTP_OUTCOMES
+          .NOT_FOUND,
+      location: null
+    }
+  );
+
+  assert.equal(resolved, false);
+  assert.deepEqual(capture.calls, []);
 });
 
 test('authorized callback creates opaque cookie and redirects only to stored return target', async () => {

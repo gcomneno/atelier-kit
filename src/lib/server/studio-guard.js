@@ -29,7 +29,7 @@ import {
  * @see docs/architecture/adr-0008-hosted-studio-architecture.md
  */
 
-/** @returns {'visitor' | 'local' | 'hosted' | 'invalid'} */
+/** @returns {'visitor' | 'local' | 'hosted' | 'demo' | 'invalid'} */
 export function getStudioRuntimeMode() {
   return resolveStudioRuntimeMode(dev, process.env);
 }

@@ -120,7 +120,7 @@ function hasHostedRedisSettings(environment) {
  * Hosted mode alone is also insufficient. The PoC requires
  * explicit activation plus a supported state topology.
  *
- * @param {'visitor' | 'local' | 'hosted' | 'invalid'} runtimeMode
+ * @param {'visitor' | 'local' | 'hosted' | 'demo' | 'invalid'} runtimeMode
  * @param {unknown} environment
  */
 export function resolveHostedPrivatePocConfig(

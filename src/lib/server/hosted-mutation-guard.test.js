@@ -130,12 +130,13 @@ test('invalid origin configuration fails closed at construction', () => {
   }
 });
 
-test('visitor Local and invalid runtimes never enter Hosted mutation authority', () => {
+test('visitor Local Demo and invalid runtimes never enter Hosted mutation authority', () => {
   const mutationGuard = guard();
 
   for (const runtimeMode of [
     'visitor',
     'local',
+    'demo',
     'invalid',
     'unknown'
   ]) {

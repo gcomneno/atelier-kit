@@ -187,9 +187,10 @@ async function authenticatedFixture() {
 test('logout is unavailable outside active Hosted runtime', async () => {
   for (
     const runtimeMode of
-    /** @type {Array<'visitor' | 'local' | 'invalid'>} */ ([
+    /** @type {Array<'visitor' | 'local' | 'demo' | 'invalid'>} */ ([
       'visitor',
       'local',
+      'demo',
       'invalid'
     ])
   ) {

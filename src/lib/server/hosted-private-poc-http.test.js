@@ -232,9 +232,10 @@ test('only exact GET /studio belongs to the initial Hosted read-only HTTP seam',
 test('visitor Local invalid and unrelated Hosted requests are inert before runtime or cookie state is touched', async () => {
   for (
     const runtimeMode of
-    /** @type {Array<'visitor' | 'local' | 'invalid'>} */ ([
+    /** @type {Array<'visitor' | 'local' | 'demo' | 'invalid'>} */ ([
       'visitor',
       'local',
+      'demo',
       'invalid'
     ])
   ) {

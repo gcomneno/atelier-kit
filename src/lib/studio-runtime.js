@@ -12,6 +12,7 @@ export const STUDIO_RUNTIME_MODES = Object.freeze({
   VISITOR: 'visitor',
   LOCAL: 'local',
   HOSTED: 'hosted',
+  DEMO: 'demo',
   INVALID: 'invalid'
 });
 
@@ -19,14 +20,16 @@ export const STUDIO_RUNTIME_MODES = Object.freeze({
  * Resolve the Studio runtime mode from trusted server-side runtime inputs.
  *
  * `ATELIER_STUDIO=1` is the existing ADR 0007 local-authoring switch.
- * `ATELIER_STUDIO_MODE=hosted` requests the new ADR 0008 hosted boundary.
+ * `ATELIER_STUDIO_MODE=hosted` requests the ADR 0008 Hosted boundary.
+ * `ATELIER_STUDIO_MODE=demo` requests the ADR 0011 public-demo boundary.
  *
- * Hosted mode and local-authoring signals are deliberately mutually exclusive.
+ * Explicit Hosted or Demo mode and local-authoring signals are deliberately
+ * mutually exclusive.
  * Unknown, empty, or conflicting explicit mode configuration fails closed.
  *
  * @param {boolean} devMode
  * @param {NodeJS.ProcessEnv | Record<string, string | undefined>} [environment]
- * @returns {'visitor' | 'local' | 'hosted' | 'invalid'}
+ * @returns {'visitor' | 'local' | 'hosted' | 'demo' | 'invalid'}
  */
 export function resolveStudioRuntimeMode(devMode, environment = process.env) {
   const hasExplicitMode = Object.prototype.hasOwnProperty.call(
@@ -37,7 +40,13 @@ export function resolveStudioRuntimeMode(devMode, environment = process.env) {
   const localAuthoring = devMode || environment.ATELIER_STUDIO === '1';
 
   if (hasExplicitMode) {
-    if (environment.ATELIER_STUDIO_MODE !== STUDIO_RUNTIME_MODES.HOSTED) {
+    const explicitMode =
+      environment.ATELIER_STUDIO_MODE;
+
+    if (
+      explicitMode !== STUDIO_RUNTIME_MODES.HOSTED &&
+      explicitMode !== STUDIO_RUNTIME_MODES.DEMO
+    ) {
       return STUDIO_RUNTIME_MODES.INVALID;
     }
 
@@ -45,7 +54,7 @@ export function resolveStudioRuntimeMode(devMode, environment = process.env) {
       return STUDIO_RUNTIME_MODES.INVALID;
     }
 
-    return STUDIO_RUNTIME_MODES.HOSTED;
+    return explicitMode;
   }
 
   if (localAuthoring) {
@@ -63,7 +72,7 @@ export function resolveStudioRuntimeMode(devMode, environment = process.env) {
  * Hosted Studio is never authorized at this runtime-only boundary. Hosted
  * admission requires the server-only trusted request-context policy.
  *
- * @param {'visitor' | 'local' | 'hosted' | 'invalid'} mode
+ * @param {'visitor' | 'local' | 'hosted' | 'demo' | 'invalid'} mode
  * @returns {boolean}
  */
 export function canAccessStudio(mode) {

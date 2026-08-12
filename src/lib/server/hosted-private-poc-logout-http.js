@@ -49,7 +49,7 @@ function outcome(value) {
  *
  * @param {{
  *   runtimeMode:
- *     'visitor' | 'local' | 'hosted' | 'invalid',
+ *     'visitor' | 'local' | 'hosted' | 'demo' | 'invalid',
  *   cookies: unknown,
  *   host?: unknown,
  *   origin?: unknown,

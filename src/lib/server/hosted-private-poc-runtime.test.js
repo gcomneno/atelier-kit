@@ -240,9 +240,10 @@ function persistentRuntimeForUser(client, oauthSecrets, sessionIds) {
 test('inactive runtimes and non-enabled Hosted mode create no stateful runtime', () => {
   for (
     const mode of
-    /** @type {Array<'visitor' | 'local' | 'invalid'>} */ ([
+    /** @type {Array<'visitor' | 'local' | 'demo' | 'invalid'>} */ ([
       'visitor',
       'local',
+      'demo',
       'invalid'
     ])
   ) {

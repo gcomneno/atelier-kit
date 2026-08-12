@@ -1460,6 +1460,9 @@ export default {
       fitCover: 'Copertina',
       fitContain: 'Intera',
       fitNatural: '1:1',
+      galleryNavigation: 'Navigazione immagini',
+      previous: 'Precedente',
+      next: 'Successiva',
       close: 'Chiudi'
     },
     visitorBrief: {

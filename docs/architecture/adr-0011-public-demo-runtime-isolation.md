@@ -146,8 +146,37 @@ at:
 - the private Hosted authoring repository;
 - the pristine public Visitor demo source.
 
-The exact sandbox marker and validation contract are deferred to the repository
-slice of #283.
+The repository slice of #283 implements this contract with a fixed
+`.atelier/demo-sandbox.json` marker outside Demo writable authority. The marker
+binds its purpose to the exact server-configured repository and branch and to a
+deployment-controlled opaque marker value.
+
+Before a Demo authoring repository is returned:
+
+- `gcomneno/atelier-kit` is rejected explicitly;
+- equality with an explicitly configured private Hosted authoring repository is
+  rejected;
+- the marker must exist with exact canonical content;
+- the marker must be read at a canonical GitHub commit revision.
+
+There is currently no separate repository configuration for a pristine Visitor
+source: the ordinary Visitor source is the canonical Atelier-Kit repository
+already denied above. The marker requirement provides the additional positive
+proof that any other configured repository and branch was intentionally
+provisioned as the Demo sandbox.
+
+Demo write authority is then restricted to `config/social.yaml`. The marker
+path is outside that writable scope, so Demo authoring cannot create, repair or
+replace its own sandbox proof.
+
+The Demo Social adapter reuses the shared Social validation and serialization
+contract plus the existing GitHub AuthoringRepository implementation. Marker
+verification and Social reads/writes must refer to the same GitHub revision;
+branch movement therefore fails closed through optimistic concurrency rather
+than carrying forward stale target verification.
+
+This slice still does not wire repository authority into public routes or
+create the public guest-session endpoint.
 
 ## Public abuse boundary
 

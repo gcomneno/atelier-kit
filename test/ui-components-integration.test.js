@@ -10,9 +10,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const artifactRelative =
-  'vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz';
+  'vendor/giadaware-ui-components/26f9e20/giadaware-ui-components-0.0.0.tgz';
 const dependency = `file:${artifactRelative}`;
-const expectedSha256 = '88b5cc12417fa911f5a885b9e554abd198f29a4322f0ac8d1fad823da16e2c7d';
+const expectedSha256 = '0a5107a3a14000799f880e43e06a98b48a01f16a927fdaf9cc3ed9cd969ca7ab';
 const npmCache = path.join(os.tmpdir(), 'atelier-kit-npm-cache');
 /** @type {string} */
 let fixtureRoot = '';
@@ -29,7 +29,7 @@ test.before(async () => {
   fs.copyFileSync(path.join(root, 'package-lock.json'), path.join(fixtureRoot, 'package-lock.json'));
   for (const relativePath of [
     artifactRelative,
-    'vendor/giadaware-ui-components/b088653/integration.json',
+    'vendor/giadaware-ui-components/26f9e20/integration.json',
     'src/lib/components/AtelierSocialIcon.svelte',
     'src/lib/components/AtelierFormStatus.svelte',
     'src/lib/social-icon-adapter.js',
@@ -158,11 +158,11 @@ function collectFiles(directory) {
 }
 
 test('records and installs the exact immutable package artifact', () => {
-  const manifest = JSON.parse(read('vendor/giadaware-ui-components/b088653/integration.json'));
+  const manifest = JSON.parse(read('vendor/giadaware-ui-components/26f9e20/integration.json'));
   assert.deepEqual(manifest, {
     package: 'giadaware-ui-components',
     version: '0.0.0',
-    sourceCommit: 'b088653cba3c940ff6b4baf3b396a109cb04e8b7',
+    sourceCommit: '26f9e2068696ecfa215b75b2628cfce2736c164b',
     filename: 'giadaware-ui-components-0.0.0.tgz',
     sha256: expectedSha256
   });
@@ -285,8 +285,28 @@ test('relationship overview uses the narrow visitor entry point and forwards can
   const harness = `<script>
     import { RelationshipGraph } from 'giadaware-ui-components/visitor';
     let { nodes, edges } = $props();
+    const labels = {
+      region: 'Demo relationships',
+      controls: 'Graph controls',
+      zoomIn: 'Zoom in',
+      zoomOut: 'Zoom out',
+      resetView: 'Reset view',
+      fitGraph: 'Fit graph',
+      panUp: 'Pan up',
+      panDown: 'Pan down',
+      panLeft: 'Pan left',
+      panRight: 'Pan right',
+      empty: 'No relationships',
+      summary: ({ nodeCount, edgeCount }) =>
+        nodeCount + ' nodes, ' + edgeCount + ' directed ' +
+        (edgeCount === 1 ? 'relationship.' : 'relationships.'),
+      relationship: ({ sourceLabel, targetLabel, relationship }) =>
+        relationship
+          ? sourceLabel + ' to ' + targetLabel + ': ' + relationship
+          : sourceLabel + ' to ' + targetLabel
+    };
   </script>
-  <RelationshipGraph {nodes} {edges} ariaLabel="Demo relationships" />`;
+  <RelationshipGraph {nodes} {edges} {labels} />`;
   const { body } = await renderHarness(harness, {
     nodes: [
       { id: 'person-a', label: 'Person A', href: '/items/person-a' },

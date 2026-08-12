@@ -29,6 +29,7 @@ const UI_COMPONENTS_PACKAGE = 'giadaware-ui-components';
 const UI_COMPONENTS_DEPENDENCY =
   'file:vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz';
 const HOSTED_UPSTASH_REDIS_PACKAGE = '@upstash/redis';
+const YAML_PACKAGE = 'yaml';
 const UI_COMPONENTS_ARTIFACT =
   'vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz';
 const UI_COMPONENTS_ARTIFACT_SHA256 =
@@ -716,16 +717,79 @@ export function buildUiComponentsDependencyPlan(kitRoot, clientRoot) {
  * @returns {{ package: string, changed: boolean, from?: string, to: string }}
  */
 export function buildHostedUpstashRedisDependencyPlan(kitRoot, clientRoot) {
-  const kitPkg = JSON.parse(fs.readFileSync(path.join(kitRoot, 'package.json'), 'utf8'));
-  const clientPkg = JSON.parse(fs.readFileSync(path.join(clientRoot, 'package.json'), 'utf8'));
-  const required = kitPkg.dependencies?.[HOSTED_UPSTASH_REDIS_PACKAGE];
+  return buildManagedRuntimeDependencyPlan(
+    kitRoot,
+    clientRoot,
+    HOSTED_UPSTASH_REDIS_PACKAGE
+  );
+}
 
-  if (typeof required !== 'string' || required === '') {
-    throw new Error(`Atelier-Kit must declare ${HOSTED_UPSTASH_REDIS_PACKAGE} as a runtime dependency`);
+/**
+ * Managed server files are copied into upgraded client sites, so every
+ * runtime package imported by those files must be migrated with them.
+ *
+ * @param {string} kitRoot
+ * @param {string} clientRoot
+ * @param {string} packageName
+ * @returns {{ package: string, changed: boolean, from?: string, to: string }}
+ */
+function buildManagedRuntimeDependencyPlan(
+  kitRoot,
+  clientRoot,
+  packageName
+) {
+  const kitPkg = JSON.parse(
+    fs.readFileSync(
+      path.join(kitRoot, 'package.json'),
+      'utf8'
+    )
+  );
+  const clientPkg = JSON.parse(
+    fs.readFileSync(
+      path.join(clientRoot, 'package.json'),
+      'utf8'
+    )
+  );
+  const required =
+    kitPkg.dependencies?.[packageName];
+
+  if (
+    typeof required !== 'string' ||
+    required === ''
+  ) {
+    throw new Error(
+      `Atelier-Kit must declare ${packageName} as a runtime dependency`
+    );
   }
 
-  const current = clientPkg.dependencies?.[HOSTED_UPSTASH_REDIS_PACKAGE];
-  return { package: HOSTED_UPSTASH_REDIS_PACKAGE, changed: current !== required, from: current, to: required };
+  const current =
+    clientPkg.dependencies?.[packageName];
+
+  return {
+    package: packageName,
+    changed: current !== required,
+    from: current,
+    to: required
+  };
+}
+
+/**
+ * Social authoring is part of the managed Kit server surface and imports the
+ * YAML parser at runtime.
+ *
+ * @param {string} kitRoot
+ * @param {string} clientRoot
+ * @returns {{ package: string, changed: boolean, from?: string, to: string }}
+ */
+export function buildYamlDependencyPlan(
+  kitRoot,
+  clientRoot
+) {
+  return buildManagedRuntimeDependencyPlan(
+    kitRoot,
+    clientRoot,
+    YAML_PACKAGE
+  );
 }
 
 /**
@@ -736,7 +800,7 @@ export function buildHostedUpstashRedisDependencyPlan(kitRoot, clientRoot) {
  * @param {string} clientRoot
  * @param {Set<string>} preservePaths
  * @param {{ readPreservedFile?: (filePath: string) => Buffer }} [validation]
- * @returns {{ dependency: { changed: boolean, from?: string, to: string }, hostedDependency: { package: string, changed: boolean, from?: string, to: string }, dependencies: { package: string, changed: boolean, from?: string, to: string }[], artifactChanged: boolean, identityChanged: boolean, packageJsonPreserved: boolean }}
+ * @returns {{ dependency: { changed: boolean, from?: string, to: string }, hostedDependency: { package: string, changed: boolean, from?: string, to: string }, yamlDependency: { package: string, changed: boolean, from?: string, to: string }, dependencies: { package: string, changed: boolean, from?: string, to: string }[], artifactChanged: boolean, identityChanged: boolean, packageJsonPreserved: boolean }}
  */
 export function buildUiComponentsIntegrationPlan(
   kitRoot,
@@ -811,9 +875,11 @@ export function buildUiComponentsIntegrationPlan(
   const packageJsonPreserved = preservePaths.has('package.json');
   let dependency;
   let hostedDependency;
+  let yamlDependency;
   try {
     dependency = buildUiComponentsDependencyPlan(kitRoot, clientRoot);
     hostedDependency = buildHostedUpstashRedisDependencyPlan(kitRoot, clientRoot);
+    yamlDependency = buildYamlDependencyPlan(kitRoot, clientRoot);
   } catch (error) {
     if (packageJsonPreserved) {
       throw new Error(
@@ -844,10 +910,24 @@ export function buildUiComponentsIntegrationPlan(
     );
   }
 
+  if (packageJsonPreserved && yamlDependency.changed) {
+    const actual = yamlDependency.from === undefined ? '(missing)' : JSON.stringify(yamlDependency.from);
+    throw new Error(
+      `${PRESERVE_MANIFEST} preserves package.json, but dependencies.${YAML_PACKAGE} is ${actual}. ` +
+        `Expected ${JSON.stringify(yamlDependency.to)}. Remove the package.json preserve rule to allow migration, ` +
+        `or set the dependency to the expected value before upgrading.`
+    );
+  }
+
   return {
     dependency,
     hostedDependency,
-    dependencies: [{ package: UI_COMPONENTS_PACKAGE, ...dependency }, hostedDependency],
+    yamlDependency,
+    dependencies: [
+      { package: UI_COMPONENTS_PACKAGE, ...dependency },
+      hostedDependency,
+      yamlDependency
+    ],
     artifactChanged,
     identityChanged,
     packageJsonPreserved

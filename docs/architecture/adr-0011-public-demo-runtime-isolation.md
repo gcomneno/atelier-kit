@@ -115,26 +115,58 @@ is distinct from legitimate budget exhaustion.
 This slice still does not connect Demo authority to routes, GitHub authoring,
 repository targets, commits or deployments.
 
-## Future Demo authority
+## Public Demo runtime composition
 
-Later #283 slices may add public-demo capabilities only through separate,
-explicit server-side boundaries.
+Slice 5 connects the previously isolated Demo boundaries into the narrow
+public flow:
 
-The intended direction is:
+**Visitor → Try Studio → Social edit → save → Visitor**
 
-- an unforgeable Demo request context distinct from Hosted request context;
-- opaque, short-lived server-side guest sessions with no synthetic GitHub
-  identity;
-- a distinct secure cookie and persistent state namespace;
-- exact Host, Origin, method and synchronizer-CSRF validation;
-- a server-side mutation budget/rate limit;
-- a dedicated sandbox repository and branch;
-- server-fixed writable roots, paths and commit messages;
-- deterministic forward-commit reset with optimistic-concurrency handling;
-- a separate read-only Visitor deployment showing the sandbox result.
+Public Demo composition is enabled only when all required server-side
+configuration is complete. Partial, malformed or unavailable configuration
+fails closed and does not fall back to process-memory production state.
 
-The browser must never choose repository, branch, writable root, commit
-message, deployment target or credentials.
+Production Demo security state uses persistent Redis for:
+
+- opaque guest sessions;
+- per-guest mutation budgets;
+- per-subject session-issuance budgets;
+- deployment-wide session-issuance budgets.
+
+Guest sessions remain identity-free. They contain no GitHub identity,
+authorization principal or Hosted Studio capability.
+
+Public session bootstrap is available only through exact:
+
+```text
+POST /demo/start
+```
+
+on the deployment-controlled canonical HTTPS Demo Host and Origin.
+
+For the initial Vercel deployment, the issuance subject is derived only from
+the Vercel-owned forwarded client-IP boundary. Ordinary forwarding headers are
+not fallback authority. The raw subject is HMAC-derived before persistent
+counter keys are created.
+
+The admitted Demo Studio surface is intentionally narrow:
+
+```text
+GET  /studio/site/social
+POST /studio/site/social?/saveSocial
+```
+
+The Demo Studio shell may render only after a genuinely trusted Demo context
+has been established. Other Studio child routes retain their existing
+Local/Hosted guards and therefore remain unavailable to Demo guests.
+
+The Visitor home exposes only a presentation-level `Try Studio` action when
+public Demo configuration is complete. Browser-visible navigation exposes only
+Social authoring and a path back to the public Visitor result.
+
+Repository, branch, writable path, commit message, Redis credentials,
+repository credentials, issuance secret and deployment target remain
+server-controlled.
 
 ## Repository isolation
 
@@ -175,17 +207,52 @@ verification and Social reads/writes must refer to the same GitHub revision;
 branch movement therefore fails closed through optimistic concurrency rather
 than carrying forward stale target verification.
 
-This slice still does not wire repository authority into public routes or
-create the public guest-session endpoint.
+Repository authority is now wired only into the admitted Demo Social route,
+after trusted-session, request-integrity, CSRF and mutation-budget checks.
 
 ## Public abuse boundary
 
 A public save can cause both a Git commit and a hosting deployment. CSRF and
 optimistic concurrency do not limit intentional high-volume use.
 
-Before public writes are enabled, Demo therefore requires an explicit
-server-side mutation budget/rate-limit policy in addition to repository
-isolation and deterministic reset.
+Public writes are therefore admitted only after the persistent mutation
+budget and independent session-issuance limits have allowed the request.
+
+## Expiry, reset and recovery
+
+Guest authority is deliberately short-lived:
+
+- 30-minute absolute session lifetime;
+- 10-minute idle timeout;
+- 5-minute lookup-credential rotation age;
+- five admitted mutations per guest authority by default;
+- bounded per-subject and deployment-wide session issuance.
+
+Session expiry revokes guest authoring authority but does not automatically
+rewrite the shared sandbox repository. Resetting the repository when one guest
+expires could overwrite another active guest's work.
+
+Sandbox recovery is therefore a separate operator/server operation:
+
+```text
+npm run demo:reset-social
+```
+
+The reset operation:
+
+1. re-verifies the configured sandbox marker at the current branch revision;
+2. restores only `config/social.yaml`;
+3. writes the canonical baseline `social.links: []`;
+4. uses optimistic concurrency against the verified revision;
+5. appends the fixed commit `demo: reset social links`;
+6. never force-pushes or rewinds Git history.
+
+The reset primitive is not exposed through HTTP and accepts no browser-selected
+repository, branch, path, baseline or commit message.
+
+Because the sandbox is shared, reset is intentionally not tied to one guest
+session. Deployment operations may schedule the operator command at an
+appropriate cadence without changing browser authority.
 
 ## Non-goals of this decision
 
@@ -194,8 +261,8 @@ This ADR does not:
 - make the existing Visitor demo writable;
 - expose the private Hosted Studio publicly;
 - weaken GitHub OAuth or Hosted authorization;
-- implement anonymous sessions yet;
-- admit any Demo mutation yet;
+- add identity/accounts to anonymous Demo guests;
+- admit Demo mutations outside the fixed Social document;
 - add additional Studio editors;
 - define a multi-tenant SaaS architecture.
 

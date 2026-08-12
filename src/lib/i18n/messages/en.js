@@ -5,6 +5,7 @@ export default {
       eyebrow: 'Atelier-Kit studio',
       title: 'Local authoring',
       hostedTitle: 'Hosted authoring',
+      demoTitle: 'Demo Studio',
       nav: {
         dashboard: 'Overview',
         siteGroup: 'Showcase settings',
@@ -32,6 +33,17 @@ export default {
         language: 'Language',
         shutdown: 'Stop studio'
       }
+    },
+    demo: {
+      intro:
+        'Try the limited public Studio safely. This temporary sandbox only lets you edit the social links used by the Demo showcase.',
+      socialIntro:
+        'Change Instagram, Facebook, X or GitHub links in the isolated Demo sandbox, then save to inspect the Visitor-facing result.',
+      expiryNote:
+        'Your guest Studio session is temporary. The sandbox may be reset independently of your browser session.',
+      savedNote:
+        'Saved to the Demo sandbox. The public deployment may need a short moment before the new links are visible.',
+      viewUpdatedSite: 'View the public Demo'
     },
     dashboard: {
       pageTitle: 'Studio · Overview',
@@ -1358,6 +1370,15 @@ export default {
       collectionsEyebrow: 'Collections',
       collectionsTitle: 'Collections',
       catalogEyebrow: 'Catalog',
+      demo: {
+        eyebrow: 'Interactive demo',
+        title: 'Try Atelier-Kit Studio',
+        intro:
+          'Open a temporary, limited Studio session and edit the social links used by this Demo showcase.',
+        action: 'Try Studio',
+        note:
+          'The Demo is isolated from Atelier-Kit and private Hosted Studio projects. Guest sessions are temporary.'
+      }
     },
     about: {
       pageTitle: 'About',

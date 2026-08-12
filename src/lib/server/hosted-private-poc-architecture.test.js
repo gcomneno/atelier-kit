@@ -116,9 +116,20 @@ test('only explicitly admitted Studio loaders/actions consume Hosted trusted loc
         path.join(STUDIO_ROOT, relative)
       );
 
+    if (relative === '+layout.server.js') {
+      assert.match(
+        contents,
+        /guardStudioShell\s*\(\s*locals\.hostedStudio\s*,\s*locals\.demoStudio\s*\)/,
+        'Studio shell must admit only trusted Hosted or Demo contexts'
+      );
+
+      continue;
+    }
+
     assert.match(
       contents,
-      /guardStudio\s*\(\s*locals\.hostedStudio\s*\)/
+      /guardStudio\s*\(\s*locals\.hostedStudio\s*\)/,
+      `${relative} must retain genuine Hosted guarding outside the explicit Demo branch`
     );
   }
 });
@@ -207,8 +218,14 @@ test('current Studio mutation surface remains contextless and Hosted fail-closed
 
       assert.match(
         contents,
-        /runtimeMode\s*!==\s*'hosted'[\s\S]*saveSocialAction/,
+        /runtimeMode\s*===\s*'local'[\s\S]*saveSocialAction/,
         'Local Social must retain its existing Local action'
+      );
+
+      assert.match(
+        contents,
+        /runtimeMode\s*===\s*'demo'[\s\S]*saveDemoPublicSocialRoute/,
+        'Demo Social must use its separate bounded public mutation seam'
       );
 
       assert.equal(

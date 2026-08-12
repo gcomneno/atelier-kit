@@ -15,6 +15,7 @@ import {
   applyUiComponentsIntegrationPlan,
   buildFilePlan,
   buildUiComponentsIntegrationPlan,
+  buildYamlDependencyPlan,
   canonicalManagedTestPath,
   deriveManagedTestsFromClient,
   hashRegularFileNoFollow,
@@ -32,9 +33,17 @@ const currentViteConfig = fs.readFileSync(path.join(kitRoot, 'vite.config.js'), 
 const artifact = 'vendor/giadaware-ui-components/b088653/giadaware-ui-components-0.0.0.tgz';
 const identity = 'vendor/giadaware-ui-components/b088653/integration.json';
 const hostedRedisPackage = '@upstash/redis';
-const hostedRedisDependency = JSON.parse(
-  fs.readFileSync(path.join(kitRoot, 'package.json'), 'utf8')
-).dependencies[hostedRedisPackage];
+const yamlPackage = 'yaml';
+const kitPackage = JSON.parse(
+  fs.readFileSync(
+    path.join(kitRoot, 'package.json'),
+    'utf8'
+  )
+);
+const hostedRedisDependency =
+  kitPackage.dependencies[hostedRedisPackage];
+const yamlDependency =
+  kitPackage.dependencies[yamlPackage];
 const legacyViteConfig = `import adapter from '@sveltejs/adapter-vercel';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { readFileSync } from 'node:fs';
@@ -135,12 +144,44 @@ function setHostedRedisDependency(clientRoot, value) {
   fs.writeFileSync(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 }
 
+
+/** @param {string} clientRoot @param {string | undefined} value */
+function setYamlDependency(clientRoot, value) {
+  const packagePath =
+    path.join(clientRoot, 'package.json');
+  const packageJson =
+    JSON.parse(
+      fs.readFileSync(
+        packagePath,
+        'utf8'
+      )
+    );
+
+  packageJson.dependencies =
+    packageJson.dependencies || {};
+
+  if (value === undefined) {
+    delete packageJson.dependencies[
+      yamlPackage
+    ];
+  } else {
+    packageJson.dependencies[
+      yamlPackage
+    ] = value;
+  }
+
+  fs.writeFileSync(
+    packagePath,
+    `${JSON.stringify(packageJson, null, 2)}\n`
+  );
+}
+
 /** @param {string} clientRoot */
-function provideInstalledHostedRedisForPortableRunner(clientRoot) {
+function provideInstalledRuntimeDependenciesForPortableRunner(clientRoot) {
   // This is the real package tree resolved by the Kit lockfile, not a test
   // double. The upgrade contract writes package.json; a client performs its
   // normal npm install before running its managed test command.
-  for (const relative of ['@upstash/redis', 'uncrypto']) {
+  for (const relative of ['@upstash/redis', 'uncrypto', 'yaml']) {
     fs.cpSync(
       path.join(kitRoot, 'node_modules', ...relative.split('/')),
       path.join(clientRoot, 'node_modules', ...relative.split('/')),
@@ -148,6 +189,16 @@ function provideInstalledHostedRedisForPortableRunner(clientRoot) {
     );
   }
   assert.equal(fs.existsSync(path.join(clientRoot, 'node_modules', ...hostedRedisPackage.split('/'))), true);
+  assert.equal(
+    fs.existsSync(
+      path.join(
+        clientRoot,
+        'node_modules',
+        yamlPackage
+      )
+    ),
+    true
+  );
 }
 
 /** @param {string} clientRoot @param {string[]} extraArgs @param {{ readPreservedFile?: (filePath: string) => Buffer, transactionHooks?: any }} integrationValidation */
@@ -264,6 +315,10 @@ test('successfully migrates the fresh issue-232 dependency, identity and artifac
     const clientPackage = JSON.parse(fs.readFileSync(path.join(clientRoot, 'package.json'), 'utf8'));
     assert.equal(clientPackage.dependencies['giadaware-ui-components'], `file:${artifact}`);
     assert.equal(clientPackage.dependencies[hostedRedisPackage], hostedRedisDependency);
+    assert.equal(
+      clientPackage.dependencies[yamlPackage],
+      yamlDependency
+    );
     assert.deepEqual(fs.readFileSync(path.join(clientRoot, artifact)), fs.readFileSync(path.join(kitRoot, artifact)));
     assert.deepEqual(fs.readFileSync(path.join(clientRoot, identity)), fs.readFileSync(path.join(kitRoot, identity)));
   } finally { cleanup(clientRoot); }
@@ -275,6 +330,10 @@ for (const [label, value] of [['missing', undefined], ['wrong', 'file:vendor/wro
     try {
       setDependency(clientRoot, value);
       setHostedRedisDependency(clientRoot, hostedRedisDependency);
+      setYamlDependency(
+        clientRoot,
+        yamlDependency
+      );
       fs.writeFileSync(path.join(clientRoot, '.atelier-kit-preserve'), 'package.json\n');
       const before = snapshotTree(clientRoot);
       await assert.rejects(
@@ -291,6 +350,10 @@ test('preserved package.json with the exact dependency is allowed and never rewr
   try {
     setDependency(clientRoot, `file:${artifact}`);
     setHostedRedisDependency(clientRoot, hostedRedisDependency);
+    setYamlDependency(
+      clientRoot,
+      yamlDependency
+    );
     const packagePath = path.join(clientRoot, 'package.json');
     const before = fs.readFileSync(packagePath);
     fs.writeFileSync(path.join(clientRoot, '.atelier-kit-preserve'), 'package.json\n');
@@ -306,6 +369,10 @@ for (const [label, value] of [['missing', undefined], ['incompatible', '^0.1.0']
     try {
       setDependency(clientRoot, `file:${artifact}`);
       setHostedRedisDependency(clientRoot, value);
+      setYamlDependency(
+        clientRoot,
+        yamlDependency
+      );
       fs.writeFileSync(path.join(clientRoot, '.atelier-kit-preserve'), 'package.json\n');
       const before = snapshotTree(clientRoot);
       await assert.rejects(
@@ -314,6 +381,58 @@ for (const [label, value] of [['missing', undefined], ['incompatible', '^0.1.0']
       );
       assert.deepEqual(snapshotTree(clientRoot), before);
     } finally { cleanup(clientRoot); }
+  });
+}
+
+
+for (const [label, value] of [
+  ['missing', undefined],
+  ['incompatible', '^1.0.0']
+]) {
+  test(`preserved package.json with ${label} YAML dependency aborts with zero mutations`, async () => {
+    const clientRoot = makeClient();
+
+    try {
+      setDependency(
+        clientRoot,
+        `file:${artifact}`
+      );
+
+      setHostedRedisDependency(
+        clientRoot,
+        hostedRedisDependency
+      );
+
+      setYamlDependency(
+        clientRoot,
+        value
+      );
+
+      fs.writeFileSync(
+        path.join(
+          clientRoot,
+          '.atelier-kit-preserve'
+        ),
+        'package.json\n'
+      );
+
+      const before =
+        snapshotTree(clientRoot);
+
+      await assert.rejects(
+        runMain(clientRoot),
+        new RegExp(
+          `preserves package\\.json.*dependencies\\.yaml.*Expected "${yamlDependency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}".*Remove the package\\.json preserve rule`
+        )
+      );
+
+      assert.deepEqual(
+        snapshotTree(clientRoot),
+        before
+      );
+    } finally {
+      cleanup(clientRoot);
+    }
   });
 }
 
@@ -504,7 +623,8 @@ test('does not request npm install when issue-232 dependency and artifact are un
     clientPackage.scripts = kitPackage.scripts;
     clientPackage.dependencies = {
       'giadaware-ui-components': `file:${artifact}`,
-      [hostedRedisPackage]: hostedRedisDependency
+      [hostedRedisPackage]: hostedRedisDependency,
+      [yamlPackage]: yamlDependency
     };
     fs.writeFileSync(clientPackagePath, `${JSON.stringify(clientPackage, null, 2)}\n`);
 
@@ -513,6 +633,88 @@ test('does not request npm install when issue-232 dependency and artifact are un
     assert.match(output, /npm run check[\s\S]*npm run build/);
     assert.deepEqual(fs.readFileSync(path.join(clientRoot, 'scripts/site-upgrade.js')), fs.readFileSync(path.join(kitRoot, 'scripts/site-upgrade.js')));
   } finally { cleanup(clientRoot); }
+});
+
+
+test('YAML runtime dependency planner follows the Kit package contract', () => {
+  const clientRoot = makeClient();
+
+  try {
+    const missing =
+      buildYamlDependencyPlan(
+        kitRoot,
+        clientRoot
+      );
+
+    assert.equal(
+      missing.package,
+      yamlPackage
+    );
+    assert.equal(
+      missing.changed,
+      true
+    );
+    assert.equal(
+      missing.to,
+      yamlDependency
+    );
+
+    setYamlDependency(
+      clientRoot,
+      yamlDependency
+    );
+
+    const current =
+      buildYamlDependencyPlan(
+        kitRoot,
+        clientRoot
+      );
+
+    assert.equal(
+      current.changed,
+      false
+    );
+    assert.equal(
+      current.to,
+      yamlDependency
+    );
+  } finally {
+    cleanup(clientRoot);
+  }
+});
+
+test('YAML dependency migration is visible in dry-run and makes no mutations', async () => {
+  const clientRoot = makeClient();
+
+  try {
+    const before =
+      snapshotTree(clientRoot);
+
+    const output =
+      await runMain(
+        clientRoot,
+        ['--dry-run']
+      );
+
+    assert.match(
+      output,
+      /dependencies\.yaml/
+    );
+
+    assert.match(
+      output,
+      new RegExp(
+        `now: ${yamlDependency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`
+      )
+    );
+
+    assert.deepEqual(
+      snapshotTree(clientRoot),
+      before
+    );
+  } finally {
+    cleanup(clientRoot);
+  }
 });
 
 test('Hosted Redis dependency migration is visible in dry-run and makes no mutations', async () => {
@@ -548,7 +750,7 @@ test('upgrade installs the existing-file test runner without requiring a root te
     assert.equal(clientPackage.scripts.test, 'node scripts/run-tests.js');
     assert.doesNotMatch(clientPackage.scripts.test, /test\/\*\.test\.js/);
     assert.equal(fs.existsSync(path.join(clientRoot, 'test')), false);
-    provideInstalledHostedRedisForPortableRunner(clientRoot);
+    provideInstalledRuntimeDependenciesForPortableRunner(clientRoot);
 
     const result = spawnSync(process.execPath, ['scripts/run-tests.js'], { cwd: clientRoot, encoding: 'utf8', env: childEnv });
     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
@@ -561,7 +763,7 @@ test('upgrade retains client tests and adds newly managed src tests', async () =
     fs.mkdirSync(path.join(clientRoot, 'src/client'), { recursive: true });
     fs.writeFileSync(path.join(clientRoot, 'src/client/custom.test.js'), "import test from 'node:test'; test('client', () => {});\n");
     await runMain(clientRoot);
-    provideInstalledHostedRedisForPortableRunner(clientRoot);
+    provideInstalledRuntimeDependenciesForPortableRunner(clientRoot);
     assert.equal(fs.existsSync(path.join(clientRoot, 'src/client/custom.test.js')), true);
     assert.equal(fs.existsSync(path.join(clientRoot, 'src/lib/about-config.test.js')), true);
     const result = spawnSync(process.execPath, ['scripts/run-tests.js'], { cwd: clientRoot, encoding: 'utf8', env: childEnv });

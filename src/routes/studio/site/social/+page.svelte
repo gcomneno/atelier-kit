@@ -14,6 +14,7 @@
 
   const socialForm = $derived(form?.socialForm ?? data.socialForm);
   const hostedSocial = $derived(form?.hostedSocial ?? data.hostedSocial);
+  const demoSocial = $derived(form?.demoSocial ?? data.demoSocial);
   let isDirty = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};
@@ -28,12 +29,17 @@
   <title>{t('studio.site.pageTitle')}</title>
 </svelte:head>
 
-<PageIntro>{t('studio.site.intro')}</PageIntro>
+<PageIntro>
+  {demoSocial ? t('studio.demo.intro') : t('studio.site.intro')}
+</PageIntro>
 
 <Panel title={t('studio.site.social.title')} id="social-settings" class="atelier-studio-panel">
 
   <div class="panel-summary">
-    <p>{t('studio.site.social.intro')}</p>
+    <p>{demoSocial ? t('studio.demo.socialIntro') : t('studio.site.social.intro')}</p>
+    {#if demoSocial}
+      <p>{t('studio.demo.expiryNote')}</p>
+    {/if}
   </div>
 
   <form
@@ -52,6 +58,17 @@
         type="hidden"
         name="authoring_revision"
         value={hostedSocial.authoringRevision}
+      />
+    {:else if demoSocial}
+      <input
+        type="hidden"
+        name="demo_csrf_token"
+        value={demoSocial.csrfToken}
+      />
+      <input
+        type="hidden"
+        name="authoring_revision"
+        value={demoSocial.authoringRevision}
       />
     {/if}
 
@@ -73,5 +90,35 @@
     </FormActions>
 
     <StudioFormStatus message={form?.socialMessage} status={form?.socialStatus} />
+
+    {#if demoSocial && form?.socialStatus === 'success'}
+      <div class="demo-after-save">
+        <p>{t('studio.demo.savedNote')}</p>
+        <a href="/">{t('studio.demo.viewUpdatedSite')}</a>
+      </div>
+    {/if}
   </form>
 </Panel>
+
+<style>
+  .demo-after-save {
+    display: grid;
+    gap: 0.45rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--studio-border);
+    border-radius: 0.75rem;
+    background: rgb(45 108 223 / 0.06);
+  }
+
+  .demo-after-save p {
+    margin: 0;
+    color: var(--studio-muted);
+    line-height: 1.5;
+  }
+
+  .demo-after-save a {
+    width: fit-content;
+    color: var(--studio-accent);
+    font-weight: 700;
+  }
+</style>

@@ -9,6 +9,9 @@ import {
 import {
   canAccessStudioRoute
 } from '$lib/server/studio-access-policy.js';
+import {
+  isTrustedDemoRequestContext
+} from '$lib/server/demo-request-context.js';
 
 /**
  * Production-safe Studio gating.
@@ -63,4 +66,44 @@ export function guardStudio(hostedContext) {
   ) {
     error(404, 'Not found');
   }
+}
+
+
+/**
+ * Admit the shared Studio shell without broadening ordinary child-route
+ * authority.
+ *
+ * Demo receives shell admission only when the hook has issued a genuine Demo
+ * context for the exact public Social route. Existing child routes continue
+ * to call guardStudio() and therefore remain fail-closed in Demo mode.
+ *
+ * @param {unknown} hostedContext
+ * @param {unknown} demoContext
+ */
+export function guardStudioShell(
+  hostedContext,
+  demoContext
+) {
+  const runtimeMode =
+    getStudioRuntimeMode();
+
+  if (
+    canAccessStudioRoute(
+      runtimeMode,
+      hostedContext
+    )
+  ) {
+    return;
+  }
+
+  if (
+    runtimeMode === 'demo' &&
+    isTrustedDemoRequestContext(
+      demoContext
+    )
+  ) {
+    return;
+  }
+
+  error(404, 'Not found');
 }

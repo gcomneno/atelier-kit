@@ -95,7 +95,6 @@ export const APPEARANCE_PRESETS = {
 
 const DEFAULT_APPEARANCE = APPEARANCE_PRESETS.warm;
 const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
-const BACKGROUND_FIT_IDS = /** @type {const} */ (['top', 'center', 'contain']);
 
 /**
  * @param {unknown} value
@@ -126,17 +125,9 @@ export function isAppearancePreset(value) {
  * @param {string} fallback
  */
 function normalizeHex(value, fallback) {
-  if (typeof value !== 'string') {
-    return fallback;
-  }
-
+  if (typeof value !== 'string') return fallback;
   const trimmed = value.trim();
-
-  if (HEX_PATTERN.test(trimmed)) {
-    return trimmed.toLowerCase();
-  }
-
-  return fallback;
+  return HEX_PATTERN.test(trimmed) ? trimmed.toLowerCase() : fallback;
 }
 
 /**
@@ -153,10 +144,7 @@ export function resolveSiteAppearance(appearance) {
   const base_color = normalizeHex(appearance.base_color, presetDefaults.base_color);
   const accent_color = normalizeHex(appearance.accent_color, presetDefaults.accent_color);
   const text_color = normalizeHex(appearance.text_color, presetDefaults.text_color);
-  const heading_color = normalizeHex(
-    appearance.heading_color,
-    presetDefaults.heading_color ?? text_color
-  );
+  const heading_color = normalizeHex(appearance.heading_color, presetDefaults.heading_color ?? text_color);
 
   return {
     preset,
@@ -164,10 +152,7 @@ export function resolveSiteAppearance(appearance) {
     accent_color,
     text_color,
     heading_color,
-    card_color: normalizeHex(
-      appearance.card_color,
-      presetDefaults.card_color ?? deriveCardColor(base_color)
-    ),
+    card_color: normalizeHex(appearance.card_color, presetDefaults.card_color ?? deriveCardColor(base_color)),
     header_title_color: normalizeHex(
       appearance.header_title_color,
       presetDefaults.header_title_color ?? heading_color
@@ -184,15 +169,10 @@ export function resolveSiteAppearance(appearance) {
   };
 }
 
-/**
- * @param {string} hex
- */
+/** @param {string} hex */
 function relativeLuminance(hex) {
   const rgb = hexToRgb(hex);
-
-  if (!rgb) {
-    return 1;
-  }
+  if (!rgb) return 1;
 
   const channel = (/** @type {number} */ value) => {
     const normalized = value / 255;
@@ -201,11 +181,7 @@ function relativeLuminance(hex) {
       : ((normalized + 0.055) / 1.055) ** 2.4;
   };
 
-  return (
-    0.2126 * channel(rgb.r) +
-    0.7152 * channel(rgb.g) +
-    0.0722 * channel(rgb.b)
-  );
+  return 0.2126 * channel(rgb.r) + 0.7152 * channel(rgb.g) + 0.0722 * channel(rgb.b);
 }
 
 /**
@@ -216,89 +192,112 @@ function relativeLuminance(hex) {
 function mixHex(hexA, hexB, ratioOfB) {
   const a = hexToRgb(hexA);
   const b = hexToRgb(hexB);
-
-  if (!a || !b) {
-    return hexA;
-  }
-
+  if (!a || !b) return hexA;
   const mix = (/** @type {number} */ channelA, /** @type {number} */ channelB) =>
     Math.round(channelA + (channelB - channelA) * ratioOfB);
-
   return rgbToHex(mix(a.r, b.r), mix(a.g, b.g), mix(a.b, b.b));
 }
 
-/**
- * @param {string} baseColor
- */
+/** @param {string} baseColor */
 export function deriveCardColor(baseColor) {
   const darkBase = relativeLuminance(baseColor) < 0.2;
   return darkBase ? mixWithWhite(baseColor, 0.2) : mixWithWhite(baseColor, 0.88);
 }
 
 /**
- * @param {SiteAppearance} appearance
+ * Return the canonical GIADA preset selected by this Atelier appearance.
+ * Custom appearances use the neutral preset as a baseline and override its
+ * semantic tokens inline.
+ * @param {Record<string, unknown> | SiteAppearance | undefined | null} appearance
  */
-export function appearanceCssVariables(appearance) {
-  const resolved = resolveSiteAppearance(appearance);
-  const darkBase = relativeLuminance(resolved.base_color) < 0.2;
+export function appearanceThemePreset(appearance) {
+  const resolved = resolveSiteAppearance(/** @type {Record<string, unknown> | undefined | null} */ (appearance));
+  return resolved.preset === 'custom' ? 'neutral' : resolved.preset;
+}
 
+/** @param {SiteAppearance} resolved */
+function matchesCanonicalPreset(resolved) {
+  if (resolved.preset === 'custom') return false;
+  const preset = APPEARANCE_PRESETS[resolved.preset];
+  return (
+    resolved.base_color === preset.base_color &&
+    resolved.accent_color === preset.accent_color &&
+    resolved.text_color === preset.text_color &&
+    resolved.heading_color === preset.heading_color &&
+    resolved.card_color === preset.card_color
+  );
+}
+
+/** @param {SiteAppearance} resolved */
+function customGiadaThemeVariables(resolved) {
+  const darkBase = relativeLuminance(resolved.base_color) < 0.2;
   return {
-    '--site-base-color': resolved.base_color,
-    '--site-accent-color': resolved.accent_color,
-    '--site-text-color': resolved.text_color,
-    '--site-heading-color': resolved.heading_color,
-    '--site-header-title-color': resolved.header_title_color,
-    '--site-intro-title-color': resolved.intro_title_color,
-    '--site-font-family': fontFamilyCss(resolved.font_preset),
-    '--site-color-scheme': darkBase ? 'dark' : 'light',
-    '--site-muted-text-color': mixHex(
+    '--giu-theme-base': resolved.base_color,
+    '--giu-theme-accent': resolved.accent_color,
+    '--giu-theme-text': resolved.text_color,
+    '--giu-theme-heading': resolved.heading_color,
+    '--giu-theme-muted': mixHex(
       resolved.text_color,
       resolved.base_color,
       darkBase ? 0.28 : 0.42
     ),
-    '--site-surface-color': darkBase
+    '--giu-theme-surface': darkBase
       ? mixWithWhite(resolved.base_color, 0.12)
       : mixWithWhite(resolved.base_color, 0.72),
-    '--site-card-color': resolved.card_color,
-    '--site-border-color': darkBase
+    '--giu-theme-card': resolved.card_color,
+    '--giu-theme-border': darkBase
       ? mixWithWhite(resolved.base_color, 0.34)
-      : mixWithWhite(resolved.base_color, 0.55)
+      : mixWithWhite(resolved.base_color, 0.55),
+    '--giu-theme-color-scheme': darkBase ? 'dark' : 'light'
+  };
+}
+
+/**
+ * Atelier owns persistence, typography and editorial-specific colors. Generic
+ * presentation flows through GIADA UI semantic theme tokens. Named presets
+ * use GIADA's canonical palette unless the saved appearance has explicit
+ * color edits, in which case those edits override the same semantic contract.
+ * @param {SiteAppearance | Record<string, unknown>} appearance
+ */
+export function appearanceCssVariables(appearance) {
+  const resolved = resolveSiteAppearance(/** @type {Record<string, unknown>} */ (appearance));
+  const overrides = matchesCanonicalPreset(resolved) ? {} : customGiadaThemeVariables(resolved);
+
+  return {
+    ...overrides,
+    '--site-base-color': 'var(--giu-theme-base)',
+    '--site-accent-color': 'var(--giu-theme-accent)',
+    '--site-text-color': 'var(--giu-theme-text)',
+    '--site-heading-color': 'var(--giu-theme-heading)',
+    '--site-header-title-color': resolved.header_title_color,
+    '--site-intro-title-color': resolved.intro_title_color,
+    '--site-font-family': fontFamilyCss(resolved.font_preset),
+    '--site-color-scheme': 'var(--giu-theme-color-scheme)',
+    '--site-muted-text-color': 'var(--giu-theme-muted)',
+    '--site-surface-color': 'var(--giu-theme-surface)',
+    '--site-card-color': 'var(--giu-theme-card)',
+    '--site-border-color': 'var(--giu-theme-border)'
   };
 }
 
 /**
  * @param {string} hex
- * @param {number} whiteRatio 0–1 amount of white to mix in
+ * @param {number} whiteRatio
  */
 function mixWithWhite(hex, whiteRatio) {
   const rgb = hexToRgb(hex);
-
-  if (!rgb) {
-    return '#fffaf2';
-  }
-
+  if (!rgb) return '#fffaf2';
   const mix = /** @param {number} channel */ (channel) =>
     Math.round(channel + (255 - channel) * whiteRatio);
   return rgbToHex(mix(rgb.r), mix(rgb.g), mix(rgb.b));
 }
 
-/**
- * @param {string} hex
- */
+/** @param {string} hex */
 function hexToRgb(hex) {
   const match = /^#([0-9a-fA-F]{6})$/.exec(hex);
-
-  if (!match) {
-    return null;
-  }
-
+  if (!match) return null;
   const value = Number.parseInt(match[1], 16);
-
-  return {
-    r: (value >> 16) & 255,
-    g: (value >> 8) & 255,
-    b: value & 255
-  };
+  return { r: (value >> 16) & 255, g: (value >> 8) & 255, b: value & 255 };
 }
 
 /**
@@ -307,9 +306,7 @@ function hexToRgb(hex) {
  * @param {number} b
  */
 function rgbToHex(r, g, b) {
-  return `#${[r, g, b]
-    .map((channel) => channel.toString(16).padStart(2, '0'))
-    .join('')}`;
+  return `#${[r, g, b].map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
 }
 
 /**
@@ -318,7 +315,6 @@ function rgbToHex(r, g, b) {
  * @param {FormDataEntryValue | null} accentColor
  * @param {FormDataEntryValue | null} textColor
  * @param {FormDataEntryValue | null} headingColor
- * @param {FormDataEntryValue | null} cardColor
  * @param {FormDataEntryValue | null} cardColor
  * @param {FormDataEntryValue | null} headerTitleColor
  * @param {FormDataEntryValue | null} introTitleColor
@@ -339,8 +335,7 @@ export function appearanceFromForm(
   backgroundFit
 ) {
   const presetValue = typeof preset === 'string' && isAppearancePreset(preset) ? preset : 'warm';
-  const presetDefaults =
-    presetValue === 'custom' ? DEFAULT_APPEARANCE : APPEARANCE_PRESETS[presetValue];
+  const presetDefaults = presetValue === 'custom' ? DEFAULT_APPEARANCE : APPEARANCE_PRESETS[presetValue];
 
   return resolveSiteAppearance({
     preset: presetValue,

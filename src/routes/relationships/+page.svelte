@@ -6,6 +6,43 @@
   let { data } = $props();
   const t = useVisitorI18n();
 
+  /**
+   * @param {string} locale
+   * @returns {import('giadaware-ui-components/visitor').RelationshipGraphLabels}
+   */
+  function buildRelationshipGraphLabels(locale) {
+    const italian = locale === 'it';
+
+    return {
+      region: t('relationships.ariaLabel'),
+      controls: italian ? 'Controlli del grafo' : 'Graph controls',
+      zoomIn: italian ? 'Ingrandisci' : 'Zoom in',
+      zoomOut: italian ? 'Riduci' : 'Zoom out',
+      resetView: italian ? 'Reimposta vista' : 'Reset view',
+      fitGraph: italian ? 'Adatta il grafo' : 'Fit graph',
+      panUp: italian ? 'Sposta in alto' : 'Pan up',
+      panDown: italian ? 'Sposta in basso' : 'Pan down',
+      panLeft: italian ? 'Sposta a sinistra' : 'Pan left',
+      panRight: italian ? 'Sposta a destra' : 'Pan right',
+      empty: t('relationships.empty'),
+      summary: ({ nodeCount, edgeCount }) =>
+        italian
+          ? `${nodeCount} nodi, ${edgeCount} relazioni dirette.`
+          : `${nodeCount} nodes, ${edgeCount} directed relationships.`,
+      relationship: ({ sourceLabel, targetLabel, relationship }) => {
+        if (italian) {
+          return relationship
+            ? `${sourceLabel} verso ${targetLabel}: ${relationship}`
+            : `${sourceLabel} verso ${targetLabel}`;
+        }
+
+        return relationship
+          ? `${sourceLabel} to ${targetLabel}: ${relationship}`
+          : `${sourceLabel} to ${targetLabel}`;
+      }
+    };
+  }
+
   const siteLabel = $derived(resolveDocumentTitle(data.site));
   const pageTitle = $derived(formatPageTitle(t('relationships.pageTitle'), data.site));
   const metaDescription = $derived(
@@ -13,47 +50,7 @@
       ? t('relationships.metaDescription', { siteName: siteLabel })
       : t('relationships.intro')
   );
-  const relationshipGraphLabels = $derived(
-    data.locale === 'it'
-      ? {
-          region: t('relationships.ariaLabel'),
-          controls: 'Controlli del grafo',
-          zoomIn: 'Ingrandisci',
-          zoomOut: 'Riduci',
-          resetView: 'Reimposta vista',
-          fitGraph: 'Adatta il grafo',
-          panUp: 'Sposta in alto',
-          panDown: 'Sposta in basso',
-          panLeft: 'Sposta a sinistra',
-          panRight: 'Sposta a destra',
-          empty: t('relationships.empty'),
-          summary: ({ nodeCount, edgeCount }) =>
-            `${nodeCount} nodi, ${edgeCount} relazioni dirette.`,
-          relationship: ({ sourceLabel, targetLabel, relationship }) =>
-            relationship
-              ? `${sourceLabel} verso ${targetLabel}: ${relationship}`
-              : `${sourceLabel} verso ${targetLabel}`
-        }
-      : {
-          region: t('relationships.ariaLabel'),
-          controls: 'Graph controls',
-          zoomIn: 'Zoom in',
-          zoomOut: 'Zoom out',
-          resetView: 'Reset view',
-          fitGraph: 'Fit graph',
-          panUp: 'Pan up',
-          panDown: 'Pan down',
-          panLeft: 'Pan left',
-          panRight: 'Pan right',
-          empty: t('relationships.empty'),
-          summary: ({ nodeCount, edgeCount }) =>
-            `${nodeCount} nodes, ${edgeCount} directed relationships.`,
-          relationship: ({ sourceLabel, targetLabel, relationship }) =>
-            relationship
-              ? `${sourceLabel} to ${targetLabel}: ${relationship}`
-              : `${sourceLabel} to ${targetLabel}`
-        }
-  );
+  const relationshipGraphLabels = $derived(buildRelationshipGraphLabels(data.locale));
 </script>
 
 <svelte:head>

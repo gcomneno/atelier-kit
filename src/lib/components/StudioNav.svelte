@@ -2,7 +2,10 @@
   import { page } from '$app/state';
   import { useI18n } from '$lib/i18n/context.js';
 
-  let { hostedAuthoring = false } = $props();
+  let {
+    hostedAuthoring = false,
+    demoAuthoring = false
+  } = $props();
 
   const t = useI18n();
 
@@ -15,7 +18,16 @@
 
 <nav class="studio-nav" aria-label="Studio">
   <ul class="studio-nav-list">
-    {#if hostedAuthoring}
+    {#if demoAuthoring}
+      <li>
+        <a class:active={isActive('/studio/site/social')} href="/studio/site/social">
+          {t('studio.layout.nav.social')}
+        </a>
+      </li>
+      <li>
+        <a href="/">{t('studio.layout.nav.preview')}</a>
+      </li>
+    {:else if hostedAuthoring}
       <li>
         <a class:active={isActive('/studio')} href="/studio">
           {t('studio.layout.nav.dashboard')}

@@ -5,6 +5,7 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			hostedStudio?: unknown;
+			demoStudio?: unknown;
 		}
 		// interface PageData {}
 		// interface PageState {}

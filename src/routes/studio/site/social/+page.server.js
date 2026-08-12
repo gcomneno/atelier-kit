@@ -11,6 +11,17 @@ import {
   getHostedPrivatePocRuntime
 } from '$lib/server/hosted-private-poc-http.js';
 import {
+  getDemoPublicRuntime
+} from '$lib/server/demo-public-http.js';
+import {
+  DEMO_PUBLIC_SOCIAL_OUTCOMES,
+  loadDemoPublicSocialRoute,
+  saveDemoPublicSocialRoute
+} from '$lib/server/demo-public-social-route.js';
+import {
+  isTrustedDemoRequestContext
+} from '$lib/server/demo-request-context.js';
+import {
   HOSTED_MUTATION_GUARD_OUTCOMES
 } from '$lib/server/hosted-mutation-guard.js';
 import {
@@ -36,7 +47,50 @@ import {
 } from '$lib/i18n/server.js';
 
 export async function load({ locals }) {
-  const runtimeMode = getStudioRuntimeMode();
+  const runtimeMode =
+    getStudioRuntimeMode();
+
+  if (runtimeMode === 'demo') {
+    if (
+      !isTrustedDemoRequestContext(
+        locals.demoStudio
+      )
+    ) {
+      error(404, 'Not found');
+    }
+
+    const result =
+      await loadDemoPublicSocialRoute({
+        runtimeMode,
+        demoContext:
+          locals.demoStudio
+      });
+
+    if (
+      result.outcome ===
+      DEMO_PUBLIC_SOCIAL_OUTCOMES.ALLOWED
+    ) {
+      return {
+        socialForm:
+          result.socialForm,
+        hostedSocial: null,
+        demoSocial:
+          result.demoSocial
+      };
+    }
+
+    if (
+      result.outcome ===
+      DEMO_PUBLIC_SOCIAL_OUTCOMES.NOT_FOUND
+    ) {
+      error(404, 'Not found');
+    }
+
+    error(
+      503,
+      'Demo authoring unavailable'
+    );
+  }
 
   guardStudio(locals.hostedStudio);
 
@@ -58,7 +112,8 @@ export async function load({ locals }) {
         });
 
       return {
-        socialForm: hosted.socialForm,
+        socialForm:
+          hosted.socialForm,
         hostedSocial: {
           authoringRevision:
             hosted.authoringRevision,
@@ -66,7 +121,8 @@ export async function load({ locals }) {
             getTrustedHostedRequestCsrfToken(
               locals.hostedStudio
             )
-        }
+        },
+        demoSocial: null
       };
     } catch {
       error(
@@ -78,7 +134,8 @@ export async function load({ locals }) {
 
   return {
     socialForm: loadSocialForm(),
-    hostedSocial: null
+    hostedSocial: null,
+    demoSocial: null
   };
 }
 
@@ -92,13 +149,125 @@ export const actions = {
       getStudioRuntimeMode();
 
     /*
-     * Local Studio deliberately retains its existing filesystem
-     * action and requires no Hosted credentials or CSRF capability.
+     * Local Studio deliberately retains its existing filesystem action.
      */
-    if (runtimeMode !== 'hosted') {
+    if (runtimeMode === 'local') {
       return saveSocialAction({
         request
       });
+    }
+
+    if (runtimeMode === 'demo') {
+      if (
+        !isTrustedDemoRequestContext(
+          locals.demoStudio
+        )
+      ) {
+        error(404, 'Not found');
+      }
+
+      const runtime =
+        getDemoPublicRuntime(
+          runtimeMode
+        );
+
+      /*
+       * Demo mutation authority is available only through the persistent
+       * public Demo composition root.
+       */
+      if (
+        runtime === null ||
+        typeof runtime !== 'object' ||
+        typeof runtime.evaluateMutation !==
+          'function'
+      ) {
+        error(404, 'Not found');
+      }
+
+      const result =
+        await saveDemoPublicSocialRoute({
+          runtimeMode,
+          demoContext:
+            locals.demoStudio,
+          request,
+          runtime
+        });
+
+      const t =
+        getOperatorTranslator();
+
+      switch (result.outcome) {
+        case DEMO_PUBLIC_SOCIAL_OUTCOMES.ALLOWED:
+          return {
+            socialStatus: 'success',
+            socialMessage:
+              t('server.saveSocialSuccess'),
+            socialForm:
+              result.socialForm,
+            hostedSocial: null,
+            demoSocial:
+              result.demoSocial
+          };
+
+        case DEMO_PUBLIC_SOCIAL_OUTCOMES.VALIDATION_FAILED:
+          return fail(400, {
+            socialStatus: 'error',
+            socialMessage:
+              t(
+                'errors.socialUrlInvalid',
+                {
+                  network:
+                    result.invalidId
+                }
+              ),
+            socialForm:
+              result.socialForm,
+            hostedSocial: null,
+            demoSocial:
+              result.demoSocial
+          });
+
+        case DEMO_PUBLIC_SOCIAL_OUTCOMES.REVISION_INVALID:
+          return fail(400, {
+            socialStatus: 'error',
+            socialMessage:
+              t('server.saveSocialError')
+          });
+
+        case DEMO_PUBLIC_SOCIAL_OUTCOMES.CONFLICT:
+          return fail(409, {
+            socialStatus: 'error',
+            socialMessage:
+              t('server.saveSocialConflict')
+          });
+
+        case DEMO_PUBLIC_SOCIAL_OUTCOMES.METHOD_NOT_ALLOWED:
+          error(405, 'Method not allowed');
+
+        case DEMO_PUBLIC_SOCIAL_OUTCOMES.FORBIDDEN:
+          error(403, 'Forbidden');
+
+        case DEMO_PUBLIC_SOCIAL_OUTCOMES.BUDGET_EXHAUSTED:
+          error(
+            429,
+            'Demo mutation budget exhausted'
+          );
+
+        case DEMO_PUBLIC_SOCIAL_OUTCOMES.BUDGET_UNAVAILABLE:
+          error(
+            503,
+            'Demo mutation budget unavailable'
+          );
+
+        case DEMO_PUBLIC_SOCIAL_OUTCOMES.NOT_FOUND:
+          error(404, 'Not found');
+
+        default:
+          error(
+            503,
+            'Demo authoring unavailable'
+          );
+      }
     }
 
     guardStudio(locals.hostedStudio);

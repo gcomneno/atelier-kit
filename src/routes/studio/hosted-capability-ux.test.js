@@ -16,7 +16,7 @@ async function source(path) {
   return readFile(path, 'utf8');
 }
 
-test('Studio navigation retains the complete Local set and limits Hosted to admitted capabilities', async () => {
+test('Studio navigation retains Local, limits Hosted, and isolates the public Demo surface', async () => {
   const nav = await source(`${COMPONENTS_ROOT}StudioNav.svelte`);
   const localRoutes = [
     '/studio',
@@ -42,18 +42,50 @@ test('Studio navigation retains the complete Local set and limits Hosted to admi
     assert.ok(nav.includes(`href="${route}"`));
   }
 
-  const hostedBranch = nav.match(
-    /\{#if hostedAuthoring\}([\s\S]*?)\{:else\}/
+  const demoBranch = nav.match(
+    /\{#if demoAuthoring\}([\s\S]*?)\{:else if hostedAuthoring\}/
   )?.[1];
-  assert.ok(hostedBranch, 'Hosted navigation branch must exist');
+
+  assert.ok(
+    demoBranch,
+    'Demo navigation branch must exist'
+  );
+
+  assert.deepEqual(
+    [...demoBranch.matchAll(/href="([^"]+)"/g)]
+      .map((match) => match[1]),
+    ['/studio/site/social', '/']
+  );
+
+  assert.doesNotMatch(
+    demoBranch,
+    /target="_blank"|class="group"|group-title|sub-list/
+  );
+
+  const hostedBranch = nav.match(
+    /\{:else if hostedAuthoring\}([\s\S]*?)\{:else\}/
+  )?.[1];
+
+  assert.ok(
+    hostedBranch,
+    'Hosted navigation branch must exist'
+  );
 
   assert.deepEqual(
     [...hostedBranch.matchAll(/href="([^"]+)"/g)]
       .map((match) => match[1]),
     ['/studio', '/studio/site/social', '/']
   );
-  assert.match(hostedBranch, /target="_blank"/);
-  assert.doesNotMatch(hostedBranch, /class="group"|group-title|sub-list/);
+
+  assert.match(
+    hostedBranch,
+    /target="_blank"/
+  );
+
+  assert.doesNotMatch(
+    hostedBranch,
+    /class="group"|group-title|sub-list/
+  );
 });
 
 test('Studio dashboard preserves Local zones and renders only Hosted Social and Preview cards', async () => {
@@ -88,27 +120,37 @@ test('Studio dashboard preserves Local zones and renders only Hosted Social and 
   assert.match(dashboard, /target=\{zone\.external \? '_blank' : undefined\}/);
 });
 
-test('Localized shell copy distinguishes Local and limited Hosted authoring', async () => {
+test('Localized shell copy distinguishes Local, limited Hosted, and public Demo authoring', async () => {
   const layout = await source(`${STUDIO_ROOT}+layout.svelte`);
   const english = await source(`${MESSAGES_ROOT}en.js`);
   const italian = await source(`${MESSAGES_ROOT}it.js`);
 
-  assert.match(layout, /hostedAuthoring \? 'studio\.layout\.hostedTitle' : 'studio\.layout\.title'/);
+  assert.match(
+    layout,
+    /data\.demoAuthoring[\s\S]*\? 'studio\.layout\.demoTitle'[\s\S]*: data\.hostedAuthoring[\s\S]*\? 'studio\.layout\.hostedTitle'[\s\S]*: 'studio\.layout\.title'/
+  );
   assert.match(english, /title: 'Local authoring'/);
   assert.match(english, /hostedTitle: 'Hosted authoring'/);
+  assert.match(english, /demoTitle:/);
   assert.match(english, /private PoC currently exposes a limited Hosted authoring surface/);
   assert.match(italian, /title: 'Modifica locale'/);
   assert.match(italian, /hostedTitle: 'Modifica ospitata'/);
+  assert.match(italian, /demoTitle:/);
   assert.match(italian, /PoC privato espone al momento una superficie di modifica ospitata limitata/);
 });
 
-test('browser-visible layout capability is only a trusted server-derived boolean', async () => {
+test('browser-visible Hosted and Demo layout capabilities are trusted server-derived booleans only', async () => {
   const layoutServer = await source(`${STUDIO_ROOT}+layout.server.js`);
 
   assert.match(layoutServer, /isTrustedHostedRequestContext/);
   assert.match(
     layoutServer,
     /hostedAuthoring:\s*isTrustedHostedRequestContext\(\s*locals\.hostedStudio\s*\)/
+  );
+
+  assert.match(
+    layoutServer,
+    /demoAuthoring:\s*isTrustedDemoRequestContext\(\s*locals\.demoStudio\s*\)/
   );
 
   for (const forbidden of [

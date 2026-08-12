@@ -23,6 +23,12 @@ import {
 const DEMO_SOCIAL_COMMIT_MESSAGE =
   'demo: update social links';
 
+export const DEMO_SOCIAL_RESET_COMMIT_MESSAGE =
+  'demo: reset social links';
+
+export const DEMO_SOCIAL_BASELINE =
+  'social:\n  links: []\n';
+
 export class DemoSocialAuthoringReadError
   extends Error {
   constructor() {
@@ -362,6 +368,127 @@ export async function saveDemoSocialAuthoringData({
           ...social.form
         }),
       authoringRevision:
+        result.revision
+    });
+  } catch (error) {
+    if (
+      error instanceof
+        AuthoringRevisionConflictError
+    ) {
+      throw error;
+    }
+
+    if (
+      error instanceof
+        DemoSocialAuthoringWriteError
+    ) {
+      throw error;
+    }
+
+    throw new DemoSocialAuthoringWriteError();
+  }
+}
+
+
+/**
+ * Restore the shared public Demo Social sandbox to its canonical baseline.
+ *
+ * This is an operator-only primitive. It is deliberately not connected to
+ * SvelteKit routes, guest contexts, browser state or the public mutation
+ * budget. The configured sandbox marker is verified at the current branch
+ * revision before the forward commit is attempted.
+ *
+ * The operation never rewrites history: reset is one ordinary Git commit
+ * guarded by optimistic concurrency.
+ *
+ * @param {{
+ *   environment?: Record<string, string | undefined>,
+ *   repositoryFactory?: (
+ *     config: import('./demo-sandbox-target.js').DemoSandboxTargetConfig
+ *   ) => {
+ *     readText(path: string): Promise<{
+ *       content: string,
+ *       revision: string
+ *     }>,
+ *     writeText(
+ *       path: string,
+ *       content: string,
+ *       options: {
+ *         expectedRevision: string,
+ *         message: string
+ *       }
+ *     ): Promise<{ revision: string }>
+ *   }
+ * }} [input]
+ */
+export async function resetDemoSocialSandbox({
+  environment = process.env,
+  repositoryFactory
+} = {}) {
+  if (
+    !isEnvironment(environment) ||
+    (
+      repositoryFactory !== undefined &&
+      typeof repositoryFactory !== 'function'
+    )
+  ) {
+    throw new DemoSocialAuthoringWriteError();
+  }
+
+  try {
+    const target =
+      await createVerifiedDemoSandboxRepository(
+        /** @type {Record<string, string | undefined>} */ (
+          environment
+        ),
+        repositoryFactory === undefined
+          ? {}
+          : { repositoryFactory }
+      );
+
+    if (
+      target === null ||
+      typeof target !== 'object' ||
+      typeof target.verifiedRevision !== 'string' ||
+      target.repository === null ||
+      typeof target.repository !== 'object' ||
+      typeof target.repository.writeText !== 'function'
+    ) {
+      throw new DemoSocialAuthoringWriteError();
+    }
+
+    commitShaFromGitHubRevision(
+      target.verifiedRevision
+    );
+
+    const result =
+      await target.repository.writeText(
+        SOCIAL_AUTHORING_PATH,
+        DEMO_SOCIAL_BASELINE,
+        {
+          expectedRevision:
+            target.verifiedRevision,
+          message:
+            DEMO_SOCIAL_RESET_COMMIT_MESSAGE
+        }
+      );
+
+    if (
+      result === null ||
+      typeof result !== 'object' ||
+      typeof result.revision !== 'string'
+    ) {
+      throw new DemoSocialAuthoringWriteError();
+    }
+
+    commitShaFromGitHubRevision(
+      result.revision
+    );
+
+    return Object.freeze({
+      previousRevision:
+        target.verifiedRevision,
+      revision:
         result.revision
     });
   } catch (error) {

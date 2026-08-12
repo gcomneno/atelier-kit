@@ -305,6 +305,7 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 - `docs/usage/customization.md` explains the first customization workflow.
 - `docs/usage/editorial-markup.md` explains Atelier Mark inline text emphasis.
 - `docs/usage/deploy-vercel.md` explains Vercel deployment.
+- `docs/usage/public-demo.md` explains the isolated public Demo deployment, abuse boundaries and deterministic reset.
 - `docs/usage/contact-flow.md` explains the no-textarea contact flow.
 - `docs/usage/content-doctor.md` explains pre-publish checks.
 - `docs/usage/item-presets.md` explains item meta presets.

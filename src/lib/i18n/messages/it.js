@@ -5,6 +5,7 @@ export default {
       eyebrow: 'Atelier-Kit studio',
       title: 'Modifica locale',
       hostedTitle: 'Modifica ospitata',
+      demoTitle: 'Studio Demo',
       nav: {
         dashboard: 'Panoramica',
         siteGroup: 'Vetrina e impostazioni',
@@ -32,6 +33,17 @@ export default {
         language: 'Lingua',
         shutdown: 'Arresta studio'
       }
+    },
+    demo: {
+      intro:
+        'Prova in sicurezza la superficie pubblica e limitata di Studio. Questa sandbox temporanea permette di modificare soltanto i link social usati dalla vetrina Demo.',
+      socialIntro:
+        'Modifica i link Instagram, Facebook, X o GitHub nella sandbox Demo isolata, quindi salva per controllare il risultato lato Visitor.',
+      expiryNote:
+        'La sessione Studio ospite è temporanea. La sandbox può essere ripristinata indipendentemente dalla sessione del browser.',
+      savedNote:
+        'Salvato nella sandbox Demo. Potrebbe servire un breve momento prima che il deployment pubblico mostri i nuovi link.',
+      viewUpdatedSite: 'Vedi la Demo pubblica'
     },
     dashboard: {
       pageTitle: 'Studio · Panoramica',
@@ -1368,6 +1380,15 @@ export default {
       collectionsEyebrow: 'Collezioni',
       collectionsTitle: 'Collezioni',
       catalogEyebrow: 'Catalogo',
+      demo: {
+        eyebrow: 'Demo interattiva',
+        title: 'Prova Atelier-Kit Studio',
+        intro:
+          'Apri una sessione Studio temporanea e limitata e modifica i link social utilizzati da questa vetrina Demo.',
+        action: 'Prova Studio',
+        note:
+          'La Demo è isolata da Atelier-Kit e dai progetti Hosted Studio privati. Le sessioni ospite sono temporanee.'
+      }
     },
     about: {
       pageTitle: 'Chi siamo',

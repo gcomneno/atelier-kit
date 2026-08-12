@@ -135,10 +135,13 @@ test('accepts new presets from forms, applies their defaults and preserves expli
 });
 
 test('maps canonical named palettes to GIADA semantic theme tokens', () => {
+  const presets = /** @type {Record<string, any>} */ (APPEARANCE_PRESETS);
+
   for (const id of ['warm', 'neutral', 'dark', 'noir', 'intimate', 'space', 'funny-coloured']) {
+    const palette = presets[id];
     const font = RECOMMENDED_FONTS[id] ?? 'inter';
     const variables = /** @type {Record<string, string>} */ (
-      appearanceCssVariables({ ...APPEARANCE_PRESETS[id], font_preset: font })
+      appearanceCssVariables({ ...palette, font_preset: font })
     );
 
     assert.equal(appearanceThemePreset({ preset: id }), id);
@@ -151,8 +154,8 @@ test('maps canonical named palettes to GIADA semantic theme tokens', () => {
     assert.equal(variables['--site-surface-color'], 'var(--giu-theme-surface)');
     assert.equal(variables['--site-border-color'], 'var(--giu-theme-border)');
     assert.equal(variables['--site-color-scheme'], 'var(--giu-theme-color-scheme)');
-    assert.equal(variables['--site-header-title-color'], APPEARANCE_PRESETS[id].header_title_color);
-    assert.equal(variables['--site-intro-title-color'], APPEARANCE_PRESETS[id].intro_title_color);
+    assert.equal(variables['--site-header-title-color'], palette.header_title_color);
+    assert.equal(variables['--site-intro-title-color'], palette.intro_title_color);
     assert.equal(variables['--site-font-family'], fontFamilyCss(font));
     assert.equal('--giu-theme-base' in variables, false);
   }

@@ -49,8 +49,6 @@
   );
 </script>
 
-<svelte:body data-giu-theme={isStudio ? undefined : giadaThemePreset} />
-
 <svelte:head>
   <link rel="icon" href={faviconHref} type={faviconType} />
   {#if faviconHref === '/favicon.svg'}

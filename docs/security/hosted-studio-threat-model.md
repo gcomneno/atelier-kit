@@ -274,6 +274,41 @@ Controls:
 - startup/config validation fails closed;
 - automated tests assert `/studio` remains unavailable in ordinary production.
 
+### Issue #281 public Visitor production audit
+
+The separately verified public Vercel project is
+`giadaware/atelier-kit-visitor-demo`, at
+<https://atelier-kit-visitor-demo.vercel.app>. It is a separate default Visitor
+demo/showcase, not a Hosted Studio deployment. The repeatable audit names this
+project explicitly and does not depend on an ignored local `.vercel` link.
+
+The following 2026-08-12 observations are historical evidence, not a current
+deployment assertion. They predate the corrected audit procedure and were not
+rerun in this worktree because live Vercel access was unavailable:
+
+| Request | Outcome | Boundary evidence |
+| --- | --- | --- |
+| `GET /`, `/about`, `/catalog`, `/collections`, `/news`, `/faq` | 200 | Default `Atelier-Kit Demo` content renders on navigable public routes. |
+| `GET /studio` | 404 | No Studio root. |
+| `GET /studio/site/social` | 404 | Nested Studio route fails closed. |
+| `GET /auth/github/login` | 404, no redirect | GitHub OAuth cannot start. |
+| `GET /auth/github/callback` | 404 | OAuth callback cannot create a session. |
+| `POST /auth/logout` with canonical Origin | 404 | No session/logout surface exists in Visitor runtime. |
+| `POST /studio/site/social` with canonical Origin | 404 | The admitted Hosted mutation is unavailable; repository-backed mutation cannot begin. |
+
+An environment-variable listing from that audit is limited evidence: it can
+show variables visible to the auditing credentials, but cannot prove the
+absence of unrelated Vercel project settings, integrations, source
+connections, or runtime defaults. No environment values, session values, or
+other secrets were recorded.
+
+This is evidence for the Visitor boundary only; it does not grant or test
+Hosted authority. Repeat the assertion-based audit after any public-project
+environment or runtime change. The exact procedure in [Deploy to
+Vercel](../usage/deploy-vercel.md) checks the public title/default content,
+all listed denied routes plus canonical-Origin `POST /studio/site/social`, and
+the absence of `Location` or `Set-Cookie` headers on denied responses.
+
 ## Security invariants
 
 These invariants must have automated coverage before private PoC approval:

@@ -15,6 +15,22 @@ export async function POST({
   request,
   cookies
 }) {
+  const runtimeMode =
+    resolveStudioRuntimeMode(
+      dev,
+      process.env
+    );
+
+  /*
+   * Visitor production must make the entire authentication surface
+   * indistinguishable from an absent route. Resolve the runtime before
+   * parsing a request body, which can otherwise turn an unavailable route
+   * into a framework-level 403 response.
+   */
+  if (runtimeMode !== 'hosted') {
+    error(404, 'Not found');
+  }
+
   let csrfToken;
 
   try {
@@ -24,12 +40,6 @@ export async function POST({
   } catch {
     error(403, 'Forbidden');
   }
-
-  const runtimeMode =
-    resolveStudioRuntimeMode(
-      dev,
-      process.env
-    );
 
   const result =
     await performHostedPrivatePocLogout({

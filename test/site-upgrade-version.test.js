@@ -181,13 +181,76 @@ function provideInstalledRuntimeDependenciesForPortableRunner(clientRoot) {
   // This is the real package tree resolved by the Kit lockfile, not a test
   // double. The upgrade contract writes package.json; a client performs its
   // normal npm install before running its managed test command.
-  for (const relative of ['@upstash/redis', 'uncrypto', 'yaml']) {
+  /** @param {string} relative */
+  const copyInstalledPackage = (relative) => {
     fs.cpSync(
-      path.join(kitRoot, 'node_modules', ...relative.split('/')),
-      path.join(clientRoot, 'node_modules', ...relative.split('/')),
+      path.join(
+        kitRoot,
+        'node_modules',
+        ...relative.split('/')
+      ),
+      path.join(
+        clientRoot,
+        'node_modules',
+        ...relative.split('/')
+      ),
       { recursive: true }
     );
+  };
+
+  for (const relative of [
+    '@upstash/redis',
+    'uncrypto',
+    'yaml'
+  ]) {
+    copyInstalledPackage(relative);
   }
+
+  /*
+   * The portable fixture intentionally does not run npm install. Copy sharp
+   * plus the runtime dependencies declared by the exact package installed
+   * from the Kit lockfile, and its platform-specific @img package tree.
+   */
+  const sharpPackage =
+    JSON.parse(
+      fs.readFileSync(
+        path.join(
+          kitRoot,
+          'node_modules',
+          'sharp',
+          'package.json'
+        ),
+        'utf8'
+      )
+    );
+
+  copyInstalledPackage('sharp');
+
+  for (
+    const relative of
+    Object.keys(
+      sharpPackage.dependencies || {}
+    )
+  ) {
+    if (!relative.startsWith('@img/')) {
+      copyInstalledPackage(relative);
+    }
+  }
+
+  fs.cpSync(
+    path.join(
+      kitRoot,
+      'node_modules',
+      '@img'
+    ),
+    path.join(
+      clientRoot,
+      'node_modules',
+      '@img'
+    ),
+    { recursive: true }
+  );
+
   assert.equal(fs.existsSync(path.join(clientRoot, 'node_modules', ...hostedRedisPackage.split('/'))), true);
   assert.equal(
     fs.existsSync(
@@ -195,6 +258,26 @@ function provideInstalledRuntimeDependenciesForPortableRunner(clientRoot) {
         clientRoot,
         'node_modules',
         yamlPackage
+      )
+    ),
+    true
+  );
+  assert.equal(
+    fs.existsSync(
+      path.join(
+        clientRoot,
+        'node_modules',
+        'sharp'
+      )
+    ),
+    true
+  );
+  assert.equal(
+    fs.existsSync(
+      path.join(
+        clientRoot,
+        'node_modules',
+        '@img'
       )
     ),
     true

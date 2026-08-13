@@ -440,7 +440,7 @@ test(
 );
 
 test(
-  'returned bytes remain independent of caller source Buffer',
+  'validated representation exposes only detached byte copies',
   async () => {
     const source =
       await encodedImage(
@@ -448,9 +448,6 @@ test(
         320,
         240
       );
-
-    const firstByte =
-      source[0];
 
     const result =
       await validateHostedImageUpload(
@@ -461,16 +458,46 @@ test(
         )
       );
 
-    source.fill(0);
-
     assert.equal(
-      result.bytes[0],
-      firstByte
+      Object.isFrozen(result),
+      true
     );
 
-    assert.notEqual(
-      result.bytes[0],
-      0
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(
+        result,
+        'bytes'
+      ),
+      false
+    );
+
+    const first =
+      result.copyBytes();
+    const second =
+      result.copyBytes();
+
+    assert.notStrictEqual(
+      first,
+      second
+    );
+
+    assert.deepEqual(
+      first,
+      second
+    );
+
+    first[0] ^= 0xff;
+
+    assert.deepEqual(
+      result.copyBytes(),
+      second
+    );
+
+    source.fill(0);
+
+    assert.deepEqual(
+      result.copyBytes(),
+      second
     );
   }
 );

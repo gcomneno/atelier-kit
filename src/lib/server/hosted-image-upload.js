@@ -88,7 +88,7 @@ function assertDimensions(width, height) {
  *
  * @param {File} file
  * @returns {Promise<Readonly<{
- *   bytes: Buffer,
+ *   copyBytes: () => Buffer,
  *   byteLength: number,
  *   format: 'jpeg' | 'png' | 'webp',
  *   extension: 'jpg' | 'png' | 'webp',
@@ -181,9 +181,16 @@ export async function validateHostedImageUpload(file) {
       )
     ];
 
+  const canonicalBytes =
+    Buffer.from(bytes);
+
   return Object.freeze({
-    bytes: Buffer.from(bytes),
-    byteLength: bytes.length,
+    copyBytes() {
+      return Buffer.from(
+        canonicalBytes
+      );
+    },
+    byteLength: canonicalBytes.length,
     format:
       /** @type {'jpeg' | 'png' | 'webp'} */ (
         format

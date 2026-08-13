@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  AuthoringChangeSetError,
   AuthoringRepositoryPathError,
   AuthoringRevisionConflictError
 } from './authoring-repository.js';
@@ -489,4 +490,354 @@ test('REST transport sends non-force ref update and translates GitHub race statu
     sha: SHA_D,
     force: false
   });
+});
+
+
+test('multi-file change set creates all blobs, one tree, one commit and one branch advancement', async () => {
+  const transport = createTransport();
+  const repository = createRepository(transport);
+
+  const result =
+    await repository.applyChanges(
+      [
+        {
+          type: 'text',
+          path: 'content/item.yaml',
+          content: 'title: Updated\n'
+        },
+        {
+          type: 'binary',
+          path: 'static/images/cover.webp',
+          content: Buffer.from([1, 2, 3])
+        },
+        {
+          type: 'delete',
+          path: 'config/legacy.yaml'
+        }
+      ],
+      {
+        expectedRevision:
+          `github:${SHA_A}`,
+        message:
+          'studio: update item and image'
+      }
+    );
+
+  assert.deepEqual(result, {
+    revision: `github:${SHA_D}`
+  });
+
+  assert.deepEqual(
+    transport.calls.map(
+      (/** @type {[string, any]} */ [name]) =>
+        name
+    ),
+    [
+      'getBranchHead',
+      'getCommitTree',
+      'createBlob',
+      'createBlob',
+      'createTree',
+      'createCommit',
+      'updateBranch'
+    ]
+  );
+
+  const treeCall =
+    transport.calls.find(
+      (/** @type {[string, any]} */ [name]) =>
+        name === 'createTree'
+    );
+
+  assert.deepEqual(
+    treeCall[1].changes,
+    [
+      {
+        path: 'content/item.yaml',
+        mode: '100644',
+        type: 'blob',
+        sha: SHA_C
+      },
+      {
+        path: 'static/images/cover.webp',
+        mode: '100644',
+        type: 'blob',
+        sha: SHA_C
+      },
+      {
+        path: 'config/legacy.yaml',
+        mode: '100644',
+        type: 'blob',
+        sha: null
+      }
+    ]
+  );
+
+  assert.equal(
+    transport.calls.filter(
+      (/** @type {[string, any]} */ [name]) =>
+        name === 'createCommit'
+    ).length,
+    1
+  );
+
+  assert.equal(
+    transport.calls.filter(
+      (/** @type {[string, any]} */ [name]) =>
+        name === 'updateBranch'
+    ).length,
+    1
+  );
+});
+
+test('multi-file stale revision rejects the complete change set before Git object creation', async () => {
+  const transport =
+    createTransport({
+      /**
+       * @this {any}
+       * @param {any} input
+       */
+      async getBranchHead(input) {
+        this.calls.push([
+          'getBranchHead',
+          input
+        ]);
+        return SHA_B;
+      }
+    });
+
+  const repository =
+    createRepository(transport);
+
+  await assert.rejects(
+    () =>
+      repository.applyChanges(
+        [
+          {
+            type: 'text',
+            path: 'content/a.yaml',
+            content: 'a\n'
+          },
+          {
+            type: 'text',
+            path: 'content/b.yaml',
+            content: 'b\n'
+          }
+        ],
+        {
+          expectedRevision:
+            `github:${SHA_A}`
+        }
+      ),
+    AuthoringRevisionConflictError
+  );
+
+  assert.deepEqual(
+    transport.calls.map(
+      (/** @type {[string, any]} */ [name]) =>
+        name
+    ),
+    ['getBranchHead']
+  );
+});
+
+test('multi-file path scope and duplicate validation fail before consulting GitHub', async () => {
+  const transport = createTransport();
+  const repository =
+    createRepository(transport);
+
+  await assert.rejects(
+    () =>
+      repository.applyChanges(
+        [
+          {
+            type: 'text',
+            path: 'content/item.yaml',
+            content: 'safe\n'
+          },
+          {
+            type: 'text',
+            path: 'package.json',
+            content: '{}\n'
+          }
+        ],
+        {
+          expectedRevision:
+            `github:${SHA_A}`
+        }
+      ),
+    GitHubAuthoringPathScopeError
+  );
+
+  assert.equal(
+    transport.calls.length,
+    0
+  );
+
+  await assert.rejects(
+    () =>
+      repository.applyChanges(
+        [
+          {
+            type: 'text',
+            path: 'content/item.yaml',
+            content: 'first\n'
+          },
+          {
+            type: 'delete',
+            path: './content/item.yaml'
+          }
+        ],
+        {
+          expectedRevision:
+            `github:${SHA_A}`
+        }
+      ),
+    AuthoringChangeSetError
+  );
+
+  assert.equal(
+    transport.calls.length,
+    0
+  );
+});
+
+test('binary single-file wrapper uses the same atomic Git change-set path', async () => {
+  const transport = createTransport();
+  const repository =
+    createRepository(transport);
+
+  const result =
+    await repository.writeBinary(
+      'static/images/cover.webp',
+      Buffer.from([9, 8, 7]),
+      {
+        expectedRevision:
+          `github:${SHA_A}`
+      }
+    );
+
+  assert.deepEqual(result, {
+    revision: `github:${SHA_D}`
+  });
+
+  assert.deepEqual(
+    transport.calls.map(
+      (/** @type {[string, any]} */ [name]) =>
+        name
+    ),
+    [
+      'getBranchHead',
+      'getCommitTree',
+      'createBlob',
+      'createTree',
+      'createCommit',
+      'updateBranch'
+    ]
+  );
+});
+
+
+test('multi-file ref conflict leaves branch visibility atomic', async () => {
+  let headReads = 0;
+
+  const transport =
+    createTransport({
+      /**
+       * @this {any}
+       * @param {any} input
+       */
+      async getBranchHead(input) {
+        this.calls.push([
+          'getBranchHead',
+          input
+        ]);
+
+        headReads += 1;
+
+        return headReads === 1
+          ? SHA_A
+          : SHA_B;
+      },
+
+      /**
+       * @this {any}
+       * @param {any} input
+       */
+      async updateBranch(input) {
+        this.calls.push([
+          'updateBranch',
+          input
+        ]);
+
+        throw new GitHubAuthoringRefConflictError();
+      }
+    });
+
+  const repository =
+    createRepository(transport);
+
+  await assert.rejects(
+    () =>
+      repository.applyChanges(
+        [
+          {
+            type: 'text',
+            path: 'content/a.yaml',
+            content: 'a\n'
+          },
+          {
+            type: 'text',
+            path: 'content/b.yaml',
+            content: 'b\n'
+          }
+        ],
+        {
+          expectedRevision:
+            `github:${SHA_A}`,
+          message:
+            'studio: update related files'
+        }
+      ),
+    (error) => {
+      assert.ok(
+        error instanceof
+          AuthoringRevisionConflictError
+      );
+
+      assert.equal(
+        error.expectedRevision,
+        `github:${SHA_A}`
+      );
+
+      assert.equal(
+        error.actualRevision,
+        `github:${SHA_B}`
+      );
+
+      return true;
+    }
+  );
+
+  assert.equal(
+    transport.calls.filter(
+      (/** @type {[string, any]} */ [name]) =>
+        name === 'createCommit'
+    ).length,
+    1
+  );
+
+  assert.equal(
+    transport.calls.filter(
+      (/** @type {[string, any]} */ [name]) =>
+        name === 'updateBranch'
+    ).length,
+    1
+  );
+
+  /*
+   * Git objects may already exist, but branch visibility changes only through
+   * updateBranch. Its failure is therefore one optimistic-concurrency
+   * conflict and never exposes a subset of the logical change set.
+   */
 });

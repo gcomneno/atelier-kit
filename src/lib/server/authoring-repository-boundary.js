@@ -40,6 +40,20 @@ export class AuthoringRevisionConflictError
   }
 }
 
+export class AuthoringChangeSetError
+  extends Error {
+  /**
+   * @param {string} message
+   */
+  constructor(message) {
+    super(message);
+    this.name =
+      'AuthoringChangeSetError';
+    this.code =
+      'AUTHORING_CHANGE_SET_INVALID';
+  }
+}
+
 /**
  * Normalize an authoring path without permitting callers to
  * escape the project/repository namespace.
@@ -108,6 +122,138 @@ export function normalizeAuthoringPath(
   if (!normalized) {
     throw new AuthoringRepositoryPathError(
       'Authoring path must identify a project file.'
+    );
+  }
+
+  return normalized;
+}
+
+/**
+ * Normalize one logical repository mutation before any adapter-specific
+ * persistence work begins.
+ *
+ * Supported variants:
+ *
+ * - `{ type: 'text', path, content: string }`
+ * - `{ type: 'binary', path, content: Buffer }`
+ * - `{ type: 'delete', path }`
+ *
+ * Duplicate paths are rejected after path normalization so one logical
+ * mutation can never contain conflicting instructions for the same file.
+ *
+ * @param {unknown} rawChanges
+ * @returns {Array<
+ *   | { type: 'text', path: string, content: string }
+ *   | { type: 'binary', path: string, content: Buffer }
+ *   | { type: 'delete', path: string }
+ * >}
+ */
+export function normalizeAuthoringChanges(
+  rawChanges
+) {
+  if (
+    !Array.isArray(rawChanges) ||
+    rawChanges.length === 0
+  ) {
+    throw new AuthoringChangeSetError(
+      'Authoring change set must contain at least one change.'
+    );
+  }
+
+  const paths = new Set();
+
+  /** @type {Array<
+   *   | { type: 'text', path: string, content: string }
+   *   | { type: 'binary', path: string, content: Buffer }
+   *   | { type: 'delete', path: string }
+   * >} */
+  const normalized = [];
+
+  for (const rawChange of rawChanges) {
+    if (
+      rawChange === null ||
+      typeof rawChange !== 'object' ||
+      Array.isArray(rawChange)
+    ) {
+      throw new AuthoringChangeSetError(
+        'Every authoring change must be an object.'
+      );
+    }
+
+    const change =
+      /** @type {Record<string, unknown>} */ (
+        rawChange
+      );
+
+    const normalizedPath =
+      normalizeAuthoringPath(
+        /** @type {string} */ (
+          change.path
+        )
+      );
+
+    if (paths.has(normalizedPath)) {
+      throw new AuthoringChangeSetError(
+        `Authoring change set contains duplicate path: ${normalizedPath}`
+      );
+    }
+
+    paths.add(normalizedPath);
+
+    if (change.type === 'text') {
+      if (typeof change.content !== 'string') {
+        throw new AuthoringChangeSetError(
+          `Text authoring change requires string content: ${normalizedPath}`
+        );
+      }
+
+      normalized.push({
+        type: 'text',
+        path: normalizedPath,
+        content: change.content
+      });
+
+      continue;
+    }
+
+    if (change.type === 'binary') {
+      if (!Buffer.isBuffer(change.content)) {
+        throw new AuthoringChangeSetError(
+          `Binary authoring change requires Buffer content: ${normalizedPath}`
+        );
+      }
+
+      normalized.push({
+        type: 'binary',
+        path: normalizedPath,
+        content: Buffer.from(change.content)
+      });
+
+      continue;
+    }
+
+    if (change.type === 'delete') {
+      if (
+        Object.prototype.hasOwnProperty.call(
+          change,
+          'content'
+        )
+      ) {
+        throw new AuthoringChangeSetError(
+          `Delete authoring change must not include content: ${normalizedPath}`
+        );
+      }
+
+      normalized.push({
+        type: 'delete',
+        path: normalizedPath
+      });
+
+      continue;
+    }
+
+    throw new AuthoringChangeSetError(
+      `Unsupported authoring change type for ${normalizedPath}.`
     );
   }
 

@@ -252,8 +252,31 @@ before allowing another save.
 
 Hosted Studio must never silently overwrite a newer repository state.
 
+A logical mutation may contain multiple normalized text writes, binary writes,
+and deletions. The complete change set is validated before repository mutation
+begins and uses one expected repository revision.
+
+For the GitHub adapter, every non-delete entry is materialized as a Git blob,
+the complete set is assembled into one tree, one commit is created with the
+expected parent, and the configured branch is advanced exactly once without
+force. A failed ref update may leave unreachable Git objects, but the configured
+branch remains unchanged and no subset of the logical mutation becomes
+branch-visible.
+
 A logical mutation that changes multiple files, such as an item YAML record plus
-an uploaded image, must result in one repository commit.
+an uploaded image, therefore produces one repository commit and one resulting
+authoring revision.
+
+The Local filesystem adapter preserves the same logical change-set contract but
+does not claim a filesystem primitive that can atomically expose several path
+replacements at once. It validates and snapshots every participating path before
+mutation, applies the complete synchronous change set, and performs compensating
+rollback if a filesystem operation fails. Its change-set revision is a
+deterministic hash over only the normalized participating paths and their
+present/absent content revisions, so unrelated Local project changes do not
+create false conflicts. Local multi-path atomicity is therefore a
+caller-visible transaction/rollback guarantee, not a claim of OS-level
+multi-file atomic replacement.
 
 ## Uploads
 

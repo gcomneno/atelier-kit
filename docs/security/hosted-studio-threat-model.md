@@ -180,10 +180,16 @@ YAML changes but associated image does not, or vice versa.
 
 Controls:
 
+- normalize and validate the complete proposed change set before mutation;
+- reject duplicate/conflicting normalized paths before repository mutation;
+- use one expected revision for the whole logical mutation;
 - build one repository tree/change-set;
-- validate complete proposed state;
-- create one commit;
-- advance branch once.
+- create one commit containing the complete logical mutation;
+- advance the configured branch exactly once and never force-update it;
+- treat a ref race as an optimistic-concurrency conflict with the branch
+  unchanged, even if unreachable Git objects were already created;
+- keep Local filesystem semantics explicit as synchronous
+  transaction/rollback rather than claiming OS-level multi-file atomicity.
 
 ### Malicious uploads
 

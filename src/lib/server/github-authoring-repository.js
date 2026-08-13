@@ -1,6 +1,7 @@
 import {
   AuthoringRepositoryPathError,
   AuthoringRevisionConflictError,
+  normalizeAuthoringChanges,
   normalizeAuthoringPath
 } from './authoring-repository-boundary.js';
 
@@ -357,6 +358,51 @@ export class GitHubAuthoringRepository {
   }
 
   /**
+   * Apply one logical repository mutation using one expected branch revision,
+   * one Git tree, one commit and one branch advancement.
+   *
+   * @param {unknown} changes
+   * @param {{ expectedRevision: string, message?: string }} options
+   * @returns {Promise<{ revision: string }>}
+   */
+  async applyChanges(changes, options) {
+    if (
+      !options ||
+      typeof options.expectedRevision !== 'string'
+    ) {
+      throw new TypeError(
+        'GitHub authoring change sets require an expected revision.'
+      );
+    }
+
+    const normalized =
+      normalizeAuthoringChanges(changes)
+        .map((change) => ({
+          ...change,
+          path:
+            assertGitHubWritablePath(
+              change.path,
+              this.writableRoots
+            )
+        }));
+
+    const parentSha =
+      await this.assertExpectedRevision(
+        options.expectedRevision
+      );
+
+    return this.commitChanges({
+      changes: normalized,
+      parentSha,
+      message:
+        options.message ||
+        'studio: apply authoring changes'
+    });
+  }
+
+  /**
+   * Backward-compatible single-file text write.
+   *
    * @param {string} relativePath
    * @param {string} content
    * @param {{ expectedRevision: string, message?: string }} options
@@ -367,91 +413,173 @@ export class GitHubAuthoringRepository {
       throw new TypeError('Authoring text content must be a string.');
     }
 
-    if (!options || typeof options.expectedRevision !== 'string') {
-      throw new TypeError('GitHub authoring writes require an expected revision.');
-    }
+    const normalized =
+      assertGitHubWritablePath(
+        relativePath,
+        this.writableRoots
+      );
 
-    const normalized = assertGitHubWritablePath(relativePath, this.writableRoots);
-    const parentSha = await this.assertExpectedRevision(options.expectedRevision);
-
-    return this.commitChange({
-      path: normalized,
-      content: Buffer.from(content, 'utf8'),
-      parentSha,
-      message: options.message || `studio: update ${normalized}`
-    });
+    return this.applyChanges(
+      [
+        {
+          type: 'text',
+          path: normalized,
+          content
+        }
+      ],
+      {
+        ...options,
+        message:
+          options?.message ||
+          `studio: update ${normalized}`
+      }
+    );
   }
 
   /**
+   * Backward-compatible single-file binary write.
+   *
+   * @param {string} relativePath
+   * @param {Buffer} content
+   * @param {{ expectedRevision: string, message?: string }} options
+   * @returns {Promise<{ revision: string }>}
+   */
+  async writeBinary(relativePath, content, options) {
+    if (!Buffer.isBuffer(content)) {
+      throw new TypeError(
+        'Authoring binary content must be a Buffer.'
+      );
+    }
+
+    const normalized =
+      assertGitHubWritablePath(
+        relativePath,
+        this.writableRoots
+      );
+
+    return this.applyChanges(
+      [
+        {
+          type: 'binary',
+          path: normalized,
+          content
+        }
+      ],
+      {
+        ...options,
+        message:
+          options?.message ||
+          `studio: update ${normalized}`
+      }
+    );
+  }
+
+  /**
+   * Backward-compatible single-file delete.
+   *
    * @param {string} relativePath
    * @param {{ expectedRevision: string, message?: string }} options
    * @returns {Promise<{ revision: string }>}
    */
   async delete(relativePath, options) {
-    if (!options || typeof options.expectedRevision !== 'string') {
-      throw new TypeError('GitHub authoring deletes require an expected revision.');
-    }
+    const normalized =
+      assertGitHubWritablePath(
+        relativePath,
+        this.writableRoots
+      );
 
-    const normalized = assertGitHubWritablePath(relativePath, this.writableRoots);
-    const parentSha = await this.assertExpectedRevision(options.expectedRevision);
-
-    return this.commitChange({
-      path: normalized,
-      content: null,
-      parentSha,
-      message: options.message || `studio: delete ${normalized}`
-    });
+    return this.applyChanges(
+      [
+        {
+          type: 'delete',
+          path: normalized
+        }
+      ],
+      {
+        ...options,
+        message:
+          options?.message ||
+          `studio: delete ${normalized}`
+      }
+    );
   }
 
   /**
-   * Deliberately models one change as a change-set of one element. A later
-   * multi-file vertical can widen only this input without changing the Git
-   * Data commit sequence.
-   *
    * @param {{
-   *   path: string,
-   *   content: Buffer | null,
+   *   changes: Array<
+   *     | { type: 'text', path: string, content: string }
+   *     | { type: 'binary', path: string, content: Buffer }
+   *     | { type: 'delete', path: string }
+   *   >,
    *   parentSha: string,
    *   message: string
    * }} input
    * @returns {Promise<{ revision: string }>}
    */
-  async commitChange({ path, content, parentSha, message }) {
-    const baseTreeSha = await this.transport.getCommitTree({
-      owner: this.owner,
-      repository: this.repository,
-      commitSha: parentSha
-    });
+  async commitChanges({
+    changes,
+    parentSha,
+    message
+  }) {
+    const baseTreeSha =
+      await this.transport.getCommitTree({
+        owner: this.owner,
+        repository: this.repository,
+        commitSha: parentSha
+      });
 
-    const blobSha = content === null
-      ? null
-      : await this.transport.createBlob({
-          owner: this.owner,
-          repository: this.repository,
-          content
-        });
+    /** @type {Array<{
+     *   path: string,
+     *   mode: '100644',
+     *   type: 'blob',
+     *   sha: string | null
+     * }>} */
+    const treeChanges = [];
 
-    const treeSha = await this.transport.createTree({
-      owner: this.owner,
-      repository: this.repository,
-      baseTreeSha,
-      changes: [
-        {
-          path,
-          mode: '100644',
-          type: 'blob',
-          sha: blobSha
-        }
-      ]
-    });
+    for (const change of changes) {
+      let blobSha = null;
 
-    const commitSha = await this.transport.createCommit({
-      owner: this.owner,
-      repository: this.repository,
-      message,
-      treeSha,
-      parentSha
-    });
+      if (change.type !== 'delete') {
+        const content =
+          change.type === 'text'
+            ? Buffer.from(
+                change.content,
+                'utf8'
+              )
+            : change.content;
+
+        blobSha =
+          await this.transport.createBlob({
+            owner: this.owner,
+            repository: this.repository,
+            content
+          });
+      }
+
+      treeChanges.push({
+        path: change.path,
+        mode: '100644',
+        type: 'blob',
+        sha: blobSha
+      });
+    }
+
+    const treeSha =
+      await this.transport.createTree({
+        owner: this.owner,
+        repository: this.repository,
+        baseTreeSha,
+        changes: treeChanges
+      });
+
+    const commitSha =
+      await this.transport.createCommit({
+        owner: this.owner,
+        repository: this.repository,
+        message,
+        treeSha,
+        parentSha
+      });
 
     try {
       await this.transport.updateBranch({
@@ -461,12 +589,18 @@ export class GitHubAuthoringRepository {
         commitSha
       });
     } catch (error) {
-      if (error instanceof GitHubAuthoringRefConflictError) {
-        const actualRevision = await this.revision();
+      if (
+        error instanceof
+          GitHubAuthoringRefConflictError
+      ) {
+        const actualRevision =
+          await this.revision();
 
         throw new AuthoringRevisionConflictError(
           this.branch,
-          githubAuthoringRevision(parentSha),
+          githubAuthoringRevision(
+            parentSha
+          ),
           actualRevision
         );
       }
@@ -475,7 +609,10 @@ export class GitHubAuthoringRepository {
     }
 
     return {
-      revision: githubAuthoringRevision(commitSha)
+      revision:
+        githubAuthoringRevision(
+          commitSha
+        )
     };
   }
 }

@@ -11,9 +11,11 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import {
+  AuthoringChangeSetError,
   AuthoringRepositoryPathError,
   AuthoringRevisionConflictError,
   LocalFilesystemAuthoringRepository,
+  authoringChangeSetRevision,
   normalizeAuthoringPath
 } from './authoring-repository.js';
 
@@ -226,5 +228,364 @@ test('stale expected revision rejects deletion and preserves the file', () => {
     );
 
     assert.equal(readFileSync(filename, 'utf8'), 'title: Concurrent\n');
+  });
+});
+
+
+test('change-set revision is deterministic, path-scoped and models absence', () => {
+  withRepository(({ root, repository }) => {
+    writeFileSync(
+      path.join(root, 'content', 'a.yaml'),
+      'title: A\n'
+    );
+    writeFileSync(
+      path.join(root, 'content', 'b.yaml'),
+      'title: B\n'
+    );
+
+    const forward = repository.revisionForPaths([
+      'content/a.yaml',
+      'content/b.yaml'
+    ]);
+    const reverse = repository.revisionForPaths([
+      'content/b.yaml',
+      'content/a.yaml'
+    ]);
+
+    assert.equal(forward, reverse);
+    assert.match(
+      forward,
+      /^changeset-sha256:[0-9a-f]{64}$/
+    );
+
+    writeFileSync(
+      path.join(root, 'content', 'unrelated.yaml'),
+      'title: unrelated\n'
+    );
+
+    assert.equal(
+      repository.revisionForPaths([
+        'content/a.yaml',
+        'content/b.yaml'
+      ]),
+      forward
+    );
+
+    const withAbsent =
+      repository.revisionForPaths([
+        'content/a.yaml',
+        'content/missing.yaml'
+      ]);
+
+    assert.notEqual(withAbsent, forward);
+  });
+});
+
+test('applies text, binary and delete as one logical Local change set', () => {
+  withRepository(({ root, repository }) => {
+    writeFileSync(
+      path.join(root, 'content', 'old.yaml'),
+      'title: Old\n'
+    );
+
+    const paths = [
+      'content/item.yaml',
+      'static/images/sample.bin',
+      'content/old.yaml'
+    ];
+
+    const expectedRevision =
+      repository.revisionForPaths(paths);
+
+    const result =
+      repository.applyChanges(
+        [
+          {
+            type: 'text',
+            path: 'content/item.yaml',
+            content: 'title: Written\n'
+          },
+          {
+            type: 'binary',
+            path: 'static/images/sample.bin',
+            content: Buffer.from([0, 1, 255])
+          },
+          {
+            type: 'delete',
+            path: 'content/old.yaml'
+          }
+        ],
+        { expectedRevision }
+      );
+
+    assert.equal(
+      readFileSync(
+        path.join(root, 'content', 'item.yaml'),
+        'utf8'
+      ),
+      'title: Written\n'
+    );
+
+    assert.deepEqual(
+      readFileSync(
+        path.join(
+          root,
+          'static',
+          'images',
+          'sample.bin'
+        )
+      ),
+      Buffer.from([0, 1, 255])
+    );
+
+    assert.equal(
+      repository.revision(
+        'content/old.yaml'
+      ),
+      null
+    );
+
+    assert.equal(
+      result.revision,
+      repository.revisionForPaths(paths)
+    );
+  });
+});
+
+test('stale Local change-set revision rejects every requested change', () => {
+  withRepository(({ root, repository }) => {
+    const first =
+      path.join(root, 'content', 'a.yaml');
+    const second =
+      path.join(root, 'content', 'b.yaml');
+
+    writeFileSync(first, 'title: A\n');
+    writeFileSync(second, 'title: B\n');
+
+    const paths = [
+      'content/a.yaml',
+      'content/b.yaml'
+    ];
+
+    const expectedRevision =
+      repository.revisionForPaths(paths);
+
+    writeFileSync(
+      first,
+      'title: Concurrent\n'
+    );
+
+    assert.throws(
+      () =>
+        repository.applyChanges(
+          [
+            {
+              type: 'text',
+              path: 'content/a.yaml',
+              content: 'title: New A\n'
+            },
+            {
+              type: 'text',
+              path: 'content/b.yaml',
+              content: 'title: New B\n'
+            }
+          ],
+          { expectedRevision }
+        ),
+      AuthoringRevisionConflictError
+    );
+
+    assert.equal(
+      readFileSync(first, 'utf8'),
+      'title: Concurrent\n'
+    );
+    assert.equal(
+      readFileSync(second, 'utf8'),
+      'title: B\n'
+    );
+  });
+});
+
+test('duplicate or invalid Local changes are rejected before filesystem mutation', () => {
+  withRepository(({ root, repository }) => {
+    const filename =
+      path.join(root, 'content', 'item.yaml');
+
+    writeFileSync(
+      filename,
+      'title: Original\n'
+    );
+
+    const expectedRevision =
+      repository.revisionForPaths([
+        'content/item.yaml'
+      ]);
+
+    assert.throws(
+      () =>
+        repository.applyChanges(
+          [
+            {
+              type: 'text',
+              path: 'content/item.yaml',
+              content: 'title: First\n'
+            },
+            {
+              type: 'delete',
+              path: './content/item.yaml'
+            }
+          ],
+          { expectedRevision }
+        ),
+      AuthoringChangeSetError
+    );
+
+    assert.equal(
+      readFileSync(filename, 'utf8'),
+      'title: Original\n'
+    );
+
+    assert.throws(
+      () =>
+        repository.applyChanges(
+          [
+            {
+              type: 'binary',
+              path: 'content/item.yaml',
+              content: 'not-a-buffer'
+            }
+          ],
+          { expectedRevision }
+        ),
+      AuthoringChangeSetError
+    );
+
+    assert.equal(
+      readFileSync(filename, 'utf8'),
+      'title: Original\n'
+    );
+  });
+});
+
+test('single-file binary wrapper preserves legacy revision semantics', () => {
+  withRepository(({ root, repository }) => {
+    const bytes =
+      Buffer.from([1, 2, 3, 255]);
+
+    const result =
+      repository.writeBinary(
+        'static/images/sample.bin',
+        bytes
+      );
+
+    assert.deepEqual(
+      readFileSync(
+        path.join(
+          root,
+          'static',
+          'images',
+          'sample.bin'
+        )
+      ),
+      bytes
+    );
+
+    assert.equal(
+      result.revision,
+      repository.revision(
+        'static/images/sample.bin'
+      )
+    );
+  });
+});
+
+
+test('single-file expected revision is converted directly into its change-set precondition', () => {
+  withRepository(({ root, repository }) => {
+    const filename =
+      path.join(
+        root,
+        'content',
+        'item.yaml'
+      );
+
+    writeFileSync(
+      filename,
+      'title: Initial\n'
+    );
+
+    const expectedRevision =
+      repository.revision(
+        'content/item.yaml'
+      );
+
+    const originalRevisionForPaths =
+      repository.revisionForPaths.bind(
+        repository
+      );
+
+    let calls = 0;
+
+    repository.revisionForPaths =
+      (paths) => {
+        calls += 1;
+
+        if (calls === 1) {
+          writeFileSync(
+            filename,
+            'title: Concurrent\n'
+          );
+        }
+
+        return originalRevisionForPaths(
+          paths
+        );
+      };
+
+    assert.throws(
+      () =>
+        repository.writeText(
+          'content/item.yaml',
+          'title: Stale writer\n',
+          { expectedRevision }
+        ),
+      AuthoringRevisionConflictError
+    );
+
+    assert.equal(
+      readFileSync(
+        filename,
+        'utf8'
+      ),
+      'title: Concurrent\n'
+    );
+  });
+});
+
+test('explicit single-path change-set revision matches revisionForPaths', () => {
+  withRepository(({ repository }) => {
+    repository.writeText(
+      'content/item.yaml',
+      'title: Item\n'
+    );
+
+    const fileRevision =
+      repository.revision(
+        'content/item.yaml'
+      );
+
+    assert.equal(
+      authoringChangeSetRevision([
+        {
+          path:
+            'content/item.yaml',
+          revision:
+            fileRevision
+        }
+      ]),
+      repository.revisionForPaths([
+        'content/item.yaml'
+      ])
+    );
   });
 });

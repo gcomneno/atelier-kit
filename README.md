@@ -66,7 +66,7 @@ Opens `http://127.0.0.1:5173/studio` on localhost only. Studio writes directly t
 
 ## Current release
 
-Latest release: **v0.1.20** — Micro-CMS Tier 1 and Tier 2 (sitemap, RSS, search, JSON-LD, Desktop authoring, guided publish).
+Latest official release: **v0.4.3** — safer and smaller client scaffolds, with source-version validation and generated Tauri/Cargo build-artifact exclusion.
 
 See [GitHub Releases](https://github.com/gcomneno/atelier-kit/releases) for highlights and validation notes.
 
@@ -115,7 +115,7 @@ npm run studio
 For a first real setup, edit files in this order:
 
 1. `config/site.yaml` for site name, tagline and footer text.
-2. `config/catalog.yaml` for catalog field visibility and item vocabulary.
+2. `config/catalog.yaml` for catalog vocabulary and visible fields.
 3. `config/signal-clouds.yaml` for lightweight visitor preference questions.
 4. `content/items/` for item records.
 5. `static/images/items/` for item images.

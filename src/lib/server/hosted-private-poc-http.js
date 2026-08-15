@@ -153,16 +153,19 @@ const HOSTED_PRIVATE_POC_READ_PATHS =
   /** @type {ReadonlySet<string>} */ (
     new Set([
       '/studio',
-      '/studio/site/social'
+      '/studio/site/social',
+      '/studio/site/hero'
     ])
   );
 
 /**
- * Issue #273 admits exactly three authenticated request shapes:
+ * The private Hosted PoC admits only explicitly enumerated request shapes:
  *
  * - GET /studio
  * - GET /studio/site/social
  * - POST /studio/site/social
+ * - GET /studio/site/hero
+ * - POST /studio/site/hero
  *
  * No other deeper Studio path or mutation method receives trusted
  * Hosted request context.
@@ -190,8 +193,12 @@ export function isHostedPrivatePocStudioAuthorizedRequest(
   }
 
   return (
-    record.url.pathname ===
-      '/studio/site/social' &&
+    (
+      record.url.pathname ===
+        '/studio/site/social' ||
+      record.url.pathname ===
+        '/studio/site/hero'
+    ) &&
     record.request.method === 'POST'
   );
 }

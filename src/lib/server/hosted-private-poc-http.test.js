@@ -532,11 +532,13 @@ test('forged allowed context cannot be placed into locals', async () => {
   assert.deepEqual(event.locals, {});
 });
 
-test('private PoC authority seam admits only root GET plus Social GET and POST', () => {
+test('private PoC authority seam admits only explicitly approved Studio request shapes', () => {
   for (const [pathname, method] of [
     ['/studio', 'GET'],
     ['/studio/site/social', 'GET'],
-    ['/studio/site/social', 'POST']
+    ['/studio/site/social', 'POST'],
+    ['/studio/site/hero', 'GET'],
+    ['/studio/site/hero', 'POST']
   ]) {
     assert.equal(
       isHostedPrivatePocStudioAuthorizedRequest(
@@ -555,6 +557,10 @@ test('private PoC authority seam admits only root GET plus Social GET and POST',
     ['/studio/site/social', 'PUT'],
     ['/studio/site/social', 'PATCH'],
     ['/studio/site/social', 'DELETE'],
+    ['/studio/site/hero', 'PUT'],
+    ['/studio/site/hero', 'PATCH'],
+    ['/studio/site/hero', 'DELETE'],
+    ['/studio/site/hero/', 'GET'],
     ['/studio/site/contact', 'GET'],
     ['/studio/site/contact', 'POST']
   ]) {
@@ -569,6 +575,41 @@ test('private PoC authority seam admits only root GET plus Social GET and POST',
       `${method} ${pathname}`
     );
   }
+});
+
+test('authorized Hero POST receives genuine trusted context before the action', async () => {
+  const authenticated =
+    await authenticatedRuntime();
+
+  const {
+    event
+  } = eventFor({
+    pathname:
+      '/studio/site/hero',
+    method: 'POST',
+    sessionId:
+      authenticated.sessionId
+  });
+
+  const result =
+    await applyHostedPrivatePocStudioAuthorizedRequest({
+      event,
+      runtimeMode: 'hosted',
+      runtimeResolver: () =>
+        authenticated.runtime
+    });
+
+  assert.equal(
+    result,
+    HOSTED_PRIVATE_POC_HTTP_OUTCOMES.ALLOWED
+  );
+
+  assert.equal(
+    isTrustedHostedRequestContext(
+      event.locals.hostedStudio
+    ),
+    true
+  );
 });
 
 test('authorized Social POST receives genuine trusted context before the action', async () => {

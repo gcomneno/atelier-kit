@@ -105,6 +105,7 @@ test('only explicitly admitted Studio loaders/actions consume Hosted trusted loc
     [
       '+layout.server.js',
       '+page.server.js',
+      'site/hero/+page.server.js',
       'site/social/+page.server.js'
     ]
   );
@@ -194,6 +195,51 @@ test('current Studio mutation surface remains contextless and Hosted fail-closed
     relative,
     contents
   } of actionFiles) {
+    if (
+      relative ===
+      'site/hero/+page.server.js'
+    ) {
+      assert.match(
+        contents,
+        /guardStudio\s*\(\s*locals\.hostedStudio\s*\)/,
+        'Hero loader must require genuine Hosted context'
+      );
+
+      assert.match(
+        contents,
+        /runtime\.evaluateMutation\s*\(/,
+        'Hero POST must delegate integrity authority to the existing Hosted mutation guard'
+      );
+
+      assert.match(
+        contents,
+        /saveHostedHeroAuthoringData\s*\(/,
+        'Hero POST must use the repository-backed Hosted image mutation seam'
+      );
+
+      assert.match(
+        contents,
+        /runtimeMode\s*===\s*'local'[\s\S]*saveHeroBannerAction/,
+        'Local Hero must retain its existing Local action'
+      );
+
+      assert.match(
+        contents,
+        /runtimeMode\s*!==\s*'hosted'[\s\S]*guardStudio\s*\(\s*\)[\s\S]*saveHeroBannerAction/,
+        'Visitor Demo and invalid Hero mutations must remain fail-closed before Local filesystem authority'
+      );
+
+      assert.equal(
+        contents.includes(
+          'GitHubAuthoringRepository'
+        ),
+        false,
+        'Hero route must not directly own repository authority'
+      );
+
+      continue;
+    }
+
     if (
       relative ===
       'site/social/+page.server.js'

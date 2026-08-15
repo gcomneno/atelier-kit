@@ -18,6 +18,7 @@
   const siteForm = $derived(data.siteForm);
   const appearanceForm = $derived(data.appearanceForm);
   const heroBannerForm = $derived(form?.heroBannerForm ?? data.heroBannerForm);
+  const hostedHero = $derived(form?.hostedHero ?? data.hostedHero);
   let showBanner = $state(false);
   let removeHeroImage = $state(false);
   const heroRemoval = createHeroBannerRemoval();
@@ -64,6 +65,19 @@
     use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
     class="studio-form"
   >
+    {#if hostedHero}
+      <input
+        type="hidden"
+        name="hosted_csrf_token"
+        value={hostedHero.csrfToken}
+      />
+      <input
+        type="hidden"
+        name="authoring_revision"
+        value={hostedHero.authoringRevision}
+      />
+    {/if}
+
     <StudioFormLegend />
 
     <label class="checkbox">

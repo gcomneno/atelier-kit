@@ -20,6 +20,7 @@ import {
 import { isValidSocialUrl, normalizeSocialId } from '../src/lib/social-networks.js';
 import { isFontPreset } from '../src/lib/site-typography.js';
 import { isAppearancePreset } from '../src/lib/site-appearance.js';
+import { validateSiteAnalyticsConfig } from '../src/lib/site-analytics.js';
 import { getSignalCloudFaqIssues } from '../src/lib/signal-cloud-faq-validation.js';
 import { analyzeCatalogItemRelations, normalizeCatalogItemId } from '../src/lib/item-relations.js';
 
@@ -292,6 +293,17 @@ function validateSite() {
 
   if ('appearance' in site && site.appearance !== undefined) {
     validateAppearance(site.appearance, source);
+  }
+
+  const analyticsValidation = validateSiteAnalyticsConfig(site.analytics);
+  if (!analyticsValidation.ok) {
+    const key =
+      analyticsValidation.reason === 'object'
+        ? 'analyticsMustBeObject'
+        : analyticsValidation.reason === 'provider'
+          ? 'analyticsProviderInvalid'
+          : 'analyticsEnabledInvalid';
+    failKey(key, { source });
   }
 
   if ('url' in site && site.url !== undefined && site.url !== '') {

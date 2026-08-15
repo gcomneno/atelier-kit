@@ -24,6 +24,7 @@ import {
   SOCIAL_NETWORK_IDS
 } from '$lib/social-networks.js';
 import { resolveSiteAppearance } from '$lib/site-appearance.js';
+import { resolveSiteAnalytics } from '$lib/site-analytics.js';
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
 import {
   getLayoutBlockLabels,
@@ -343,6 +344,7 @@ export function getSiteConfig() {
     url: optionalString(site, 'url'),
     og_image: optionalString(site, 'og_image'),
     appearance: resolveSiteAppearance(isRecord(site.appearance) ? site.appearance : undefined),
+    analytics: resolveSiteAnalytics(site.analytics),
     hero_banner: parseHeroBanner(site)
   };
 }

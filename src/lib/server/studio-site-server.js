@@ -46,6 +46,7 @@ import {
 import { isValidFooterHref } from '$lib/footer-links.js';
 import { assertValidMarkedText } from '$lib/marked-text.js';
 import { validateEditorialFields } from '$lib/editorial-markup.js';
+import { resolveSiteAnalytics } from '$lib/site-analytics.js';
 
 const MAX_FOOTER_COLUMNS = 4;
 const MAX_FOOTER_LINKS = 4;
@@ -57,6 +58,17 @@ function isRecord(value) {
 function readString(record, key, fallback = '') {
   const value = record[key];
   return typeof value === 'string' ? value : fallback;
+}
+
+export function loadAnalyticsForm() {
+  const data = readProjectYaml('config/site.yaml');
+  const site = data.site;
+
+  if (!isRecord(site)) {
+    throw new Error('config/site.yaml is missing a site object.');
+  }
+
+  return resolveSiteAnalytics(site.analytics);
 }
 
 export function loadAppearanceForm() {
@@ -405,6 +417,63 @@ export async function saveSiteAction({ request }) {
       siteStatus: 'error',
       siteMessage: message,
       siteForm: loadSiteForm()
+    });
+  }
+}
+
+export async function saveAnalyticsAction({ request }) {
+  guardStudio();
+
+  const locale = getOperatorLocale();
+  const t = getOperatorTranslator();
+  const formData = await request.formData();
+
+  try {
+    const data = readProjectYaml('config/site.yaml');
+    const site = data.site;
+
+    if (!isRecord(site)) {
+      throw new Error('config/site.yaml is missing a site object.');
+    }
+
+    const enabled = checkboxEnabled(
+      formData.get('analytics_enabled')
+    );
+    const nextSite = { ...site };
+
+    if (enabled) {
+      nextSite.analytics = {
+        provider: 'vercel',
+        enabled: true
+      };
+    } else {
+      delete nextSite.analytics;
+    }
+
+    writeProjectYaml('config/site.yaml', {
+      site: nextSite
+    });
+
+    const validation = runStructuralValidation();
+
+    return {
+      analyticsStatus:
+        validation.ok ? 'success' : 'warning',
+      analyticsMessage:
+        saveMessage(validation, locale),
+      analyticsForm:
+        loadAnalyticsForm()
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : t('server.saveSiteError');
+
+    return fail(400, {
+      analyticsStatus: 'error',
+      analyticsMessage: message,
+      analyticsForm: loadAnalyticsForm()
     });
   }
 }

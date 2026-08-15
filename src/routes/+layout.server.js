@@ -42,6 +42,7 @@ export function load({ url }) {
     locale,
     lang: locale,
     appearance: site.appearance,
+    analytics: site.analytics,
     site: {
       name: site.name,
       header_title: site.header_title,

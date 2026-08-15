@@ -19,6 +19,7 @@ export default {
         social: 'Social',
         layout: 'Layout',
         footer: 'Footer',
+        analytics: 'Analytics',
         about: 'About',
         catalog: 'Catalog',
         items: 'Items',
@@ -85,6 +86,24 @@ export default {
           description: 'Open the public site in a new tab.'
         }
       }
+    },
+    analytics: {
+      pageTitle: 'Studio · Analytics',
+      intro:
+        'Configure optional traffic measurement for the public Visitor site.',
+      title: 'Vercel Web Analytics',
+      description:
+        'When enabled, Atelier-Kit initializes Vercel Web Analytics only on public Visitor routes. Studio routes are excluded.',
+      enabled: 'Enable Vercel Web Analytics',
+      dashboardRequired:
+        'Web Analytics must also be enabled in the Vercel project dashboard.',
+      publishRequired:
+        'Data collection starts only after publishing a deployment that contains this integration.',
+      noHistory:
+        'Traffic from before activation cannot be reconstructed.',
+      pageViewsOnly:
+        'The baseline integration measures traffic and page views; custom interaction funnels are not included.',
+      save: 'Save Analytics settings'
     },
     system: {
       pageTitle: 'Studio · System',
@@ -1202,6 +1221,9 @@ export default {
       '{source}: site.appearance.font_preset must be one of: system, inter, source-serif, fraunces, dm-sans, lora.',
     appearanceBackgroundFitInvalid:
       '{source}: site.appearance.background_fit must be one of: top, center, contain.',
+    analyticsMustBeObject: '{source}: site.analytics must be an object when present.',
+    analyticsProviderInvalid: '{source}: site.analytics.provider must be "vercel".',
+    analyticsEnabledInvalid: '{source}: site.analytics.enabled must be true or false.',
     siteUrlInvalid: '{source}: site.url must be a valid http or https URL.',
     ogImageInvalid: '{source}: site.og_image must be a non-empty string when provided.',
     ogImageUrlInvalid: '{source}: site.og_image must be a valid http or https URL.',

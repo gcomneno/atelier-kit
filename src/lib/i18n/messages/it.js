@@ -19,6 +19,7 @@ export default {
         social: 'Social',
         layout: 'Layout',
         footer: 'Footer',
+        analytics: 'Analytics',
         about: 'Chi siamo',
         catalog: 'Catalogo',
         items: 'Oggetti',
@@ -85,6 +86,24 @@ export default {
           description: 'Apri il sito pubblico in una nuova scheda.'
         }
       }
+    },
+    analytics: {
+      pageTitle: 'Studio · Analytics',
+      intro:
+        'Configura la misurazione opzionale del traffico per il sito Visitor pubblico.',
+      title: 'Vercel Web Analytics',
+      description:
+        'Quando è abilitato, Atelier-Kit inizializza Vercel Web Analytics soltanto sulle route Visitor pubbliche. Le route Studio sono escluse.',
+      enabled: 'Abilita Vercel Web Analytics',
+      dashboardRequired:
+        'Web Analytics deve essere abilitato anche nel dashboard del progetto Vercel.',
+      publishRequired:
+        'La raccolta dati inizia soltanto dopo la pubblicazione di un deployment che contiene questa integrazione.',
+      noHistory:
+        'Il traffico precedente all’attivazione non può essere ricostruito.',
+      pageViewsOnly:
+        'L’integrazione base misura traffico e page view; i funnel di interazione personalizzati non sono inclusi.',
+      save: 'Salva impostazioni Analytics'
     },
     system: {
       pageTitle: 'Studio · Sistema',
@@ -1209,6 +1228,9 @@ export default {
       '{source}: site.appearance.font_preset deve essere uno tra: system, inter, source-serif, fraunces, dm-sans, lora.',
     appearanceBackgroundFitInvalid:
       '{source}: site.appearance.background_fit deve essere uno tra: top, center, contain.',
+    analyticsMustBeObject: '{source}: site.analytics deve essere un oggetto quando presente.',
+    analyticsProviderInvalid: '{source}: site.analytics.provider deve essere "vercel".',
+    analyticsEnabledInvalid: '{source}: site.analytics.enabled deve essere true oppure false.',
     siteUrlInvalid: '{source}: site.url deve essere un URL http o https valido.',
     ogImageInvalid: '{source}: site.og_image deve essere una stringa non vuota quando presente.',
     ogImageUrlInvalid: '{source}: site.og_image deve essere un URL http o https valido.',

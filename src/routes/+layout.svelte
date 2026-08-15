@@ -9,11 +9,16 @@
   import { markedTextFontPresets } from '$lib/marked-text.js';
   import { fontStylesheetHrefs } from '$lib/site-typography.js';
   import { STUDIO_HEAD_STYLE } from '$lib/studio-theme.js';
+  import { initializeVisitorAnalytics } from '$lib/visitor-analytics.js';
 
   let { children, data } = $props();
   const isStudio = $derived(page.url.pathname.startsWith('/studio'));
 
   setVisitorI18nContext(() => data.locale);
+
+  $effect(() => {
+    void initializeVisitorAnalytics(data.analytics, page.url.pathname);
+  });
 
   /** @param {string} href */
   function faviconTypeFromHref(href) {

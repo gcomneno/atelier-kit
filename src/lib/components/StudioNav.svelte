@@ -58,6 +58,7 @@
           <li><a class:active={isActive('/studio/site/contact')} href="/studio/site/contact">{t('studio.layout.nav.contact')}</a></li>
           <li><a class:active={isActive('/studio/site/social')} href="/studio/site/social">{t('studio.layout.nav.social')}</a></li>
           <li><a class:active={isActive('/studio/site/footer')} href="/studio/site/footer">{t('studio.layout.nav.footer')}</a></li>
+          <li><a class:active={isActive('/studio/site/analytics')} href="/studio/site/analytics">{t('studio.layout.nav.analytics')}</a></li>
         </ul>
       </li>
 

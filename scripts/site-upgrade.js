@@ -30,6 +30,7 @@ const UI_COMPONENTS_DEPENDENCY =
   'file:vendor/giadaware-ui-components/26f9e20/giadaware-ui-components-0.0.0.tgz';
 const HOSTED_UPSTASH_REDIS_PACKAGE = '@upstash/redis';
 const YAML_PACKAGE = 'yaml';
+const VERCEL_ANALYTICS_PACKAGE = '@vercel/analytics';
 const UI_COMPONENTS_ARTIFACT =
   'vendor/giadaware-ui-components/26f9e20/giadaware-ui-components-0.0.0.tgz';
 const UI_COMPONENTS_ARTIFACT_SHA256 =
@@ -793,6 +794,25 @@ export function buildYamlDependencyPlan(
 }
 
 /**
+ * Visitor layout code is managed by site upgrades and imports the official
+ * Vercel Analytics runtime when the site-owned setting enables it.
+ *
+ * @param {string} kitRoot
+ * @param {string} clientRoot
+ * @returns {{ package: string, changed: boolean, from?: string, to: string }}
+ */
+export function buildVercelAnalyticsDependencyPlan(
+  kitRoot,
+  clientRoot
+) {
+  return buildManagedRuntimeDependencyPlan(
+    kitRoot,
+    clientRoot,
+    VERCEL_ANALYTICS_PACKAGE
+  );
+}
+
+/**
  * Complete the issue #232 integration preflight before any target mutation.
  * Preserved identity files are usable only when they are already exact.
  *
@@ -800,7 +820,7 @@ export function buildYamlDependencyPlan(
  * @param {string} clientRoot
  * @param {Set<string>} preservePaths
  * @param {{ readPreservedFile?: (filePath: string) => Buffer }} [validation]
- * @returns {{ dependency: { changed: boolean, from?: string, to: string }, hostedDependency: { package: string, changed: boolean, from?: string, to: string }, yamlDependency: { package: string, changed: boolean, from?: string, to: string }, dependencies: { package: string, changed: boolean, from?: string, to: string }[], artifactChanged: boolean, identityChanged: boolean, packageJsonPreserved: boolean }}
+ * @returns {{ dependency: { changed: boolean, from?: string, to: string }, hostedDependency: { package: string, changed: boolean, from?: string, to: string }, yamlDependency: { package: string, changed: boolean, from?: string, to: string }, analyticsDependency: { package: string, changed: boolean, from?: string, to: string }, dependencies: { package: string, changed: boolean, from?: string, to: string }[], artifactChanged: boolean, identityChanged: boolean, packageJsonPreserved: boolean }}
  */
 export function buildUiComponentsIntegrationPlan(
   kitRoot,
@@ -876,10 +896,15 @@ export function buildUiComponentsIntegrationPlan(
   let dependency;
   let hostedDependency;
   let yamlDependency;
+  let analyticsDependency;
   try {
     dependency = buildUiComponentsDependencyPlan(kitRoot, clientRoot);
     hostedDependency = buildHostedUpstashRedisDependencyPlan(kitRoot, clientRoot);
     yamlDependency = buildYamlDependencyPlan(kitRoot, clientRoot);
+    analyticsDependency = buildVercelAnalyticsDependencyPlan(
+      kitRoot,
+      clientRoot
+    );
   } catch (error) {
     if (packageJsonPreserved) {
       throw new Error(
@@ -919,14 +944,29 @@ export function buildUiComponentsIntegrationPlan(
     );
   }
 
+  if (packageJsonPreserved && analyticsDependency.changed) {
+    const actual =
+      analyticsDependency.from === undefined
+        ? '(missing)'
+        : JSON.stringify(analyticsDependency.from);
+
+    throw new Error(
+      `${PRESERVE_MANIFEST} preserves package.json, but dependencies.${VERCEL_ANALYTICS_PACKAGE} is ${actual}. ` +
+        `Expected ${JSON.stringify(analyticsDependency.to)}. Remove the package.json preserve rule to allow migration, ` +
+        `or set the dependency to the expected value before upgrading.`
+    );
+  }
+
   return {
     dependency,
     hostedDependency,
     yamlDependency,
+    analyticsDependency,
     dependencies: [
       { package: UI_COMPONENTS_PACKAGE, ...dependency },
       hostedDependency,
-      yamlDependency
+      yamlDependency,
+      analyticsDependency
     ],
     artifactChanged,
     identityChanged,

@@ -27,6 +27,7 @@ test('Studio navigation retains Local, limits Hosted, and isolates the public De
     '/studio/site/contact',
     '/studio/site/social',
     '/studio/site/footer',
+    '/studio/site/analytics',
     '/studio/about',
     '/studio/catalog',
     '/studio/items',
@@ -85,6 +86,45 @@ test('Studio navigation retains Local, limits Hosted, and isolates the public De
   assert.doesNotMatch(
     hostedBranch,
     /class="group"|group-title|sub-list/
+  );
+});
+
+
+test('Analytics settings route remains Local-only and carries no Hosted or Demo authority', async () => {
+  const route = await source(
+    `${STUDIO_ROOT}site/analytics/+page.server.js`
+  );
+  const nav = await source(
+    `${COMPONENTS_ROOT}StudioNav.svelte`
+  );
+
+  assert.match(
+    route,
+    /export function load\(\)\s*\{\s*guardStudio\(\);/
+  );
+
+  assert.doesNotMatch(
+    route,
+    /hostedStudio|demoStudio|hostedAuthoring|demoAuthoring/
+  );
+
+  const demoBranch = nav.match(
+    /\{#if demoAuthoring\}([\s\S]*?)\{:else if hostedAuthoring\}/
+  )?.[1];
+
+  const hostedBranch = nav.match(
+    /\{:else if hostedAuthoring\}([\s\S]*?)\{:else\}/
+  )?.[1];
+
+  assert.ok(demoBranch);
+  assert.ok(hostedBranch);
+  assert.doesNotMatch(
+    demoBranch,
+    /\/studio\/site\/analytics/
+  );
+  assert.doesNotMatch(
+    hostedBranch,
+    /\/studio\/site\/analytics/
   );
 });
 

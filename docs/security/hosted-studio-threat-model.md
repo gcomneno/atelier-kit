@@ -196,20 +196,39 @@ Controls:
 Threats:
 
 - oversized files;
-- disguised file types;
+- disguised or malformed file types;
+- truncated or otherwise undecodable images;
+- decompression/resource-exhaustion payloads;
 - parser/browser payloads;
 - storage abuse;
-- path manipulation.
+- browser-controlled filename or path manipulation.
 
 Controls:
 
-- existing size limit retained or tightened;
-- strict extension and content-type rules;
-- deterministic filename generation;
-- bounded request body;
+- admit only JPEG, PNG and WebP for the initial Hosted image boundary;
+- reject empty inputs and encoded payloads larger than 5 MiB;
+- determine format from uploaded bytes rather than trusting browser filename,
+  extension or MIME metadata;
+- use `sharp`/libvips metadata inspection and forced pixel decoding so a
+  plausible header alone cannot establish admission;
+- reject images wider or taller than 8192 pixels;
+- reject decoded images above the 40,000,000-pixel budget;
+- reject malformed, truncated, unsupported or undecodable image data before
+  repository mutation;
+- configure image parsing for one page and bounded input pixels;
+- derive destination directory, basename, extension, related document path and
+  commit message only from branded server-owned image slots;
+- treat uploaded original filenames as non-authoritative and never as repository
+  paths;
+- normalize every derived repository path through the authoring path boundary;
+- use one normalized `applyChanges()` change set and one expected revision for
+  related metadata plus binary writes/deletes;
+- replacement deletes only a canonical prior path belonging to the same admitted
+  server-owned slot;
+- validation, stale-revision and ref-conflict failure must expose no partial
+  branch-visible metadata/image state;
 - no arbitrary remote fetch;
 - SVG excluded initially;
-- repository path allow-list;
 - deployment content security remains independent.
 
 ### SSRF

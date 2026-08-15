@@ -282,18 +282,52 @@ multi-file atomic replacement.
 
 Hosted uploads never write persistent data to the function filesystem.
 
-Before repository mutation they must enforce the existing Atelier image
-constraints plus hosted-specific resource limits.
+The initial controlled image-upload boundary admits exactly one uploaded image
+at a time and validates the uploaded bytes before repository mutation authority
+is consulted. Browser-provided filenames, extensions and MIME types are
+informational only and do not establish format or repository-path authority.
 
-Required controls include:
+The admitted image contract is deliberately finite:
 
-- allowed MIME/extension policy;
-- maximum byte size;
-- deterministic destination path;
-- no client-controlled traversal;
-- no arbitrary remote URL ingestion;
-- no SVG upload unless separately threat-modelled and approved;
-- one atomic commit for metadata and image state.
+- JPEG, normalized to the `jpg` extension and `image/jpeg` MIME type;
+- PNG;
+- WebP;
+- maximum encoded size: 5 MiB;
+- maximum width: 8192 pixels;
+- maximum height: 8192 pixels;
+- maximum decoded pixel budget: 40,000,000 pixels.
+
+Server-side validation uses `sharp`/libvips to determine the actual image format
+from the bytes, inspect dimensions and force pixel decoding. Unsupported,
+empty, malformed, truncated, undecodable or over-limit inputs fail before a
+repository mutation begins. SVG and arbitrary remote URL ingestion remain
+excluded.
+
+Repository destinations are derived only from branded server-owned image slots.
+Each admitted slot fixes its repository directory, public directory, basename,
+related text/YAML path and commit message. Browser input cannot select or mint
+repository, branch, writable root, destination directory, basename, related
+document path or commit message authority.
+
+The current reusable slot boundary covers the site header logo, favicon, hero
+banner and site background under `static/images/site`, with corresponding public
+paths under `/images/site`. A slot may resolve only the admitted `jpg`, `png`
+or `webp` extension.
+
+Create, replacement and removal are complete logical mutations:
+
+- create writes the related text/YAML state and the validated binary;
+- replacement writes the related text/YAML state and new binary and deletes the
+  prior admitted slot asset when its canonical path changes;
+- removal updates the related text/YAML state and deletes the prior admitted
+  slot asset.
+
+All participating writes and deletes are normalized before mutation and are
+submitted through one `AuthoringRepository.applyChanges()` call with one
+expected revision and one server-owned commit message. A successful mutation
+therefore produces one resulting repository revision. Validation failure, stale
+revision or ref-conflict failure must not expose a branch-visible partial image
+and metadata state.
 
 Temporary runtime storage, if used, is scratch space only.
 

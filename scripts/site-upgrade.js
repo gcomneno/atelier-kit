@@ -31,6 +31,7 @@ const UI_COMPONENTS_DEPENDENCY =
 const HOSTED_UPSTASH_REDIS_PACKAGE = '@upstash/redis';
 const YAML_PACKAGE = 'yaml';
 const VERCEL_ANALYTICS_PACKAGE = '@vercel/analytics';
+const SHARP_PACKAGE = 'sharp';
 const UI_COMPONENTS_ARTIFACT =
   'vendor/giadaware-ui-components/26f9e20/giadaware-ui-components-0.0.0.tgz';
 const UI_COMPONENTS_ARTIFACT_SHA256 =
@@ -813,6 +814,25 @@ export function buildVercelAnalyticsDependencyPlan(
 }
 
 /**
+ * Managed Hosted image authoring imports sharp at runtime, so upgraded client
+ * packages must carry the exact Kit-owned sharp dependency as well.
+ *
+ * @param {string} kitRoot
+ * @param {string} clientRoot
+ * @returns {{ package: string, changed: boolean, from?: string, to: string }}
+ */
+export function buildSharpDependencyPlan(
+  kitRoot,
+  clientRoot
+) {
+  return buildManagedRuntimeDependencyPlan(
+    kitRoot,
+    clientRoot,
+    SHARP_PACKAGE
+  );
+}
+
+/**
  * Complete the issue #232 integration preflight before any target mutation.
  * Preserved identity files are usable only when they are already exact.
  *
@@ -820,7 +840,7 @@ export function buildVercelAnalyticsDependencyPlan(
  * @param {string} clientRoot
  * @param {Set<string>} preservePaths
  * @param {{ readPreservedFile?: (filePath: string) => Buffer }} [validation]
- * @returns {{ dependency: { changed: boolean, from?: string, to: string }, hostedDependency: { package: string, changed: boolean, from?: string, to: string }, yamlDependency: { package: string, changed: boolean, from?: string, to: string }, analyticsDependency: { package: string, changed: boolean, from?: string, to: string }, dependencies: { package: string, changed: boolean, from?: string, to: string }[], artifactChanged: boolean, identityChanged: boolean, packageJsonPreserved: boolean }}
+ * @returns {{ dependency: { changed: boolean, from?: string, to: string }, hostedDependency: { package: string, changed: boolean, from?: string, to: string }, yamlDependency: { package: string, changed: boolean, from?: string, to: string }, analyticsDependency: { package: string, changed: boolean, from?: string, to: string }, sharpDependency: { package: string, changed: boolean, from?: string, to: string }, dependencies: { package: string, changed: boolean, from?: string, to: string }[], artifactChanged: boolean, identityChanged: boolean, packageJsonPreserved: boolean }}
  */
 export function buildUiComponentsIntegrationPlan(
   kitRoot,
@@ -897,11 +917,16 @@ export function buildUiComponentsIntegrationPlan(
   let hostedDependency;
   let yamlDependency;
   let analyticsDependency;
+  let sharpDependency;
   try {
     dependency = buildUiComponentsDependencyPlan(kitRoot, clientRoot);
     hostedDependency = buildHostedUpstashRedisDependencyPlan(kitRoot, clientRoot);
     yamlDependency = buildYamlDependencyPlan(kitRoot, clientRoot);
     analyticsDependency = buildVercelAnalyticsDependencyPlan(
+      kitRoot,
+      clientRoot
+    );
+    sharpDependency = buildSharpDependencyPlan(
       kitRoot,
       clientRoot
     );
@@ -957,16 +982,31 @@ export function buildUiComponentsIntegrationPlan(
     );
   }
 
+  if (packageJsonPreserved && sharpDependency.changed) {
+    const actual =
+      sharpDependency.from === undefined
+        ? '(missing)'
+        : JSON.stringify(sharpDependency.from);
+
+    throw new Error(
+      `${PRESERVE_MANIFEST} preserves package.json, but dependencies.${SHARP_PACKAGE} is ${actual}. ` +
+        `Expected ${JSON.stringify(sharpDependency.to)}. Remove the package.json preserve rule to allow migration, ` +
+        `or set the dependency to the expected value before upgrading.`
+    );
+  }
+
   return {
     dependency,
     hostedDependency,
     yamlDependency,
     analyticsDependency,
+    sharpDependency,
     dependencies: [
       { package: UI_COMPONENTS_PACKAGE, ...dependency },
       hostedDependency,
       yamlDependency,
-      analyticsDependency
+      analyticsDependency,
+      sharpDependency
     ],
     artifactChanged,
     identityChanged,

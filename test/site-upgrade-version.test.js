@@ -15,6 +15,7 @@ import {
   applyUiComponentsIntegrationPlan,
   buildFilePlan,
   buildUiComponentsIntegrationPlan,
+  buildSharpDependencyPlan,
   buildVercelAnalyticsDependencyPlan,
   buildYamlDependencyPlan,
   canonicalManagedTestPath,
@@ -36,6 +37,7 @@ const identity = 'vendor/giadaware-ui-components/26f9e20/integration.json';
 const hostedRedisPackage = '@upstash/redis';
 const yamlPackage = 'yaml';
 const vercelAnalyticsPackage = '@vercel/analytics';
+const sharpPackage = 'sharp';
 const kitPackage = JSON.parse(
   fs.readFileSync(
     path.join(kitRoot, 'package.json'),
@@ -48,6 +50,8 @@ const yamlDependency =
   kitPackage.dependencies[yamlPackage];
 const vercelAnalyticsDependency =
   kitPackage.dependencies[vercelAnalyticsPackage];
+const sharpDependency =
+  kitPackage.dependencies[sharpPackage];
 const legacyViteConfig = `import adapter from '@sveltejs/adapter-vercel';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { readFileSync } from 'node:fs';
@@ -205,6 +209,40 @@ function setVercelAnalyticsDependency(
   } else {
     packageJson.dependencies[
       vercelAnalyticsPackage
+    ] = value;
+  }
+
+  fs.writeFileSync(
+    packagePath,
+    `${JSON.stringify(packageJson, null, 2)}\n`
+  );
+}
+
+/**
+ * @param {string} clientRoot
+ * @param {string | undefined} value
+ */
+function setSharpDependency(
+  clientRoot,
+  value
+) {
+  const packagePath =
+    path.join(clientRoot, 'package.json');
+  const packageJson =
+    JSON.parse(
+      fs.readFileSync(packagePath, 'utf8')
+    );
+
+  packageJson.dependencies =
+    packageJson.dependencies || {};
+
+  if (value === undefined) {
+    delete packageJson.dependencies[
+      sharpPackage
+    ];
+  } else {
+    packageJson.dependencies[
+      sharpPackage
     ] = value;
   }
 
@@ -444,6 +482,10 @@ test('successfully migrates the fresh issue-232 dependency, identity and artifac
       clientPackage.dependencies[vercelAnalyticsPackage],
       vercelAnalyticsDependency
     );
+    assert.equal(
+      clientPackage.dependencies[sharpPackage],
+      sharpDependency
+    );
     assert.deepEqual(fs.readFileSync(path.join(clientRoot, artifact)), fs.readFileSync(path.join(kitRoot, artifact)));
     assert.deepEqual(fs.readFileSync(path.join(clientRoot, identity)), fs.readFileSync(path.join(kitRoot, identity)));
   } finally { cleanup(clientRoot); }
@@ -462,6 +504,10 @@ for (const [label, value] of [['missing', undefined], ['wrong', 'file:vendor/wro
       setVercelAnalyticsDependency(
         clientRoot,
         vercelAnalyticsDependency
+      );
+      setSharpDependency(
+        clientRoot,
+        sharpDependency
       );
       fs.writeFileSync(path.join(clientRoot, '.atelier-kit-preserve'), 'package.json\n');
       const before = snapshotTree(clientRoot);
@@ -487,6 +533,10 @@ test('preserved package.json with the exact dependency is allowed and never rewr
       clientRoot,
       vercelAnalyticsDependency
     );
+    setSharpDependency(
+      clientRoot,
+      sharpDependency
+    );
     const packagePath = path.join(clientRoot, 'package.json');
     const before = fs.readFileSync(packagePath);
     fs.writeFileSync(path.join(clientRoot, '.atelier-kit-preserve'), 'package.json\n');
@@ -509,6 +559,10 @@ for (const [label, value] of [['missing', undefined], ['incompatible', '^0.1.0']
       setVercelAnalyticsDependency(
         clientRoot,
         vercelAnalyticsDependency
+      );
+      setSharpDependency(
+        clientRoot,
+        sharpDependency
       );
       fs.writeFileSync(path.join(clientRoot, '.atelier-kit-preserve'), 'package.json\n');
       const before = snapshotTree(clientRoot);
@@ -602,6 +656,10 @@ for (const [label, value] of [
         clientRoot,
         value
       );
+      setSharpDependency(
+        clientRoot,
+        sharpDependency
+      );
 
       fs.writeFileSync(
         path.join(
@@ -618,6 +676,64 @@ for (const [label, value] of [
         runMain(clientRoot),
         new RegExp(
           `preserves package\\.json.*dependencies\\.@vercel/analytics.*Expected "${vercelAnalyticsDependency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}".*Remove the package\\.json preserve rule`
+        )
+      );
+
+      assert.deepEqual(
+        snapshotTree(clientRoot),
+        before
+      );
+    } finally {
+      cleanup(clientRoot);
+    }
+  });
+}
+
+
+for (const [label, value] of [
+  ['missing', undefined],
+  ['incompatible', '^0.1.0']
+]) {
+  test(`preserved package.json with ${label} sharp dependency aborts with zero mutations`, async () => {
+    const clientRoot = makeClient();
+
+    try {
+      setDependency(
+        clientRoot,
+        `file:${artifact}`
+      );
+      setHostedRedisDependency(
+        clientRoot,
+        hostedRedisDependency
+      );
+      setYamlDependency(
+        clientRoot,
+        yamlDependency
+      );
+      setVercelAnalyticsDependency(
+        clientRoot,
+        vercelAnalyticsDependency
+      );
+      setSharpDependency(
+        clientRoot,
+        value
+      );
+
+      fs.writeFileSync(
+        path.join(
+          clientRoot,
+          '.atelier-kit-preserve'
+        ),
+        'package.json\n'
+      );
+
+      const before =
+        snapshotTree(clientRoot);
+
+      await assert.rejects(
+        runMain(clientRoot),
+        new RegExp(
+          `preserves package\\.json.*dependencies\\.sharp.*Expected "${sharpDependency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}".*Remove the package\\.json preserve rule`
         )
       );
 
@@ -820,7 +936,8 @@ test('does not request npm install when issue-232 dependency and artifact are un
       'giadaware-ui-components': `file:${artifact}`,
       [hostedRedisPackage]: hostedRedisDependency,
       [yamlPackage]: yamlDependency,
-      [vercelAnalyticsPackage]: vercelAnalyticsDependency
+      [vercelAnalyticsPackage]: vercelAnalyticsDependency,
+      [sharpPackage]: sharpDependency
     };
     fs.writeFileSync(clientPackagePath, `${JSON.stringify(clientPackage, null, 2)}\n`);
 
@@ -831,6 +948,66 @@ test('does not request npm install when issue-232 dependency and artifact are un
   } finally { cleanup(clientRoot); }
 });
 
+
+
+test('sharp runtime dependency planner follows the Kit package contract', () => {
+  const clientRoot = makeClient();
+
+  try {
+    const missing =
+      buildSharpDependencyPlan(
+        kitRoot,
+        clientRoot
+      );
+
+    assert.equal(
+      missing.package,
+      sharpPackage
+    );
+    assert.equal(
+      missing.changed,
+      true
+    );
+    assert.equal(
+      missing.from,
+      undefined
+    );
+    assert.equal(
+      missing.to,
+      sharpDependency
+    );
+
+    setSharpDependency(
+      clientRoot,
+      sharpDependency
+    );
+
+    const exact =
+      buildSharpDependencyPlan(
+        kitRoot,
+        clientRoot
+      );
+
+    assert.equal(
+      exact.package,
+      sharpPackage
+    );
+    assert.equal(
+      exact.changed,
+      false
+    );
+    assert.equal(
+      exact.from,
+      sharpDependency
+    );
+    assert.equal(
+      exact.to,
+      sharpDependency
+    );
+  } finally {
+    cleanup(clientRoot);
+  }
+});
 
 test('Vercel Analytics runtime dependency planner follows the Kit package contract', () => {
   const clientRoot = makeClient();

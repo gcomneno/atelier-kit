@@ -197,6 +197,7 @@ The command:
   unrecognized Vite configs stay intact and are flagged for manual resolver adoption; preserved Vite
   configs stay intact because they are explicitly excluded from the upgrade;
 - merges npm scripts from the kit `package.json`;
+- synchronizes the finite Kit-owned runtime dependencies required by managed source (`@upstash/redis`, `yaml`, `@vercel/analytics`, `sharp`, and the vendored UI package) without replacing unrelated consumer dependencies;
 - writes the tracked `.atelier-kit-version` file used by deployed builds, while retaining the ignored
   `.atelier-kit-upgrade.json` metadata for compatibility with historical clients;
 - prints a diff summary and asks for confirmation (use `--yes` to skip);
@@ -214,7 +215,7 @@ From the kit repository, target a client folder directly:
 npm run site:upgrade -- --target ../luna-argento --from .
 ```
 
-After upgrading, run `npm run check` and `npm run build` in the client folder.
+After upgrading, run `npm install` when the plan reports dependency changes, then run `npm run check` and `npm run build` in the client folder.
 
 Tag the kit release (`git tag vX.Y.Z`) before upgrading clients so `.atelier-kit-version` and the
 legacy-compatible `.atelier-kit-upgrade.json` metadata record the correct version.

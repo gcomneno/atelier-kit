@@ -18,6 +18,7 @@
 
   const hostedZones = [
     { id: 'social', href: '/studio/site/social', tone: 'site' },
+    { id: 'hero', href: '/studio/site/hero', tone: 'site' },
     { id: 'preview', href: '/', tone: 'publish', external: true }
   ];
 </script>

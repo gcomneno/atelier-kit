@@ -46,13 +46,23 @@ export default {
         'Saved to the Demo sandbox. The public deployment may need a short moment before the new links are visible.',
       viewUpdatedSite: 'View the public Demo'
     },
+    hosted: {
+      intro:
+        'Edit the admitted Hosted content here. A successful save commits to the configured GitHub authoring branch; deployment and the Visitor Preview are separate.',
+      authoringState: {
+        title: 'Hosted authoring state',
+        revision: 'Authored revision: {revision}',
+        deploymentManual:
+          'Saved changes are committed to GitHub. Deployment is manual in this phase and is not tracked by Hosted Studio; Preview may still show an older immutable deployment snapshot.'
+      }
+    },
     dashboard: {
       pageTitle: 'Studio · Overview',
       intro:
         'Four areas, matching the left menu: pick where to work. Each box opens the first page in that group.',
       zonesLegend: 'Studio areas',
       hostedIntro:
-        'This private PoC currently exposes a limited Hosted authoring surface: manage social links or preview the public site.',
+        'This private Hosted Studio exposes bounded Social and Hero authoring. Saves commit to GitHub; the public Preview is a separately deployed snapshot and may lag behind the authored revision.',
       hostedZonesLegend: 'Hosted authoring areas',
       zones: {
         site: {
@@ -80,10 +90,15 @@ export default {
           title: 'Social authoring',
           description: 'Manage the social links shown on the public site.'
         },
+        hero: {
+          eyebrow: 'Hosted',
+          title: 'Hero authoring',
+          description: 'Manage the admitted Hero banner, image and metadata.'
+        },
         preview: {
-          eyebrow: 'Public site',
-          title: 'Public preview',
-          description: 'Open the public site in a new tab.'
+          eyebrow: 'Deployment',
+          title: 'Deployed Preview',
+          description: 'Open the currently deployed Visitor snapshot. It may not yet contain the latest authored revision.'
         }
       }
     },

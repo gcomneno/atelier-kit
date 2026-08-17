@@ -23,6 +23,7 @@
   let removeHeroImage = $state(false);
   const heroRemoval = createHeroBannerRemoval();
   let isDirty = $state(false);
+  let isSaving = $state(false);
   /** @type {import('$lib/studio-form-dirty.js').StudioFormDirtyControl} */
   const dirtyControl = {};
   const imageMutationMessages = {
@@ -40,6 +41,28 @@
   const hasStoredImage = $derived(Boolean(heroBannerForm.image_file) && !removeHeroImage);
   const bannerFieldsEnabled = $derived(showBanner);
   const uploadRequired = $derived(showBanner && !hasStoredImage);
+
+  function enhanceHeroBanner() {
+    const completeDirty = studioFormEnhanceDirty(dirtyControl);
+
+    return async (/** @type {{ update: Function }} */ input) => {
+      try {
+        await completeDirty(input);
+      } finally {
+        isSaving = false;
+      }
+    };
+  }
+
+  /** @param {SubmitEvent} event */
+  function submitHeroBanner(event) {
+    if (isSaving) {
+      event.preventDefault();
+      return;
+    }
+
+    isSaving = true;
+  }
 </script>
 
 <svelte:head>
@@ -62,7 +85,8 @@
     action="?/saveHeroBanner"
     enctype="multipart/form-data"
     use:studioFormDirty={{ setDirty: (value) => (isDirty = value), dirtyControl }}
-    use:enhance={() => studioFormEnhanceDirty(dirtyControl)}
+    use:enhance={enhanceHeroBanner}
+    onsubmit={submitHeroBanner}
     class="studio-form"
   >
     {#if hostedHero}
@@ -143,7 +167,9 @@
     </fieldset>
 
     <FormActions>
-      <Button type="submit" disabled={!isDirty}>{t('studio.site.heroBanner.save')}</Button>
+      <Button type="submit" disabled={!isDirty || isSaving}>
+        {isSaving ? t('studio.site.heroBanner.saving') : t('studio.site.heroBanner.save')}
+      </Button>
     </FormActions>
 
     <StudioFormStatus message={form?.heroBannerMessage} status={form?.heroBannerStatus} />

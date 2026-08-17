@@ -432,7 +432,8 @@ export default {
         captionHint: 'Text along the bottom of the banner image, centered.',
         href: 'Link (optional, e.g. /news/preview)',
         hrefHint: 'Internal path: makes the image clickable (e.g. /news, /collections).',
-        save: 'Save hero banner'
+        save: 'Save hero banner',
+        saving: 'Saving…'
       },
       contact: {
         title: 'Contact actions',

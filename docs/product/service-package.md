@@ -51,7 +51,29 @@ Before production work starts, the client should provide:
 - an existing logo, if one is to be used;
 - reasonable cooperation or access needed to configure domain and infrastructure accounts.
 
-The Base package assumes that supplied content is reasonably close to publication-ready. Small corrections and formatting are part of setup; full copywriting, large-scale image preparation and content reconstruction are not.
+The Base package assumes that supplied content is reasonably close to publication-ready.
+
+#### Included content preparation
+
+For supplied text, Base includes light editorial cleanup needed to make already-good material publication-ready, such as:
+
+- correcting typos, punctuation and small grammatical mistakes;
+- small wording or formatting adjustments needed to fit the showcase;
+- preserving the client's meaning and voice rather than rewriting the material.
+
+For supplied photos, Base includes ordinary technical preparation needed by Atelier-Kit, such as:
+
+- inserting and associating the supplied images with the correct content;
+- ordinary resizing, format conversion or compression when technically useful;
+- routine adjustments required for correct publication through the supported Atelier-Kit workflow.
+
+Base does **not** include creating substantial text from scratch, major rewriting, interview-based content creation, professional copywriting, professional retouching, complex background removal, compositing, image reconstruction or recovery of unsuitable source images.
+
+The commercial rule is:
+
+> **Base makes already-good client material publication-ready; it does not create the client's material for them.**
+
+If the supplied material requires substantially more editorial or image work than the Base scope allows, the operator identifies that **before the extra work starts** and proposes a separate quote or scope adjustment. Extra work is not silently added and billed after delivery.
 
 ### Domain, Vercel and publication
 

@@ -64,7 +64,7 @@ test('Hosted Hero prevents re-entrant submits while a save is pending', () => {
   const source = fs.readFileSync(path.join(projectRoot, route), 'utf8');
 
   assert.match(source, /let isSaving = \$state\(false\)/);
-  assert.match(source, /function submitHeroBanner\(event\)[\s\S]*if \(isSaving\)[\s\S]*event\.preventDefault\(\)[\s\S]*isSaving = true/);
+  assert.match(source, /function submitHeroBanner\(event\)[\s\S]*if \(isSaving\)[\s\S]*event\.preventDefault\(\)[\s\S]*isSaving = true;[\s\S]*flushSync\(\)/);
   assert.match(source, /function enhanceHeroBanner\(\)[\s\S]*finally[\s\S]*isSaving = false/);
   assert.match(source, /use:enhance=\{enhanceHeroBanner\}/);
   assert.match(source, /onsubmit=\{submitHeroBanner\}/);
@@ -257,9 +257,8 @@ test('rendered Hosted Hero blocks a second submit while the first save is pendin
 
   const first = new Event('submit', { bubbles: true, cancelable: true });
   assert.equal(form.dispatchEvent(first), true);
-  module.flushSync();
 
-  assert.equal(button.disabled, true);
+  assert.equal(button.disabled, true, 'button disables before dispatchEvent returns');
   assert.match(button.textContent ?? '', /Saving/);
 
   const second = new Event('submit', { bubbles: true, cancelable: true });

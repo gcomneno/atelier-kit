@@ -3,6 +3,7 @@
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   // @ts-nocheck
   import { enhance } from '$app/forms';
+  import { flushSync } from 'svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
@@ -62,6 +63,7 @@
     }
 
     isSaving = true;
+    flushSync();
   }
 </script>
 

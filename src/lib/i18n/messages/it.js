@@ -434,7 +434,8 @@ export default {
         captionHint: 'Testo in basso sull’immagine del banner, centrato.',
         href: 'Link (opzionale, es. /news/anteprima)',
         hrefHint: 'Percorso interno: rende l’immagine cliccabile (es. /news, /collections).',
-        save: 'Salva hero banner'
+        save: 'Salva hero banner',
+        saving: 'Salvataggio…'
       },
       contact: {
         title: 'Contatti',

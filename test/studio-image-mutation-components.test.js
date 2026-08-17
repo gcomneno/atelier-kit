@@ -59,6 +59,19 @@ function literalAttribute(component, name) {
   return Array.isArray(value) && value.length === 1 && value[0].type === 'Text' ? value[0].data : undefined;
 }
 
+test('Hosted Hero prevents re-entrant submits while a save is pending', () => {
+  const route = 'src/routes/studio/site/hero/+page.svelte';
+  const source = fs.readFileSync(path.join(projectRoot, route), 'utf8');
+
+  assert.match(source, /let isSaving = \$state\(false\)/);
+  assert.match(source, /function submitHeroBanner\(event\)[\s\S]*if \(isSaving\)[\s\S]*event\.preventDefault\(\)[\s\S]*isSaving = true/);
+  assert.match(source, /function enhanceHeroBanner\(\)[\s\S]*finally[\s\S]*isSaving = false/);
+  assert.match(source, /use:enhance=\{enhanceHeroBanner\}/);
+  assert.match(source, /onsubmit=\{submitHeroBanner\}/);
+  assert.match(source, /disabled=\{!isDirty \|\| isSaving\}/);
+  assert.match(source, /isSaving \? t\('studio\.site\.heroBanner\.saving'\)/);
+});
+
 test('real Studio pages wire every image mutation field contract', () => {
   for (const contract of pageContracts) {
     const source = fs.readFileSync(path.join(projectRoot, contract.route), 'utf8');
@@ -202,6 +215,57 @@ const fontPresets = [{ id: 'system', label: 'System' }];
 const heroBannerForm = {
   show: true, image_file: '/images/site/hero-banner.png', description: 'Description', caption: 'Caption', href: ''
 };
+
+test('rendered Hosted Hero blocks a second submit while the first save is pending', async (t) => {
+  const restoreDom = installDom();
+  const { temporaryRoot, module } = await buildPages();
+  const target = document.createElement('div');
+  document.body.append(target);
+
+  /** @type {unknown} */
+  let instance;
+
+  t.after(async () => {
+    if (instance) await module.unmount(instance);
+    target.remove();
+    restoreDom();
+    fs.rmSync(temporaryRoot, { recursive: true, force: true });
+  });
+
+  instance = module.mountPage(target, {
+    page: 'hero',
+    data: {
+      siteForm,
+      appearanceForm,
+      appearancePresets,
+      fontPresets,
+      heroBannerForm,
+      hostedHero: {
+        csrfToken: 'csrf',
+        authoringRevision: 'revision-1'
+      }
+    }
+  });
+  module.flushSync();
+
+  const form = /** @type {HTMLFormElement} */ (target.querySelector('form'));
+  const show = /** @type {HTMLInputElement} */ (form.querySelector('input[name=show_banner]'));
+  const button = /** @type {HTMLButtonElement} */ (form.querySelector('button[type=submit]'));
+
+  toggle(module, show, false);
+  assert.equal(button.disabled, false);
+
+  const first = new Event('submit', { bubbles: true, cancelable: true });
+  assert.equal(form.dispatchEvent(first), true);
+  module.flushSync();
+
+  assert.equal(button.disabled, true);
+  assert.match(button.textContent ?? '', /Saving/);
+
+  const second = new Event('submit', { bubbles: true, cancelable: true });
+  assert.equal(form.dispatchEvent(second), false, 'second submit is prevented while save is pending');
+  assert.equal(second.defaultPrevented, true);
+});
 
 test('actual rendered Studio pages enforce all four upload/removal contracts', async (t) => {
   const restoreDom = installDom();

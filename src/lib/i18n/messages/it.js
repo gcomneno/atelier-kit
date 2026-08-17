@@ -46,13 +46,23 @@ export default {
         'Salvato nella sandbox Demo. Potrebbe servire un breve momento prima che il deployment pubblico mostri i nuovi link.',
       viewUpdatedSite: 'Vedi la Demo pubblica'
     },
+    hosted: {
+      intro:
+        'Modifica qui i contenuti ammessi in Hosted Studio. Un salvataggio riuscito produce un commit sul branch GitHub configurato; deployment e Anteprima Visitor restano separati.',
+      authoringState: {
+        title: 'Stato modifica ospitata',
+        revision: 'Revisione salvata: {revision}',
+        deploymentManual:
+          'Le modifiche salvate vengono committate su GitHub. In questa fase il deployment è manuale e non è tracciato da Hosted Studio; Anteprima può quindi mostrare ancora uno snapshot di deployment precedente.'
+      }
+    },
     dashboard: {
       pageTitle: 'Studio · Panoramica',
       intro:
         'Quattro aree, come nel menu a sinistra: scegli dove lavorare. Ogni box apre la prima pagina del gruppo.',
       zonesLegend: 'Aree Studio',
       hostedIntro:
-        'Questo PoC privato espone al momento una superficie di modifica ospitata limitata: gestisci i link social oppure visualizza l’anteprima del sito pubblico.',
+        'Questo Hosted Studio privato espone una superficie limitata per Social e Hero. I salvataggi producono commit GitHub; l’Anteprima pubblica è uno snapshot di deployment separato e può essere indietro rispetto alla revisione salvata.',
       hostedZonesLegend: 'Aree di modifica ospitata',
       zones: {
         site: {
@@ -80,10 +90,15 @@ export default {
           title: 'Modifica social',
           description: 'Gestisci i link social mostrati sul sito pubblico.'
         },
+        hero: {
+          eyebrow: 'Ospitato',
+          title: 'Modifica Hero',
+          description: 'Gestisci banner Hero, immagine e metadati ammessi.'
+        },
         preview: {
-          eyebrow: 'Sito pubblico',
-          title: 'Anteprima pubblica',
-          description: 'Apri il sito pubblico in una nuova scheda.'
+          eyebrow: 'Deployment',
+          title: 'Anteprima del deployment',
+          description: 'Apri lo snapshot Visitor attualmente distribuito. Potrebbe non contenere ancora l’ultima revisione salvata.'
         }
       }
     },

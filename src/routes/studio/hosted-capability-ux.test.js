@@ -75,7 +75,7 @@ test('Studio navigation retains Local, limits Hosted, and isolates the public De
   assert.deepEqual(
     [...hostedBranch.matchAll(/href="([^"]+)"/g)]
       .map((match) => match[1]),
-    ['/studio', '/studio/site/social', '/']
+    ['/studio', '/studio/site/social', '/studio/site/hero', '/']
   );
 
   assert.match(
@@ -128,7 +128,7 @@ test('Analytics settings route remains Local-only and carries no Hosted or Demo 
   );
 });
 
-test('Studio dashboard preserves Local zones and renders only Hosted Social and Preview cards', async () => {
+test('Studio dashboard preserves Local zones and renders only admitted Hosted Social, Hero and Preview cards', async () => {
   const dashboard = await source(`${STUDIO_ROOT}+page.svelte`);
 
   for (const route of [
@@ -145,6 +145,7 @@ test('Studio dashboard preserves Local zones and renders only Hosted Social and 
   )?.[1];
   assert.ok(hostedZones, 'Hosted dashboard zones must exist');
   assert.match(hostedZones, /id: 'social', href: '\/studio\/site\/social'/);
+  assert.match(hostedZones, /id: 'hero', href: '\/studio\/site\/hero'/);
   assert.match(hostedZones, /id: 'preview', href: '\/', tone: 'publish', external: true/);
 
   for (const deadRoute of [
@@ -172,11 +173,35 @@ test('Localized shell copy distinguishes Local, limited Hosted, and public Demo 
   assert.match(english, /title: 'Local authoring'/);
   assert.match(english, /hostedTitle: 'Hosted authoring'/);
   assert.match(english, /demoTitle:/);
-  assert.match(english, /private PoC currently exposes a limited Hosted authoring surface/);
+  assert.match(english, /private Hosted Studio exposes bounded Social and Hero authoring/);
   assert.match(italian, /title: 'Modifica locale'/);
   assert.match(italian, /hostedTitle: 'Modifica ospitata'/);
   assert.match(italian, /demoTitle:/);
-  assert.match(italian, /PoC privato espone al momento una superficie di modifica ospitata limitata/);
+  assert.match(italian, /Hosted Studio privato espone una superficie limitata per Social e Hero/);
+});
+
+test('Hosted editors expose authored revision and an explicit manual deployment boundary', async () => {
+  const hero = await source(`${STUDIO_ROOT}site/hero/+page.svelte`);
+  const social = await source(`${STUDIO_ROOT}site/social/+page.svelte`);
+  const english = await source(`${MESSAGES_ROOT}en.js`);
+  const italian = await source(`${MESSAGES_ROOT}it.js`);
+
+  for (const editor of [hero, social]) {
+    assert.match(editor, /data-testid="hosted-authoring-state"/);
+    assert.match(editor, /authoringRevision/);
+    assert.match(editor, /studio\.hosted\.intro/);
+    assert.match(editor, /studio\.hosted\.authoringState\.revision/);
+    assert.match(editor, /studio\.hosted\.authoringState\.deploymentManual/);
+  }
+
+  assert.match(english, /successful save commits to the configured GitHub authoring branch/);
+  assert.match(english, /Saved changes are committed to GitHub/);
+  assert.match(english, /Deployment is manual in this phase/);
+  assert.match(english, /older immutable deployment snapshot/);
+
+  assert.match(italian, /modifiche salvate vengono committate su GitHub/);
+  assert.match(italian, /deployment è manuale/);
+  assert.match(italian, /snapshot di deployment precedente/);
 });
 
 test('browser-visible Hosted and Demo layout capabilities are trusted server-derived booleans only', async () => {

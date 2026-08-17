@@ -71,7 +71,9 @@
   <title>{t('studio.site.pageTitle')}</title>
 </svelte:head>
 
-<PageIntro>{t('studio.site.intro')}</PageIntro>
+<PageIntro>
+  {t(hostedHero ? 'studio.hosted.intro' : 'studio.site.intro')}
+</PageIntro>
 
 <Panel title={t('studio.site.heroBanner.title')} id="hero-banner-settings" class="atelier-studio-panel">
 
@@ -81,6 +83,14 @@
       <p class="hint">{t('studio.site.heroBanner.backgroundImageActive')}</p>
     {/if}
   </div>
+
+  {#if hostedHero}
+    <div class="hosted-authoring-state" data-testid="hosted-authoring-state">
+      <strong>{t('studio.hosted.authoringState.title')}</strong>
+      <p>{t('studio.hosted.authoringState.revision', { revision: hostedHero.authoringRevision })}</p>
+      <p>{t('studio.hosted.authoringState.deploymentManual')}</p>
+    </div>
+  {/if}
 
   <form
     method="POST"
@@ -179,6 +189,26 @@
 </Panel>
 
 <style>
+  .hosted-authoring-state {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--studio-border);
+    border-radius: 0.75rem;
+    background: rgb(45 108 223 / 0.06);
+  }
+
+  .hosted-authoring-state strong,
+  .hosted-authoring-state p {
+    margin: 0;
+  }
+
+  .hosted-authoring-state p {
+    color: var(--studio-muted);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
   .banner-preview {
     overflow: hidden;
     aspect-ratio: 21 / 8;

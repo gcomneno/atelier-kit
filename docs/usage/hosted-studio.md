@@ -102,6 +102,31 @@ A successful GET against a public repository is not proof that the PAT has
 repository authority: public content can be readable without token authority.
 Verify a controlled write through the admitted path instead.
 
+## Save-to-deploy and Preview contract
+
+A successful private Hosted save means exactly one thing: the admitted mutation
+was committed to the configured GitHub authoring branch and the authoring
+revision advanced. It does **not** mean that an already-running Visitor
+deployment changed.
+
+For this phase, deployment remains an explicit operator action outside Hosted
+Studio. Hosted Studio does not receive browser deployment credentials, does not
+reuse Local Studio's Git/Vercel-CLI publishing path, and does not automatically
+trigger or inspect Vercel deployments.
+
+The operator-facing contract is therefore:
+
+1. **Authored revision** — Social and Hero show the current repository-backed
+   authoring revision returned by the successful read/save.
+2. **Deployment status** — manual and not tracked by Hosted Studio in this
+   phase.
+3. **Preview** — opens the currently deployed immutable Visitor snapshot. It
+   may represent an older revision than the authoring revision shown in Studio.
+
+Refreshing Preview cannot publish a revision. A deployment failure or delay
+does not roll back, repeat, or otherwise alter an already-successful repository
+mutation.
+
 ## Deploy, redeploy, and promotion
 
 Environment changes affect subsequent deployments, not an already-running
@@ -122,12 +147,14 @@ Only these Hosted routes are admitted:
 - `GET /studio`
 - `GET /studio/site/social`
 - `POST /studio/site/social`
+- `GET /studio/site/hero`
+- `POST /studio/site/hero`
 - authentication lifecycle: `GET /auth/github/login`, `GET /auth/github/callback`,
   and `POST /auth/logout`
 
 All other Studio pages and actions remain fail-closed. The Hosted UI exposes
-only Overview, Social, and Preview. Local filesystem, Git, and Vercel-CLI
-publishing are not Hosted capabilities.
+only Overview, Social, Hero, and the deployed Preview snapshot. Local
+filesystem, Git, and Vercel-CLI publishing are not Hosted capabilities.
 
 ## Operator smoke test
 

@@ -39,6 +39,11 @@
         </a>
       </li>
       <li>
+        <a class:active={isActive('/studio/site/hero')} href="/studio/site/hero">
+          {t('studio.layout.nav.hero')}
+        </a>
+      </li>
+      <li>
         <a href="/" target="_blank" rel="noreferrer">{t('studio.layout.nav.preview')}</a>
       </li>
     {:else}

@@ -9,6 +9,8 @@ import { build } from 'vite';
 import { parse } from 'svelte/compiler';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 
+import { createTranslator } from '../src/lib/i18n/index.js';
+
 const projectRoot = process.cwd();
 
 const pageContracts = [
@@ -265,6 +267,102 @@ test('rendered Hosted Hero blocks a second submit while the first save is pendin
   assert.equal(form.dispatchEvent(second), false, 'second submit is prevented while save is pending');
   assert.equal(second.defaultPrevented, true);
 });
+
+test(
+  'rendered Hosted Hero shows the localized save success instead of the internal key',
+  async (t) => {
+    const restoreDom =
+      installDom();
+
+    const {
+      temporaryRoot,
+      module
+    } = await buildPages();
+
+    const target =
+      document.createElement('div');
+
+    document.body.append(target);
+
+    /** @type {unknown} */
+    let instance;
+
+    t.after(async () => {
+      if (instance) {
+        await module.unmount(
+          instance
+        );
+      }
+
+      target.remove();
+      restoreDom();
+
+      fs.rmSync(
+        temporaryRoot,
+        {
+          recursive: true,
+          force: true
+        }
+      );
+    });
+
+    instance =
+      module.mountPage(
+        target,
+        {
+          page: 'hero',
+          data: {
+            siteForm,
+            appearanceForm,
+            appearancePresets,
+            fontPresets,
+            heroBannerForm,
+            hostedHero: {
+              csrfToken:
+                'csrf',
+              authoringRevision:
+                'revision-1'
+            }
+          }
+        }
+      );
+
+    module.flushSync();
+
+    const translate =
+      createTranslator('en');
+
+    /** @type {{ updateForm: (form: unknown) => void }} */ (
+      instance
+    ).updateForm({
+      heroBannerStatus:
+        'success',
+      heroBannerMessage:
+        translate(
+          'server.saveHeroBannerSuccess'
+        ),
+      heroBannerForm,
+      hostedHero: {
+        csrfToken:
+          'csrf',
+        authoringRevision:
+          'revision-2'
+      }
+    });
+
+    module.flushSync();
+
+    assert.match(
+      target.textContent ?? '',
+      /Hero banner saved\./
+    );
+
+    assert.doesNotMatch(
+      target.textContent ?? '',
+      /server\.saveHeroBannerSuccess/
+    );
+  }
+);
 
 test('actual rendered Studio pages enforce all four upload/removal contracts', async (t) => {
   const restoreDom = installDom();

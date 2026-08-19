@@ -951,6 +951,7 @@ export default {
     saveFooterError: 'Could not save footer.',
     saveLayoutError: 'Could not save layout.',
     saveAppearanceError: 'Could not save appearance.',
+    saveHeroBannerSuccess: 'Hero banner saved.',
     saveHeroBannerError: 'Could not save hero banner.',
     saveAboutError: 'Could not save about page.',
     saveCatalogError: 'Could not save catalog settings.',

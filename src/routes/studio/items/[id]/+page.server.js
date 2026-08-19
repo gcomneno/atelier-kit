@@ -30,6 +30,7 @@ import {
 } from '$lib/studio-item-gallery.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 import { assertValidMarkedText } from '$lib/marked-text.js';
+import { getItemExternalCtaIssues } from '$lib/item-external-cta.js';
 import { getStudioItemRelationRows, parseAndValidateStudioItemRelations, withStudioItemRelations } from '$lib/studio-item-relations.js';
 
 function readString(record, key, fallback = '') {
@@ -41,6 +42,12 @@ function loadItemForm(id) {
   const item = readItemRecord(id);
   const meta = Array.isArray(item.meta) ? item.meta : [];
   const coverFields = getStudioItemCoverFields(item);
+  const externalCta =
+    item.external_cta &&
+    typeof item.external_cta === 'object' &&
+    !Array.isArray(item.external_cta)
+      ? item.external_cta
+      : {};
 
   return {
     id: readString(item, 'id', id),
@@ -48,6 +55,8 @@ function loadItemForm(id) {
     subtitle: readString(item, 'subtitle'),
     status: readString(item, 'status'),
     price_mode: readString(item, 'price_mode', 'hidden'),
+    external_cta_label: readString(externalCta, 'label'),
+    external_cta_href: readString(externalCta, 'href'),
     image_file: coverFields.image_file,
     image_alt: coverFields.image_alt,
     galleryRows: getStudioItemGalleryRows(item),
@@ -100,11 +109,64 @@ export const actions = {
     const locale = getOperatorLocale();
     const t = getOperatorTranslator();
     let submittedRelationRows = null;
+    let submittedExternalCtaFields = null;
 
     try {
       assertContentId(params.id, t('fields.itemId'), locale);
       const original = readItemRecord(params.id);
       const formData = await request.formData();
+
+      const externalCtaHrefSubmitted = formData.has('external_cta_href');
+      const externalCtaLabelSubmitted = formData.has('external_cta_label');
+      const externalCtaFieldsSubmitted =
+        externalCtaHrefSubmitted || externalCtaLabelSubmitted;
+
+      const externalCtaHref = optionalField(formData.get('external_cta_href'));
+      const externalCtaLabel = optionalField(formData.get('external_cta_label'));
+
+      const externalCtaRemoval =
+        externalCtaHrefSubmitted &&
+        externalCtaLabelSubmitted &&
+        externalCtaHref === '' &&
+        externalCtaLabel === '';
+
+      const externalCta =
+        externalCtaFieldsSubmitted && !externalCtaRemoval
+          ? {
+              href: externalCtaHref,
+              label: externalCtaLabel
+            }
+          : undefined;
+
+      if (externalCtaFieldsSubmitted) {
+        submittedExternalCtaFields = {
+          external_cta_href: externalCtaHref,
+          external_cta_label: externalCtaLabel
+        };
+      }
+
+      if (externalCtaFieldsSubmitted && !externalCtaRemoval) {
+        for (const issue of getItemExternalCtaIssues(externalCta)) {
+          const source = `items.${params.id}.external_cta`;
+
+          if (issue === 'href') {
+            throw new Error(
+              t('validate.itemExternalCtaHrefInvalid', { source })
+            );
+          }
+
+          if (issue === 'label') {
+            throw new Error(
+              t('validate.itemExternalCtaLabelRequired', { source })
+            );
+          }
+
+          throw new Error(
+            t('validate.itemExternalCtaMustBeObject', { source })
+          );
+        }
+      }
+
       submittedRelationRows = getStudioItemRelationRows(readSubmittedRelationRows(formData));
       const relations = parseAndValidateStudioItemRelations(formData, params.id, listItemSummaries(), locale);
       assertValidMarkedText([
@@ -165,6 +227,14 @@ export const actions = {
           meta: parseItemMetaFromForm(formData, locale)
         }, relations);
 
+        if (externalCtaFieldsSubmitted) {
+          if (externalCta) {
+            item.external_cta = externalCta;
+          } else {
+            delete item.external_cta;
+          }
+        }
+
         writeItemRecord(params.id, item);
       } catch (writeError) {
         if (uploadedGalleryImage) {
@@ -192,6 +262,7 @@ export const actions = {
           itemMessage: message,
           itemForm: {
             ...loadItemForm(params.id),
+            ...(submittedExternalCtaFields ?? {}),
             ...(submittedRelationRows ? { relationRows: submittedRelationRows } : {})
           },
           metaSuggestions: listItemMetaSuggestions(),

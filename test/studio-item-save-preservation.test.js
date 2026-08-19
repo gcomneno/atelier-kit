@@ -62,6 +62,10 @@ function fixture(id, overrides = {}) {
       href: '/documents/example.txt',
       label: 'Open source document'
     },
+    external_cta: {
+      href: 'https://example.test/item',
+      label: 'Open external page'
+    },
     material: 'Paper',
     dimensions: 'A4',
     availability: 'Archive',
@@ -153,6 +157,10 @@ test('Studio item edits preserve non-form fields and valid manual ordering', asy
       href: '/documents/example.txt',
       label: 'Open source document'
     });
+    assert.deepEqual(ordered.external_cta, {
+      href: 'https://example.test/item',
+      label: 'Open external page'
+    });
     assert.equal(ordered.material, 'Paper');
     assert.equal(ordered.dimensions, 'A4');
     assert.equal(ordered.availability, 'Archive');
@@ -162,6 +170,10 @@ test('Studio item edits preserve non-form fields and valid manual ordering', asy
     assert.deepEqual(unordered.preview, {
       href: '/documents/example.txt',
       label: 'Open source document'
+    });
+    assert.deepEqual(unordered.external_cta, {
+      href: 'https://example.test/item',
+      label: 'Open external page'
     });
   } finally {
     await server?.close();

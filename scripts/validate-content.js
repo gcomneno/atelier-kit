@@ -23,6 +23,7 @@ import { isAppearancePreset } from '../src/lib/site-appearance.js';
 import { validateSiteAnalyticsConfig } from '../src/lib/site-analytics.js';
 import { getSignalCloudFaqIssues } from '../src/lib/signal-cloud-faq-validation.js';
 import { analyzeCatalogItemRelations, normalizeCatalogItemId } from '../src/lib/item-relations.js';
+import { getItemExternalCtaIssues } from '../src/lib/item-external-cta.js';
 
 const ROOT = process.cwd();
 const t = createTranslator(loadOperatorLocale());
@@ -1001,6 +1002,16 @@ function validateItems() {
     requireString(item, 'title', source);
     requireString(item, 'description', source);
     validateMetaEntries(item.meta, source);
+
+    for (const issue of getItemExternalCtaIssues(item.external_cta)) {
+      if (issue === 'object') {
+        failKey('itemExternalCtaMustBeObject', { source });
+      } else if (issue === 'href') {
+        failKey('itemExternalCtaHrefInvalid', { source });
+      } else if (issue === 'label') {
+        failKey('itemExternalCtaLabelRequired', { source });
+      }
+    }
 
     validateItemImages(item, source);
   }

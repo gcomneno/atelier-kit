@@ -146,6 +146,32 @@
     </label>
 
     <label>
+      <StudioFieldLabel
+        label={t('studio.itemsEdit.externalCtaLabel')}
+        optional
+        hint={t('studio.itemsEdit.externalCtaLabelHint')}
+      />
+      <input
+        name="external_cta_label"
+        value={itemForm.external_cta_label}
+      />
+    </label>
+
+    <label>
+      <StudioFieldLabel
+        label={t('studio.itemsEdit.externalCtaHref')}
+        optional
+        hint={t('studio.itemsEdit.externalCtaHrefHint')}
+      />
+      <input
+        type="url"
+        name="external_cta_href"
+        value={itemForm.external_cta_href}
+        placeholder="https://example.com/item"
+      />
+    </label>
+
+    <label>
       <StudioFieldLabel label={t('studio.itemsEdit.description')} required />
       <MarkedTextField name="description" value={itemForm.description} multiline rows={5} />
     </label>

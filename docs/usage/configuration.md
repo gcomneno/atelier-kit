@@ -278,6 +278,10 @@ price_mode: "hidden"
 image_file: "/images/items/placeholder.svg"
 description: "Replace with a real description."
 notice: "Draft item. Replace before publishing."
+
+external_cta:
+  href: "https://example.com/my-item"
+  label: "View external page"
 ```
 
 Rules:
@@ -285,7 +289,30 @@ Rules:
 - `id` should match the file name without `.yaml`;
 - `image_file` must start with `/`;
 - image paths are resolved from the `static/` directory;
+- `external_cta` is optional;
+- when present, `external_cta.href` must be an absolute `http` or `https` URL;
+- `external_cta.href` and `external_cta.label` must both be non-empty;
 - use `npm run item:validate` after editing content.
+
+### External item action
+
+An item can expose one primary action that leaves the Atelier-Kit site:
+
+```yaml
+external_cta:
+  href: "https://example.com/my-item"
+  label: "View external page"
+```
+
+The destination is intentionally provider-neutral. Consumers can use labels such as
+`Buy on Etsy`, `Read on Amazon`, `Listen on Spotify` or another appropriate action.
+
+Internal site navigation does not belong in `external_cta`; use normal routes or
+the optional item `preview` link for internal preview content.
+
+When both `external_cta` and `preview` are present, the external action is rendered
+as the primary action and the preview becomes secondary. When only `preview` exists,
+its existing primary presentation is preserved.
 
 ## Validation
 

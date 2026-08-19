@@ -241,10 +241,32 @@
       <div class="hero-footer">
         <MetaInfo meta={item.meta} />
 
-        {#if item.preview}
-          <p class="preview-link">
-            <a href={item.preview.href} target="_blank" rel="noopener noreferrer">{item.preview.label}</a>
-          </p>
+        {#if item.external_cta || item.preview}
+          <div class="item-actions">
+            {#if item.external_cta}
+              <a
+                class="item-action primary-action"
+                href={item.external_cta.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {item.external_cta.label}
+              </a>
+            {/if}
+
+            {#if item.preview}
+              <a
+                class:item-action={true}
+                class:primary-action={!item.external_cta}
+                class:secondary-action={Boolean(item.external_cta)}
+                href={item.preview.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {item.preview.label}
+              </a>
+            {/if}
+          </div>
         {/if}
 
         {#if item.notice}
@@ -563,26 +585,46 @@
     line-height: 1.5;
   }
 
-  .preview-link {
-    margin: 0;
+  .item-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
   }
 
-  .preview-link a {
+  .item-action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border: 1px solid var(--site-accent-color, #8c3a44);
     border-radius: 999px;
     padding: 0.65rem 1rem;
-    background: var(--site-accent-color, #8c3a44);
-    color: #fff;
     font-weight: 700;
     text-decoration: none;
   }
 
-  .preview-link a:hover {
+  .primary-action {
+    background: var(--site-accent-color, #8c3a44);
+    color: #fff;
+  }
+
+  .primary-action:hover {
     background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 82%, black);
     border-color: color-mix(in srgb, var(--site-accent-color, #8c3a44) 82%, black);
+  }
+
+  .secondary-action {
+    background: transparent;
+    color: var(--site-accent-color, #8c3a44);
+  }
+
+  .secondary-action:hover {
+    background: color-mix(in srgb, var(--site-accent-color, #8c3a44) 10%, transparent);
+  }
+
+  .item-action:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--site-accent-color, #8c3a44) 45%, transparent);
+    outline-offset: 3px;
   }
 
   .related-items {

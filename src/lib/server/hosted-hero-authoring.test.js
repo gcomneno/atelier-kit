@@ -158,6 +158,20 @@ const SITE_YAML = [
   ''
 ].join('\n');
 
+const QUOTED_SITE_YAML = [
+  'site:',
+  '  name: "Nero Quotidiano"',
+  '  tagline: "Il portale editoriale ufficiale."',
+  '  language: it',
+  '  hero_signature: "Notizie, personaggi, curiosità e materiali dal mondo delle Cronache."',
+  '  unrelated:',
+  '    preserve: yes',
+  '  hero_banner:',
+  '    show: true',
+  '    image_file: /images/site/hero-banner.jpg',
+  ''
+].join('\n');
+
 /**
  * @param {{
  *   content?: string,
@@ -522,6 +536,161 @@ test(
     assert.equal(
       result.authoringRevision,
       RESULT_REVISION
+    );
+  }
+);
+
+test(
+  'metadata-only Hosted Hero save preserves untouched YAML scalar representation',
+  async () => {
+    const harness =
+      repositoryHarness({
+        content:
+          QUOTED_SITE_YAML
+      });
+
+    await saveHostedHeroAuthoringData({
+      runtimeMode:
+        'hosted',
+      hostedContext:
+        HOSTED_CONTEXT,
+      formData:
+        baseForm(),
+      expectedRevision:
+        EXPECTED_REVISION,
+      environment: {},
+      repositoryFactory:
+        repositoryFactory(
+          harness
+        )
+    });
+
+    assert.equal(
+      harness.writes.length,
+      1
+    );
+
+    const changes =
+      /** @type {Array<{
+       *   type: string,
+       *   path: string,
+       *   content: string
+       * }>} */ (
+        harness.writes[0].changes
+      );
+
+    const content =
+      changes[0].content;
+
+    assert.ok(
+      content.includes(
+        '  name: "Nero Quotidiano"'
+      )
+    );
+    assert.ok(
+      content.includes(
+        '  tagline: "Il portale editoriale ufficiale."'
+      )
+    );
+    assert.ok(
+      content.includes(
+        '  hero_signature: "Notizie, personaggi, curiosità e materiali dal mondo delle Cronache."'
+      )
+    );
+
+    const written =
+      parse(content);
+
+    assert.deepEqual(
+      written.site.hero_banner,
+      {
+        show: true,
+        image_file:
+          '/images/site/hero-banner.jpg',
+        description:
+          'New description',
+        caption:
+          'New caption',
+        href:
+          'https://new.example/'
+      }
+    );
+  }
+);
+
+test(
+  'image-bearing Hosted Hero save preserves untouched YAML scalar representation',
+  async () => {
+    const harness =
+      repositoryHarness({
+        content:
+          QUOTED_SITE_YAML
+      });
+
+    const form =
+      baseForm();
+
+    form.set(
+      'banner_upload',
+      await pngUpload()
+    );
+
+    let relatedContent = '';
+
+    await saveHostedHeroAuthoringData({
+      runtimeMode:
+        'hosted',
+      hostedContext:
+        HOSTED_CONTEXT,
+      formData:
+        form,
+      expectedRevision:
+        EXPECTED_REVISION,
+      environment: {},
+      repositoryFactory:
+        repositoryFactory(
+          harness
+        ),
+      /** @param {ImageMutationInput} input */
+      async imageMutationApplier(
+        input
+      ) {
+        relatedContent =
+          await input.buildRelatedTextContent(
+            '/images/site/hero-banner.png'
+          );
+
+        return {
+          publicPath:
+            '/images/site/hero-banner.png',
+          authoringRevision:
+            RESULT_REVISION
+        };
+      }
+    });
+
+    assert.ok(
+      relatedContent.includes(
+        '  name: "Nero Quotidiano"'
+      )
+    );
+    assert.ok(
+      relatedContent.includes(
+        '  tagline: "Il portale editoriale ufficiale."'
+      )
+    );
+    assert.ok(
+      relatedContent.includes(
+        '  hero_signature: "Notizie, personaggi, curiosità e materiali dal mondo delle Cronache."'
+      )
+    );
+
+    const written =
+      parse(relatedContent);
+
+    assert.equal(
+      written.site.hero_banner.image_file,
+      '/images/site/hero-banner.png'
     );
   }
 );

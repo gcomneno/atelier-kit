@@ -724,6 +724,12 @@ export default {
       subtitle: 'Sottotitolo',
       status: 'Stato',
       priceMode: 'Modalità prezzo',
+      externalCtaLabel: 'Etichetta azione esterna',
+      externalCtaLabelHint:
+        'Esempi: Compra su Etsy, Leggi su Amazon o Ascolta su Spotify. Lascia vuoti entrambi i campi per nascondere il pulsante.',
+      externalCtaHref: 'URL azione esterna',
+      externalCtaHrefHint:
+        'Usa un URL assoluto http o https. Se compili uno dei due campi dell’azione esterna, devi compilare anche l’altro.',
       description: 'Descrizione',
       notice: 'Avviso oggetto',
       noticeHint: 'Lascia vuoto per nascondere l’avviso nella pagina dell’oggetto.',
@@ -1295,6 +1301,9 @@ export default {
     footerColumnMustBeObject: '{source}: la colonna deve essere un oggetto.',
     footerColumnLinksMustBeArray: '{source}: links deve essere un array se presente.',
     footerLinkMustBeObject: '{source}: il link deve essere un oggetto.',
+    itemExternalCtaMustBeObject: '{source}: external_cta deve essere un oggetto quando presente.',
+    itemExternalCtaHrefInvalid: '{source}: external_cta.href deve essere un URL assoluto http o https valido.',
+    itemExternalCtaLabelRequired: '{source}: external_cta.label deve essere una stringa non vuota.',
     footerLinkHrefInvalid: '{source}: href deve iniziare con "/" o essere un URL http o https valido.',
     footerLinkLabelRequired: '{source}: l’etichetta del link non può essere vuota se href è impostato.',
     footerFieldMustBeString: '{source}: footer.{field} deve essere una stringa se presente.',

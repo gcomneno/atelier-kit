@@ -33,6 +33,7 @@ import {
 } from '$lib/layout-block-labels.js';
 import { normalizeMetaHierarchy } from '$lib/item-meta.js';
 import { getItemCoverImage, normalizeItemImages } from '$lib/item-images.js';
+import { normalizeItemExternalCta } from '$lib/item-external-cta.js';
 import { normalizeItemRelations } from '$lib/item-relations.js';
 import { projectFaqEntries } from '$lib/signal-cloud-faq.js';
 import { parseAboutPortrait } from '$lib/about-config.js';
@@ -817,6 +818,7 @@ export function getItems() {
         description: requiredString(item, 'description', source),
         notice: optionalString(item, 'notice'),
         preview: normalizeItemPreview(item.preview),
+        external_cta: normalizeItemExternalCta(item.external_cta),
         sort_order: optionalSortOrder(item, 'sort_order'),
         material: optionalString(item, 'material') || findMetaValue(meta, 'Material'),
         dimensions: optionalString(item, 'dimensions') || findMetaValue(meta, 'Dimensions'),
@@ -986,7 +988,12 @@ export function getPublicMarkedTextValues() {
     banner.description, banner.caption, catalog.eyebrow, catalog.title, catalog.intro,
     about?.title, about?.intro, about?.portrait?.caption,
     ...(about?.sections.flatMap((section) => [section.heading, section.body]) ?? []),
-    ...getItems().flatMap((item) => [item.title, item.subtitle, item.description, item.notice]),
+    ...getItems().flatMap((item) => [
+      item.title,
+      item.subtitle,
+      item.description,
+      item.notice
+    ]),
     ...getCollections().flatMap((collection) => [collection.title, collection.description]),
     ...getNewsPosts().flatMap((post) => [post.title, post.excerpt, post.body]),
     footer?.copyright, footer?.legal_line,

@@ -719,6 +719,12 @@ export default {
       subtitle: 'Subtitle',
       status: 'Status',
       priceMode: 'Price mode',
+      externalCtaLabel: 'External action label',
+      externalCtaLabelHint:
+        'Example: Buy on Etsy, Read on Amazon or Listen on Spotify. Leave both external action fields blank to hide the button.',
+      externalCtaHref: 'External action URL',
+      externalCtaHrefHint:
+        'Use an absolute http or https URL. Both external action fields are required when either one is set.',
       description: 'Description',
       notice: 'Item notice',
       noticeHint: 'Leave empty to hide the notice on the item page.',
@@ -1287,6 +1293,9 @@ export default {
     footerColumnMustBeObject: '{source}: column must be an object.',
     footerColumnLinksMustBeArray: '{source}: links must be an array when provided.',
     footerLinkMustBeObject: '{source}: link must be an object.',
+    itemExternalCtaMustBeObject: '{source}: external_cta must be an object when provided.',
+    itemExternalCtaHrefInvalid: '{source}: external_cta.href must be an absolute http or https URL.',
+    itemExternalCtaLabelRequired: '{source}: external_cta.label must be a non-empty string.',
     footerLinkHrefInvalid: '{source}: href must start with "/" or be a valid http or https URL.',
     footerLinkLabelRequired: '{source}: link label must not be empty when href is set.',
     footerFieldMustBeString: '{source}: footer.{field} must be a string when provided.',

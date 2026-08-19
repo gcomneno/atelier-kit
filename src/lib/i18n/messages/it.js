@@ -958,6 +958,7 @@ export default {
     saveFooterError: 'Impossibile salvare il footer.',
     saveLayoutError: 'Impossibile salvare il layout.',
     saveAppearanceError: 'Impossibile salvare l’aspetto.',
+    saveHeroBannerSuccess: 'Hero banner salvato.',
     saveHeroBannerError: 'Impossibile salvare l’hero banner.',
     saveAboutError: 'Impossibile salvare la pagina Chi siamo.',
     saveCatalogError: 'Impossibile salvare le impostazioni catalogo.',

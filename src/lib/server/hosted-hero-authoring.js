@@ -1,4 +1,4 @@
-import { parse, stringify } from 'yaml';
+import { parse, parseDocument } from 'yaml';
 
 import {
   AuthoringRevisionConflictError
@@ -150,11 +150,57 @@ function parseSiteDocument(content) {
 }
 
 /**
+ * Serialize only the Hero-owned subtree into the original YAML document.
+ *
+ * Unrelated YAML nodes retain their existing scalar representation,
+ * comments, and formatting instead of being reconstructed from a plain
+ * JavaScript object.
+ *
+ * @param {string} originalContent
  * @param {Record<string, unknown>} document
  */
-function serializeSiteDocument(document) {
+function serializeSiteDocument(
+  originalContent,
+  document
+) {
+  if (typeof originalContent !== 'string') {
+    throw new HostedHeroAuthoringValidationError();
+  }
+
   try {
-    return `${stringify(document).trim()}\n`;
+    const yamlDocument =
+      parseDocument(originalContent);
+
+    if (yamlDocument.errors.length > 0) {
+      throw new Error();
+    }
+
+    const site =
+      /** @type {Record<string, unknown>} */ (
+        document.site
+      );
+
+    if (
+      Object.prototype.hasOwnProperty.call(
+        site,
+        'hero_banner'
+      )
+    ) {
+      yamlDocument.setIn(
+        ['site', 'hero_banner'],
+        site.hero_banner
+      );
+    } else if (
+      yamlDocument.hasIn(
+        ['site', 'hero_banner']
+      )
+    ) {
+      yamlDocument.deleteIn(
+        ['site', 'hero_banner']
+      );
+    }
+
+    return yamlDocument.toString();
   } catch {
     throw new HostedHeroAuthoringValidationError();
   }
@@ -529,6 +575,7 @@ export async function saveHostedHeroAuthoringData({
   }
 
   let repository;
+  let currentContent;
   let currentDocument;
   let currentRevision;
 
@@ -566,9 +613,12 @@ export async function saveHostedHeroAuthoringData({
     currentRevision =
       current.revision;
 
+    currentContent =
+      current.content;
+
     currentDocument =
       parseSiteDocument(
-        current.content
+        currentContent
       );
   } catch (error) {
     if (
@@ -654,6 +704,7 @@ export async function saveHostedHeroAuthoringData({
           );
 
         return serializeSiteDocument(
+          currentContent,
           nextDocument
         );
       }
@@ -789,6 +840,7 @@ export async function saveHostedHeroAuthoringData({
 
   const content =
     serializeSiteDocument(
+      currentContent,
       nextDocument
     );
 

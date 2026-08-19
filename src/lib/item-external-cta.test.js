@@ -9,7 +9,7 @@ import {
 
 test('accepts absolute http and https CTA destinations', () => {
   assert.equal(
-    isValidItemExternalCtaHref('https://www.amazon.it/dp/B0GT9QB8HH'),
+    isValidItemExternalCtaHref('https://store.example.test/item'),
     true
   );
 
@@ -34,12 +34,12 @@ test('rejects internal, non-http and malformed CTA destinations', () => {
 test('normalizes a valid external CTA', () => {
   assert.deepEqual(
     normalizeItemExternalCta({
-      href: '  https://www.amazon.it/dp/B0GT9QB8HH  ',
-      label: '  Leggi su Amazon  '
+      href: '  https://store.example.test/item  ',
+      label: '  Open external page  '
     }),
     {
-      href: 'https://www.amazon.it/dp/B0GT9QB8HH',
-      label: 'Leggi su Amazon'
+      href: 'https://store.example.test/item',
+      label: 'Open external page'
     }
   );
 });

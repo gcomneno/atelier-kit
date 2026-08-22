@@ -1220,6 +1220,8 @@ export default {
     stepCheck: 'Type and Svelte checks',
     stepBuild: 'Production build',
     stepDeploy: 'Vercel production deploy',
+    vercelCliMissing:
+      'Local Vercel CLI not found at {path}. Run npm ci before deploying; production deploy will not download an undeclared CLI.',
     complete: 'Publish prep complete.',
     previewHint: 'Preview locally with: npm run preview',
     deployHint: 'Deploy to Vercel with: npm run publish -- --deploy'

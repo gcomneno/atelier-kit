@@ -28,9 +28,9 @@ Opens `http://127.0.0.1:5173/studio` on localhost only. Studio writes directly t
 - Catalog items (with photo upload), collections, news, Signal Clouds and public FAQ answers
 - About page and publish readiness (Content Doctor + **Put site online**)
 
-**Production stays read-only** — `/studio` is disabled on Vercel. Clients use **Atelier Desktop** (Tauri) for the same UI without exposing authoring on the live URL.
+**Ordinary Visitor production stays read-only.** Local Studio and **Atelier Desktop** (Tauri) remain the default authoring paths. Atelier-Kit also supports a separately configured **private Hosted Studio** with server-side authentication, persistent state and repository-backed authoring; it is not enabled by ordinary Visitor deployments.
 
-→ Full guide: [`docs/usage/studio.md`](docs/usage/studio.md) · Desktop: [`desktop/README.md`](desktop/README.md)
+→ Local Studio: [`docs/usage/studio.md`](docs/usage/studio.md) · Hosted Studio: [`docs/usage/hosted-studio.md`](docs/usage/hosted-studio.md) · Desktop: [`desktop/README.md`](desktop/README.md)
 
 ## Features
 
@@ -66,7 +66,7 @@ Opens `http://127.0.0.1:5173/studio` on localhost only. Studio writes directly t
 
 ## Current release
 
-Latest official release: **v0.4.3** — safer and smaller client scaffolds, with source-version validation and generated Tauri/Cargo build-artifact exclusion.
+Latest official release: **v0.5.0** — private Hosted Studio, an isolated public Demo runtime, structured reading and relationships, broader Giada UI adoption, analytics, safer publishing and upgrade flows, and visitor/Studio hardening.
 
 See [GitHub Releases](https://github.com/gcomneno/atelier-kit/releases) for highlights and validation notes.
 

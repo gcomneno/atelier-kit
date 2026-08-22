@@ -4,6 +4,40 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.5.0 - 2026-08-22
+
+### Added
+
+- **Private Hosted Studio** ([#249](https://github.com/gcomneno/atelier-kit/pull/249), [#274](https://github.com/gcomneno/atelier-kit/pull/274), [#276](https://github.com/gcomneno/atelier-kit/pull/276)): add a dedicated repository-backed authoring runtime with GitHub OAuth, server-side authorization and sessions, persistent Redis state, Social authoring and a reproducible private deployment/operator contract.
+- **Atomic Hosted authoring and controlled images** ([#291](https://github.com/gcomneno/atelier-kit/pull/291), [#293](https://github.com/gcomneno/atelier-kit/pull/293), [#295](https://github.com/gcomneno/atelier-kit/pull/295)): support multi-file repository mutations, validated image upload slots and Hosted Hero authoring while preserving optimistic concurrency and server-owned repository authority.
+- **Isolated public Demo runtime** ([#282](https://github.com/gcomneno/atelier-kit/pull/282), [#284](https://github.com/gcomneno/atelier-kit/pull/284), [#288](https://github.com/gcomneno/atelier-kit/pull/288)): add a separately bounded public demo experience with short-lived guest authority, persistent mutation budgets, sandbox-only repository writes and fail-closed separation from Visitor and private Hosted Studio.
+- **Structured long-form reading** ([#237](https://github.com/gcomneno/atelier-kit/pull/237)): add a product-neutral `reading_blocks` contract and structured reader while retaining the legacy body parser as a compatibility fallback.
+- **Catalog relationships and genealogy scaffold** ([#213](https://github.com/gcomneno/atelier-kit/pull/213), [#215](https://github.com/gcomneno/atelier-kit/pull/215), [#216](https://github.com/gcomneno/atelier-kit/pull/216), [#219](https://github.com/gcomneno/atelier-kit/pull/219)): add typed item relationships, Studio relationship authoring, graph projection and a genealogy-oriented client scaffold built on the generic relationship model.
+- **Editable collection/catalog presentation** ([#244](https://github.com/gcomneno/atelier-kit/pull/244), [#246](https://github.com/gcomneno/atelier-kit/pull/246), [#248](https://github.com/gcomneno/atelier-kit/pull/248)): make collection eyebrows, collection title/intro and catalog page title consumer-editable while preserving existing fallbacks.
+- **Optional Vercel Web Analytics** ([#296](https://github.com/gcomneno/atelier-kit/pull/296)): add site-owned Visitor analytics configuration with Studio controls and explicit exclusion of Studio page views.
+- **Provider-neutral item external CTA** ([#312](https://github.com/gcomneno/atelier-kit/pull/312)): allow catalog items to expose a validated absolute HTTP(S) call-to-action while preserving preview behavior and legacy item compatibility.
+
+### Changed
+
+- **Broader Giada UI adoption** ([#218](https://github.com/gcomneno/atelier-kit/pull/218), [#226](https://github.com/gcomneno/atelier-kit/pull/226), [#227](https://github.com/gcomneno/atelier-kit/pull/227), [#228](https://github.com/gcomneno/atelier-kit/pull/228), [#229](https://github.com/gcomneno/atelier-kit/pull/229), [#230](https://github.com/gcomneno/atelier-kit/pull/230), [#233](https://github.com/gcomneno/atelier-kit/pull/233), [#243](https://github.com/gcomneno/atelier-kit/pull/243)): migrate standard Studio controls and surfaces onto immutable shared Giada UI primitives while keeping Atelier-Kit domain state and semantics application-owned.
+- **Canonical GIADA semantic theme contract** ([#289](https://github.com/gcomneno/atelier-kit/pull/289)): move generic visitor presentation colors onto shared semantic theme tokens while preserving Atelier-Kit typography, editorial colors and consumer-owned palette configuration.
+- **Safer publishing and upgrade paths** ([#205](https://github.com/gcomneno/atelier-kit/pull/205), [#298](https://github.com/gcomneno/atelier-kit/pull/298)): make Local publication preflight/result handling explicit and propagate Kit-managed runtime dependencies required by Hosted image authoring.
+- **Hosted authored-revision contract** ([#306](https://github.com/gcomneno/atelier-kit/pull/306)): distinguish repository authoring revisions from the independently deployed immutable Visitor snapshot and expose the currently admitted Social + Hero Hosted surface clearly.
+
+### Fixed
+
+- Improve visitor correctness across 404 copy/layout, synopsis disclosure, News presentation and responsive content behavior ([#203](https://github.com/gcomneno/atelier-kit/pull/203), [#204](https://github.com/gcomneno/atelier-kit/pull/204)).
+- Keep Studio image upload/removal actions mutually exclusive and preserve item-owned fields during edits ([#212](https://github.com/gcomneno/atelier-kit/pull/212), [#245](https://github.com/gcomneno/atelier-kit/pull/245)).
+- Preserve portrait-image focal areas and localize lightbox navigation ([#278](https://github.com/gcomneno/atelier-kit/pull/278)).
+- Prevent duplicate/re-entrant Hosted Hero submissions and expose saving state before repository mutation proceeds ([#303](https://github.com/gcomneno/atelier-kit/pull/303), [#305](https://github.com/gcomneno/atelier-kit/pull/305)).
+- Preserve untouched YAML representation during Hosted Hero writes and localize Hero save-success feedback ([#311](https://github.com/gcomneno/atelier-kit/pull/311), [#314](https://github.com/gcomneno/atelier-kit/pull/314)).
+- Prevent the mobile visitor search from reserving excessive vertical space when the header switches to column layout ([#326](https://github.com/gcomneno/atelier-kit/pull/326)).
+
+### Security
+
+- Add fail-closed Hosted runtime separation, GitHub identity/authorization, opaque server-side sessions, OAuth/PKCE, trusted route context, exact Host/Origin enforcement, synchronizer CSRF and secret-safe security events as the foundation of private Hosted Studio ([#252](https://github.com/gcomneno/atelier-kit/pull/252), [#260](https://github.com/gcomneno/atelier-kit/pull/260), [#262](https://github.com/gcomneno/atelier-kit/pull/262), [#264](https://github.com/gcomneno/atelier-kit/pull/264), [#266](https://github.com/gcomneno/atelier-kit/pull/266), [#268](https://github.com/gcomneno/atelier-kit/pull/268), [#270](https://github.com/gcomneno/atelier-kit/pull/270)).
+- Refresh vulnerable transitive dependencies within existing ranges and lock the production Vercel CLI path to the repository-controlled `vercel@59.3.0`, including a patched `tar` override and fail-closed local-only CLI resolution ([#250](https://github.com/gcomneno/atelier-kit/pull/250), [#319](https://github.com/gcomneno/atelier-kit/pull/319)).
+
 ## v0.4.3 - 2026-07-16
 
 ### Fixed

@@ -285,17 +285,21 @@ npm run content:doctor -- --strict
 
 Atelier-Kit uses the Vercel adapter.
 
-Deploy with:
+The Vercel CLI used for production deployment is locked in the repository
+dependency graph. Install dependencies first:
 
 ```bash
-npx vercel
+npm ci
 ```
 
 Production deploy:
 
 ```bash
-npx vercel --prod
+npm run publish -- --deploy
 ```
+
+The publish command uses only the repository-local Vercel CLI and fails closed
+if that dependency is missing.
 
 See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 

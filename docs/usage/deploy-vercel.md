@@ -53,23 +53,35 @@ npm run preview
 
 ## Deploy with Vercel CLI
 
-First deploy:
+The Vercel CLI is an exact, lockfile-controlled development dependency.
+Install dependencies with `npm ci` before deployment.
 
-```bash
-npx vercel
-```
-
-Production deploy:
+Production deployment through Atelier-Kit must use:
 
 ```bash
 npm run publish -- --deploy
 ```
 
-Or manually:
+The publish script invokes only the repository-local
+`node_modules/.bin/vercel` executable and fails closed if it is missing. It
+does not use `npx` and cannot silently download a different CLI at deployment
+time.
+
+For an initial/manual Vercel command from a POSIX shell, use the same locked
+local executable:
 
 ```bash
-npx vercel --prod
+./node_modules/.bin/vercel
 ```
+
+For a manual production command:
+
+```bash
+./node_modules/.bin/vercel --prod
+```
+
+On Windows, use the corresponding local
+`node_modules\\.bin\\vercel.cmd` executable.
 
 ## Vercel project settings
 
@@ -106,9 +118,11 @@ No application environment variables are required for the Visitor demo.
 
 ### Reproducible live audit
 
-After every production deployment, run this audit from any checkout. Every
-Vercel command names the audited project explicitly, so it does not depend on
-an ignored local `.vercel` link. The environment command lists names only,
+After every production deployment, run this audit from a checkout whose
+dependencies were installed from the committed lockfile with `npm ci`. Every
+Vercel command uses the repository-local, lockfile-controlled CLI and names the
+audited project explicitly, so it does not depend on an ignored local
+`.vercel` link. The environment command lists names only,
 never values: an empty result is limited to environment variables visible to
 the auditing credentials and cannot prove the absence of unrelated Vercel
 settings, integrations, source connections, or runtime defaults.
@@ -124,8 +138,8 @@ cleanup trap do not persist in an interactive caller.
   project='atelier-kit-visitor-demo'
   scope='giadaware'
   base_url='https://atelier-kit-visitor-demo.vercel.app'
-  npx vercel@58.9.4 project inspect "$project" --scope "$scope"
-  npx vercel@58.9.4 env ls --project "$project" --scope "$scope"
+  ./node_modules/.bin/vercel project inspect "$project" --scope "$scope"
+  ./node_modules/.bin/vercel env ls --project "$project" --scope "$scope"
 
   audit_dir="$(mktemp -d)"
   trap 'rm -rf "$audit_dir"' EXIT

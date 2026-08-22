@@ -28,7 +28,7 @@ These are different products. Atelier-Kit should avoid becoming a generic CMS.
 | Plugin marketplace and open-ended customization | Curated features, upgrade via kit sync |
 | Hosted admin with multi-user roles by default | Local or lightweight authoring, single-operator first |
 | Page builder, widgets, unlimited pages | Layout presets and fixed routes |
-| Comments, accounts, ecommerce, analytics | Excluded by design |
+| Comments, accounts, ecommerce, generic tracking stacks | Excluded by design; optional bounded Web Analytics is supported |
 
 A no-code editor must not turn Atelier-Kit into the CMS it was designed to avoid. A **bounded** editor for a **bounded** content model is the micro-CMS path.
 
@@ -54,11 +54,11 @@ A credible micro-CMS inspired by WordPress should cover eight pillars. Each pill
 | Admin UI for CRUD | Visual editing without YAML | **Studio** (`npm run studio`) |
 | Preview before publish | Yes | Dev server / preview |
 | Pre-save validation | Yes | Content validate + Content Doctor |
-| Browser-accessible admin | Yes for a finished micro-CMS | **Atelier Desktop** → localhost `/studio` (ADR 0007). Production URL is read-only; `/studio` returns 404 on Vercel |
+| Browser-accessible admin | Yes for a finished micro-CMS | **Atelier Desktop / Local Studio** for local authoring; **private Hosted Studio** is available as a separately configured bounded authoring deployment |
 | No terminal required | Yes at Level 3 | **Atelier Desktop** for clients; `studio:launch` for operators ([#67](https://github.com/gcomneno/atelier-kit/issues/67)) |
 | Revision history | Nice to have | Git only; no restore UI — **out of scope** (Git is enough) |
 
-**Status:** **client-grade via Atelier Desktop** (Path B, ADR 0007). Hosted production studio (Path A) deferred.
+**Status:** **client-grade** through Local Studio / Atelier Desktop, with private Hosted Studio available when browser-accessible remote authoring is explicitly required.
 
 ### 3. Media
 
@@ -165,7 +165,7 @@ Excluding these does **not** weaken the micro-CMS claim. WordPress often reaches
 - visitor accounts, membership and login;
 - multisite and multi-tenant SaaS;
 - drag-and-drop page builders;
-- built-in analytics and tracking;
+- generic analytics/tracking infrastructure beyond the bounded optional integration supported by Atelier-Kit;
 - automatic multi-locale content translation;
 - headless REST/GraphQL API for external apps.
 
@@ -181,7 +181,7 @@ If Atelier-Kit is presented as a micro-CMS, buyers will expect **CMS behavior**,
 | “I can search the catalog” | Client-side search in visitor header | Addressed |
 | “My blog has a feed” | `/news/rss.xml` | Addressed |
 | “Two people edit the site” | No multi-user permissions | Low — **out of scope** for current target |
-| “I edit from any browser on the live URL” | Production `/studio` returns 404; Path A deferred | Medium — use Desktop or operator |
+| “I edit from any browser on the live URL” | Ordinary Visitor production remains read-only; private Hosted Studio is a separate explicitly configured deployment | Low/Medium — use Local/Desktop by default or contract Hosted Studio when remote browser authoring is required |
 
 The micro-CMS claim is **defensible today** for operator-assisted or Desktop handoff. See [`product-levels.md`](product-levels.md) Level 3.
 
@@ -242,7 +242,7 @@ Historical ordering before Tier 1 was approved. Use the **Official roadmap** sec
 1. **XML sitemap** — small implementation, immediate SEO credibility.
 2. **Client-side search** on item and news titles — already planned; standard CMS expectation.
 3. **RSS for news** — important for writing-oriented showcases.
-4. **Production-safe authoring path** — hosted studio with minimal auth, or Desktop as the primary client surface.
+4. **Production-safe authoring path** — Local/Desktop as the default client surface, with bounded private Hosted Studio available for explicitly managed remote authoring.
 5. **Terminal-free publish** — epic [#52](https://github.com/gcomneno/atelier-kit/issues/52).
 6. **JSON-LD** — Tier 2; news and about only.
 

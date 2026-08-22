@@ -13,7 +13,7 @@ It is designed for people who need a simple online showcase, not a full e-commer
 - a catalog for handmade creations;
 - a small SvelteKit product;
 - a deployable starter kit;
-- a possible setup/customization service.
+- the product foundation for a repeatable GiadaWare setup, deployment and handoff service.
 
 ## What it is not
 
@@ -32,9 +32,17 @@ Configure the site, add items and images, deploy the showcase.
 
 No cart. No accounts. No contact-form swamp.
 
-## Product direction
+## Commercial delivery
 
-Atelier-Kit is currently strongest at **developer-assisted** setup and is moving toward **guided setup** and eventual **no-code** authoring.
+Atelier-Kit is commercially delivered as a bounded setup, deployment and handoff service around the open-source product.
+
+The standard offer uses supported Atelier-Kit capabilities and keeps customer content, domain and infrastructure ownership under customer control whenever practical.
+
+Private Hosted Studio is an optional managed capability rather than a default requirement for every customer.
+
+The official Public Demo demonstrates Atelier-Kit capability; it is not a customer production environment or a support commitment.
+
+See [`service-package.md`](service-package.md) for the canonical commercial-offer boundaries.
 
 See:
 

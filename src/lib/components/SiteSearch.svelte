@@ -232,6 +232,7 @@
 
   @media (max-width: 720px) {
     .site-search {
+      flex: 0 0 auto;
       max-width: none;
       width: 100%;
     }

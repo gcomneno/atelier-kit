@@ -393,4 +393,46 @@
   .catalog-sidebar--dark .news-link:hover {
     background: color-mix(in srgb, var(--site-accent-color, #e4c4a0) 14%, var(--site-card-color, #2f2e2c));
   }
+  @media (max-width: 959px) {
+    .catalog-sidebar {
+      --sidebar-link-size: 1.125rem;
+      --sidebar-body-size: 1.0625rem;
+      --sidebar-meta-size: 0.8125rem;
+      --sidebar-footer-size: 0.875rem;
+    }
+
+    .widget {
+      --sidebar-widget-height: 20rem;
+    }
+
+    .widget-body {
+      padding: 0.8rem 0.9rem 0.45rem;
+      line-height: 1.6;
+    }
+
+    .news-list {
+      gap: 0.35rem;
+    }
+
+    .news-link {
+      gap: 0.3rem;
+      padding: 0.58rem 0.55rem;
+    }
+
+    time {
+      line-height: 1.3;
+      letter-spacing: 0.04em;
+    }
+
+    :global(.news-title) {
+      line-height: 1.45;
+    }
+
+    .about-snippet {
+      line-height: 1.65;
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+    }
+  }
+
 </style>

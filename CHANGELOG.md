@@ -4,6 +4,17 @@ All notable changes to Atelier-Kit will be documented in this file.
 
 ## Unreleased
 
+## v0.5.1 - 2026-08-25
+
+### Changed
+
+- **Commercial offer packaging** ([#328](https://github.com/gcomneno/atelier-kit/pull/328)): define the canonical Atelier-Kit delivery package and clarify the boundaries between the open-source product, standard GiadaWare delivery, optional Hosted Studio, Public Demo, customer ownership and separately scoped maintenance/support work.
+
+### Fixed
+
+- **Theme-safe News cards** ([#332](https://github.com/gcomneno/atelier-kit/pull/332)): keep News card background, border, primary text and secondary copy on the shared semantic visitor theme contract so consumer palettes preserve readable contrast.
+- **Mobile sidebar readability** ([#333](https://github.com/gcomneno/atelier-kit/pull/333)): increase mobile About and News typography, spacing, line height and bounded widget height while preserving the existing desktop sidebar rhythm.
+
 ## v0.5.0 - 2026-08-22
 
 ### Added

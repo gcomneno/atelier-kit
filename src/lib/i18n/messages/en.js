@@ -169,7 +169,9 @@ export default {
         white: 'White',
         black: 'Black',
         larger: 'Increase text size',
-        smaller: 'Decrease text size'
+        smaller: 'Decrease text size',
+        strong: 'Strong',
+        em: 'Emphasis'
       },
       remove: 'Remove formatting',
       feedback: {
@@ -250,7 +252,7 @@ export default {
       atelierMark: {
         title: 'Atelier Mark — inline text emphasis',
         intro:
-          'Atelier Mark applies controlled color, size or font presets in supported site texts — no HTML, custom CSS or font URLs. Plain text without { stays unchanged.',
+          'Atelier Mark applies controlled semantic emphasis, color, size or font presets in supported site texts — no HTML, custom CSS or font URLs. Plain text without { stays unchanged.',
         whereTitle: 'Where it works',
         where: {
           1: 'Studio → Site → Identity → Tagline.',
@@ -266,7 +268,8 @@ export default {
           4: '{muted}…{/muted} — muted text',
           5: '{white}…{/white} / {black}…{/black} — explicit colors; check contrast against the background.',
           6: '{larger}…{/larger} / {smaller}…{/smaller} — one controlled size level.',
-          7: '{font:fraunces}…{/font} — supported font preset. Literal braces: {{ and }}. Tags cannot nest. Unknown or unclosed tags block Save.'
+          7: '{strong}…{/strong} / {em}…{/em} — semantic strong or italic emphasis.',
+          8: '{font:fraunces}…{/font} — supported font preset. Literal braces: {{ and }}. Tags cannot nest. Unknown or unclosed tags block Save.'
         },
         studioTitle: 'In Studio',
         studio: {

@@ -1,6 +1,6 @@
 # Atelier Mark — editorial inline tokens
 
-**Atelier Mark** lets operators emphasize words in short site texts using **theme colors and registered font presets**, not CSS or HTML.
+**Atelier Mark** lets operators emphasize words in short site texts using **semantic emphasis, theme colors and registered font presets**, not CSS or HTML.
 
 ADR: [`docs/adr/0008-atelier-mark-editorial-inline-tokens.md`](../adr/0008-atelier-mark-editorial-inline-tokens.md)
 
@@ -22,7 +22,7 @@ Plain text without `{` is unchanged.
 
 ## Syntax
 
-| Markup | Visitor color |
+| Markup | Visitor effect |
 |--------|----------------|
 | `{accent}…{/accent}` | Accent (`--site-accent-color`) |
 | `{intro}…{/intro}` | Intro title color |
@@ -32,6 +32,8 @@ Plain text without `{` is unchanged.
 | `{black}…{/black}` | Explicit black (`#000`) |
 | `{larger}…{/larger}` | One controlled increase (`1.2em`) |
 | `{smaller}…{/smaller}` | One controlled decrease (`0.85em`) |
+| `{strong}…{/strong}` | Semantic strong emphasis (`font-weight: 700`) |
+| `{em}…{/em}` | Semantic italic emphasis (`font-style: italic`) |
 | `{font:fraunces}…{/font}` | Fraunces font preset |
 
 Font IDs are exactly the presets from Site appearance: `system`, `inter`, `source-serif`, `fraunces`, `dm-sans`, `lora`. Inline fonts override the site-wide font only for the wrapped text. `system` uses the device sans-serif and makes no external request; Google Fonts are loaded only for presets actually used by the site-wide setting or inline markup. URLs, free-form family names, CSS and unknown presets are rejected.
@@ -40,6 +42,7 @@ Font IDs are exactly the presets from Site appearance: `system`, `inter`, `sourc
 - **No nesting**, including between color and font tags
 - Unknown or unclosed tags are rejected on save
 - Size tokens have one semantic level only: there are no numeric values or arbitrary sizes.
+- `strong` and `em` are fixed semantic-emphasis tokens; they accept no values, HTML or custom styles.
 - White and black are explicit presets, not theme colors. The operator must check contrast against the chosen background.
 
 ### Example

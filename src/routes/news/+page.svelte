@@ -137,9 +137,9 @@
     gap: 1rem;
     padding: 1.25rem;
     border-radius: 1rem;
-    border: 1px solid rgb(47 40 31 / 0.12);
-    background: rgb(255 250 242 / 0.82);
-    color: inherit;
+    border: 1px solid var(--site-border-color, #e4d8c7);
+    background: var(--site-card-color, #fffaf2);
+    color: var(--site-text-color, #2f281f);
     text-decoration: none;
   }
 
@@ -161,7 +161,7 @@
   }
 
   time {
-    color: #7d684f;
+    color: var(--site-muted-text-color, #7d684f);
     font-size: 0.85rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -175,7 +175,7 @@
 
   .post-copy p {
     margin: 0;
-    color: #4f4236;
+    color: var(--site-muted-text-color, #4f4236);
     font-size: 1rem;
     line-height: 1.6;
   }

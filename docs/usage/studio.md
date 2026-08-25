@@ -101,6 +101,16 @@ The studio does **not** yet:
 | `/studio/readiness` | Content Doctor publish review |
 | `/studio/help` | Safe studio access and publishing guidance |
 
+## News YAML ownership
+
+Existing files under `content/news/*.yaml` may contain client-owned unrelated
+top-level fields alongside the Studio-managed News fields. Normal Studio edits
+to an existing News post preserve those unrelated top-level values, including
+nested objects and arrays, but they are preserved data only: they are not form
+fields in Studio and do not gain generic Atelier-Kit runtime semantics.
+
+New News posts created in Studio contain only canonical News fields.
+
 ## Signal Clouds and the public FAQ
 
 Open `/studio/signal-clouds` to edit each shared visitor question.

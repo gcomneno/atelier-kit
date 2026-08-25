@@ -128,6 +128,39 @@ test('Analytics settings route remains Local-only and carries no Hosted or Demo 
   );
 });
 
+test('News editing remains outside the Hosted authoring surface', async () => {
+  const nav = await source(
+    `${COMPONENTS_ROOT}StudioNav.svelte`
+  );
+  const dashboard = await source(`${STUDIO_ROOT}+page.svelte`);
+  const newsEditor = await source(
+    `${STUDIO_ROOT}news/[id]/+page.server.js`
+  );
+  const newsCreate = await source(
+    `${STUDIO_ROOT}news/new/+page.server.js`
+  );
+
+  const hostedBranch = nav.match(
+    /\{:else if hostedAuthoring\}([\s\S]*?)\{:else\}/
+  )?.[1];
+  const hostedZones = dashboard.match(
+    /const hostedZones = \[([\s\S]*?)\];/
+  )?.[1];
+
+  assert.ok(hostedBranch);
+  assert.ok(hostedZones);
+  assert.doesNotMatch(hostedBranch, /\/studio\/news/);
+  assert.doesNotMatch(hostedZones, /\/studio\/news/);
+
+  for (const source of [newsEditor, newsCreate]) {
+    assert.match(source, /guardStudio\(\)/);
+    assert.doesNotMatch(
+      source,
+      /hostedStudio|hostedAuthoring|loadHosted|saveHosted|AuthoringRepository|expectedRevision/
+    );
+  }
+});
+
 test('Studio dashboard preserves Local zones and renders only admitted Hosted Social, Hero and Preview cards', async () => {
   const dashboard = await source(`${STUDIO_ROOT}+page.svelte`);
 

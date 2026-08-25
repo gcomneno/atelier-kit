@@ -16,6 +16,7 @@ import {
 } from '$lib/server/studio-io.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
 import { assertValidMarkedText } from '$lib/marked-text.js';
+import { mergeNewsCanonicalEditValues } from '$lib/news-authoring.js';
 
 function readString(record, key, fallback = '') {
   const value = record[key];
@@ -108,10 +109,6 @@ export const actions = {
         body: requiredField(formData.get('body'), t('fields.newsBody'), locale)
       };
 
-      if (typeof original.sort_order === 'number' && Number.isInteger(original.sort_order)) {
-        post.sort_order = original.sort_order;
-      }
-
       const excerpt = optionalField(formData.get('excerpt'));
       const imageAlt = optionalField(formData.get('image_alt'));
 
@@ -127,7 +124,7 @@ export const actions = {
         }
       }
 
-      writeNewsRecord(params.id, post);
+      writeNewsRecord(params.id, mergeNewsCanonicalEditValues(original, post));
       const validation = runStructuralValidation();
 
       return {

@@ -364,7 +364,7 @@ portableTest('Hosted Social mutation writes only fixed path with fixed commit me
       expectedRevision: REVISION,
       environment: {
         REQUEST_PATH:
-          '../../browser-controlled',
+          'content/news/browser-controlled.yaml',
         COMMIT_MESSAGE:
           'browser controlled'
       },

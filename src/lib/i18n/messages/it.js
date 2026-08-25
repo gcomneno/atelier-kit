@@ -170,7 +170,9 @@ export default {
         white: 'Bianco',
         black: 'Nero',
         larger: 'Aumenta dimensione testo',
-        smaller: 'Riduci dimensione testo'
+        smaller: 'Riduci dimensione testo',
+        strong: 'Grassetto',
+        em: 'Corsivo'
       },
       remove: 'Rimuovi formattazione',
       feedback: {
@@ -251,7 +253,7 @@ export default {
       atelierMark: {
         title: 'Atelier Mark — enfasi inline nei testi',
         intro:
-          'Atelier Mark applica preset controllati di colore, dimensione o font nei testi supportati — senza HTML, CSS personalizzato o URL font. Testo senza { resta invariato.',
+          'Atelier Mark applica enfasi semantica e preset controllati di colore, dimensione o font nei testi supportati — senza HTML, CSS personalizzato o URL font. Testo senza { resta invariato.',
         whereTitle: 'Dove funziona',
         where: {
           1: 'Studio → Sito → Identità → Tagline.',
@@ -267,7 +269,8 @@ export default {
           4: '{muted}…{/muted} — testo tenue',
           5: '{white}…{/white} / {black}…{/black} — colori espliciti; verifica il contrasto con lo sfondo.',
           6: '{larger}…{/larger} / {smaller}…{/smaller} — un livello controllato di dimensione.',
-          7: '{font:fraunces}…{/font} — preset font supportato. Parentesi graffe letterali: {{ e }}. I tag non si annidano. Tag sconosciuti o non chiusi bloccano Salva.'
+          7: '{strong}…{/strong} / {em}…{/em} — enfasi semantica forte o corsiva.',
+          8: '{font:fraunces}…{/font} — preset font supportato. Parentesi graffe letterali: {{ e }}. I tag non si annidano. Tag sconosciuti o non chiusi bloccano Salva.'
         },
         studioTitle: 'In Studio',
         studio: {

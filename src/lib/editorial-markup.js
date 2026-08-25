@@ -1,7 +1,7 @@
 import { FONT_PRESET_IDS, fontFamilyCss, isFontPreset } from './site-typography.js';
 
 /** @typedef {import('./site-typography.js').FontPreset} FontPreset */
-/** @typedef {'accent' | 'intro' | 'heading' | 'muted' | 'white' | 'black' | 'larger' | 'smaller' | 'text'} EditorialMarkToken */
+/** @typedef {'accent' | 'intro' | 'heading' | 'muted' | 'white' | 'black' | 'larger' | 'smaller' | 'strong' | 'em' | 'text'} EditorialMarkToken */
 
 /**
  * Canonical Atelier Mark contract. Tokens are single-level semantic presets:
@@ -15,7 +15,9 @@ export const EDITORIAL_MARK_TOKENS = Object.freeze([
   { id: 'white', className: 'mark-white', kind: 'explicit-color' },
   { id: 'black', className: 'mark-black', kind: 'explicit-color' },
   { id: 'larger', className: 'mark-larger', kind: 'size' },
-  { id: 'smaller', className: 'mark-smaller', kind: 'size' }
+  { id: 'smaller', className: 'mark-smaller', kind: 'size' },
+  { id: 'strong', className: 'mark-strong', kind: 'semantic-emphasis' },
+  { id: 'em', className: 'mark-em', kind: 'semantic-emphasis' }
 ]);
 
 export const EDITORIAL_MARK_TAGS = Object.freeze(EDITORIAL_MARK_TOKENS.map(({ id }) => id));
@@ -30,6 +32,8 @@ export const EDITORIAL_MARK_CLASSES = {
   black: 'mark-black',
   larger: 'mark-larger',
   smaller: 'mark-smaller',
+  strong: 'mark-strong',
+  em: 'mark-em',
   text: 'mark-text'
 };
 

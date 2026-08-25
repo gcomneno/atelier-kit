@@ -50,4 +50,12 @@
     font-size: 0.85em;
   }
 
+  :global(.mark-strong) {
+    font-weight: 700;
+  }
+
+  :global(.mark-em) {
+    font-style: italic;
+  }
+
 </style>

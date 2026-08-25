@@ -4,8 +4,9 @@
 
 The canonical token registry is `EDITORIAL_MARK_TOKENS` in `src/lib/editorial-markup.js`:
 theme colors `accent`, `intro`, `heading`, `muted`; explicit colors `white`, `black`;
-single-level sizes `larger`, `smaller`; plus allowlisted `font:<preset>`. Tokens never
-nest. `transformMarkedTextSelection` is the shared apply/replace/remove contract used by
+single-level sizes `larger`, `smaller`; semantic emphasis `strong`, `em`; plus allowlisted
+`font:<preset>`. Tokens never nest. `transformMarkedTextSelection` is the shared
+apply/replace/remove contract used by
 the local Studio toolbar; `EditorialText` is shared by Studio preview and the visitor.
 
 ## Marked editorial fields

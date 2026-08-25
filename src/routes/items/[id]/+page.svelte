@@ -524,19 +524,6 @@
     justify-content: flex-end;
   }
 
-  .description-shell:not(.expanded) .description-actions {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    z-index: 1;
-    padding-left: 2.5rem;
-    background: linear-gradient(
-      to right,
-      transparent,
-      color-mix(in srgb, var(--site-base-color, #0f0e0d) 88%, transparent) 42%
-    );
-  }
-
   .description-toggle {
     width: fit-content;
     border: 0;

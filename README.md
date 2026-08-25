@@ -66,7 +66,7 @@ Opens `http://127.0.0.1:5173/studio` on localhost only. Studio writes directly t
 
 ## Current release
 
-Latest official release: **v0.5.0** — private Hosted Studio, an isolated public Demo runtime, structured reading and relationships, broader Giada UI adoption, analytics, safer publishing and upgrade flows, and visitor/Studio hardening.
+Latest official release: **v0.5.1** — a patch release improving Visitor News theme contrast and mobile sidebar readability, while formalizing the canonical Atelier-Kit commercial delivery package.
 
 See [GitHub Releases](https://github.com/gcomneno/atelier-kit/releases) for highlights and validation notes.
 

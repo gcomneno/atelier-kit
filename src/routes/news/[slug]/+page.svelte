@@ -179,6 +179,10 @@
   .body {
     display: grid;
     gap: 1.1rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1px solid var(--site-border-color, #e4d8c7);
+    border-radius: 1rem;
+    background: var(--site-card-color, #fffaf2);
   }
 
   .body :global(p) {

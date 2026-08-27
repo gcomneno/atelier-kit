@@ -1,4 +1,5 @@
 <script>
+  import NewsDetailAfterBody from '$lib/client-extension/NewsDetailAfterBody.svelte';
   import BookReading from '$lib/components/BookReading.svelte';
   import ImageLightbox from '$lib/components/ImageLightbox.svelte';
   import JsonLd from '$lib/components/JsonLd.svelte';
@@ -95,6 +96,8 @@
           <EditorialText tag="p" value={paragraph} />
         {/each}
       </div>
+
+      <NewsDetailAfterBody post={data.post} />
     </article>
   </main>
 {/if}

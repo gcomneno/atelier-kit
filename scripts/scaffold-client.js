@@ -16,6 +16,17 @@ const EXCLUDED_RELATIVE_PATHS = new Set([
   'desktop/src-tauri/target'
 ]);
 const KIT_ONLY_ROOT_NAMES = new Set(['test']);
+const SANCTIONED_ENV_NAMES = new Set([
+  '.env.example',
+  '.env.test'
+]);
+
+function isSourceLocalEnvFile(name) {
+  return (
+    (name === '.env' || name.startsWith('.env.')) &&
+    !SANCTIONED_ENV_NAMES.has(name)
+  );
+}
 
 const SUPPORTED_TEMPLATES = new Set([
   'writing',
@@ -183,6 +194,12 @@ function copyTree(source, target, sourceRoot = source) {
   }
 
   if (stat.isFile()) {
+    const name = path.basename(source);
+
+    if (isSourceLocalEnvFile(name)) {
+      return;
+    }
+
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.copyFileSync(source, target);
   }

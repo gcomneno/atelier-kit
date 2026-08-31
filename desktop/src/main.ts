@@ -1,7 +1,7 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 
 const NOT_TAURI_MESSAGE =
-  "Apri Atelier Desktop come app nativa, non nel browser: cd desktop && npm run tauri dev";
+  "Open Atelier Desktop as a native app, not in the browser: cd desktop && npm run tauri dev";
 
 interface DesktopStatus {
   site_path: string | null;

@@ -2,6 +2,7 @@ import { resolveAbsoluteUrl } from '$lib/site-meta.js';
 import {
   getAboutConfig,
   getCollections,
+  getFaqEntries,
   getItems,
   getLegalPages,
   getNewsPosts,
@@ -71,6 +72,10 @@ export function buildSitemapUrls(origin) {
 
   if (getAboutConfig()) {
     urls.push({ loc: absolute('/about') });
+  }
+
+  if (getFaqEntries().length > 0) {
+    urls.push({ loc: absolute('/faq') });
   }
 
   for (const page of getLegalPages()) {

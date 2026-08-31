@@ -223,7 +223,7 @@ The FAQ is configured inside the same record in `config/signal-clouds.yaml`; the
 
 A record appears publicly only when the cloud is enabled, `faq.visible` is true, and both the shared question and `faq.answer` are non-empty. Optional `faq.group` and non-negative `faq.order` values control presentation.
 
-When at least one eligible entry exists, Atelier-Kit adds the FAQ link to public navigation and emits schema.org `FAQPage` JSON-LD. Otherwise `/faq` shows an empty state and the navigation link stays hidden.
+When at least one eligible entry exists, Atelier-Kit adds the FAQ link to public navigation, includes `/faq` in the XML sitemap, and emits schema.org `FAQPage` JSON-LD. Otherwise `/faq` shows an empty state, the navigation link stays hidden, and the sitemap omits `/faq`.
 
 FAQ publishing is purely editorial: there is no visitor submission endpoint, inbox, moderation queue or stored message.
 

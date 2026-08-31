@@ -324,6 +324,7 @@ See `docs/usage/deploy-vercel.md` for the pre-deploy checklist.
 - `docs/product/micro-cms-positioning.md` explains the micro-CMS contract and WordPress comparison.
 - `docs/product/micro-cms-epic.md` tracks the micro-CMS epic and issues.
 - `docs/product/product-levels.md` explains developer-assisted, guided and no-code levels.
+- `docs/product/customer-support-contract.md` explains customer support obligations and boundaries.
 - `docs/product/no-code-roadmap.md` explains the staged no-code authoring roadmap.
 - `docs/usage/site-wizard.md` explains the guided setup wizard.
 - `docs/usage/studio.md` explains Studio and Atelier Desktop authoring.
@@ -338,6 +339,9 @@ Atelier-Kit is open-source under the MIT license.
 People who can configure it themselves can use it freely.
 
 People who want help configuring, customizing or deploying it may support the author or request paid setup/customization work.
+
+Customer support, when included by agreement or handoff, is bounded by
+[`docs/product/customer-support-contract.md`](docs/product/customer-support-contract.md).
 
 To report bugs, suggest scoped features or improve docs, see [`CONTRIBUTING.md`](CONTRIBUTING.md). Please use the GitHub issue templates — blank issues are disabled.
 

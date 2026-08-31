@@ -219,3 +219,5 @@ After upgrading, run `npm install` when the plan reports dependency changes, the
 
 Tag the kit release (`git tag vX.Y.Z`) before upgrading clients so `.atelier-kit-version` and the
 legacy-compatible `.atelier-kit-upgrade.json` metadata record the correct version.
+
+For the customer maintenance contract governing this workflow, see [`../product/maintenance-and-upgrade-contract.md`](../product/maintenance-and-upgrade-contract.md).

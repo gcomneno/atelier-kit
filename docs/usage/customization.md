@@ -355,3 +355,5 @@ For practical customization examples, see:
 - `docs/recipes/no-textarea-contact-flow.md`
 - `docs/recipes/private-preview.md`
 - `docs/recipes/replace-demo-content.md`
+
+For preservation, bespoke-extension and supported-upgrade policy, see [`../product/maintenance-and-upgrade-contract.md`](../product/maintenance-and-upgrade-contract.md).

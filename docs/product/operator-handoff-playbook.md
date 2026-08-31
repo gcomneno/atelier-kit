@@ -365,3 +365,5 @@ Use Luna Argento to demo studio flows during handoff calls.
 - [`client-intake.md`](../client-intake.md) — intake worksheet
 - [`deploy-vercel.md`](../usage/deploy-vercel.md) — Vercel setup
 - [`content-doctor.md`](../usage/content-doctor.md) — publish readiness
+
+For supported-version, ownership, recovery and upgrade boundaries, see [`maintenance-and-upgrade-contract.md`](maintenance-and-upgrade-contract.md).

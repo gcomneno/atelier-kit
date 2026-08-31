@@ -9,6 +9,9 @@ begins.
 Pricing is intentionally defined elsewhere. This document is the input contract
 for pricing, onboarding, maintenance/upgrade and support.
 
+Customer support obligations and boundaries are defined canonically in
+[`customer-support-contract.md`](customer-support-contract.md).
+
 ## Commercial unit
 
 The primary commercial unit is:
@@ -465,6 +468,7 @@ The intended outcome is:
 - [`micro-cms-positioning.md`](micro-cms-positioning.md)
 - [`product-levels.md`](product-levels.md)
 - [`operator-handoff-playbook.md`](operator-handoff-playbook.md)
+- [`customer-support-contract.md`](customer-support-contract.md)
 - [`../usage/studio.md`](../usage/studio.md)
 - [`../usage/hosted-studio.md`](../usage/hosted-studio.md)
 - [`../usage/public-demo.md`](../usage/public-demo.md)

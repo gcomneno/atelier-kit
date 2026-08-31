@@ -2,7 +2,7 @@
 
 Step-by-step checklist for delivering an Atelier-Kit client site from intake to handoff call.
 
-Part of epic [#43](https://github.com/gcomneno/atelier-kit/issues/43). Complements [`service-package.md`](service-package.md) and ADR 0003.
+Part of epic [#43](https://github.com/gcomneno/atelier-kit/issues/43). Complements [`service-package.md`](service-package.md), [`customer-support-contract.md`](customer-support-contract.md) and ADR 0003.
 
 Reference demo: [Luna Argento](https://luna-argento.vercel.app) — jewelry template, Italian copy, live Vercel deploy.
 
@@ -220,6 +220,8 @@ Use this agenda with the client.
 - Public URL (e.g. `https://client-site.vercel.app`)
 - Git repository (if applicable)
 - This checklist (copy the section below)
+- Support channel, coverage and private security escalation path when support
+  is included
 
 ### 5.2 What they can change alone
 
@@ -339,6 +341,11 @@ Contact [operator name/email] for deploy help or kit updates.
 - [ ] Production deploy verified
 - [ ] Git repo pushed (if used)
 - [ ] Client received URL + client checklist
+- [ ] Support channel recorded
+- [ ] Support coverage recorded
+- [ ] Supported version recorded
+- [ ] Repository/deployment/account ownership boundaries recorded
+- [ ] Private security escalation path recorded
 - [ ] 30-minute handoff call completed
 
 ---
@@ -360,6 +367,7 @@ Use Luna Argento to demo studio flows during handoff calls.
 ## Related docs
 
 - [`service-package.md`](service-package.md) — pricing and scope
+- [`customer-support-contract.md`](customer-support-contract.md) — support obligations and boundaries
 - [`studio.md`](../usage/studio.md) — studio routes and access rules
 - [`adr-0007-production-safe-studio-desktop.md`](../architecture/adr-0007-production-safe-studio-desktop.md) — authoring security model
 - [`client-intake.md`](../client-intake.md) — intake worksheet

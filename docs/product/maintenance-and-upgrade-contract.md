@@ -12,6 +12,9 @@ hosting service, or indefinite support.
 The contract applies to customer-owned Atelier-Kit showcase sites when a
 maintenance or upgrade relationship explicitly includes that work.
 
+Customer support obligations and boundaries are defined separately in
+[`customer-support-contract.md`](customer-support-contract.md).
+
 ## Contract principles
 
 Atelier-Kit is a bounded micro-CMS for creative showcases. Maintenance and
@@ -315,6 +318,7 @@ This contract does not provide:
 
 - `docs/product/service-package.md`
 - `docs/product/operator-handoff-playbook.md`
+- `docs/product/customer-support-contract.md`
 - `docs/usage/client-scaffold.md`
 - `docs/usage/customization.md`
 - `docs/usage/deploy-vercel.md`

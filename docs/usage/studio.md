@@ -226,7 +226,9 @@ Full operator guide: [`editorial-markup.md`](editorial-markup.md). In Studio, op
 
 ## Operator language
 
-Studio labels, save messages, Content Doctor output and `npm run publish` banners follow `site.language` in `config/site.yaml`. Supported operator locales: **English** (`en`) and **Italian** (`it`). See [ADR 0005](../architecture/adr-0005-operator-ui-i18n.md).
+Studio labels, save messages, Content Doctor output and `npm run publish` banners follow `site.language` in `config/site.yaml`. Supported operator locales: **English** (`en`) and **Italian** (`it`).
+
+The Studio language selector changes presentation/configured language only. It does not grant authority or alter validation, save/mutation or runtime semantics. When localization is unsupported or missing, deterministic English fallback applies. See [ADR 0005](../architecture/adr-0005-operator-ui-i18n.md).
 
 ## Recommended access
 

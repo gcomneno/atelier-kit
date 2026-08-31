@@ -31,6 +31,49 @@ src/lib/i18n/
 
 The same field drives `<html lang="…">` for visitors **and** operator UI locale.
 
+### Canonical source and presentation authority
+
+English (`en`) is the canonical source language for Atelier-Kit-owned UI and
+CLI/operator presentation strings. Other deterministic catalogs, such as
+Italian, are derived presentation representations, not parallel semantic
+authorities.
+
+Language selection changes presentation only. It MUST NOT change domain
+semantics, structured results, validation behavior, exit-code meaning,
+authorization, mutations, persistence or runtime authority.
+
+Static UI/CLI localization remains deterministic and catalog-based.
+Missing or unsupported localized presentation falls back deterministically to
+canonical English.
+
+GiadaWare AI translation is an OPTIONAL provider-independent semantic
+capability for genuinely dynamic human-readable presentation only. Atelier-Kit
+must not depend on Ollama, models, provider SDKs, endpoints or
+provider-specific translation mechanics. No current runtime AI translation
+integration is justified. Translation output is derived presentation data and
+never application authority. The provider-independent contract is owned by
+GiadaWare AI:
+
+https://github.com/gcomneno/giadaware-ai/blob/main/docs/TRANSLATION-CONTRACT.md
+
+Repository-specific exceptions:
+
+- client-authored config/content YAML;
+- scaffold/starter locale packs that intentionally generate authoritative
+  client-language content;
+- legal/editorial source material;
+- educational examples or recipes where multilingual material is intentional;
+- upstream/vendor/platform metadata;
+- archival or compatibility material where language is part of the evidence or
+  history.
+
+### CLI and GUI parity
+
+`site.language` is shared configuration. Studio language selection writes that
+setting. Relevant operator CLI/scripts resolve it. Scaffold and wizard
+`--language` may generate authoritative starter content/config for the selected
+client language and is therefore not equivalent to runtime UI translation.
+
 ### Scope
 
 | In scope | Out of scope (future) |
@@ -48,6 +91,10 @@ The same field drives `<html lang="…">` for visitors **and** operator UI local
 - Adding a locale = new `messages/{code}.js` file
 - Scripts import from `src/lib/i18n/` via relative path (same as `item-presets.js`)
 - Preset labels translated at display time, not in source data files
+- Static UI/CLI strings keep English as canonical source and catalogs as
+  deterministic presentation data
+- Missing localized strings resolve to English before falling back to the key
+- Runtime AI translation is not part of this ADR's implemented surface
 
 ## Related
 

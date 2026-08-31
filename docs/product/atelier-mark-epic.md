@@ -151,7 +151,7 @@ Literal `{` → `{{`. No nesting in v1.
 ## Upgrade notes (for client sites)
 
 - Sites without markup: **no change** after upgrade.
-- Custom preserved `+page.svelte` (e.g. Nero Quotidiano): must adopt `EditorialText` manually or markup in YAML will show raw `{accent}` text.
+- Custom preserved `+page.svelte` (e.g. Ombre Quotidiane): must adopt `EditorialText` manually or markup in YAML will show raw `{accent}` text.
 - `site:upgrade` should add new lib files; Identity page updates apply unless listed in `.atelier-kit-preserve`.
 
 ## Reference example (Club)

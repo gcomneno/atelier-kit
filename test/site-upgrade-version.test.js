@@ -1373,7 +1373,7 @@ test('applied same-path conflict stays byte-identical, unproven in metadata, and
   const rel = 'src/lib/editorial-markup.test.js';
   try {
     fs.mkdirSync(path.dirname(path.join(clientRoot, rel)), { recursive: true });
-    const custom = "// Nero Quotidiano preserved conflict\n";
+    const custom = "// Ombre Quotidiane preserved conflict\n";
     fs.writeFileSync(path.join(clientRoot, rel), custom);
     const first = await runMain(clientRoot);
     assert.match(first, /Keep customized/);

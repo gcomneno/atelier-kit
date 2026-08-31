@@ -160,7 +160,7 @@ const SITE_YAML = [
 
 const QUOTED_SITE_YAML = [
   'site:',
-  '  name: "Nero Quotidiano"',
+  '  name: "Ombre Quotidiane"',
   '  tagline: "Il portale editoriale ufficiale."',
   '  language: it',
   '  hero_signature: "Notizie, personaggi, curiosità e materiali dal mondo delle Cronache."',
@@ -584,7 +584,7 @@ test(
 
     assert.ok(
       content.includes(
-        '  name: "Nero Quotidiano"'
+        '  name: "Ombre Quotidiane"'
       )
     );
     assert.ok(
@@ -671,7 +671,7 @@ test(
 
     assert.ok(
       relatedContent.includes(
-        '  name: "Nero Quotidiano"'
+        '  name: "Ombre Quotidiane"'
       )
     );
     assert.ok(

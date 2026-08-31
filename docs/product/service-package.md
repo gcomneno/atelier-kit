@@ -469,3 +469,5 @@ The intended outcome is:
 - [`../usage/hosted-studio.md`](../usage/hosted-studio.md)
 - [`../usage/public-demo.md`](../usage/public-demo.md)
 - [`../usage/deploy-vercel.md`](../usage/deploy-vercel.md)
+
+Maintenance and upgrade obligations are defined canonically in [`maintenance-and-upgrade-contract.md`](maintenance-and-upgrade-contract.md).

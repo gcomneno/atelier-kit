@@ -44,7 +44,7 @@ test('desktop sidebar compact defaults remain unchanged', () => {
   assert.match(desktop, /--sidebar-body-size:\s*0\.8125rem;/);
   assert.match(desktop, /--sidebar-meta-size:\s*0\.6875rem;/);
   assert.match(desktop, /--sidebar-footer-size:\s*0\.8125rem;/);
-  assert.match(desktop, /--sidebar-widget-height:\s*13rem;/);
+  assert.match(desktop, /--sidebar-widget-height:\s*13\.75rem;/);
 });
 
 test('mobile sidebar increases readable typography and widget height', () => {

@@ -195,7 +195,7 @@
   }
 
   .widget {
-    --sidebar-widget-height: 13rem;
+    --sidebar-widget-height: 13.75rem;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     height: var(--sidebar-widget-height);

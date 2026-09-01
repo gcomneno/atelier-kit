@@ -51,7 +51,7 @@
             {/if}
           </h1>
           {#each splitEditorialParagraphs(catalogIntro) as paragraph}
-            <EditorialText tag="p" value={paragraph} />
+            <EditorialText tag="p" class="catalog-intro" value={paragraph} />
           {/each}
         </header>
       </div>
@@ -151,7 +151,17 @@
     letter-spacing: -0.07em;
   }
 
-  header :global(p),
+  :global(.catalog-intro) {
+    max-width: 42rem;
+    margin: 0;
+    color: color-mix(in srgb, var(--site-text-color, #2f281f) 82%, transparent);
+    font-size: clamp(0.95rem, 1.8vw, 1.05rem);
+    line-height: 1.65;
+    text-align: justify;
+    hyphens: auto;
+    white-space: pre-line;
+  }
+
   .empty {
     max-width: 42rem;
     margin: 0;

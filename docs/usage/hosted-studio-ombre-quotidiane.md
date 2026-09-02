@@ -15,7 +15,7 @@ Ombre Quotidiane has a public Visitor deployment and may optionally have a separ
 
 The Visitor project is ordinary production. `/studio/**` and `/auth/**` must remain unavailable/fail-closed there and no Hosted credentials belong in that project.
 
-A Hosted Studio project, if provisioned, is the only browser-accessible authoring deployment. It is not a public Visitor replacement and must not inherit authority from the Atelier-Kit validation Hosted deployment, obsolete `nero-quotidiano-hosted-studio` infrastructure, or the public Demo runtime.
+A Hosted Studio project, if provisioned, is the only browser-accessible authoring deployment. It is not a public Visitor replacement and must not inherit authority from the Atelier-Kit validation Hosted deployment, the historical `nero-quotidiano-hosted-studio` validation chain decommissioned on 2026-09-02, or the public Demo runtime.
 
 The Git repository remains the canonical content history. Hosted Studio commits to the configured repository branch; the Visitor is updated only through the repository's normal Vercel Git deployment pipeline.
 
@@ -46,7 +46,7 @@ All not-yet-admitted Studio routes/actions remain fail-closed.
 
 ## Hosted runtime configuration
 
-Hosted Studio is optional, private, separate infrastructure. For Ombre Quotidiane, no current Hosted Studio project, canonical Hosted origin, OAuth callback, or state namespace is known from the current naming prerequisite. Do not invent replacements from the obsolete `nero-quotidiano-hosted-studio` deployment.
+Hosted Studio is optional, private, separate infrastructure. For Ombre Quotidiane, no current Hosted Studio project, canonical Hosted origin, OAuth callback, or state namespace is provisioned. The historical `nero-quotidiano-hosted-studio` project and its dedicated persistent Redis state, OAuth application, and repository token were decommissioned on 2026-09-02. Future Hosted authority must be provisioned fresh rather than reconstructed from that retired validation chain.
 
 If Hosted Studio is explicitly provisioned for the current consumer, the Hosted project requires the explicit private Hosted runtime and persistent state topology:
 
@@ -122,7 +122,7 @@ A deployment delay or failure does not undo, repeat, or modify an already-succes
 
 ## Provisioning the optional Hosted Studio
 
-Hosted Studio must be provisioned as a dedicated project separate from the Visitor project before use. Do not relink the canonical Visitor checkout merely to deploy Hosted Studio, and do not reuse obsolete `nero-quotidiano-hosted-studio` configuration as current Ombre Quotidiane authority.
+Hosted Studio must be provisioned as a dedicated project separate from the Visitor project before use. Do not relink the canonical Visitor checkout merely to deploy Hosted Studio. The historical `nero-quotidiano-hosted-studio` validation chain was decommissioned on 2026-09-02; any future Ombre Quotidiane Hosted Studio must use freshly provisioned origin, OAuth, repository credential, persistent state, and state namespace authority.
 
 Before production deployment from a dedicated clean worktree linked to the explicitly provisioned current Hosted Studio project:
 

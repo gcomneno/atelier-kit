@@ -1,41 +1,66 @@
 # Private Hosted Studio operator runbook
 
-This is the canonical runbook for the first **private** Hosted Studio deployment
-selected by issue #275. It is not a public/client-facing Hosted rollout; that
-still requires a separate security review. Read [ADR 0008](../architecture/adr-0008-hosted-studio-architecture.md),
+This is the canonical **general** operator runbook for explicitly provisioned
+private Hosted Studio deployments.
+
+It is not a record of one deployment that must remain alive forever. Read
+[ADR 0008](../architecture/adr-0008-hosted-studio-architecture.md),
 [ADR 0009](../architecture/adr-0009-hosted-studio-authentication-authorization.md),
-[ADR 0010](../architecture/adr-0010-hosted-studio-persistent-state.md), and
-the [Hosted Studio threat model](../security/hosted-studio-threat-model.md) for
-the governing decisions and controls.
+[ADR 0010](../architecture/adr-0010-hosted-studio-persistent-state.md), and the
+[Hosted Studio threat model](../security/hosted-studio-threat-model.md) for the
+governing architecture and security controls.
+
+Issue #275 created the first real Atelier-Kit validation deployment and proved
+this operating model. That validation infrastructure has since been retired;
+its evidence is preserved below as historical validation, not as current
+runtime authority.
+
+Consumer-specific runbooks define the current repository, branch, writable
+roots, deployment identity, origin, OAuth callback, and state namespace for any
+explicitly provisioned consumer Hosted Studio.
 
 ## Runtime and deployment boundary
 
-These are three different modes; do not transfer credentials or assumptions
+These are distinct authority domains; do not transfer credentials or assumptions
 between them.
 
 | Mode | Purpose | Studio behavior |
 | --- | --- | --- |
 | Ordinary visitor production | Public client-facing site | `/studio/**` and `/auth/**` fail closed (404); no Hosted credentials. |
 | Local Studio | Authoring from a checkout/Atelier Desktop | Filesystem edits and local Git/Vercel publishing remain local-only capabilities. |
-| Private Hosted Studio | Separate, explicitly configured authoring deployment | Authenticated, authorized, GitHub-backed authoring with the limited surface below. |
+| Private Hosted Studio | Separate, explicitly configured authoring deployment | Authenticated, authorized, GitHub-backed authoring with the admitted Hosted surface. |
 
-The private deployment provider is Vercel, using dedicated project
-`atelier-kit-hosted-studio`, at
-<https://atelier-kit-hosted-studio.vercel.app>, in `fra1`. Its callback is
-<https://atelier-kit-hosted-studio.vercel.app/auth/github/callback>. It uses
-the `persistent-redis` state topology through Upstash Redis from the Vercel
-Marketplace; the resource is `atelier-kit-hosted-state`.
+A private Hosted Studio must be provisioned as separate infrastructure with its
+own canonical HTTPS origin, server-side secrets, repository authority, and
+persistent state. It must not inherit authority from Visitor, Demo, Local, or a
+retired validation deployment.
 
-It is fixed to `gcomneno/atelier-kit`, branch
-`issue-275-hosted-validation`, writable root `config`, and the currently
-admitted mutation path `config/social.yaml`. The validation branch is a
-controlled temporary target for #275 and must not be confused with `main`.
+No current general Atelier-Kit Hosted deployment name, hostname, branch, OAuth
+callback, Redis resource, or state namespace is implied by this document. Those
+values are deployment-specific and must be observed or provisioned explicitly.
+
+## Persistent state topology
+
+A deployed Hosted Studio uses the `persistent-redis` topology contract defined
+by ADR 0010.
+
+Redis owns transient Hosted security/session state such as OAuth transactions,
+opaque session records, and session/CSRF-related secrets. Git/GitHub remains the
+canonical editorial history and repository authority.
+
+Production Hosted Studio must fail closed if persistent state is unavailable.
+It must never silently fall back to process memory merely because an in-memory
+adapter exists for tests, local development, or a single-process PoC role.
+
+The first real validation used Upstash Redis through the Vercel Marketplace,
+but provider identity is an implementation choice behind the persistent store
+contract. A new deployment must provision its own state resource and namespace;
+do not reuse a retired or unrelated deployment resource by default.
 
 ## Configuration and credentials
 
-Set the following environment variables on the private authoring deployment.
-The groups describe the sensitivity of their values, independently of whether
-the Vercel UI currently stores a value as Sensitive.
+An explicitly provisioned private Hosted Studio requires the following runtime
+configuration.
 
 ### Activation and non-secret configuration
 
@@ -47,8 +72,7 @@ ATELIER_STUDIO_PRIVATE_POC_STATE_TOPOLOGY=persistent-redis
 
 ### Deployment/security configuration
 
-These values are not intrinsically credentials, although the current deployment
-may store them as Sensitive:
+The concrete values are deployment-specific:
 
 ```text
 ATELIER_STUDIO_CANONICAL_ORIGIN
@@ -70,207 +94,261 @@ ATELIER_STUDIO_GITHUB_TOKEN
 ATELIER_STUDIO_STATE_REDIS_REST_TOKEN
 ```
 
-Never put a secret value in documentation, logs, browser data, Git history, or
-screenshots. Do not record token, session, or CSRF values anywhere outside the
-server-side secret store.
+Never put secret values in documentation, issue comments, logs, browser data,
+Git history, screenshots, or client-readable storage.
 
 ## GitHub OAuth and operator authorization
 
-The OAuth application currently used is **Atelier Kit Hosted Studio**. Its
-callback must exactly match
-`https://atelier-kit-hosted-studio.vercel.app/auth/github/callback`.
+Each provisioned Hosted Studio needs an OAuth application/configuration whose
+callback exactly matches:
 
-OAuth authentication identifies an operator; it does not grant authoring
-authority. Authorization uses stable numeric GitHub subjects in the deployment
-allow-list. An operator can safely discover their subject with:
+```text
+<ATELIER_STUDIO_CANONICAL_ORIGIN>/auth/github/callback
+```
+
+OAuth authentication identifies an operator; it does not grant repository or
+Studio authority. Authorization uses the server-side allow-list of stable GitHub
+numeric subjects.
+
+An operator may discover their own numeric subject with:
 
 ```bash
 gh api user --jq '.id'
 ```
 
-Do not treat a specific subject as a universal project default. The #275
-validation operator subject was `126195429`.
+Do not treat a historical validation subject, OAuth application, or callback as
+a universal project default.
 
 ## Repository credential
 
-Use a dedicated fine-grained PAT, separate from the OAuth identity/token.
-Select `gcomneno/atelier-kit` explicitly, grant **Repository permissions →
-Contents: Read and write**, and retain the GitHub-required **Metadata:
-Read-only** permission. This vertical needs no broader repository permissions.
+Use a dedicated fine-grained GitHub repository credential for Hosted repository
+writes, separate from the OAuth identity/token.
 
-A successful GET against a public repository is not proof that the PAT has
-repository authority: public content can be readable without token authority.
-Verify a controlled write through the admitted path instead.
+Restrict it to the intended repository and only the permissions required by the
+authoring adapter: repository Contents read/write plus GitHub-required Metadata
+read-only. Browser input must never select repository, branch, writable roots,
+commit message, or provider credentials.
+
+For a new deployment, provision dedicated credentials by default. Historical or
+otherwise unclassified OAuth applications and repository credentials must be
+preserved while ownership is unknown, but must not be reused merely because they
+already exist. Any deliberate sharing requires a separate explicit
+architecture/security decision.
 
 ## Save-to-deploy and Preview contract
 
-A successful private Hosted save means exactly one thing: the admitted mutation
-was committed to the configured GitHub authoring branch and the authoring
-revision advanced. It does **not** mean that an already-running Visitor
-deployment changed.
+A successful private Hosted save means the admitted repository mutation
+succeeded and the configured authoring revision advanced. It does not grant the
+browser generic deployment authority.
 
-For this phase, deployment remains an explicit operator action outside Hosted
-Studio. Hosted Studio does not receive browser deployment credentials, does not
-reuse Local Studio's Git/Vercel-CLI publishing path, and does not automatically
-trigger or inspect Vercel deployments.
+The operator-facing contract is:
 
-The operator-facing contract is therefore:
+1. **Authored revision** — the Hosted editor reports the repository-backed
+   revision after a successful read/save.
+2. **Deployment status** — a separate hosting concern unless a future explicit
+   architecture change admits deployment orchestration.
+3. **Preview** — may show a deployed Visitor snapshot that is older than the
+   current authored revision.
 
-1. **Authored revision** — Social and Hero show the current repository-backed
-   authoring revision returned by the successful read/save.
-2. **Deployment status** — manual and not tracked by Hosted Studio in this
-   phase.
-3. **Preview** — opens the currently deployed immutable Visitor snapshot. It
-   may represent an older revision than the authoring revision shown in Studio.
-
-Refreshing Preview cannot publish a revision. A deployment failure or delay
-does not roll back, repeat, or otherwise alter an already-successful repository
-mutation.
-
-## Deploy, redeploy, and promotion
-
-Environment changes affect subsequent deployments, not an already-running
-deployment. Deploy the intended feature revision; before explicit canonical
-promotion, verify that it is Ready, in `fra1`, and passes the root smoke check.
-Canonical promotion is an explicit operator action.
-
-Redis state is shared and persistent. It must never fall back to process memory;
-sessions were observed surviving real redeploys. Keep the previous known-good
-deployment as the rollback target. After a temporary security-policy test,
-restore both the intended configuration value and a deployment snapshot that
-uses that intended configuration.
+A deployment delay or failure does not roll back, repeat, or otherwise alter an
+already-successful repository mutation.
 
 ## Admitted Hosted surface
 
-Only these Hosted routes are admitted:
+The reusable Hosted capability currently admits:
 
-- `GET /studio`
-- `GET /studio/site/social`
-- `POST /studio/site/social`
-- `GET /studio/site/hero`
-- `POST /studio/site/hero`
-- authentication lifecycle: `GET /auth/github/login`, `GET /auth/github/callback`,
-  and `POST /auth/logout`
+- `GET /studio`;
+- `GET /studio/site/social`;
+- `POST /studio/site/social`;
+- `GET /studio/site/hero`;
+- `POST /studio/site/hero`;
+- `GET /auth/github/login`;
+- `GET /auth/github/callback`;
+- `POST /auth/logout`.
 
-All other Studio pages and actions remain fail-closed. The Hosted UI exposes
-only Overview, Social, Hero, and the deployed Preview snapshot. Local
-filesystem, Git, and Vercel-CLI publishing are not Hosted capabilities.
+All other Studio routes/actions remain fail-closed unless separately admitted by
+scoped work and tests. Local filesystem editing, Local Git, and Local Vercel-CLI
+publishing are not Hosted capabilities.
+
+Consumer-specific writable paths and image destinations remain server-owned and
+must be documented in the relevant consumer runbook.
+
+## Provisioning checklist
+
+Before declaring a new private Hosted Studio operational:
+
+1. provision a dedicated authoring project separate from Visitor production;
+2. establish the exact canonical HTTPS origin;
+3. configure the matching OAuth callback;
+4. configure a stable numeric operator allow-list;
+5. configure fixed repository, branch, writable roots, and server-owned mutation
+   destinations;
+6. provision deployment-capable persistent Redis state with an isolated
+   namespace;
+7. configure least-privilege repository credentials separately from OAuth;
+8. verify Hosted secrets are absent from Visitor production;
+9. deploy the intended source revision;
+10. run the operator and failure-path smoke checks below.
+
+Do not copy configuration from a historical or unrelated Hosted deployment just
+because variable names match.
 
 ## Operator smoke test
 
-Run this against the canonical authoring origin after a deployment or promotion:
+Against the canonical authoring origin:
 
-1. As an anonymous browser, request `/studio`; it must enter authentication.
-2. Sign in as an allow-listed operator; `/studio` must show the dashboard.
-3. Read Social, then save one valid Social change and confirm the expected
-   controlled-branch revision advances.
-4. Submit a save with a stale revision; it must fail without a branch advance.
-5. Submit with a wrong CSRF value; it must fail without a branch advance.
-6. `POST` logout, then confirm `/studio` again requires authentication. Logout
-   is POST-only: navigating to a logout URL with GET is not logout.
-7. Exercise an unknown, syntactically valid session and confirm it is cleared
-   and redirected to authentication.
-8. After every mutation and failure case, verify both `main` and the controlled
-   validation branch; only the intended successful mutation may advance the
-   controlled branch, and `main` must not move.
+1. request `/studio` anonymously; it must enter authentication rather than expose
+   authoring state;
+2. authenticate as an allow-listed operator; `/studio` must expose only the
+   admitted Hosted surface;
+3. read an admitted editor and perform one controlled valid mutation;
+4. submit a stale revision and confirm no repository advance;
+5. submit an invalid/wrong CSRF or Origin request and confirm no mutation;
+6. exercise an unadmitted Studio route and confirm fail-closed behavior;
+7. logout with POST and confirm the next `/studio` requires authentication;
+8. verify Visitor production still exposes no `/studio/**` or `/auth/**`
+   authority;
+9. verify persistent session/state behavior appropriate to the deployment
+   topology;
+10. verify no secret value appears in responses, logs, issue evidence, or Git
+    history.
 
-## Rollback or disable
+## Recovery and rollback
 
-1. Restore the known-good allow-list and other intended configuration values.
-2. Roll back or promote the known-good deployment, as appropriate, and ensure
-   the selected snapshot actually uses those restored values.
-3. If Hosted configuration is disabled or incomplete, it must fail closed.
-   Never address an outage by falling back to in-memory authority.
-4. After recovery, verify canonical `/` and anonymous `/studio` behavior.
+Repository content recovery and Hosted deployment recovery are separate
+operations.
 
-## Issue #275 deployment validation record
+For repository content, use ordinary controlled Git/repository history and the
+admitted authoring boundaries. Do not rewrite published history merely to hide a
+Hosted mutation.
 
-### Live production evidence
+For Hosted runtime recovery:
 
-The final capability-aware deployment used feature revision
-`2e7be819a043b89f454ab6ecf9967731a93f8c7f`. The normal known-good deployment
-was `dpl_FjWHTCwtEc8oLGe1uguzi7nP1vsG`; the temporary
-authorization-revocation deployment was `dpl_Cmhc3L9ZA7XEzCJdYHaY7ftAArFY`.
-The normal deployment was restored after that test.
+1. restore intended server-side configuration without exposing values;
+2. restore or redeploy a known-good source revision;
+3. verify the canonical Hosted origin and OAuth callback still match exactly;
+4. verify anonymous authentication gating and allow-listed access;
+5. verify persistent state behavior;
+6. leave the runtime fail-closed if configuration or persistent state is
+   incomplete rather than falling back to weaker authority.
 
-The controlled branch began at
-`5bf517ea2b3df8b5a23c66ba07abaf4290ab8f16`. One valid Social save advanced
-only `issue-275-hosted-validation` to
-`f28a2ea84eba98db34217ce11e019da5b60367e8`; only `config/social.yaml`
-changed. `main` remained at `5bf517ea2b3df8b5a23c66ba07abaf4290ab8f16`.
+## Lifecycle and decommissioning
 
-Observed live failure and security outcomes:
+Hosted infrastructure is not permanent merely because it once proved the
+architecture.
 
-- A stale authoring revision returned a SvelteKit `ActionResult` failure with
-  application status 409 and did not advance the branch.
-- A wrong CSRF value returned 403 and did not advance the branch.
-- A wrong cross-site `Origin` returned HTTP 403 before authoring and did not
-  advance the branch. This observed rejection came from SvelteKit's framework
-  CSRF/origin boundary, so it is defense in depth and is **not** live proof
-  specifically of the custom `HostedMutationGuard` Origin branch.
-- An unknown syntactically valid session returned 302 to
-  `/auth/github/login?returnTo=%2Fstudio` and explicitly cleared the stale
-  session cookie.
-- A valid POST logout returned 200, cleared browser session transport,
-  invalidated server authority, and made the next `/studio` require
-  authentication.
-- An initially under-scoped fine-grained PAT caused a generic 503 repository
-  write failure; no branch advanced and no credential leaked.
-- Session authority survived an actual redeployment, demonstrating persistent
-  Redis rather than dependence on one process.
-- Not-yet-admitted Studio routes stayed 404/fail-closed.
+Before retiring a deployment, inventory each concrete dependency and classify
+it as:
 
-For the authorization-revocation test, production's allow-list was temporarily
-changed to subject `1` in a separate deployment while the browser retained an
-already-valid Hosted session for subject `126195429`. `GET /studio` returned
-403 under the current allow-list. This proves authorization is re-evaluated
-against current deployment policy for an existing session; it was **not** a
-fresh unauthorized OAuth callback test. The configuration and deployment were
-restored and verified afterwards; `main` and the validation branch were
-unchanged by this test.
+- `DEDICATED — SAFE TO RETIRE`;
+- `SHARED — KEEP`;
+- `UNKNOWN — DO NOT DELETE`.
+
+Only proven dedicated resources may be removed. Shared or unknown OAuth apps,
+repository credentials, databases, domains, or integrations must be preserved
+until ownership is resolved.
+
+Retiring one validation or consumer deployment does not deprecate Hosted Studio,
+ADR 0008/0009/0010, the `persistent-redis` topology contract, Redis adapters,
+OAuth/session/CSRF semantics, or the ability to provision a new dedicated
+Hosted Studio when product need justifies it.
+
+## Issue #275 historical validation record
+
+Issue #275 established the first real private Hosted Studio deployment and
+validated the selected Vercel + persistent Redis operating model.
+
+Historical deployment identity:
+
+```text
+Vercel project:      atelier-kit-hosted-studio
+Canonical origin:    https://atelier-kit-hosted-studio.vercel.app
+OAuth callback:      https://atelier-kit-hosted-studio.vercel.app/auth/github/callback
+Redis resource:      atelier-kit-hosted-state
+Repository:          gcomneno/atelier-kit
+Validation branch:   issue-275-hosted-validation
+Writable root:       config
+Initial mutation:    config/social.yaml
+```
+
+The final capability-aware validation deployment used feature revision
+`2e7be819a043b89f454ab6ecf9967731a93f8c7f`. The controlled branch began at
+`5bf517ea2b3df8b5a23c66ba07abaf4290ab8f16`; one valid Social save advanced
+only the validation branch to
+`f28a2ea84eba98db34217ce11e019da5b60367e8`, while `main` remained unchanged.
+
+Observed validation evidence included:
+
+- stale revision rejection with no branch advance;
+- wrong CSRF and cross-site Origin rejection with no branch advance;
+- unknown session rejection and stale-cookie clearing;
+- POST logout invalidating server-side authority;
+- generic/secret-safe repository failure from an initially under-scoped
+  fine-grained PAT;
+- session authority surviving a real redeploy, proving persistent state rather
+  than dependence on one process;
+- not-yet-admitted Studio routes remaining fail-closed;
+- current-policy authorization being re-evaluated for an existing authenticated
+  session.
+
+These observations remain historical architecture/security evidence. They do
+not make the old deployment, branch, OAuth callback, or Redis resource current
+runtime authority.
+
+### #359 decommission record
+
+On 2026-09-02 issue #359 reconciled the lifecycle of the #275 validation
+infrastructure.
+
+Observed inventory showed:
+
+- `atelier-kit-hosted-studio` still existed as a dedicated Vercel project;
+- `atelier-kit-hosted-state` was an owned Upstash for Redis Marketplace
+  resource connected only to `atelier-kit-hosted-studio (production)`;
+- `issue-275-hosted-validation` was already absent/non-authoritative;
+- the canonical local checkout was linked to `atelier-kit-public-demo`, not the
+  historical Hosted project.
+
+After classification as dedicated resources:
+
+- `atelier-kit-hosted-state` was disconnected from all projects and deleted;
+- subsequent inspection returned no such resource;
+- `atelier-kit-hosted-studio` was removed from Vercel;
+- subsequent inspection returned no such project;
+- the canonical checkout link remained unchanged.
+
+The historical GitHub OAuth application and repository PAT were **not** deleted
+because current account-level ownership/reuse was not proven. They remain
+`UNKNOWN — DO NOT DELETE` until separately reconciled.
+
+The lifecycle decision is therefore:
+
+```text
+Hosted Studio architecture
+  KEEP
+
+#275 Atelier-Kit validation infrastructure
+  DECOMMISSIONED
+
+Future consumer Hosted Studio
+  PROVISION EXPLICITLY WHEN NEEDED
+```
 
 ## Issue #281 public Visitor deployment validation record
 
 The separately verified public Vercel project is
 `giadaware/atelier-kit-visitor-demo`, at
-<https://atelier-kit-visitor-demo.vercel.app>. It is default-content,
-read-only Visitor deployment and must never share this Hosted Studio
-deployment's configuration or credentials.
+<https://atelier-kit-visitor-demo.vercel.app>. It is a default-content,
+read-only Visitor deployment and must never inherit Hosted Studio configuration
+or credentials.
 
-The corrected issue #281 live audit was rerun successfully on 2026-08-12.
-`/` returned 200 with the expected `<title>Atelier-Kit Demo</title>` and
-default demo notice. `/about`, `/catalog`, `/collections`, `/news`, and `/faq`
-returned 200. The listed Studio/auth GET routes and canonical-Origin POSTs to
-`/auth/logout` and `/studio/site/social` returned 404, with neither `Location`
-nor `Set-Cookie` response headers.
-
-The environment-variable listing returned no variables. This remains limited
-evidence: it can only report variables visible to the auditing credentials and
-does not prove the absence of unrelated Vercel settings.
+The corrected issue #281 live audit on 2026-08-12 verified representative
+Visitor pages returned 200 while representative Studio/auth GET routes and
+canonical-Origin POSTs remained 404/fail-closed, with neither OAuth redirect nor
+`Set-Cookie` response transport on denied routes. The environment-variable
+listing visible to the auditing credentials returned no variables.
 
 Run the explicit-project, canonical-Origin audit in [Deploy to
-Vercel](deploy-vercel.md) after every Visitor deployment. Its assertions prove
-representative default content/page identity, no OAuth redirect, and no
-`Set-Cookie` response transport on denied GET and POST routes, including
-`POST /studio/site/social`. The security interpretation is recorded in the
+Vercel](deploy-vercel.md) after every relevant Visitor deployment. The security
+interpretation is recorded in the
 [Hosted Studio threat model](../security/hosted-studio-threat-model.md).
-
-Updating the checkbox on GitHub Epic #82 remains the external reconciliation
-step. It was not performed in this worktree.
-
-### Automated coverage (not live observations)
-
-Automated evidence covers expired-session handling, missing-`Origin` handling,
-unauthorized fresh OAuth callback behavior, and OAuth/store outage paths not
-otherwise observed live. It also covers the Local/Visitor runtime matrix and
-Local-only publish import isolation.
-
-The targeted Visitor/Local/Hosted authority gate passed 112/112, and the
-targeted Local-only publish-path architecture gate passed 14/14. These are
-executable architecture/test evidence, not live visitor-deployment evidence.
-
-Before this documentation change, the full gate at
-`2e7be819a043b89f454ab6ecf9967731a93f8c7f` was green: 700/700 tests,
-`svelte-check` with zero errors and warnings, production build, and content
-validation. This is pre-documentation validation; run the final gate again
-after the docs change.

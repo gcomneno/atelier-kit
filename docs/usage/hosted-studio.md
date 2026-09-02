@@ -129,10 +129,11 @@ authoring adapter: repository Contents read/write plus GitHub-required Metadata
 read-only. Browser input must never select repository, branch, writable roots,
 commit message, or provider credentials.
 
-A future deployment may reuse an existing account-level OAuth application or
-repository credential only after ownership and sharing have been reviewed
-explicitly. Unknown credentials must be preserved rather than deleted or
-silently repurposed.
+For a new deployment, provision dedicated credentials by default. Historical or
+otherwise unclassified OAuth applications and repository credentials must be
+preserved while ownership is unknown, but must not be reused merely because they
+already exist. Any deliberate sharing requires a separate explicit
+architecture/security decision.
 
 ## Save-to-deploy and Preview contract
 

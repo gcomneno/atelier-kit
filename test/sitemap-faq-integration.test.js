@@ -47,6 +47,11 @@ function writeSignalCloudsFixture(root, signalCloudsYaml) {
   );
 }
 
+/** @param {{ loc: string }} entry */
+function isFaqSitemapEntry(entry) {
+  return new URL(entry.loc).pathname === '/faq';
+}
+
 test('buildSitemapUrls includes /faq only when eligible FAQ entries exist', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'atelier-sitemap-faq-'));
   const originalCwd = process.cwd();
@@ -95,10 +100,7 @@ test('buildSitemapUrls includes /faq only when eligible FAQ entries exist', asyn
     const withEligibleFaq = sitemap.buildSitemapUrls('https://example.test');
 
     assert.ok(
-      withEligibleFaq.some(
-        /** @param {{ loc: string }} entry */
-        (entry) => entry.loc === 'https://example.test/faq'
-      ),
+      withEligibleFaq.some(isFaqSitemapEntry),
       'expected /faq in sitemap when an eligible FAQ entry exists'
     );
 
@@ -120,10 +122,7 @@ test('buildSitemapUrls includes /faq only when eligible FAQ entries exist', asyn
     const withoutEligibleFaq = sitemap.buildSitemapUrls('https://example.test');
 
     assert.equal(
-      withoutEligibleFaq.some(
-        /** @param {{ loc: string }} entry */
-        (entry) => entry.loc === 'https://example.test/faq'
-      ),
+      withoutEligibleFaq.some(isFaqSitemapEntry),
       false,
       'expected /faq to be omitted when no eligible FAQ entries exist'
     );

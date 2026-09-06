@@ -12,6 +12,13 @@ const kitRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const childEnv = { ...process.env, ATELIER_STUDIO: '1' };
 delete childEnv.NODE_TEST_CONTEXT;
 
+/** @param {string} root */
+function writeTestPlaceholder(root) {
+  const file = path.join(root, 'static/images/items/placeholder.svg');
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1" viewBox="0 0 1 1"></svg>\n');
+}
+
 test('legacy tagline display loads, validates, renders inertly and survives Site Identity save', () => {
   const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'atelier-legacy-tagline-'));
   const target = path.join(parent, 'client');
@@ -23,6 +30,7 @@ test('legacy tagline display loads, validates, renders inertly and survives Site
       { cwd: kitRoot, encoding: 'utf8', env: childEnv }
     );
     assert.equal(scaffold.status, 0, `${scaffold.stdout}\n${scaffold.stderr}`);
+    writeTestPlaceholder(target);
 
     const sitePath = path.join(target, 'config/site.yaml');
     const config = parse(fs.readFileSync(sitePath, 'utf8'));

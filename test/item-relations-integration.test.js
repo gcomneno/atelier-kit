@@ -47,6 +47,9 @@ test('relations flow through loading, validation and Studio authoring', async ()
       fs.cpSync(path.join(kitRoot, entry), path.join(root, entry), { recursive: true });
     }
     fs.symlinkSync(path.join(kitRoot, 'node_modules'), path.join(root, 'node_modules'), 'dir');
+    const placeholderPath = path.join(root, 'static/images/items/placeholder.svg');
+    fs.mkdirSync(path.dirname(placeholderPath), { recursive: true });
+    fs.writeFileSync(placeholderPath, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1" viewBox="0 0 1 1"></svg>\n');
 
     /**
      * @param {string} id

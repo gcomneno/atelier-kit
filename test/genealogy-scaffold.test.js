@@ -71,6 +71,13 @@ function runContentValidation(target) {
   });
 }
 
+/** @param {string} root */
+function writeTestPlaceholder(root) {
+  const file = path.join(root, 'static/images/items/placeholder.svg');
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1" viewBox="0 0 1 1"></svg>\n');
+}
+
 /**
  * Load generated visitor route modules against the generated content root.
  * @param {string} target
@@ -133,6 +140,7 @@ test('genealogy scaffold generates validated multi-generation people and the gen
     );
     assert.equal(forcedScaffold.status, 0, `${forcedScaffold.stdout}\n${forcedScaffold.stderr}`);
     assert.deepEqual(snapshotTree(target), firstGeneration);
+    writeTestPlaceholder(target);
 
     const site = readYaml(target, 'config/site.yaml').site;
     const catalog = readYaml(target, 'config/catalog.yaml').catalog;

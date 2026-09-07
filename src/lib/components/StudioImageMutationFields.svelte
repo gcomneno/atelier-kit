@@ -4,7 +4,7 @@
   import { untrack } from 'svelte';
 
   /** @typedef {'none' | 'add' | 'replace' | 'remove'} MutationState */
-  /** @typedef {{ state: MutationState, hasUpload: boolean, remove: boolean }} MutationSnapshot */
+  /** @typedef {{ state: MutationState, hasUpload: boolean, remove: boolean, file?: File | null }} MutationSnapshot */
   /** @typedef {{ none?: string, add: string, replace: string, remove: string }} MutationMessages */
 
   /** @type {{ uploadName: string, removeName: string, uploadLabel: string, uploadHint?: string, removeLabel: string, hasExisting?: boolean, accept?: string, disabled?: boolean, required?: boolean, stateMessages: MutationMessages, resetKey?: unknown, onmutation?: (snapshot: MutationSnapshot) => void }} */
@@ -39,9 +39,10 @@
   /** @param {Event} event */
   function onFileChange(event) {
     const input = /** @type {HTMLInputElement} */ (event.currentTarget);
-    const snapshot = mutation.selectFile(input.files?.[0]);
+    const file = input.files?.[0] ?? null;
+    const snapshot = mutation.selectFile(file);
     remove = snapshot.remove;
-    publish(snapshot);
+    publish({ ...snapshot, file });
   }
 
   /** @param {Event} event */
@@ -50,7 +51,7 @@
     const snapshot = mutation.setRemove(input.checked);
     remove = snapshot.remove;
     if (snapshot.remove && uploadInput) uploadInput.value = '';
-    publish(snapshot);
+    publish({ ...snapshot, file: null });
   }
 
   $effect(() => {
@@ -60,7 +61,7 @@
       const snapshot = mutation.reset(nextHasExisting);
       remove = false;
       if (uploadInput) uploadInput.value = '';
-      publish(snapshot);
+      publish({ ...snapshot, file: null });
     });
   });
 </script>

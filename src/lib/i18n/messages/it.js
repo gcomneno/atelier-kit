@@ -452,6 +452,8 @@ export default {
         captionHint: 'Testo in basso sull’immagine del banner, centrato.',
         href: 'Link (opzionale, es. /news/anteprima)',
         hrefHint: 'Percorso interno: rende l’immagine cliccabile (es. /news, /collections).',
+        focalPoint: 'Punto focale del hero banner',
+        resetFocalPoint: 'Reimposta il punto focale al centro',
         save: 'Salva hero banner',
         saving: 'Salvataggio…'
       },
@@ -1030,6 +1032,8 @@ export default {
     catalogHomeLimitInvalid: 'Il limite in home deve essere 0 (tutte) o un numero intero da 1 a {max}.',
     catalogHomeLimitMax: 'Il limite in home non può superare {max}.',
     heroBannerImageRequired: 'Carica un’immagine banner oppure disattiva la visualizzazione.',
+    heroBannerFocalPointInvalid:
+      'Il punto focale del hero banner deve usare valori x e y da 0 a 1.',
     contactEmailRequired: 'L’email di contatto è obbligatoria quando il contatto email è abilitato.',
     contactWhatsappRequired: 'Il numero WhatsApp è obbligatorio quando il contatto WhatsApp è abilitato.',
     socialUrlInvalid: 'Inserisci un URL http o https valido per {network}.',

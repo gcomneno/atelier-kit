@@ -66,6 +66,22 @@ Fields:
 - `og_image` is an optional social preview image for Facebook, Instagram and similar link unfurlers. Use a path under `/images/…` (for example `/images/site/og.jpg`) or a full `https://` URL. Recommended size: 1200×630.
 - `favicon` is an optional browser tab icon path. Studio saves uploaded favicons under `static/images/site/favicon.*` and stores the public path, for example `/images/site/favicon.png`. Omit the field or leave it empty to use the default Atelier-Kit icon.
 
+### Hero banner focal point
+
+Hero/banner media can optionally store a normalized focal point in `config/site.yaml`:
+
+```yaml
+site:
+  hero_banner:
+    show: true
+    image_file: /images/site/hero-banner.jpg
+    focal_point:
+      x: 0.28
+      y: 0.35
+```
+
+`x` and `y` are numeric coordinates from `0` to `1`, independent from the source image dimensions. The visitor maps them to the cropped image position without modifying the source asset. When `focal_point` is absent, the legacy centered crop remains unchanged. Resetting the focal point in Studio removes `focal_point` rather than persisting an explicit center value.
+
 ## Social links
 
 Edit `config/social.yaml` directly or use **Studio → Site → Social**. Supported first-class IDs are `instagram`, `facebook`, `x`, and `github`; the legacy `twitter` alias is normalized to `x`.

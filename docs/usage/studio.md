@@ -195,6 +195,24 @@ site:
 
 Remove the custom favicon to fall back to the default Atelier-Kit `/favicon.svg`.
 
+## Hero banner focal point
+
+Open **Site → Hero** to control which part of a cropped hero image remains visually important across responsive layouts.
+
+When a Hero image is available, Studio shows the shared GiadaWare UI focal-point control alongside the preview. Click or move the marker to choose the focal position, preview the resulting crop, and save it with the Hero configuration.
+
+The persisted value is normalized:
+
+```yaml
+site:
+  hero_banner:
+    focal_point:
+      x: 0.28
+      y: 0.35
+```
+
+Use **Reset focal point to center** to return to the default centered behavior. Reset removes the optional `focal_point` field. The operation changes only configuration metadata; it does not crop, rewrite or replace the source image.
+
 ## Atelier Mark
 
 **Atelier Mark** is inline text emphasis for short site identity fields. Operators wrap words with theme-color tokens or registered font presets instead of HTML or custom CSS.

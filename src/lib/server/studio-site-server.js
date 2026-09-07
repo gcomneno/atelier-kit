@@ -3,6 +3,10 @@
 import { fail } from '@sveltejs/kit';
 import { guardStudio } from '$lib/server/studio-guard.js';
 import { appearanceFromForm, deriveCardColor, resolveSiteAppearance } from '$lib/site-appearance.js';
+import {
+  parseImageFocalPoint,
+  parseImageFocalPointFormFields
+} from '$lib/image-focal-point.js';
 import { localizedAppearancePresets, localizedFontPresets } from '$lib/i18n/index.js';
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
 import { getOperatorLocale, getOperatorTranslator } from '$lib/i18n/server.js';
@@ -121,12 +125,15 @@ export function loadHeroBannerForm() {
       ? site.hero_banner
       : {};
 
+  const focalPoint = parseImageFocalPoint(banner.focal_point);
+
   return {
     show: banner.show === true,
     image_file: readString(banner, 'image_file'),
     description: readString(banner, 'description'),
     caption: readString(banner, 'caption'),
-    href: readString(banner, 'href')
+    href: readString(banner, 'href'),
+    ...(focalPoint ? { focal_point: focalPoint } : {})
   };
 }
 
@@ -842,6 +849,19 @@ export async function saveHeroBannerAction({ request }) {
 
   try {
     const bannerMutation = readImageMutation(formData, 'banner_upload', 'remove_hero_image', locale);
+
+    let focalPoint;
+
+    try {
+      focalPoint = parseImageFocalPointFormFields({
+        enabled: checkboxEnabled(formData.get('banner_focal_point_enabled')),
+        x: formData.get('banner_focal_point_x'),
+        y: formData.get('banner_focal_point_y')
+      });
+    } catch {
+      throw new Error(t('errors.heroBannerFocalPointInvalid'));
+    }
+
     const data = readProjectYaml('config/site.yaml');
 
     if (!isRecord(data.site)) {
@@ -879,7 +899,8 @@ export async function saveHeroBannerAction({ request }) {
         image_file: imageFile,
         ...(description !== '' ? { description } : {}),
         ...(caption !== '' ? { caption } : {}),
-        ...(href !== '' ? { href } : {})
+        ...(href !== '' ? { href } : {}),
+        ...(focalPoint ? { focal_point: focalPoint } : {})
       };
     } else if (imageFile !== '') {
       site.hero_banner = {
@@ -887,7 +908,8 @@ export async function saveHeroBannerAction({ request }) {
         image_file: imageFile,
         ...(description !== '' ? { description } : {}),
         ...(caption !== '' ? { caption } : {}),
-        ...(href !== '' ? { href } : {})
+        ...(href !== '' ? { href } : {}),
+        ...(focalPoint ? { focal_point: focalPoint } : {})
       };
     } else if (site.hero_banner) {
       delete site.hero_banner;

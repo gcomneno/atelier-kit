@@ -4,6 +4,7 @@ import { parse } from 'yaml';
 import { createTranslator } from '../src/lib/i18n/index.js';
 import { loadOperatorLocale } from '../src/lib/i18n/load-operator-locale.js';
 import { validateAboutPortraitContent } from '../src/lib/about-config.js';
+import { isValidImageFocalPoint } from '../src/lib/image-focal-point.js';
 import { validateEditorialFields } from '../src/lib/editorial-markup.js';
 import { isValidFooterHref } from '../src/lib/footer-links.js';
 import { isHomeShowMode, isLayoutPreset, MAX_CATALOG_HOME_LIMIT, MAX_LATEST_NEWS_COUNT } from '../src/lib/layout-presets.js';
@@ -332,6 +333,10 @@ function validateSite() {
   if (site.hero_banner && typeof site.hero_banner === 'object' && !Array.isArray(site.hero_banner)) {
     const banner = site.hero_banner;
     const bannerSource = `${source}:hero_banner`;
+
+    if ('focal_point' in banner && !isValidImageFocalPoint(banner.focal_point)) {
+      failKey('missingField', { source: bannerSource, field: 'focal_point' });
+    }
 
     if (banner.show === true) {
       const imageFile = requireString(banner, 'image_file', bannerSource);

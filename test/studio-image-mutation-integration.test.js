@@ -60,6 +60,12 @@ function formFor(studio, pair) {
     form.set('banner_description', values.description);
     form.set('banner_caption', values.caption);
     form.set('banner_href', values.href);
+
+    if (values.focal_point) {
+      form.set('banner_focal_point_enabled', 'on');
+      form.set('banner_focal_point_x', String(values.focal_point.x));
+      form.set('banner_focal_point_y', String(values.focal_point.y));
+    }
   }
   return form;
 }
@@ -188,6 +194,93 @@ test('site image mutation production actions', async (t) => {
       const site = parse(fs.readFileSync(sitePath, 'utf8')).site;
       assert.deepEqual(site.audit_unrelated, { preserved: 'byte-for-byte meaning' });
       assert.equal(site.hero_banner, undefined);
+    });
+
+
+    await t.test('Hero focal point metadata persists without rewriting image bytes', async () => {
+      reset(pairs[3]);
+
+      const imagePath = path.join(assetsPath, 'hero-banner.png');
+      const beforeImage = fs.readFileSync(imagePath);
+
+      const form = formFor(studio, pairs[3]);
+      form.set('banner_focal_point_enabled', 'on');
+      form.set('banner_focal_point_x', '0.28');
+      form.set('banner_focal_point_y', '0.35');
+
+      const result = await invoke(studio.saveHeroBannerAction, form);
+      assertSuccessfulAction(result, pairs[3], 'focal-point metadata');
+
+      const saved = parse(fs.readFileSync(sitePath, 'utf8')).site;
+
+      assert.deepEqual(
+        saved.hero_banner.focal_point,
+        { x: 0.28, y: 0.35 }
+      );
+
+      assert.deepEqual(
+        fs.readFileSync(imagePath),
+        beforeImage
+      );
+    });
+
+    await t.test('Hero focal point reset omits focal_point', async () => {
+      reset(pairs[3]);
+
+      const document = parse(fs.readFileSync(sitePath, 'utf8'));
+      document.site.hero_banner.focal_point = { x: 0.28, y: 0.35 };
+      fs.writeFileSync(sitePath, `${stringify(document).trim()}\n`);
+
+      const form = formFor(studio, pairs[3]);
+      form.delete('banner_focal_point_enabled');
+      form.delete('banner_focal_point_x');
+      form.delete('banner_focal_point_y');
+
+      const result = await invoke(studio.saveHeroBannerAction, form);
+      assertSuccessfulAction(result, pairs[3], 'focal-point reset');
+
+      const saved = parse(fs.readFileSync(sitePath, 'utf8')).site;
+
+      assert.equal(
+        Object.hasOwn(saved.hero_banner, 'focal_point'),
+        false
+      );
+    });
+
+    await t.test('invalid Hero focal point preserves YAML and every image byte', async () => {
+      reset(pairs[3]);
+
+      const yamlBefore = fs.readFileSync(sitePath);
+      const assetsBefore = new Map(
+        fs.readdirSync(assetsPath).map((name) => [
+          name,
+          fs.readFileSync(path.join(assetsPath, name))
+        ])
+      );
+
+      const form = formFor(studio, pairs[3]);
+      form.set(
+        'banner_upload',
+        new File(['new-hero'], 'hero.png', { type: 'image/png' })
+      );
+      form.set('banner_focal_point_enabled', 'on');
+      form.set('banner_focal_point_x', 'Infinity');
+      form.set('banner_focal_point_y', '0.35');
+
+      const result = await invoke(studio.saveHeroBannerAction, form);
+
+      assert.equal(result.status, 400);
+      assert.deepEqual(fs.readFileSync(sitePath), yamlBefore);
+
+      assert.deepEqual(
+        new Map(
+          fs.readdirSync(assetsPath).map((name) => [
+            name,
+            fs.readFileSync(path.join(assetsPath, name))
+          ])
+        ),
+        assetsBefore
+      );
     });
 
   } finally {

@@ -158,6 +158,27 @@ const SITE_YAML = [
   ''
 ].join('\n');
 
+const SITE_YAML_WITH_FOCAL_POINT = [
+  'site:',
+  '  name: Example',
+  '  language: en',
+  '  unrelated:',
+  '    preserve: yes',
+  '  appearance:',
+  '    preset: custom',
+  '    background_image: /images/site/background.webp',
+  '  hero_banner:',
+  '    show: true',
+  '    image_file: /images/site/hero-banner.jpg',
+  '    description: Existing description',
+  '    caption: Existing caption',
+  '    href: https://example.test/',
+  '    focal_point:',
+  '      x: 0.28',
+  '      y: 0.35',
+  ''
+].join('\n');
+
 const QUOTED_SITE_YAML = [
   'site:',
   '  name: "Ombre Quotidiane"',
@@ -297,6 +318,30 @@ function baseForm() {
   return form;
 }
 
+/**
+ * @param {FormData} form
+ * @param {string} x
+ * @param {string} y
+ */
+function setFocalPointForm(
+  form,
+  x,
+  y
+) {
+  form.set(
+    'banner_focal_point_enabled',
+    'on'
+  );
+  form.set(
+    'banner_focal_point_x',
+    x
+  );
+  form.set(
+    'banner_focal_point_y',
+    y
+  );
+}
+
 test(
   'Hosted Hero read exposes only projected form state plus canonical revision',
   async () => {
@@ -434,6 +479,12 @@ test(
     const form =
       baseForm();
 
+    setFocalPointForm(
+      form,
+      '0.28',
+      '0.35'
+    );
+
     const result =
       await saveHostedHeroAuthoringData({
         runtimeMode:
@@ -529,7 +580,11 @@ test(
         caption:
           'New caption',
         href:
-          'https://new.example/'
+          'https://new.example/',
+        focal_point: {
+          x: 0.28,
+          y: 0.35
+        }
       }
     );
 
@@ -634,6 +689,11 @@ test(
       'banner_upload',
       await pngUpload()
     );
+    setFocalPointForm(
+      form,
+      '0.28',
+      '0.35'
+    );
 
     let relatedContent = '';
 
@@ -691,6 +751,75 @@ test(
     assert.equal(
       written.site.hero_banner.image_file,
       '/images/site/hero-banner.png'
+    );
+    assert.deepEqual(
+      written.site.hero_banner.focal_point,
+      {
+        x: 0.28,
+        y: 0.35
+      }
+    );
+  }
+);
+
+test(
+  'Hosted Hero focal point reset omits a previously persisted focal point',
+  async () => {
+    const harness =
+      repositoryHarness({
+        content:
+          SITE_YAML_WITH_FOCAL_POINT
+      });
+
+    const form =
+      baseForm();
+
+    const result =
+      await saveHostedHeroAuthoringData({
+        runtimeMode:
+          'hosted',
+        hostedContext:
+          HOSTED_CONTEXT,
+        formData:
+          form,
+        expectedRevision:
+          EXPECTED_REVISION,
+        environment: {},
+        repositoryFactory:
+          repositoryFactory(
+            harness
+          )
+      });
+
+    assert.equal(
+      harness.writes.length,
+      1
+    );
+
+    const changes =
+      /** @type {Array<{
+       *   type: string,
+       *   path: string,
+       *   content: string
+       * }>} */ (
+        harness.writes[0].changes
+      );
+
+    const written =
+      parse(
+        changes[0].content
+      );
+
+    assert.equal(
+      Object.hasOwn(
+        written.site.hero_banner,
+        'focal_point'
+      ),
+      false
+    );
+    assert.equal(
+      result.authoringRevision,
+      RESULT_REVISION
     );
   }
 );
@@ -799,7 +928,10 @@ test(
   'Hosted Hero remove uses only trusted repository image path and clears the banner atomically',
   async () => {
     const harness =
-      repositoryHarness();
+      repositoryHarness({
+        content:
+          SITE_YAML_WITH_FOCAL_POINT
+      });
 
     const form =
       new FormData();
@@ -882,6 +1014,76 @@ test(
     assert.equal(
       result.heroBannerForm.show,
       false
+    );
+  }
+);
+
+test(
+  'invalid Hosted Hero focal point rejects before repository or image mutation access',
+  async () => {
+    const harness =
+      repositoryHarness();
+
+    const form =
+      baseForm();
+
+    form.set(
+      'banner_upload',
+      await pngUpload()
+    );
+    setFocalPointForm(
+      form,
+      'Infinity',
+      '0.35'
+    );
+
+    let factoryCalls = 0;
+    let imageCalls = 0;
+
+    await assert.rejects(
+      saveHostedHeroAuthoringData({
+        runtimeMode:
+          'hosted',
+        hostedContext:
+          HOSTED_CONTEXT,
+        formData:
+          form,
+        expectedRevision:
+          EXPECTED_REVISION,
+        environment: {},
+        repositoryFactory() {
+          factoryCalls += 1;
+
+          return repositoryFactory(
+            harness
+          )();
+        },
+        async imageMutationApplier() {
+          imageCalls += 1;
+
+          throw new Error(
+            'must not run'
+          );
+        }
+      }),
+      HostedHeroAuthoringValidationError
+    );
+
+    assert.equal(
+      factoryCalls,
+      0
+    );
+    assert.equal(
+      harness.reads.length,
+      0
+    );
+    assert.equal(
+      harness.writes.length,
+      0
+    );
+    assert.equal(
+      imageCalls,
+      0
     );
   }
 );

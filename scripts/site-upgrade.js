@@ -27,17 +27,17 @@ const VERSION_FILE = '.atelier-kit-version';
 const PRESERVE_MANIFEST = '.atelier-kit-preserve';
 const UI_COMPONENTS_PACKAGE = 'giadaware-ui-components';
 const UI_COMPONENTS_DEPENDENCY =
-  'file:vendor/giadaware-ui-components/26f9e20/giadaware-ui-components-0.0.0.tgz';
+  'file:vendor/giadaware-ui-components/3980787/giadaware-ui-components-0.1.0.tgz';
 const HOSTED_UPSTASH_REDIS_PACKAGE = '@upstash/redis';
 const YAML_PACKAGE = 'yaml';
 const VERCEL_ANALYTICS_PACKAGE = '@vercel/analytics';
 const SHARP_PACKAGE = 'sharp';
 const UI_COMPONENTS_ARTIFACT =
-  'vendor/giadaware-ui-components/26f9e20/giadaware-ui-components-0.0.0.tgz';
+  'vendor/giadaware-ui-components/3980787/giadaware-ui-components-0.1.0.tgz';
 const UI_COMPONENTS_ARTIFACT_SHA256 =
-  '0a5107a3a14000799f880e43e06a98b48a01f16a927fdaf9cc3ed9cd969ca7ab';
+  '925b5560b65d2ae227cae913a848a677ff2390a65b1ddf4391df7f3a65dee8ba';
 const UI_COMPONENTS_IDENTITY =
-  'vendor/giadaware-ui-components/26f9e20/integration.json';
+  'vendor/giadaware-ui-components/3980787/integration.json';
 const UI_COMPONENTS_INTEGRATION_FILES = [
   UI_COMPONENTS_ARTIFACT,
   UI_COMPONENTS_IDENTITY
@@ -865,8 +865,8 @@ export function buildUiComponentsIntegrationPlan(
   }
   if (
     identity.package !== UI_COMPONENTS_PACKAGE ||
-    identity.version !== '0.0.0' ||
-    identity.sourceCommit !== '26f9e2068696ecfa215b75b2628cfce2736c164b' ||
+    identity.version !== '0.1.0' ||
+    identity.sourceCommit !== '3980787c1fd5736cca46467ad51a5617a551c04b' ||
     identity.filename !== path.basename(UI_COMPONENTS_ARTIFACT) ||
     identity.sha256 !== UI_COMPONENTS_ARTIFACT_SHA256
   ) {

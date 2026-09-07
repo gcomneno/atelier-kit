@@ -496,3 +496,157 @@ test('normally hidden Hero keeps upload and detail fields disabled', async (t) =
   assert.equal(upload?.disabled, true);
   assert.equal(details?.disabled, true);
 });
+
+
+test('Hero Studio adopts the GiadaWare focal-point control without a bespoke pointer widget', () => {
+  const route = 'src/routes/studio/site/hero/+page.svelte';
+  const source = fs.readFileSync(path.join(projectRoot, route), 'utf8');
+
+  assert.match(
+    source,
+    /ImageFocalPointControl[\s\S]*from 'giadaware-ui-components\/studio'/
+  );
+  assert.match(
+    source,
+    /getImageFocalPointObjectPosition/
+  );
+  assert.match(
+    source,
+    /name="banner_focal_point_enabled"/
+  );
+  assert.match(
+    source,
+    /name="banner_focal_point_x"/
+  );
+  assert.match(
+    source,
+    /name="banner_focal_point_y"/
+  );
+  assert.doesNotMatch(source, /onpointerdown=/);
+  assert.doesNotMatch(source, /onpointermove=/);
+  assert.doesNotMatch(source, /focal-point-marker/);
+});
+
+test('rendered Hero serializes focal metadata, previews canonical object-position and reset omits it', async (t) => {
+  const restoreDom = installDom();
+  const { temporaryRoot, module } = await buildPages();
+  const target = document.createElement('div');
+  document.body.append(target);
+
+  const focalHero = {
+    ...heroBannerForm,
+    focal_point: {
+      x: 0.28,
+      y: 0.35
+    }
+  };
+
+  const instance = module.mountPage(target, {
+    page: 'hero',
+    data: {
+      siteForm,
+      appearanceForm,
+      appearancePresets,
+      fontPresets,
+      heroBannerForm: focalHero
+    }
+  });
+
+  module.flushSync();
+
+  t.after(async () => {
+    await module.unmount(instance);
+    target.remove();
+    restoreDom();
+    fs.rmSync(temporaryRoot, { recursive: true, force: true });
+  });
+
+  const form = /** @type {HTMLFormElement} */ (target.querySelector('form'));
+  const preview = /** @type {HTMLImageElement} */ (target.querySelector('.banner-preview img'));
+
+  assert.equal(preview.style.objectPosition, '28% 35%');
+
+  let data = new FormData(form);
+  assert.equal(data.get('banner_focal_point_enabled'), 'on');
+  assert.equal(data.get('banner_focal_point_x'), '0.28');
+  assert.equal(data.get('banner_focal_point_y'), '0.35');
+
+  const reset = /** @type {HTMLButtonElement} */ (
+    [...form.querySelectorAll('button')].find((button) =>
+      /Reset focal point to center/.test(button.textContent ?? '')
+    )
+  );
+
+  assert.ok(reset);
+  click(module, reset);
+
+  data = new FormData(form);
+  assert.equal(data.get('banner_focal_point_enabled'), null);
+  assert.equal(data.get('banner_focal_point_x'), null);
+  assert.equal(data.get('banner_focal_point_y'), null);
+  assert.equal(preview.style.objectPosition, 'center');
+});
+
+test('Hero replacement upload becomes the focal-point preview source before save', async (t) => {
+  const restoreDom = installDom();
+  const { temporaryRoot, module } = await buildPages();
+  const target = document.createElement('div');
+  document.body.append(target);
+
+  const originalCreateObjectURL = URL.createObjectURL;
+  const originalRevokeObjectURL = URL.revokeObjectURL;
+
+  URL.createObjectURL = () => 'blob:hero-preview';
+  URL.revokeObjectURL = () => {};
+
+  const instance = module.mountPage(target, {
+    page: 'hero',
+    data: {
+      siteForm,
+      appearanceForm,
+      appearancePresets,
+      fontPresets,
+      heroBannerForm
+    }
+  });
+
+  module.flushSync();
+
+  t.after(async () => {
+    await module.unmount(instance);
+    URL.createObjectURL = originalCreateObjectURL;
+    URL.revokeObjectURL = originalRevokeObjectURL;
+    target.remove();
+    restoreDom();
+    fs.rmSync(temporaryRoot, { recursive: true, force: true });
+  });
+
+  const upload = /** @type {HTMLInputElement} */ (
+    target.querySelector('input[name=banner_upload]')
+  );
+
+  choose(
+    module,
+    upload,
+    new File(
+      ['replacement'],
+      'replacement.webp',
+      { type: 'image/webp' }
+    )
+  );
+
+  const preview = /** @type {HTMLImageElement} */ (
+    target.querySelector('.banner-preview img')
+  );
+
+  assert.equal(preview.getAttribute('src'), 'blob:hero-preview');
+
+  const focalControlImage = /** @type {HTMLImageElement} */ (
+    target.querySelector('.giu-image-focal-point-control__image')
+  );
+
+  assert.equal(
+    focalControlImage.getAttribute('src'),
+    'blob:hero-preview'
+  );
+});

@@ -10,9 +10,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const artifactRelative =
-  'vendor/giadaware-ui-components/26f9e20/giadaware-ui-components-0.0.0.tgz';
+  'vendor/giadaware-ui-components/3980787/giadaware-ui-components-0.1.0.tgz';
 const dependency = `file:${artifactRelative}`;
-const expectedSha256 = '0a5107a3a14000799f880e43e06a98b48a01f16a927fdaf9cc3ed9cd969ca7ab';
+const expectedSha256 = '925b5560b65d2ae227cae913a848a677ff2390a65b1ddf4391df7f3a65dee8ba';
 const npmCache = path.join(os.tmpdir(), 'atelier-kit-npm-cache');
 /** @type {string} */
 let fixtureRoot = '';
@@ -29,7 +29,7 @@ test.before(async () => {
   fs.copyFileSync(path.join(root, 'package-lock.json'), path.join(fixtureRoot, 'package-lock.json'));
   for (const relativePath of [
     artifactRelative,
-    'vendor/giadaware-ui-components/26f9e20/integration.json',
+    'vendor/giadaware-ui-components/3980787/integration.json',
     'src/lib/components/AtelierSocialIcon.svelte',
     'src/lib/components/AtelierFormStatus.svelte',
     'src/lib/social-icon-adapter.js',
@@ -158,12 +158,12 @@ function collectFiles(directory) {
 }
 
 test('records and installs the exact immutable package artifact', () => {
-  const manifest = JSON.parse(read('vendor/giadaware-ui-components/26f9e20/integration.json'));
+  const manifest = JSON.parse(read('vendor/giadaware-ui-components/3980787/integration.json'));
   assert.deepEqual(manifest, {
     package: 'giadaware-ui-components',
-    version: '0.0.0',
-    sourceCommit: '26f9e2068696ecfa215b75b2628cfce2736c164b',
-    filename: 'giadaware-ui-components-0.0.0.tgz',
+    version: '0.1.0',
+    sourceCommit: '3980787c1fd5736cca46467ad51a5617a551c04b',
+    filename: 'giadaware-ui-components-0.1.0.tgz',
     sha256: expectedSha256
   });
   assert.equal(sha256(artifactRelative), expectedSha256);
@@ -191,7 +191,7 @@ test('records and installs the exact immutable package artifact', () => {
   assert.equal(packageJson.dependencies['giadaware-ui-components'], dependency);
   assert.equal(lock.packages[''].dependencies['giadaware-ui-components'], dependency);
   assert.equal(lock.packages['node_modules/giadaware-ui-components'].resolved, dependency);
-  assert.equal(lock.packages['node_modules/giadaware-ui-components'].version, '0.0.0');
+  assert.equal(lock.packages['node_modules/giadaware-ui-components'].version, '0.1.0');
   assert.equal(
     lock.packages['node_modules/giadaware-ui-components'].integrity,
     sha512Integrity(fs.readFileSync(path.join(root, artifactRelative)))
@@ -253,6 +253,7 @@ test('package entry points expose the admitted components and adapters consume n
   assert.match(studioRoot, /EditableList/);
   assert.match(studioRoot, /EditableListRow/);
   assert.match(studioRoot, /ReorderActions/);
+  assert.match(studioRoot, /ImageFocalPointControl/);
 
   const sourceFiles = collectFiles(path.join(root, 'src'))
     .filter((file) => /\.(?:js|svelte)$/.test(file));

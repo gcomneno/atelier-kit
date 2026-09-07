@@ -5,6 +5,7 @@
   import { splitEditorialParagraphs, stripEditorialMarkup } from '$lib/editorial-markup.js';
   import { resolveDocumentTitle, resolveIntroTitle } from '$lib/site-branding.js';
   import { useVisitorI18n } from '$lib/i18n/visitor-context.js';
+  import { getImageFocalPointObjectPosition } from '$lib/image-focal-point.js';
 
   let { data } = $props();
   const t = useVisitorI18n();
@@ -98,10 +99,18 @@
 
       {#if showBannerMain && data.site.hero_banner}
         {@const banner = data.site.hero_banner}
+        {@const bannerObjectPosition = getImageFocalPointObjectPosition(banner.focal_point)}
         <div class="hero-banner-slot">
           {#if banner.href}
             <a class="hero-banner" href={banner.href}>
-              <img src={banner.image_file} alt={banner.image_alt} loading="lazy" width="960" height="360" />
+              <img
+                src={banner.image_file}
+                alt={banner.image_alt}
+                loading="lazy"
+                width="960"
+                height="360"
+                style:object-position={bannerObjectPosition}
+              />
               {#if banner.description}
                 <EditorialText tag="span" class="hero-banner-description" value={banner.description} />
               {/if}
@@ -111,7 +120,14 @@
             </a>
           {:else}
             <figure class="hero-banner">
-              <img src={banner.image_file} alt={banner.image_alt} loading="lazy" width="960" height="360" />
+              <img
+                src={banner.image_file}
+                alt={banner.image_alt}
+                loading="lazy"
+                width="960"
+                height="360"
+                style:object-position={bannerObjectPosition}
+              />
               {#if banner.description}
                 <EditorialText tag="span" class="hero-banner-description" value={banner.description} />
               {/if}
@@ -482,7 +498,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
   }
 
   :global(.hero-banner-caption) {

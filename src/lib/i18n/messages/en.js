@@ -450,6 +450,8 @@ export default {
         captionHint: 'Text along the bottom of the banner image, centered.',
         href: 'Link (optional, e.g. /news/preview)',
         hrefHint: 'Internal path: makes the image clickable (e.g. /news, /collections).',
+        focalPoint: 'Hero banner focal point',
+        resetFocalPoint: 'Reset focal point to center',
         save: 'Save hero banner',
         saving: 'Saving…'
       },
@@ -1023,6 +1025,8 @@ export default {
     catalogHomeLimitInvalid: 'Home limit must be 0 (show all) or a whole number from 1 to {max}.',
     catalogHomeLimitMax: 'Home limit cannot exceed {max}.',
     heroBannerImageRequired: 'Upload a banner image or turn off display.',
+    heroBannerFocalPointInvalid:
+      'Hero banner focal point must use x and y values from 0 to 1.',
     contactEmailRequired: 'Contact email is required when email contact is enabled.',
     contactWhatsappRequired: 'WhatsApp phone number is required when WhatsApp contact is enabled.',
     socialUrlInvalid: 'Enter a valid http or https URL for {network}.',

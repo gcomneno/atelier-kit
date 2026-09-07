@@ -1,9 +1,16 @@
 <script>
-  import { Button, FormActions, PageIntro, Panel } from 'giadaware-ui-components/studio';
+  import {
+    Button,
+    FormActions,
+    ImageFocalPointControl,
+    PageIntro,
+    Panel
+  } from 'giadaware-ui-components/studio';
+  import 'giadaware-ui-components/studio/styles.css';
   import MarkedTextField from '$lib/components/MarkedTextField.svelte';
   // @ts-nocheck
   import { enhance } from '$app/forms';
-  import { flushSync } from 'svelte';
+  import { flushSync, onDestroy } from 'svelte';
   import StudioFieldLabel from '$lib/components/StudioFieldLabel.svelte';
   import StudioFormLegend from '$lib/components/StudioFormLegend.svelte';
   import StudioFormStatus from '$lib/components/AtelierFormStatus.svelte';
@@ -11,6 +18,10 @@
   import { useI18n } from '$lib/i18n/context.js';
   import { studioFormDirty, studioFormEnhanceDirty } from '$lib/studio-form-dirty.js';
   import { createHeroBannerRemoval } from '$lib/studio-image-mutation.js';
+  import {
+    getImageFocalPointObjectPosition,
+    parseImageFocalPoint
+  } from '$lib/image-focal-point.js';
 
   const t = useI18n();
 
@@ -22,6 +33,10 @@
   const hostedHero = $derived(form?.hostedHero ?? data.hostedHero);
   let showBanner = $state(false);
   let removeHeroImage = $state(false);
+  let bannerFocalPoint = $state({ x: 0.5, y: 0.5 });
+  let bannerFocalPointEnabled = $state(false);
+  let uploadPreviewUrl = $state('');
+  let ownedPreviewUrl = '';
   const heroRemoval = createHeroBannerRemoval();
   let isDirty = $state(false);
   let isSaving = $state(false);
@@ -33,15 +48,83 @@
     remove: t('studio.imageMutation.remove')
   };
 
+  function releaseUploadPreview() {
+    if (ownedPreviewUrl && typeof URL !== 'undefined') {
+      URL.revokeObjectURL(ownedPreviewUrl);
+    }
+
+    ownedPreviewUrl = '';
+    uploadPreviewUrl = '';
+  }
+
+  /** @param {File | null | undefined} file */
+  function setUploadPreview(file) {
+    releaseUploadPreview();
+
+    if (
+      file &&
+      file.size > 0 &&
+      typeof URL !== 'undefined'
+    ) {
+      ownedPreviewUrl = URL.createObjectURL(file);
+      uploadPreviewUrl = ownedPreviewUrl;
+    }
+  }
+
+  /** @param {{ x: number, y: number }} value */
+  function setBannerFocalPoint(value) {
+    bannerFocalPoint = value;
+    bannerFocalPointEnabled = true;
+    flushSync();
+    dirtyControl.checkDirty?.();
+  }
+
+  function resetBannerFocalPoint() {
+    bannerFocalPoint = { x: 0.5, y: 0.5 };
+    bannerFocalPointEnabled = false;
+    flushSync();
+    dirtyControl.checkDirty?.();
+  }
+
+  function bannerObjectPosition() {
+    return getImageFocalPointObjectPosition(
+      bannerFocalPointEnabled
+        ? bannerFocalPoint
+        : null
+    );
+  }
+
   $effect(() => {
     ({ show: showBanner, remove: removeHeroImage } = heroRemoval.reset(heroBannerForm.show));
 
+    const persistedFocalPoint =
+      parseImageFocalPoint(
+        heroBannerForm.focal_point
+      );
+
+    bannerFocalPoint =
+      persistedFocalPoint ??
+      { x: 0.5, y: 0.5 };
+
+    bannerFocalPointEnabled =
+      Boolean(persistedFocalPoint);
+
+    releaseUploadPreview();
     dirtyControl.resetBaseline?.();
+  });
+
+  onDestroy(() => {
+    releaseUploadPreview();
   });
 
   const hasStoredImage = $derived(Boolean(heroBannerForm.image_file) && !removeHeroImage);
   const bannerFieldsEnabled = $derived(showBanner);
   const uploadRequired = $derived(showBanner && !hasStoredImage);
+  const bannerPreviewSource = $derived(
+    removeHeroImage
+      ? ''
+      : uploadPreviewUrl || heroBannerForm.image_file
+  );
 
   function enhanceHeroBanner() {
     const completeDirty = studioFormEnhanceDirty(dirtyControl);
@@ -121,9 +204,13 @@
       {t('studio.site.heroBanner.show')}
     </label>
 
-    {#if hasStoredImage}
+    {#if bannerPreviewSource}
       <div class="banner-preview">
-        <img src={heroBannerForm.image_file} alt={siteForm.name} />
+        <img
+          src={bannerPreviewSource}
+          alt={siteForm.name}
+          style:object-position={bannerObjectPosition()}
+        />
       </div>
     {/if}
 
@@ -140,6 +227,12 @@
       stateMessages={imageMutationMessages}
       onmutation={(mutation) => {
         ({ show: showBanner, remove: removeHeroImage } = heroRemoval.update(mutation.remove, showBanner));
+
+        if (mutation.remove) {
+          releaseUploadPreview();
+        } else {
+          setUploadPreview(mutation.file);
+        }
       }}
     />
 
@@ -148,6 +241,32 @@
       name="banner_image_file"
       value={removeHeroImage ? '' : heroBannerForm.image_file}
     />
+
+    {#if bannerFocalPointEnabled && bannerFocalPoint}
+      <input type="hidden" name="banner_focal_point_enabled" value="on" />
+      <input type="hidden" name="banner_focal_point_x" value={bannerFocalPoint.x} />
+      <input type="hidden" name="banner_focal_point_y" value={bannerFocalPoint.y} />
+    {/if}
+
+    {#if bannerFieldsEnabled && bannerPreviewSource}
+      <div class="focal-point-editor">
+        <ImageFocalPointControl
+          image={{ src: bannerPreviewSource, alt: siteForm.name }}
+          value={bannerFocalPoint}
+          onvaluechange={setBannerFocalPoint}
+          label={t('studio.site.heroBanner.focalPoint')}
+          disabled={!bannerFieldsEnabled}
+        />
+
+        <Button
+          type="button"
+          onclick={resetBannerFocalPoint}
+          disabled={!bannerFocalPointEnabled}
+        >
+          {t('studio.site.heroBanner.resetFocalPoint')}
+        </Button>
+      </div>
+    {/if}
 
     <fieldset disabled={!bannerFieldsEnabled}>
       <label>
@@ -223,6 +342,12 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
   }
+
+  .focal-point-editor {
+    display: grid;
+    gap: 0.75rem;
+    justify-items: start;
+  }
+
 </style>

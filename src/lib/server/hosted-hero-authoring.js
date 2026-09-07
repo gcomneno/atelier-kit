@@ -23,6 +23,10 @@ import {
   checkboxEnabled
 } from './studio-form-values.js';
 import {
+  parseImageFocalPoint,
+  parseImageFocalPointFormFields
+} from '../image-focal-point.js';
+import {
   assertValidMarkedText
 } from '../marked-text.js';
 import {
@@ -215,6 +219,11 @@ function heroFormFromSite(site) {
       ? site.hero_banner
       : {};
 
+  const focalPoint =
+    parseImageFocalPoint(
+      banner.focal_point
+    );
+
   return Object.freeze({
     show:
       banner.show === true,
@@ -237,7 +246,10 @@ function heroFormFromSite(site) {
       readString(
         banner,
         'href'
-      )
+      ),
+    ...(focalPoint
+      ? { focal_point: focalPoint }
+      : {})
   });
 }
 
@@ -388,12 +400,14 @@ export async function loadHostedHeroAuthoringData({
  * @param {FormData} formData
  * @param {string} nextImagePath
  * @param {boolean} removingImage
+ * @param {{ x: number, y: number } | null} focalPoint
  */
 function buildNextHeroDocument(
   document,
   formData,
   nextImagePath,
-  removingImage
+  removingImage,
+  focalPoint
 ) {
   const existingSite =
     /** @type {Record<string, unknown>} */ (
@@ -489,6 +503,9 @@ function buildNextHeroDocument(
         : {}),
       ...(href !== ''
         ? { href }
+        : {}),
+      ...(focalPoint
+        ? { focal_point: focalPoint }
         : {})
     };
   } else if (
@@ -506,6 +523,9 @@ function buildNextHeroDocument(
         : {}),
       ...(href !== ''
         ? { href }
+        : {}),
+      ...(focalPoint
+        ? { focal_point: focalPoint }
         : {})
     };
   } else {
@@ -562,6 +582,7 @@ export async function saveHostedHeroAuthoringData({
   );
 
   let mutation;
+  let focalPoint;
 
   try {
     mutation =
@@ -570,6 +591,28 @@ export async function saveHostedHeroAuthoringData({
         'banner_upload',
         'remove_hero_image'
       );
+  } catch {
+    throw new HostedHeroAuthoringValidationError();
+  }
+
+  try {
+    focalPoint =
+      parseImageFocalPointFormFields({
+        enabled:
+          checkboxEnabled(
+            formData.get(
+              'banner_focal_point_enabled'
+            )
+          ),
+        x:
+          formData.get(
+            'banner_focal_point_x'
+          ),
+        y:
+          formData.get(
+            'banner_focal_point_y'
+          )
+      });
   } catch {
     throw new HostedHeroAuthoringValidationError();
   }
@@ -700,7 +743,8 @@ export async function saveHostedHeroAuthoringData({
             currentDocument,
             formData,
             nextPublicPath,
-            mutation.remove
+            mutation.remove,
+            focalPoint
           );
 
         return serializeSiteDocument(
@@ -748,7 +792,8 @@ export async function saveHostedHeroAuthoringData({
           currentDocument,
           formData,
           result.publicPath,
-          mutation.remove
+          mutation.remove,
+          focalPoint
         );
 
       const nextSite =
@@ -825,7 +870,8 @@ export async function saveHostedHeroAuthoringData({
         currentDocument,
         formData,
         currentImagePath,
-        false
+        false,
+        focalPoint
       );
   } catch (error) {
     if (

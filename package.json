@@ -41,7 +41,7 @@
   "dependencies": {
     "@upstash/redis": "^1.38.2",
     "@vercel/analytics": "^2.0.1",
-    "giadaware-ui-components": "file:vendor/giadaware-ui-components/26f9e20/giadaware-ui-components-0.0.0.tgz",
+    "giadaware-ui-components": "file:vendor/giadaware-ui-components/3980787/giadaware-ui-components-0.1.0.tgz",
     "sharp": "^0.35.3",
     "yaml": "^2.9.0"
   },

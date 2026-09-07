@@ -2,6 +2,7 @@ import { parse } from 'yaml';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { isValidFooterHref } from '$lib/footer-links.js';
+import { parseImageFocalPoint } from '$lib/image-focal-point.js';
 import {
   DEFAULT_LATEST_NEWS_COUNT,
   DEFAULT_LAYOUT_PRESET,
@@ -367,12 +368,14 @@ function parseHeroBanner(site) {
   }
 
   const href = optionalString(banner, 'href');
+  const focalPoint = parseImageFocalPoint(banner.focal_point);
 
   return {
     image_file: imageFile,
     image_alt: optionalString(site, 'name') ?? 'Hero banner',
     description: optionalString(banner, 'description'),
     caption: optionalString(banner, 'caption'),
+    ...(focalPoint ? { focal_point: focalPoint } : {}),
     ...(href ? { href } : {})
   };
 }

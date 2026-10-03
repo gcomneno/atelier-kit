@@ -4,3 +4,9 @@ contact_links:
     url: https://github.com/gcomneno/atelier-kit/tree/main/docs
   - name: Contributing guide
     url: https://github.com/gcomneno/atelier-kit/blob/main/CONTRIBUTING.md
+  - name: "ADR-0009 — Uiverse come fonte esterna"
+    url: https://github.com/gcomneno/atelier-kit/blob/main/docs/adr/0009-uiverse-external-design-source.md
+    about: "Leggi la decisione architetturale prima di aprire un intake."
+  - name: "Uiverse Intake Checklist"
+    url: https://github.com/gcomneno/atelier-kit/blob/main/docs/design-sources/uiverse-intake-checklist.md
+    about: "Checklist operativa completa per l'intake."

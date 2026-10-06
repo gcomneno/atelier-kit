@@ -234,7 +234,7 @@ test('lock and install use one physical Svelte runtime and the package host peer
   assert.doesNotMatch(archive.stdout, /(?:^|\/)svelte(?:\/src|\/internal)(?:\/|$)/);
 });
 
-test('package entry points expose the admitted components and adapters consume no third root component', () => {
+test('package entry points expose the admitted components to explicit consumers', () => {
   const packageEntry = fixtureRequire.resolve('giadaware-ui-components');
   assert.equal(
     path.relative(fixtureRoot, packageEntry).split(path.sep).join('/'),
@@ -268,11 +268,23 @@ test('package entry points expose the admitted components and adapters consume n
 
   assert.deepEqual(consumers.map(([file]) => file).sort(), [
     'src/lib/components/AtelierFormStatus.svelte',
-    'src/lib/components/AtelierSocialIcon.svelte'
+    'src/lib/components/AtelierSocialIcon.svelte',
+    'src/routes/giada-ui/+page.svelte'
   ]);
-  assert.match(consumers[0][1] + consumers[1][1], /import \{ FormStatus \}/);
-  assert.match(consumers[0][1] + consumers[1][1], /import \{ SocialIcon \}/);
-  assert.doesNotMatch(consumers[0][1] + consumers[1][1], /giadaware-ui-components\/(visitor|studio)/);
+  for (const [file, source] of consumers) {
+    const rootImports = [...source.matchAll(/import \{([^}]+)\} from 'giadaware-ui-components'/g)];
+    assert.equal(rootImports.length, 1, file);
+    const names = rootImports[0][1].split(',').map((name) => name.trim()).sort();
+    assert.deepEqual(names, file === 'src/routes/giada-ui/+page.svelte'
+      ? ['FormStatus', 'SocialIcon']
+      : [file.includes('AtelierFormStatus') ? 'FormStatus' : 'SocialIcon']);
+    assert.doesNotMatch(source, /giadaware-ui-components\/studio/);
+    if (file !== 'src/routes/giada-ui/+page.svelte') {
+      assert.doesNotMatch(source, /giadaware-ui-components\/visitor/);
+    } else {
+      assert.match(source, /import \{ RelationshipGraph \} from 'giadaware-ui-components\/visitor'/);
+    }
+  }
 });
 
 test('relationship overview uses the narrow visitor entry point and forwards canonical item links', async () => {

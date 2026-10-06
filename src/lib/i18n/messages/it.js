@@ -1420,6 +1420,58 @@ export default {
     }
   },
   visitor: {
+    giadaUi: {
+      navLabel: 'GiadaWare UI',
+      title: 'GiadaWare UI in Atelier-Kit',
+      eyebrow: 'Demo pubblica Atelier-Kit',
+      intro:
+        'Atelier-Kit usa GiadaWare UI in un’applicazione reale. Questi tre piccoli esempi mostrano come lavorano insieme.',
+      packageOwns:
+        'GiadaWare UI gestisce presentazione riutilizzabile, semantica delle interazioni, accessibilità e contratti controllati dei componenti.',
+      consumerOwns:
+        'Atelier-Kit gestisce rotte, stato applicativo, conversione dei dati di dominio, localizzazione e decisioni sui flussi di lavoro.',
+      scope:
+        'Questa pagina spiega il confine attraverso pochi esempi; non è un catalogo generico di componenti.',
+      linksLabel: 'Risorse GiadaWare UI',
+      repository: 'Repository sorgente',
+      interfaceGuide: 'Guida alle interfacce',
+      livingDemo: 'Documentazione della demo nell’applicazione',
+      social: {
+        description:
+          'GiadaWare UI presenta la piccola icona. Atelier-Kit fornisce la destinazione e l’etichetta accessibile localizzata.',
+        label: 'Repository sorgente GiadaWare UI su GitHub'
+      },
+      status: {
+        description:
+          'Prova un messaggio di esempio locale. Atelier-Kit decide quando mostrarlo e cancellarlo; GiadaWare UI fornisce la semantica riutilizzabile del feedback. Nessun salvataggio, richiesta o persistenza.',
+        show: 'Mostra messaggio di esempio',
+        clear: 'Cancella messaggio di esempio',
+        message: 'Solo un messaggio di esempio. Non è stato salvato nulla.'
+      },
+      graph: {
+        description:
+          'Un piccolo grafo illustrativo: selezione e attivazione restano in questa pagina. Atelier-Kit gestisce conversione del dominio e decisioni sulle rotte; GiadaWare UI gestisce interazione e presentazione neutre del grafo. Questi nodi non navigano e non salvano modifiche.',
+        idea: 'Idea',
+        study: 'Studio',
+        work: 'Opera',
+        region: 'Relazioni illustrative',
+        controls: 'Controlli del grafo',
+        zoomIn: 'Ingrandisci',
+        zoomOut: 'Riduci',
+        resetView: 'Reimposta vista',
+        fitGraph: 'Adatta il grafo',
+        panUp: 'Sposta in alto',
+        panDown: 'Sposta in basso',
+        panLeft: 'Sposta a sinistra',
+        panRight: 'Sposta a destra',
+        empty: 'Nessuna relazione',
+        summary: '{nodeCount} nodi, {edgeCount} relazioni dirette.',
+        relationship: '{sourceLabel} verso {targetLabel}',
+        none: 'nessuno',
+        selected: 'Selezionato: {label}.',
+        activated: 'Attivato: {label}.'
+      }
+    },
     common: {
       backToShowcase: '← Torna alla vetrina',
       backToNews: '← Torna alle notizie',

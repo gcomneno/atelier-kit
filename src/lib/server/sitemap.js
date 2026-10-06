@@ -1,3 +1,4 @@
+import { getStudioRuntimeMode } from '$lib/server/studio-guard.js';
 import { resolveAbsoluteUrl } from '$lib/site-meta.js';
 import {
   getAboutConfig,
@@ -80,6 +81,10 @@ export function buildSitemapUrls(origin) {
 
   for (const page of getLegalPages()) {
     urls.push({ loc: absolute(`/legal/${page.slug}`) });
+  }
+
+  if (getStudioRuntimeMode() === 'demo') {
+    urls.push({ loc: absolute('/giada-ui') });
   }
 
   return urls;

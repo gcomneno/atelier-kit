@@ -85,6 +85,44 @@ POST /studio/site/social?/saveSocial
 
 Other Studio routes remain unavailable to Demo guests.
 
+## GiadaWare UI public page
+
+`GET /giada-ui` (and `HEAD`) is an anonymous, read-only Visitor page
+available only when `getStudioRuntimeMode() === 'demo'`. It is
+request-rendered, never prerendered. Visitor, Local, Hosted and invalid or
+conflicting runtime configuration return 404; query parameters and cookies
+cannot enable it.
+
+This documentary page needs no `ATELIER_DEMO_PUBLIC` flag, guest session,
+Redis, sandbox credentials, CSRF capability or authoring readiness. The
+configuration and failure requirements elsewhere in this guide apply to
+Demo authoring, not admission to this page.
+
+The server adds its navigation link and sitemap entry only in Demo runtime.
+Robots behavior is unchanged; search remains item/news-only.
+
+Exactly three compact examples consume the pinned GiadaWare UI artifact:
+`SocialIcon` and `FormStatus` from the root entry point, and
+`RelationshipGraph` from `/visitor`. Feedback, graph selection and graph
+activation are page-local samples with no request, save, persistence or node
+navigation. The page uses the Atelier visitor layout and bilingual copy,
+without Studio components, Studio CSS or authoring controls.
+
+GiadaWare UI owns reusable presentation, interaction semantics, accessibility
+and controlled component contracts. Atelier-Kit owns routes, application
+state, domain conversion, localization and workflow decisions. This page is
+not a generic component catalogue or a copy of the upstream living demo.
+
+Public references:
+
+- [Source repository](https://github.com/gcomneno/giadaware-ui-components)
+- [Interface guide](https://github.com/gcomneno/giadaware-ui-components/blob/main/docs/interface-guide.md)
+- [Living consumer demo documentation](https://github.com/gcomneno/giadaware-ui-components#living-consumer-demo)
+
+The last link documents the living consumer demo; it is not a claim of a
+separately deployed GiadaWare UI demo URL. This read-only surface grants no
+Demo, Studio or authentication authority.
+
 ## Guest lifecycle
 
 Default guest policy:

@@ -1410,6 +1410,58 @@ export default {
     }
   },
   visitor: {
+    giadaUi: {
+      navLabel: 'GiadaWare UI',
+      title: 'GiadaWare UI in Atelier-Kit',
+      eyebrow: 'Atelier-Kit Public Demo',
+      intro:
+        'Atelier-Kit is a real consumer of GiadaWare UI. These three small examples show how they work together.',
+      packageOwns:
+        'GiadaWare UI owns reusable presentation, interaction semantics, accessibility and controlled component contracts.',
+      consumerOwns:
+        'Atelier-Kit owns routes, application state, domain conversion, localization and workflow decisions.',
+      scope:
+        'This page explains that boundary through a few examples; it is not a generic component catalogue.',
+      linksLabel: 'GiadaWare UI resources',
+      repository: 'Source repository',
+      interfaceGuide: 'Interface guide',
+      livingDemo: 'Living consumer demo documentation',
+      social: {
+        description:
+          'GiadaWare UI presents the small icon. Atelier-Kit supplies the destination and the localized accessible label.',
+        label: 'GiadaWare UI source repository on GitHub'
+      },
+      status: {
+        description:
+          'Try local sample feedback. Atelier-Kit decides when to show and clear it; GiadaWare UI supplies reusable feedback semantics. Nothing is saved, requested or persisted.',
+        show: 'Show sample feedback',
+        clear: 'Clear sample feedback',
+        message: 'Sample feedback only. Nothing has been saved.'
+      },
+      graph: {
+        description:
+          'A tiny illustrative graph: selection and activation stay on this page. Atelier-Kit owns domain conversion and route decisions; GiadaWare UI owns neutral graph interaction and presentation. These nodes do not navigate or persist changes.',
+        idea: 'Idea',
+        study: 'Study',
+        work: 'Work',
+        region: 'Illustrative relationships',
+        controls: 'Graph controls',
+        zoomIn: 'Zoom in',
+        zoomOut: 'Zoom out',
+        resetView: 'Reset view',
+        fitGraph: 'Fit graph',
+        panUp: 'Pan up',
+        panDown: 'Pan down',
+        panLeft: 'Pan left',
+        panRight: 'Pan right',
+        empty: 'No relationships',
+        summary: '{nodeCount} nodes, {edgeCount} directed relationships.',
+        relationship: '{sourceLabel} to {targetLabel}',
+        none: 'none',
+        selected: 'Selected: {label}.',
+        activated: 'Activated: {label}.'
+      }
+    },
     common: {
       backToShowcase: '← Back to showcase',
       backToNews: '← Back to news',

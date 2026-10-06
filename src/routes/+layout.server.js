@@ -1,5 +1,6 @@
 import { createTranslator } from '$lib/i18n/index.js';
 import { resolveLocale } from '$lib/i18n/resolve-locale.js';
+import { getStudioRuntimeMode } from '$lib/server/studio-guard.js';
 import { buildSearchIndex } from '$lib/server/search-index.js';
 import { resolveAbsoluteImageUrl } from '$lib/site-meta.js';
 import { resolveDocumentTitle } from '$lib/site-branding.js';
@@ -33,7 +34,10 @@ export function load({ url }) {
     ...(hasItemRelationships
       ? [{ href: '/relationships', label: t('visitor.relationships.navLabel') }]
       : []),
-    ...(faqEntries.length > 0 ? [{ href: '/faq', label: t('visitor.faq.navLabel') }] : [])
+    ...(faqEntries.length > 0 ? [{ href: '/faq', label: t('visitor.faq.navLabel') }] : []),
+    ...(getStudioRuntimeMode() === 'demo'
+      ? [{ href: '/giada-ui', label: t('visitor.giadaUi.navLabel') }]
+      : [])
   ];
   const documentTitle = resolveDocumentTitle(site);
   const aboutPortrait = getAboutConfig()?.portrait ?? null;

@@ -1425,13 +1425,41 @@ export default {
       title: 'GiadaWare UI in Atelier-Kit',
       eyebrow: 'Demo pubblica Atelier-Kit',
       intro:
-        'Atelier-Kit usa GiadaWare UI in un’applicazione reale. Questi tre piccoli esempi mostrano come lavorano insieme.',
+        'GiadaWare User Interface è una libreria di componenti Svelte nata con un principio semplice: l’applicazione possiede il dominio; la libreria possiede soltanto la UI.',
       packageOwns:
-        'GiadaWare UI gestisce presentazione riutilizzabile, semantica delle interazioni, accessibilità e contratti controllati dei componenti.',
+        'GiadaWare UI si occupa di presentazione riutilizzabile, semantica delle interazioni, accessibilità, stato controllato, styling e CSS custom properties, con un comportamento deterministico tra SSR e hydration.',
       consumerOwns:
-        'Atelier-Kit gestisce rotte, stato applicativo, conversione dei dati di dominio, localizzazione e decisioni sui flussi di lavoro.',
+        'L’applicazione che usa la libreria possiede stato e logica di dominio, routing, fetch, persistenza, form action, localizzazione e workflow.',
       scope:
-        'Questa pagina spiega il confine attraverso pochi esempi; non è un catalogo generico di componenti.',
+        'L’obiettivo è una superficie piccola, leggibile e verificabile, nella quale ogni componente abbia un contratto esplicito e mantenga il più possibile le semantiche native del Web.',
+      ownershipTitle: 'Una divisione chiara delle responsabilità',
+      contractsTitle: 'I componenti sono API pubbliche',
+      contracts:
+        'Props, tipi, comportamento accessibile, focus, SSR/hydration e hook CSS fanno parte del contratto. La superficie pubblica descritta qui usa un solo entry point per i componenti e un import CSS separato; le decisioni organizzative interne restano interne.',
+      guide:
+        'Il repository include una Developer Interface Guide, mantenuta in inglese e italiano, e una suite che verifica contratti TypeScript, SSR, comportamento nel browser, hydration, accessibilità e consumo reale del pacchetto.',
+      incubationTitle: 'Ancora in incubazione',
+      incubation:
+        'Il repository è pubblico, ma il pacchetto non è pubblicato su registry. L’obiettivo è far maturare il contratto prima di trattarlo come prodotto stabile.',
+      direction: 'Reusable presentation. Explicit contracts. Consumer-owned application logic.',
+      examplesTitle: 'Tre esempi in Atelier-Kit',
+      examplesNote:
+        'Atelier-Kit usa un artefatto precedente del pacchetto, fissato alla revisione 3980787. Questi tre esempi possono usare import diversi dalla panoramica del progetto, incluso RelationshipGraph da /visitor.',
+      map: {
+        alt:
+          'Mappa dei componenti GiadaWare UI: cinque gruppi di componenti di presentazione, entry point pubblici per componenti e CSS e divisione delle responsabilità tra libreria e applicazione.',
+        caption:
+          'GiadaWare UI — Current Component Map. Le etichette nell’immagine sono in inglese. La mappa presenta la panoramica del progetto; questa pagina dimostra solo tre componenti.',
+        open: 'Apri la mappa a dimensione originale',
+        summary: 'Leggi la mappa dei componenti come testo',
+        core: 'Base / Stato',
+        media: 'Media e interazione',
+        forms: 'Controlli dei moduli',
+        layout: 'Layout e struttura',
+        ordered: 'Raccolte ordinate e riordinamento',
+        imports:
+          'Entry point pubblici: componenti dalla radice del pacchetto; CSS tramite un import separato.'
+      },
       linksLabel: 'Risorse GiadaWare UI',
       repository: 'Repository sorgente',
       interfaceGuide: 'Guida alle interfacce',

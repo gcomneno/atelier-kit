@@ -58,12 +58,61 @@
     <p class="eyebrow">{t('giadaUi.eyebrow')}</p>
     <h1>{t('giadaUi.title')}</h1>
     <p>{t('giadaUi.intro')}</p>
+  </header>
+
+  <figure class="component-map">
+    <img
+      src="/images/giada-ui-component-map.jpeg"
+      alt={t('giadaUi.map.alt')}
+      width="800"
+      height="600"
+    />
+    <figcaption>
+      <p>{t('giadaUi.map.caption')}</p>
+      <a href="/images/giada-ui-component-map.jpeg">{t('giadaUi.map.open')}</a>
+      <details>
+        <summary>{t('giadaUi.map.summary')}</summary>
+        <ul>
+          <li><strong>{t('giadaUi.map.core')}:</strong> FormStatus, StatusNotice, SocialIcon, SocialLink.</li>
+          <li><strong>{t('giadaUi.map.media')}:</strong> ImageLightbox, RelationshipGraph, ImageAttachmentControl, ImageFocalPointControl.</li>
+          <li><strong>{t('giadaUi.map.forms')}:</strong> Button, IconButton, Checkbox, Radio, FieldLabel, FieldDescription, FieldError, FormActions.</li>
+          <li><strong>{t('giadaUi.map.layout')}:</strong> Panel, Surface, PageIntro, AsyncOperationPanel.</li>
+          <li><strong>{t('giadaUi.map.ordered')}:</strong> EditableList, EditableListRow, ReorderActions, ReorderAnnouncement.</li>
+        </ul>
+        <p>{t('giadaUi.map.imports')}</p>
+        <p><code>giadaware-ui-components</code><br /><code>giadaware-ui-components/styles.css</code></p>
+        <p>{t('giadaUi.packageOwns')}</p>
+        <p>{t('giadaUi.consumerOwns')}</p>
+      </details>
+    </figcaption>
+  </figure>
+
+  <section aria-labelledby="ownership-title">
+    <h2 id="ownership-title">{t('giadaUi.ownershipTitle')}</h2>
     <p>{t('giadaUi.packageOwns')}</p>
     <p>{t('giadaUi.consumerOwns')}</p>
     <p>{t('giadaUi.scope')}</p>
-  </header>
+  </section>
 
-  <section aria-labelledby="social-icon-title">
+  <section aria-labelledby="contracts-title">
+    <h2 id="contracts-title">{t('giadaUi.contractsTitle')}</h2>
+    <p>{t('giadaUi.contracts')}</p>
+    <p><code>giadaware-ui-components</code><br /><code>giadaware-ui-components/styles.css</code></p>
+    <p>{t('giadaUi.guide')}</p>
+  </section>
+
+  <section aria-labelledby="incubation-title">
+    <h2 id="incubation-title">{t('giadaUi.incubationTitle')}</h2>
+    <p>{t('giadaUi.incubation')}</p>
+    <p><q lang="en">{t('giadaUi.direction')}</q></p>
+  </section>
+
+  <div class="examples-intro">
+    <h2>{t('giadaUi.examplesTitle')}</h2>
+    <p>{t('giadaUi.examplesNote')}</p>
+  </div>
+
+  <section class="interactive-sample" aria-labelledby="social-icon-title">
     <h2 id="social-icon-title">SocialIcon</h2>
     <p>{t('giadaUi.social.description')}</p>
     <a
@@ -76,7 +125,7 @@
     </a>
   </section>
 
-  <section aria-labelledby="form-status-title">
+  <section class="interactive-sample" aria-labelledby="form-status-title">
     <h2 id="form-status-title">FormStatus</h2>
     <p>{t('giadaUi.status.description')}</p>
     <div class="sample-actions">
@@ -94,7 +143,7 @@
     />
   </section>
 
-  <section aria-labelledby="relationship-graph-title">
+  <section class="interactive-sample" aria-labelledby="relationship-graph-title">
     <h2 id="relationship-graph-title">RelationshipGraph</h2>
     <p>{t('giadaUi.graph.description')}</p>
     <RelationshipGraph
@@ -139,12 +188,15 @@
   }
 
   header,
+  .component-map,
+  .examples-intro,
   section {
     display: grid;
     gap: 0.75rem;
   }
 
   header > *,
+  .examples-intro > *,
   section > h2,
   section > p {
     margin: 0;
@@ -204,7 +256,36 @@
     cursor: pointer;
   }
 
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  figcaption {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  figcaption > p {
+    margin: 0;
+  }
+
+  .component-map {
+    margin: 0;
+  }
+
+  .component-map img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  code {
+    overflow-wrap: anywhere;
+  }
+
   a:focus-visible,
+  summary:focus-visible,
   button:focus-visible {
     outline: 3px solid var(--site-accent-color, #8c3a44);
     outline-offset: 3px;

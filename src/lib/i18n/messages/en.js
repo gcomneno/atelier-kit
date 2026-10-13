@@ -1415,13 +1415,40 @@ export default {
       title: 'GiadaWare UI in Atelier-Kit',
       eyebrow: 'Atelier-Kit Public Demo',
       intro:
-        'Atelier-Kit is a real consumer of GiadaWare UI. These three small examples show how they work together.',
+        'GiadaWare User Interface is a Svelte component library built on a simple principle: the application owns the domain; the library owns only the UI.',
       packageOwns:
-        'GiadaWare UI owns reusable presentation, interaction semantics, accessibility and controlled component contracts.',
+        'GiadaWare UI owns reusable presentation, interaction semantics, accessibility, controlled state, styling and CSS custom properties, with deterministic behavior between SSR and hydration.',
       consumerOwns:
-        'Atelier-Kit owns routes, application state, domain conversion, localization and workflow decisions.',
+        'The consuming application owns application state and domain logic, routing, fetch, persistence, form actions, localization and workflows.',
       scope:
-        'This page explains that boundary through a few examples; it is not a generic component catalogue.',
+        'The goal is a small, readable and verifiable surface, where each component has an explicit contract and preserves native Web semantics as far as possible.',
+      ownershipTitle: 'A clear division of responsibility',
+      contractsTitle: 'Components are public APIs',
+      contracts:
+        'Props, types, accessible behavior, focus, SSR/hydration and CSS hooks are part of the contract. The public surface described here uses one component entry point and a separate CSS import; internal organization stays internal.',
+      guide:
+        'The repository includes a Developer Interface Guide maintained in English and Italian, and a suite covering TypeScript contracts, SSR, browser behavior, hydration, accessibility and real package consumption.',
+      incubationTitle: 'Still in incubation',
+      incubation:
+        'The repository is public, but the package is not published on a registry. The aim is to let the contract mature before treating it as a stable product.',
+      direction: 'Reusable presentation. Explicit contracts. Consumer-owned application logic.',
+      examplesTitle: 'Three examples in Atelier-Kit',
+      examplesNote:
+        'Atelier-Kit consumes an earlier pinned package artifact (3980787). These three samples may use imports different from the project overview, including RelationshipGraph from /visitor.',
+      map: {
+        alt:
+          'GiadaWare UI component map: five groups of presentation components, public component and CSS entry points, and the division of ownership between library and application.',
+        caption:
+          'GiadaWare UI — Current Component Map. Labels in the image are English. The map presents the project overview; this page demonstrates only three components.',
+        open: 'Open full-size map',
+        summary: 'Read the component map as text',
+        core: 'Core / Status',
+        media: 'Media & Interaction',
+        forms: 'Form Controls',
+        layout: 'Layout & Structure',
+        ordered: 'Ordered Collection / Reordering',
+        imports: 'Public entry points: components from the package root; CSS through a separate import.'
+      },
       linksLabel: 'GiadaWare UI resources',
       repository: 'Source repository',
       interfaceGuide: 'Interface guide',

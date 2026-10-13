@@ -101,6 +101,23 @@ Demo authoring, not admission to this page.
 The server adds its navigation link and sitemap entry only in Demo runtime.
 Robots behavior is unchanged; search remains item/news-only.
 
+The bilingual editorial overview presents the maintainer-supplied principle,
+explicit public contracts, library/application ownership and incubation status.
+Immediately after the introduction, a responsive 800×600 figure displays the
+original component map, with localized alt text, caption and full-size image
+link. Its labels are English; native details provide a localized text equivalent
+of all five groups, entry points and ownership. The map is a project overview,
+not a claim that every listed component is demonstrated here.
+
+The overview describes the library's newer public surface: one component entry
+point, `giadaware-ui-components`, and a separate
+`giadaware-ui-components/styles.css` import. This is maintainer-supplied editorial
+material, not an independent verification of upstream HEAD. The examples retain
+the earlier pinned artifact `3980787`, and a localized note explains that their
+imports can differ from the overview. No package migration or change to the
+historical root, `/visitor` and `/studio` architecture is implied; the CSS path
+is displayed documentation, not a new stylesheet import.
+
 Exactly three compact examples consume the pinned GiadaWare UI artifact:
 `SocialIcon` and `FormStatus` from the root entry point, and
 `RelationshipGraph` from `/visitor`. Feedback, graph selection and graph

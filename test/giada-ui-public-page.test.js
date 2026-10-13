@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
+import { Window } from 'happy-dom';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { createTranslator } from '../src/lib/i18n/index.js';
 
@@ -201,11 +202,50 @@ test('SSR renders bilingual documentary content, public links and exactly three 
     const { body, head } = render(harness.default, {
       props: { data: { locale, site: { name: 'Atelier-Kit' } } }
     });
-    for (const key of ['intro', 'packageOwns', 'consumerOwns', 'scope']) {
+    for (const key of ['intro', 'packageOwns', 'consumerOwns', 'scope', 'ownershipTitle', 'contractsTitle', 'contracts', 'guide', 'incubationTitle', 'incubation', 'direction', 'examplesTitle', 'examplesNote']) {
       assert.ok(body.includes(t(`visitor.giadaUi.${key}`)), key);
     }
     assert.ok(head.includes(t('visitor.giadaUi.title')));
-    assert.equal((body.match(/<section\b/g) ?? []).length, 3);
+    const window = new Window();
+    const document = window.document;
+    document.body.innerHTML = body;
+    const samples = document.querySelectorAll('section.interactive-sample');
+    assert.deepEqual([...samples].map((section) => section.querySelector('h2')?.textContent),
+      ['SocialIcon', 'FormStatus', 'RelationshipGraph']);
+    assert.equal(document.querySelectorAll('section:not(.interactive-sample)').length, 3);
+    const figure = document.querySelector('figure');
+    assert.ok(figure);
+    assert.equal(figure.previousElementSibling?.tagName, 'HEADER');
+    const image = figure.querySelector('img');
+    assert.ok(image);
+    assert.equal(image.getAttribute('src'), '/images/giada-ui-component-map.jpeg');
+    assert.equal(image.getAttribute('alt'), t('visitor.giadaUi.map.alt'));
+    assert.equal(image.getAttribute('width'), '800');
+    assert.equal(image.getAttribute('height'), '600');
+    assert.equal(figure.querySelector('figcaption > p')?.textContent, t('visitor.giadaUi.map.caption'));
+    const fullSize = figure.querySelector('a');
+    assert.equal(fullSize?.getAttribute('href'), image.getAttribute('src'));
+    assert.equal(fullSize?.textContent, t('visitor.giadaUi.map.open'));
+    assert.equal(fullSize?.hasAttribute('download'), false);
+    const equivalent = figure.querySelector('details');
+    assert.ok(equivalent);
+    assert.equal(equivalent.querySelector('summary')?.textContent, t('visitor.giadaUi.map.summary'));
+    const groups = [
+      ['core', 'FormStatus, StatusNotice, SocialIcon, SocialLink.'],
+      ['media', 'ImageLightbox, RelationshipGraph, ImageAttachmentControl, ImageFocalPointControl.'],
+      ['forms', 'Button, IconButton, Checkbox, Radio, FieldLabel, FieldDescription, FieldError, FormActions.'],
+      ['layout', 'Panel, Surface, PageIntro, AsyncOperationPanel.'],
+      ['ordered', 'EditableList, EditableListRow, ReorderActions, ReorderAnnouncement.']
+    ];
+    assert.deepEqual([...equivalent.querySelectorAll('li')].map((item) => item.textContent),
+      groups.map(([key, names]) => `${t(`visitor.giadaUi.map.${key}`)}: ${names}`));
+    for (const key of ['packageOwns', 'consumerOwns', 'map.imports']) {
+      assert.ok(equivalent.textContent.includes(t(`visitor.giadaUi.${key}`)));
+    }
+    assert.ok(equivalent.textContent.includes('giadaware-ui-components/styles.css'));
+    assert.equal(document.querySelector('q[lang="en"]')?.textContent,
+      'Reusable presentation. Explicit contracts. Consumer-owned application logic.');
+    assert.equal(document.querySelector('dialog'), null);
     for (const name of ['SocialIcon', 'FormStatus', 'RelationshipGraph']) {
       assert.ok(body.includes(`>${name}</h2>`));
     }
@@ -228,7 +268,12 @@ test('visitor imports and sample callbacks contain no authoring, persistence or 
   const loader = read('src/routes/giada-ui/+page.server.js');
   assert.match(page, /import \{ FormStatus, SocialIcon \} from 'giadaware-ui-components'/);
   assert.match(page, /import \{ RelationshipGraph \} from 'giadaware-ui-components\/visitor'/);
-  assert.doesNotMatch(page, /studio|\/styles\.css|\$app\/|fetch\(|localStorage|sessionStorage|document\.|window\.|goto\(|<form\b/);
+  assert.doesNotMatch(page, /studio|\$app\/|fetch\(|localStorage|sessionStorage|document\.|window\.|goto\(|<form\b/);
+  const scripts = [...page.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)]
+    .map((match) => match[1]).join('\n');
+  assert.doesNotMatch(scripts, /\/styles\.css/);
+  assert.doesNotMatch(page, /@import|<link\b|<svelte:window|<dialog\b/);
+  assert.match(page, /\.component-map img\s*\{[^}]*width: 100%;[^}]*height: auto;/);
   assert.doesNotMatch(loader, /demoAvailable|Redis|session|cookies|csrf|actions|POST|authoring/);
   assert.match(page, /durationMs=\{null\}/);
   assert.match(page, /onclick=\{\(\) => \{ showFeedback = true; \}\}/);
@@ -238,4 +283,16 @@ test('visitor imports and sample callbacks contain no authoring, persistence or 
   const graphData = page.slice(page.indexOf('const nodes'), page.indexOf('/** @returns'));
   assert.doesNotMatch(graphData, /href:|\/items\/|Math\.random|Date\./);
   assert.equal(fs.existsSync(path.join(root, 'src/routes/giada-ui/+server.js')), false);
+});
+
+test('component map is the supplied original 800×600 JPEG', async () => {
+  const image = fs.readFileSync(path.join(root, 'static/images/giada-ui-component-map.jpeg'));
+  const { default: sharp } = await import('sharp');
+  const metadata = await sharp(image).metadata();
+  assert.equal(metadata.format, 'jpeg');
+  assert.equal(metadata.width, 800);
+  assert.equal(metadata.height, 600);
+  // Digest of the maintainer-supplied original; no dependency on a local source path.
+  const { createHash } = await import('node:crypto');
+  assert.equal(createHash('sha256').update(image).digest('hex'), '1e4d054eaf50eececf4351b7652c0446355e0c3f5fefba85fc4abc3b4752adfa');
 });

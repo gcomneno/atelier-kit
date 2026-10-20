@@ -145,11 +145,11 @@
         <h2 id="demo-showcase-title">{t('home.showcase.title')}</h2>
         <ul class="demo-showcase-list">
           <li>
-            <h3><a href="https://ombre-quotidiane-giadaware.vercel.app/">Ombre Quotidiane</a></h3>
+            <h3><a href="https://ombre-quotidiane.vercel.app/">Ombre Quotidiane</a></h3>
             <p>{t('home.showcase.ombreDescription')}</p>
           </li>
           <li>
-            <h3>Universi Condivisi</h3>
+            <h3><a href="https://universi-condivisi.vercel.app/">Universi Condivisi</a></h3>
             <p>{t('home.showcase.universiDescription')}</p>
           </li>
           <li>

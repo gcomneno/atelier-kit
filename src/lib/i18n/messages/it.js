@@ -1514,6 +1514,12 @@ export default {
       allNews: 'Tutte le notizie'
     },
     home: {
+      showcase: {
+        title: 'Built with Atelier-Kit',
+        ombreDescription: 'Universo narrativo delle Cronache del Gentiluomo delle Ombre.',
+        universiDescription: 'Progetto editoriale dedicato a storie e universi narrativi.',
+        clubDescription: "Vetrina di narrativa satirica e racconti dell'assurdo."
+      },
       collectionsEyebrow: 'Collezioni',
       collectionsTitle: 'Collezioni',
       catalogEyebrow: 'Catalogo',

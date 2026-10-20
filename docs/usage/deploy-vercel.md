@@ -101,10 +101,18 @@ of the private Hosted Studio project:
 
 | Deployment | Vercel project | Purpose |
 | --- | --- | --- |
+| Public Demo | `atelier-kit-public-demo` | Separate Demo runtime; bounded guest authoring and read-only consumer showcase |
 | Public Visitor demo | `atelier-kit-visitor-demo` | Read-only Atelier-Kit default demo content |
 | Private Hosted Studio | `atelier-kit-hosted-studio` | Explicitly configured private authoring only |
 
-The public production URL is
+The Demo project uses `ATELIER_STUDIO_MODE=demo` and the separate server-side
+Demo configuration documented in [Public Demo deployment](public-demo.md).
+Its homepage displays the fixed bilingual “Built with Atelier-Kit” section,
+even when Demo authoring is unavailable. The section is excluded from Visitor,
+Local, Hosted and invalid runtimes. Do not enable Demo mode on
+`atelier-kit-visitor-demo` to obtain this presentation.
+
+The public Visitor production URL is
 <https://atelier-kit-visitor-demo.vercel.app>. It deploys this canonical
 Atelier-Kit checkout in default Visitor runtime, using the default content in
 `config/`, `content/`, and `static/`. Do not substitute client content merely

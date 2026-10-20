@@ -5,6 +5,28 @@ bounded Visitor → Try Studio → Social edit → Visitor experience.
 
 It is neither ordinary Visitor production nor private Hosted Studio.
 
+## Deployment identity and homepage showcase
+
+`atelier-kit-public-demo` is the dedicated Demo runtime deployment. It is
+separate from `atelier-kit-visitor-demo`, the read-only default-content Visitor
+deployment, and from private Hosted Studio.
+
+Only Demo runtime displays the fixed, read-only “Built with Atelier-Kit”
+homepage section, outside the hero/sidebar grid and catalog. It presents exactly
+three consumers with Italian and English Visitor translations:
+
+- [Ombre Quotidiane](https://ombre-quotidiane-giadaware.vercel.app/)
+- Universi Condivisi — no link; its public URL has not been verified.
+- [Club dell'Assurdo](https://club-dell-assurdo.vercel.app/)
+
+These are ordinary links without embeds or external fetches. The section is
+application presentation, not editable sandbox or starter content. It needs
+only `ATELIER_STUDIO_MODE=demo`: no public-authoring flag, session, Redis or
+sandbox credentials. Missing or invalid authoring configuration keeps the
+showcase visible while the existing Try Studio CTA remains unavailable.
+Visitor, Local, Hosted and invalid runtimes never show it; browser query
+parameters and cookies cannot enable it. It grants no authoring authority.
+
 ## Runtime
 
 ```text

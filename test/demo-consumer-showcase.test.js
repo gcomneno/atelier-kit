@@ -147,7 +147,7 @@ test('Demo presentation stays visible with disabled, missing, malformed or ready
   }
 });
 
-test('SSR renders exactly three bilingual consumers and two correct ordinary links outside hero and catalog', async () => {
+test('SSR renders exactly three bilingual consumers and three correct ordinary links outside hero and catalog', async () => {
   setRuntime({ ATELIER_STUDIO_MODE: 'demo' });
   const page = await server.ssrLoadModule('/src/routes/+page.server.js');
   /** @type {Record<string, string[]>} */
@@ -178,9 +178,9 @@ test('SSR renders exactly three bilingual consumers and two correct ordinary lin
     assert.deepEqual(entries.map((entry) => entry.querySelector('h3')?.textContent),
       ['Ombre Quotidiane', 'Universi Condivisi', "Club dell'Assurdo"]);
     assert.deepEqual(entries.map((entry) => entry.querySelector('p')?.textContent), descriptions[language]);
-    assert.equal(entries[1].querySelector('a'), null);
     assert.deepEqual([...section.querySelectorAll('a')].map((a) => [a.textContent, a.getAttribute('href')]), [
-      ['Ombre Quotidiane', 'https://ombre-quotidiane-giadaware.vercel.app/'],
+      ['Ombre Quotidiane', 'https://ombre-quotidiane.vercel.app/'],
+      ['Universi Condivisi', 'https://universi-condivisi.vercel.app/'],
       ["Club dell'Assurdo", 'https://club-dell-assurdo.vercel.app/']
     ]);
     assert.equal(section.querySelector('form, button, iframe, img, script'), null);

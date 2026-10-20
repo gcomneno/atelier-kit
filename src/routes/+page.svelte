@@ -140,6 +140,26 @@
       {/if}
     </div>
 
+    {#if data.demoShowcaseVisible}
+      <section class="demo-showcase" aria-labelledby="demo-showcase-title">
+        <h2 id="demo-showcase-title">{t('home.showcase.title')}</h2>
+        <ul class="demo-showcase-list">
+          <li>
+            <h3><a href="https://ombre-quotidiane-giadaware.vercel.app/">Ombre Quotidiane</a></h3>
+            <p>{t('home.showcase.ombreDescription')}</p>
+          </li>
+          <li>
+            <h3>Universi Condivisi</h3>
+            <p>{t('home.showcase.universiDescription')}</p>
+          </li>
+          <li>
+            <h3><a href="https://club-dell-assurdo.vercel.app/">Club dell'Assurdo</a></h3>
+            <p>{t('home.showcase.clubDescription')}</p>
+          </li>
+        </ul>
+      </section>
+    {/if}
+
     {#if showAboutMain && data.main?.about}
       {@const about = data.main.about}
       <section class="home-about" aria-labelledby="home-about-title">
@@ -433,6 +453,52 @@
     );
     font-size: 0.86rem;
     line-height: 1.5;
+  }
+
+  .demo-showcase {
+    padding: 2rem 0;
+  }
+
+  .demo-showcase h2 {
+    margin: 0 0 1rem;
+  }
+
+  .demo-showcase-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 1.2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .demo-showcase-list li {
+    min-width: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--site-border-color, #e4d8c7);
+    border-radius: 1rem;
+    background: var(--site-card-color, #fffaf2);
+    overflow-wrap: anywhere;
+  }
+
+  .demo-showcase-list h3 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  .demo-showcase-list p {
+    margin: 0.75rem 0 0;
+    line-height: 1.6;
+  }
+
+  .demo-showcase-list a {
+    color: inherit;
+    text-underline-offset: 0.2em;
+  }
+
+  .demo-showcase-list a:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 4px;
   }
 
   .hero-banner {

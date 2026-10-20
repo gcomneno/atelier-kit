@@ -1503,6 +1503,12 @@ export default {
       allNews: 'All news'
     },
     home: {
+      showcase: {
+        title: 'Built with Atelier-Kit',
+        ombreDescription: 'The narrative universe of the Chronicles of the Gentleman of Shadows.',
+        universiDescription: 'An editorial project dedicated to stories and narrative universes.',
+        clubDescription: 'A showcase of satirical fiction and tales of the absurd.'
+      },
       collectionsEyebrow: 'Collections',
       collectionsTitle: 'Collections',
       catalogEyebrow: 'Catalog',

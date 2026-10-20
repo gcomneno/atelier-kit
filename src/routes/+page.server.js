@@ -24,12 +24,13 @@ export function load() {
   const collectionsEditorial =
     getCollectionsEditorialConfig();
 
+  const runtime = getStudioRuntimeMode();
   let demoAvailable = false;
 
   try {
     demoAvailable =
       resolveDemoPublicConfig(
-        getStudioRuntimeMode(),
+        runtime,
         process.env
       ) !== null;
   } catch {
@@ -43,6 +44,7 @@ export function load() {
   return {
     site,
     demoAvailable,
+    demoShowcaseVisible: runtime === 'demo',
     catalog: getCatalogConfig(),
     collections: getCollections(),
     items: getItems(),

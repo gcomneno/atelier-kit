@@ -15,8 +15,8 @@ Only Demo runtime displays the fixed, read-only “Built with Atelier-Kit”
 homepage section, outside the hero/sidebar grid and catalog. It presents exactly
 three consumers with Italian and English Visitor translations:
 
-- [Ombre Quotidiane](https://ombre-quotidiane-giadaware.vercel.app/)
-- Universi Condivisi — no link; its public URL has not been verified.
+- [Ombre Quotidiane](https://ombre-quotidiane.vercel.app/)
+- [Universi Condivisi](https://universi-condivisi.vercel.app/)
 - [Club dell'Assurdo](https://club-dell-assurdo.vercel.app/)
 
 These are ordinary links without embeds or external fetches. The section is
